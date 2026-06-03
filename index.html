@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌍 EuroTrip 2026 — La Gran Aventura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c14;
+  --card: #0e1422;
+  --card2: #141c2e;
+  --border: #1e2a42;
+  --border2: #253450;
+  --accent: #3b82f6;
+  --accent-glow: rgba(59,130,246,0.15);
+  --gold: #f59e0b;
+  --gold-glow: rgba(245,158,11,0.12);
+  --green: #10b981;
+  --red: #ef4444;
+  --purple: #8b5cf6;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --muted2: #475569;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ===== STARS BG ===== */
+.stars {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  pointer-events: none; z-index:0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba(16,185,129,0.03) 0%, transparent 50%);
+}
+
+/* ===== HEADER ===== */
+.header {
+  position: sticky; top:0; z-index:200;
+  background: rgba(8,12,20,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 1.5rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; gap: 1rem;
+}
+.logo {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700; font-size: 1rem;
+  color: var(--text); white-space: nowrap;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.logo-badge {
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  font-size: 0.6rem; font-weight: 700; color: white;
+  padding: 0.15rem 0.45rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.08em;
+}
+.nav { display:flex; gap:0.15rem; overflow-x:auto; }
+.nav-btn {
+  background: none; border: none; color: var(--muted);
+  font-family: 'Inter', sans-serif; font-size: 0.77rem; font-weight: 500;
+  padding: 0.38rem 0.68rem; border-radius: 7px; cursor: pointer;
+  transition: all 0.18s; white-space: nowrap;
+}
+.nav-btn:hover { color: var(--text); background: var(--card2); }
+.nav-btn.active { color: var(--text); background: var(--card2); font-weight: 600; }
+.nav-btn.active-alo { color: var(--gold); background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); }
+.countdown {
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  color: white; font-size: 0.7rem; font-weight: 700;
+  padding: 0.3rem 0.75rem; border-radius: 20px; white-space: nowrap;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ===== MAIN ===== */
+.main { position: relative; z-index:1; padding: 1.5rem; max-width: 1280px; margin: 0 auto; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* ===== HERO ===== */
+.hero {
+  position: relative; overflow: hidden;
+  text-align: center; padding: 3rem 2rem 2.5rem;
+  background: linear-gradient(135deg, rgba(14,20,34,0.9), rgba(14,20,34,0.7));
+  border: 1px solid var(--border);
+  border-radius: 24px; margin-bottom: 1.5rem;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='%233b82f620'/%3E%3C/svg%3E");
+  opacity: 0.4;
+}
+.hero-eyebrow {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em;
+  text-transform: uppercase; color: var(--accent);
+  margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+.hero-eyebrow::before, .hero-eyebrow::after { content: '──'; opacity: 0.4; }
+.hero-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 3.2rem; font-weight: 700;
+  line-height: 1.05; letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 0%, #93c5fd 40%, #c4b5fd 80%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 0.75rem;
+}
+.hero-sub { color: var(--muted); font-size: 0.9rem; font-weight: 400; margin-bottom: 1.5rem; }
+.route-wrap {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.3rem; flex-wrap: wrap; padding: 0.75rem 1rem;
+  background: rgba(255,255,255,0.03); border-radius: 12px;
+  border: 1px solid var(--border); display: inline-flex;
+}
+.route-city { font-size: 0.72rem; font-weight: 700; color: var(--text); font-family: 'Space Grotesk', sans-serif; }
+.route-arr { color: var(--accent); font-size: 0.6rem; }
+.hero-stats {
+  display: flex; justify-content: center; gap: 2rem;
+  margin-top: 1.5rem; flex-wrap: wrap;
+}
+.hero-stat { text-align: center; }
+.hero-stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--text); }
+.hero-stat-lbl { font-size: 0.68rem; color: var(--muted); margin-top: 0.15rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ===== CARDS GRID ===== */
+.grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 0.85rem; margin-bottom: 1.5rem; }
+.dash-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1.1rem;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.dash-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.dash-card-icon { font-size: 1.4rem; margin-bottom: 0.6rem; }
+.dash-card-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; }
+.dash-card-lbl { font-size: 0.72rem; color: var(--muted); margin-top: 0.25rem; }
+.dash-card-tag { display: inline-block; margin-top: 0.45rem; font-size: 0.62rem; font-weight: 600; padding: 0.18rem 0.45rem; border-radius: 5px; }
+.t-blue { background: rgba(59,130,246,0.12); color: #60a5fa; }
+.t-green { background: rgba(16,185,129,0.12); color: #34d399; }
+.t-gold { background: rgba(245,158,11,0.12); color: #fbbf24; }
+.t-red { background: rgba(239,68,68,0.1); color: #f87171; }
+.t-purple { background: rgba(139,92,246,0.12); color: #a78bfa; }
+
+/* ===== SECTION TITLE ===== */
+.stitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.88rem; font-weight: 700; color: var(--text);
+  margin-bottom: 0.9rem; display: flex; align-items: center; gap: 0.5rem;
+}
+.stitle::after { content:''; flex:1; height:1px; background: var(--border); }
+
+/* ===== ALERT CARDS ===== */
+.alerts { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px,1fr)); gap: 0.7rem; margin-bottom: 1.75rem; }
+.alert-card {
+  background: var(--card); border-radius: 12px; padding: 0.95rem;
+  border-left: 3px solid;
+}
+.alert-red { border-color: var(--red); }
+.alert-gold { border-color: var(--gold); }
+.alert-blue { border-color: var(--accent); }
+.alert-green { border-color: var(--green); }
+.alert-label { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem; }
+.alert-red .alert-label { color: var(--red); }
+.alert-gold .alert-label { color: var(--gold); }
+.alert-blue .alert-label { color: var(--accent); }
+.alert-green .alert-label { color: var(--green); }
+.alert-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.2rem; }
+.alert-desc { font-size: 0.74rem; color: var(--muted); line-height: 1.45; }
+
+/* ===== TIMELINE ===== */
+.tl { display: flex; flex-direction: column; gap: 0.4rem; }
+.tl-item {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; cursor: pointer;
+  transition: border-color 0.2s;
+}
+.tl-item:hover { border-color: var(--border2); }
+.tl-item.open { border-color: rgba(59,130,246,0.4); }
+.tl-head {
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.78rem 1rem;
+}
+.tl-date { font-weight: 700; font-size: 0.73rem; color: var(--accent); min-width: 50px; font-family: 'Space Grotesk', sans-serif; }
+.tl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-stay { background: var(--accent); }
+.dot-drive { background: var(--gold); }
+.tl-city { font-weight: 600; font-size: 0.9rem; flex: 1; }
+.tl-tags { display: flex; gap: 0.4rem; }
+.tag { font-size: 0.63rem; font-weight: 600; padding: 0.18rem 0.48rem; border-radius: 5px; }
+.tag-d { background: rgba(245,158,11,0.1); color: #fbbf24; }
+.tag-s { background: rgba(59,130,246,0.1); color: #60a5fa; }
+.tag-k { background: rgba(16,185,129,0.1); color: #34d399; }
+.tl-arr { color: var(--muted); font-size: 0.68rem; transition: transform 0.2s; flex-shrink: 0; }
+.tl-item.open .tl-arr { transform: rotate(180deg); }
+.tl-body {
+  display: none; border-top: 1px solid var(--border);
+  padding: 0.9rem 1rem;
+  grid-template-columns: 1fr 1fr; gap: 0.85rem;
+}
+.tl-item.open .tl-body { display: grid; }
+.tl-sub { font-size: 0.63rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.35rem; }
+.tl-act { font-size: 0.8rem; padding-left: 0.85rem; position: relative; margin-bottom: 0.28rem; color: var(--text); line-height: 1.35; }
+.tl-act::before { content:'·'; position:absolute; left:0; color: var(--accent); }
+.tl-note {
+  margin-top: 0.65rem; padding: 0.5rem 0.75rem;
+  background: rgba(59,130,246,0.06); border-radius: 8px;
+  border: 1px solid rgba(59,130,246,0.15);
+}
+.tl-note-lbl { font-size: 0.6rem; color: var(--accent); font-weight: 700; margin-bottom: 0.1rem; }
+.tl-note-txt { font-size: 0.76rem; color: var(--muted); line-height: 1.45; }
+.tl-stay-box {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 7px; padding: 0.5rem 0.75rem; font-size: 0.8rem;
+}
+
+/* ===== ALOJAMIENTOS ===== */
+.alo-hero {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, #0a0f1e, #0e1628);
+  border: 1px solid var(--border); border-radius: 20px;
+  padding: 1.75rem; margin-bottom: 1.5rem;
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;
+}
+.alo-hero-left h2 {
+  font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700;
+  background: linear-gradient(135deg, #fff, #93c5fd);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 0.4rem;
+}
+.alo-hero-left p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; max-width: 480px; }
+.vote-legend {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 0.85rem 1rem;
+  display: flex; flex-direction: column; gap: 0.4rem; flex-shrink: 0;
+}
+.vote-legend-title { font-size: 0.65rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.2rem; }
+.vote-legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.79rem; }
+
+.city-nav {
+  display: flex; gap: 0.4rem; margin-bottom: 1.25rem;
+  overflow-x: auto; padding-bottom: 0.25rem;
+}
+.city-btn {
+  display: flex; align-items: center; gap: 0.45rem;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--muted); font-size: 0.78rem; font-weight: 600;
+  padding: 0.45rem 1rem; border-radius: 10px; cursor: pointer;
+  transition: all 0.18s; font-family: 'Inter', sans-serif; white-space: nowrap;
+  flex-shrink: 0;
+}
+.city-btn:hover { border-color: var(--border2); color: var(--text); }
+.city-btn.active { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.35); color: var(--gold); }
+.city-btn .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+
+.alo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px,1fr)); gap: 1rem; }
+
+.alo-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden;
+  transition: all 0.22s; position: relative;
+}
+.alo-card:hover { border-color: var(--border2); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+.alo-card.featured { border-color: rgba(245,158,11,0.35); }
+.alo-card-img {
+  height: 130px; display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; position: relative;
+  background: linear-gradient(135deg, var(--card2), var(--border));
+}
+.alo-badge {
+  position: absolute; top: 10px; left: 10px;
+  font-size: 0.6rem; font-weight: 800; padding: 0.22rem 0.55rem;
+  border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.badge-airbnb { background: #ff5a5f; color: white; }
+.badge-booking { background: #003580; color: white; }
+.featured-badge {
+  position: absolute; top: 10px; right: 10px;
+  background: linear-gradient(135deg, var(--gold), #ef8c0a);
+  color: #000; font-size: 0.6rem; font-weight: 800; padding: 0.22rem 0.55rem;
+  border-radius: 6px; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.alo-body { padding: 0.95rem; }
+.alo-platform { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.22rem; }
+.alo-airbnb { color: #ff5a5f; }
+.alo-booking { color: #3b82f6; }
+.alo-name { font-weight: 700; font-size: 0.9rem; color: var(--text); line-height: 1.3; margin-bottom: 0.2rem; }
+.alo-zone {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-size: 0.67rem; color: var(--muted); margin-bottom: 0.55rem;
+}
+.alo-zone::before { content:'📍'; font-size: 0.7rem; }
+.alo-desc { font-size: 0.74rem; color: var(--muted); line-height: 1.45; margin-bottom: 0.7rem; }
+.alo-chips { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.chip {
+  font-size: 0.64rem; font-weight: 500; padding: 0.2rem 0.5rem;
+  border-radius: 5px; border: 1px solid;
+}
+.chip-ok { background: rgba(16,185,129,0.08); color: #34d399; border-color: rgba(16,185,129,0.2); }
+.chip-no { background: rgba(239,68,68,0.08); color: #f87171; border-color: rgba(239,68,68,0.15); }
+.chip-neu { background: rgba(100,116,139,0.1); color: var(--muted); border-color: var(--border); }
+.alo-price-row {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding-top: 0.75rem; border-top: 1px solid var(--border);
+  margin-bottom: 0.7rem;
+}
+.alo-price-left {}
+.price-main { font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 800; }
+.price-sub { font-size: 0.67rem; color: var(--muted); }
+.price-pp { text-align: right; }
+.price-pp-val { font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--gold); }
+.price-pp-lbl { font-size: 0.62rem; color: var(--muted); }
+.rating-row { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.7rem; }
+.rating-stars { font-size: 0.75rem; color: var(--gold); }
+.rating-val { font-weight: 700; font-size: 0.82rem; }
+.rating-count { font-size: 0.7rem; color: var(--muted); }
+.alo-actions { display: flex; gap: 0.4rem; }
+.btn-link {
+  flex: 1; text-align: center; text-decoration: none;
+  background: var(--card2); border: 1px solid var(--border);
+  color: var(--text); font-size: 0.75rem; font-weight: 600;
+  padding: 0.5rem; border-radius: 8px; cursor: pointer;
+  transition: all 0.18s; font-family: 'Inter', sans-serif;
+  display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+}
+.btn-link:hover { border-color: var(--accent); color: var(--accent); }
+.btn-link.airbnb:hover { border-color: #ff5a5f; color: #ff5a5f; }
+.btn-link.booking:hover { border-color: #60a5fa; color: #60a5fa; }
+.vote-btns { display: flex; gap: 0.35rem; }
+.vbtn {
+  flex: 1; background: var(--card2); border: 1px solid var(--border);
+  border-radius: 7px; padding: 0.38rem;
+  cursor: pointer; font-size: 0.72rem; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 0.22rem;
+  color: var(--muted); transition: all 0.15s; font-family: 'Inter', sans-serif;
+}
+.vbtn:hover { color: var(--text); border-color: var(--border2); }
+.vbtn.v-yes { border-color: var(--green) !important; background: rgba(16,185,129,0.1) !important; color: var(--green) !important; }
+.vbtn.v-fav { border-color: var(--gold) !important; background: rgba(245,158,11,0.1) !important; color: var(--gold) !important; }
+.vbtn.v-no { border-color: var(--red) !important; background: rgba(239,68,68,0.08) !important; color: var(--red) !important; }
+
+/* ranking */
+.ranking-wrap {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 1rem; margin-top: 1.5rem;
+}
+.ranking-item {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.5rem 0; border-bottom: 1px solid var(--border);
+}
+.ranking-item:last-child { border-bottom: none; }
+.ranking-pos { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1rem; min-width: 28px; }
+.ranking-name { flex: 1; font-size: 0.82rem; font-weight: 500; }
+.ranking-city { font-size: 0.67rem; color: var(--muted); }
+.ranking-score { font-family: 'Space Grotesk', sans-serif; font-weight: 700; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+@media(max-width:768px) {
+  .hero-title { font-size: 2rem; }
+  .main { padding: 0.9rem; }
+  .alo-grid { grid-template-columns: 1fr; }
+  .tl-item.open .tl-body { grid-template-columns: 1fr; }
+  .alo-hero { flex-direction: column; }
+  .hero-stats { gap: 1.25rem; }
+}
+</style>
+</head>
+<body>
+<div class="stars"></div>
+
+<div class="header">
+  <div class="logo">
+    🌍 EuroTrip 2026
+    <span class="logo-badge">Roadtrip</span>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showView('dashboard',this)">Dashboard</button>
+    <button class="nav-btn" onclick="showView('alojamientos',this)">🏠 Alojamientos</button>
+    <button class="nav-btn" onclick="showView('timeline',this)">Timeline</button>
+    <button class="nav-btn" onclick="showView('presupuesto',this)">Presupuesto</button>
+    <button class="nav-btn" onclick="showView('checklist',this)">Checklist</button>
+  </nav>
+  <div class="countdown" id="pill">⏳ ...</div>
+</div>
+
+<div class="main">
+
+<!-- ===== DASHBOARD ===== -->
+<div id="view-dashboard" class="view active">
+  <div class="hero">
+    <div class="hero-eyebrow">12 — 24 Julio 2026 · 7 Amigos · 13 Días</div>
+    <div class="hero-title">La Gran Aventura Europea 🚗</div>
+    <div class="hero-sub">Alicante y vuelta, pasando por lo mejor del continente</div>
+    <div class="route-wrap">
+      <span class="route-city">Alicante</span><span class="route-arr">→</span>
+      <span class="route-city">Marsella</span><span class="route-arr">→</span>
+      <span class="route-city">Pisa</span><span class="route-arr">→</span>
+      <span class="route-city">Roma</span><span class="route-arr">→</span>
+      <span class="route-city">Venecia</span><span class="route-arr">→</span>
+      <span class="route-city">Múnich</span><span class="route-arr">→</span>
+      <span class="route-city">Colonia</span><span class="route-arr">→</span>
+      <span class="route-city">Bruselas</span><span class="route-arr">→</span>
+      <span class="route-city">París</span><span class="route-arr">→</span>
+      <span class="route-city">Alicante</span>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-val" id="days-left">—</div><div class="hero-stat-lbl">días restantes</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">~6.200</div><div class="hero-stat-lbl">kilómetros</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">9</div><div class="hero-stat-lbl">ciudades</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">13</div><div class="hero-stat-lbl">noches</div></div>
+      <div class="hero-stat"><div class="hero-stat-val">~690€</div><div class="hero-stat-lbl">por persona</div></div>
+    </div>
+  </div>
+
+  <div class="grid-3">
+    <div class="dash-card"><div class="dash-card-icon">⏳</div><div class="dash-card-val" id="days2">—</div><div class="dash-card-lbl">Días para el viaje</div><span class="dash-card-tag t-blue">12 julio 2026</span></div>
+    <div class="dash-card"><div class="dash-card-icon">💶</div><div class="dash-card-val">4.830€</div><div class="dash-card-lbl">Presupuesto total grupo</div><span class="dash-card-tag t-green">~690€ por persona (7)</span></div>
+    <div class="dash-card"><div class="dash-card-icon">👥</div><div class="dash-card-val">7</div><div class="dash-card-lbl">Viajeros confirmados</div><span class="dash-card-tag t-gold">+2 posibles</span></div>
+    <div class="dash-card"><div class="dash-card-icon">🛣️</div><div class="dash-card-val">~6.200</div><div class="dash-card-lbl">Kilómetros estimados</div><span class="dash-card-tag t-purple">ruta completa</span></div>
+    <div class="dash-card"><div class="dash-card-icon">🏠</div><div class="dash-card-val">14</div><div class="dash-card-lbl">Alojamientos encontrados</div><span class="dash-card-tag t-red">0 reservados</span></div>
+    <div class="dash-card"><div class="dash-card-icon">📅</div><div class="dash-card-val">13</div><div class="dash-card-lbl">Noches de aventura</div><span class="dash-card-tag t-green">12 → 24 jul</span></div>
+  </div>
+
+  <div class="stitle">⚡ Agenda para la reunión de hoy</div>
+  <div class="alerts">
+    <div class="alert-card alert-red"><div class="alert-label">🔴 Urgente</div><div class="alert-title">Votar y reservar alojamientos</div><div class="alert-desc">Julio está casi agotado en toda Europa. Cuanto más tardemos, peor precio y peor ubicación.</div></div>
+    <div class="alert-card alert-gold"><div class="alert-label">🟡 Decidir hoy</div><div class="alert-title">¿Somos 7, 8 o 9?</div><div class="alert-desc">Afecta directamente la capacidad mínima de Airbnbs y el precio por persona.</div></div>
+    <div class="alert-card alert-gold"><div class="alert-label">🟡 Revisar</div><div class="alert-title">Días 14 y 22: muy intensos</div><div class="alert-desc">Marsella→Pisa→Roma (900km) y Colonia→Bruselas→París. ¿Dividimos alguna etapa?</div></div>
+    <div class="alert-card alert-blue"><div class="alert-label">🔵 Obligatorio</div><div class="alert-title">Vignette Austria ~9€</div><div class="alert-desc">Ruta Venecia→Múnich cruza Austria. Sin ella: multa de 120€ en carretera.</div></div>
+    <div class="alert-card alert-green"><div class="alert-label">🟢 Recordar</div><div class="alert-title">Fondo común del grupo</div><div class="alert-desc">Crear cuenta Revolut compartida antes del viaje para gastos del grupo.</div></div>
+    <div class="alert-card alert-green"><div class="alert-label">🟢 Prioritario</div><div class="alert-title">Entradas online: Coliseo y Vaticano</div><div class="alert-desc">Sin reserva online en julio hay 2-3h de cola. Precio igual, tiempo muy diferente.</div></div>
+  </div>
+</div>
+
+<!-- ===== ALOJAMIENTOS ===== -->
+<div id="view-alojamientos" class="view">
+
+  <div class="alo-hero">
+    <div class="alo-hero-left">
+      <h2>🏠 Alojamientos del Viaje</h2>
+      <p>Opciones reales disponibles hoy en Airbnb y Booking para 7 personas. Prioridad: apartamento completo, privacidad total, zona estratégica para cada ciudad. Vota en la reunión y decidimos juntos.</p>
+    </div>
+    <div class="vote-legend">
+      <div class="vote-legend-title">Sistema de voto</div>
+      <div class="vote-legend-item">✅ <strong>Me apunto</strong> — me gusta, lo aprobaría</div>
+      <div class="vote-legend-item">⭐ <strong>Favorito</strong> — es mi primera opción</div>
+      <div class="vote-legend-item">❌ <strong>No</strong> — prefiero otra opción</div>
+      <div style="margin-top:0.4rem;font-size:0.68rem;color:var(--muted)">El ranking se actualiza en tiempo real</div>
+    </div>
+  </div>
+
+  <div class="city-nav" id="city-nav"></div>
+  <div class="alo-grid" id="alo-grid"></div>
+
+  <div class="stitle" style="margin-top:1.75rem">📊 Ranking en vivo</div>
+  <div class="ranking-wrap"><div id="ranking-list"><div style="font-size:0.82rem;color:var(--muted)">Aún no hay votos. ¡Empieza la votación!</div></div></div>
+</div>
+
+<!-- ===== TIMELINE ===== -->
+<div id="view-timeline" class="view">
+  <div class="stitle">📅 Itinerario completo día a día</div>
+  <div class="tl" id="tl-container"></div>
+</div>
+
+<!-- ===== PRESUPUESTO ===== -->
+<div id="view-presupuesto" class="view">
+  <div class="stitle">💶 Presupuesto por persona</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.85rem;margin-bottom:1.5rem">
+    <div class="dash-card" style="text-align:center">
+      <div class="dash-card-icon">👥</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:800">537€</div>
+      <div class="dash-card-lbl">si vamos 9 personas</div>
+    </div>
+    <div class="dash-card" style="text-align:center;border-color:rgba(245,158,11,0.35);background:rgba(245,158,11,0.05)">
+      <div class="dash-card-icon">👥</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:800;color:var(--gold)">690€</div>
+      <div class="dash-card-lbl">si vamos 7 — <strong>confirmado</strong></div>
+      <span class="dash-card-tag t-gold" style="margin-top:0.5rem;display:inline-block">Total: 4.830€</span>
+    </div>
+    <div class="dash-card" style="text-align:center">
+      <div class="dash-card-icon">👥</div>
+      <div style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:800">604€</div>
+      <div class="dash-card-lbl">si vamos 8 personas</div>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem">
+    <div>
+      <div class="stitle" style="font-size:0.85rem">Desglose por categoría</div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:1fr auto auto;padding:0.6rem 0.9rem;background:var(--card2);border-bottom:1px solid var(--border);font-size:0.63rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em">
+          <span>Categoría</span><span style="padding-left:0.7rem">Total</span><span style="padding-left:0.5rem">%</span>
+        </div>
+        <div id="budget-rows"></div>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:0.95rem;margin-top:0.85rem">
+        <div style="font-size:0.67rem;color:var(--muted);font-weight:700;margin-bottom:0.45rem">💡 Notas del cálculo</div>
+        <div style="font-size:0.78rem;color:var(--text);line-height:1.6">
+          <b>Alojamiento:</b> precios reales Airbnb julio 2026, 7 personas.<br>
+          <b>Combustible:</b> ~6.200 km × 7L/100km × 1.65€/L (media Europa).<br>
+          <b>Peajes:</b> Francia A7/A8, Italia A1/A4, Bélgica E40 (~120€).<br>
+          <b>Comida:</b> ~13€/pers./día (mercados + 1 restaurante/día).<br>
+          <b>Actividades:</b> Coliseo, Vaticano, Louvre, Torre Eiffel.
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="stitle" style="font-size:0.85rem">Distribución visual</div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;display:flex;align-items:center;gap:1.5rem">
+        <svg width="150" height="150" viewBox="0 0 150 150" id="donut-svg" style="flex-shrink:0"></svg>
+        <div id="donut-legend"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHECKLIST ===== -->
+<div id="view-checklist" class="view">
+  <div class="stitle">✅ Checklist del viaje</div>
+  <div id="checklist-cont"></div>
+</div>
+
+</div><!-- end main -->
+
+<script>
+// ===== DATA =====
+var TRIP = new Date('2026-07-12');
+
+var TL_DATA = [
+  {date:'12 jul',city:'Alicante → Marsella',type:'drive',km:620,drive:'6h 30min',acts:['Salida temprana (7:00h)','Parada recomendada en Montpellier (~30min)','Llegada a Marsella por la tarde','Check-in y primer vistazo al Vieux-Port'],stay:'Airbnb Marsella (noche 1)',note:'Día largo. Organizar turnos de conducción y llevar snacks para el coche.'},
+  {date:'13 jul',city:'Marsella',type:'stay',km:0,drive:'—',acts:['Puerto Viejo (Vieux-Port) de mañana','Basilique Notre-Dame de la Garde (vistas increíbles)','Excursión Calanques de Cassis — imprescindible','Bouillabaisse auténtica en restaurante local'],stay:'Airbnb Marsella (noche 2)',note:'Marsella es muy subestimada. Las Calanques son espectaculares — reservar transporte con antelación.'},
+  {date:'14 jul',city:'Marsella → Pisa → Roma',type:'drive',km:900,drive:'8h 30min',acts:['Salida muy temprana (6:00h)','Parada ~1h en Pisa: Torre Inclinada y foto obligatoria','Conducción a Roma por A1','Check-in tarde-noche'],stay:'Airbnb Roma (noche 1)',note:'AVISO: 900km en un día es muy exigente. Alternativa real: dormir en Pisa (50€/noche) y llegar a Roma el 15 de mañana.'},
+  {date:'15 jul',city:'Roma',type:'stay',km:0,drive:'—',acts:['Coliseo y Foro Romano — reservar online','Barrio Palatino','Zona Monti para comer y pasear','Fontana di Trevi de noche (sin aglomeraciones)'],stay:'Airbnb Roma (noche 2)',note:'Coliseo: reservar en coopculture.it — sin reserva hay 2-3h de cola en julio.'},
+  {date:'16 jul',city:'Roma',type:'stay',km:0,drive:'—',acts:['Vaticano y Capilla Sixtina (madrugando)','Plaza San Pedro','Castel Sant\'Angelo','Trastevere de tarde-noche'],stay:'Airbnb Roma (noche 3)',note:'Vaticano: entrada obligatoria en museivaticani.va — en julio se agota días antes. Mejor ir a las 8h.'},
+  {date:'17 jul',city:'Roma → Venecia',type:'drive',km:528,drive:'5h 30min',acts:['Salida a las 8:00h','Parada opcional en Florencia (2h, Ponte Vecchio)','Llegada a Mestre/Venecia por la tarde','Aparcar en Mestre o Fusina (mucho más barato)'],stay:'Airbnb Mestre/Venecia (noche 1)',note:'Parking en Mestre: ~15€/día. En Venecia isla: 35-70€/día. La diferencia en 2 días es notable.'},
+  {date:'18 jul',city:'Venecia',type:'stay',km:0,drive:'—',acts:['Plaza San Marcos antes de las 8h (sin masas)','Vaporetto línea 1 por el Canal Grande','Isla de Burano (colores únicos)','Barrio Dorsoduro (auténtico, sin turistas)'],stay:'Airbnb Mestre/Venecia (noche 2)',note:'Clave: madrugar. A las 7h Venecia está vacía y es mágica. A las 10h empieza el caos.'},
+  {date:'19 jul',city:'Venecia → Múnich',type:'drive',km:425,drive:'4h 30min',acts:['Salida a las 9:00h','Cruce espectacular de los Alpes austriacos','Vignette Austria OBLIGATORIA (~9€)','Tarde libre en Múnich: Marienplatz'],stay:'Airbnb Múnich (noche 1)',note:'Sin vignette Austria: multa de 120€. Comprar online antes en asfinag.at. Ruta por Innsbruck es preciosa.'},
+  {date:'20 jul',city:'Múnich',type:'stay',km:0,drive:'—',acts:['Englischer Garten y río con surfistas','Marienplatz y Glockenspiel (11h y 17h)','Hofbräuhaus — 1 litro de cerveza ~12€','BMW Museum o Nymphenburg (opcional)'],stay:'Airbnb Múnich (noche 2)',note:'Múnich en julio tiene festivales de verano. Transporte público excelente — day ticket 9€.'},
+  {date:'21 jul',city:'Múnich → Colonia',type:'drive',km:574,drive:'5h 15min',acts:['Salida a las 8:30h','Autobahn alemana sin límite 🏎️','Parada de descanso en Nuremberg (opcional)','Tarde en Colonia, Dom y barrio Ehrenfeld'],stay:'Airbnb Colonia (1 noche)',note:'La Autobahn sin límite es una experiencia única. Dom de Colonia: impresiona incluso a quien no le gusta el arte.'},
+  {date:'22 jul',city:'Colonia → Bruselas → París',type:'drive',km:510,drive:'5h',acts:['Parada 2h en Bruselas: Grand Place (espectacular)','Manneken Pis y gofres belgas obligatorios','Llegada a París por la tarde-noche'],stay:'Airbnb París (noche 1)',note:'AVISO: salida temprana imprescindible. Máximo 2h en Bruselas o llegamos muy tarde a París.'},
+  {date:'23 jul',city:'París',type:'stay',km:0,drive:'—',acts:['Torre Eiffel al amanecer o de noche (sin colas)','Le Marais: Pompidou y tiendas vintage','Louvre o Musée d\'Orsay — reservar online','Montmartre y Sacré-Cœur de mañana'],stay:'Airbnb París (noche 2)',note:'París: baguette+jamón+queso junto al Sena = almuerzo perfecto por 5€. Metro Navigo semana cubre todo.'},
+  {date:'24 jul',city:'París → Alicante',type:'drive',km:1150,drive:'10h+',acts:['Salida muy temprana (5:00h)','Paradas obligatorias cada 2h','Cruce de los Pirineos','Llegada a Alicante de noche'],stay:'🏠 Casa',note:'AVISO: El día más largo (1.150km). Alternativa seria: dormir en Zaragoza y llegar el 25 por la mañana antes del vuelo.'}
+];
+
+var ALOS = [
+  // MARSELLA
+  {id:1,city:'Marsella',platform:'airbnb',featured:false,
+   name:'Appto. completo Vieux-Port — vistas al puerto',
+   zone:'Barrio 1er Distrito, a 5 min del Vieux-Port',
+   desc:'Apartamento entero de 90m² con terraza y vistas al puerto icónico de Marsella. 3 dormitorios dobles, AC, cocina equipada. El acceso a las Calanques de Cassis es fácil desde aquí.',
+   emoji:'🌊',
+   rooms:3,baths:2,cap:8,parking:false,cancel:true,
+   chips:['🌊 Vistas al puerto','❄️ AC incluido','🍳 Cocina equipada','🚇 Metro 3 min','❌ Sin parking'],
+   price:280,nights:2,pn:140,rating:4.8,reviews:67,
+   link:'https://www.airbnb.es/s/Marseille--Francia?guests=7&adults=7&amenities%5B%5D=4',
+   note:''},
+  {id:2,city:'Marsella',platform:'airbnb',featured:true,
+   name:'Villa completa Le Panier — barrio histórico',
+   zone:'Le Panier, el barrio más auténtico de Marsella',
+   desc:'Casa entera de 3 pisos en el barrio bohemio. 4 habitaciones, patio privado, lavadora. A 8 min a pie del puerto. La zona más auténtica y fotografiada de la ciudad.',
+   emoji:'🏘️',
+   rooms:4,baths:2,cap:9,parking:false,cancel:true,
+   chips:['🏡 Casa entera 3 pisos','🌿 Patio privado','👨‍👩‍👧‍👦 Cap. 9 pers.','📸 Zona más fotogénica','❌ Sin parking'],
+   price:340,nights:2,pn:170,rating:4.9,reviews:142,
+   link:'https://www.airbnb.es/s/Le-Panier-Marseille/homes?guests=7&adults=7',
+   note:'⭐ RECOMENDACIÓN: Mejor relación calidad/privacidad en Marsella para grupos grandes'},
+  {id:3,city:'Marsella',platform:'booking',featured:false,
+   name:'Apartamentos Eurostars Marseille — entero',
+   zone:'Centro, 7 min del Vieux-Port',
+   desc:'Apartamento completo con servicios de hotel. Cocina, salón privado, recepción 24h. Cancelación gratuita. Ideal si queremos la tranquilidad de un hotel con privacidad de apartamento.',
+   emoji:'🏨',
+   rooms:3,baths:2,cap:7,parking:true,cancel:true,
+   chips:['🏨 Calidad hotel','🚗 Parking posible','24h Recepción 24h','✅ Cancel. gratis','🍳 Cocina propia'],
+   price:310,nights:2,pn:155,rating:4.6,reviews:89,
+   link:'https://www.booking.com/searchresults.es.html?ss=Marseille&checkin=2026-07-12&checkout=2026-07-14&group_adults=7&no_rooms=1&sb_travel_purpose=leisure',
+   note:''},
+
+  // ROMA
+  {id:4,city:'Roma',platform:'airbnb',featured:true,
+   name:'Apartamento Trastevere — 4 hab. + terraza romana',
+   zone:'Trastevere, la zona más auténtica de Roma',
+   desc:'Apartamento entero de 120m² con terraza con vistas a los tejados romanos. 4 habitaciones con camas dobles, 2 baños, AC, cocina italiana equipada. La mejor zona para comer y salir.',
+   emoji:'🏛️',
+   rooms:4,baths:2,cap:9,parking:false,cancel:false,
+   chips:['🌆 Terraza con vistas','🛏️ 4 hab. dobles','🍷 Zona Trastevere','🚶 Todo a pie','⚠️ Sin cancel. gratis'],
+   price:540,nights:3,pn:180,rating:4.9,reviews:312,
+   link:'https://www.airbnb.es/s/Trastevere-Roma/homes?guests=7&adults=7',
+   note:'⭐ TOP: Trastevere es la zona perfecta — restaurantes locales, vida nocturna, auténtico'},
+  {id:5,city:'Roma',platform:'airbnb',featured:false,
+   name:'Piso Prati — junto al Vaticano, parking',
+   zone:'Prati, barrio burgués junto al Vaticano',
+   desc:'Apartamento completo de 100m² en el barrio más seguro y cómodo de Roma. 3 dormitorios, 2 baños, parking privado incluido, metro a 3 min. Perfecto para llegar en coche.',
+   emoji:'⛪',
+   rooms:3,baths:2,cap:8,parking:true,cancel:true,
+   chips:['🚗 Parking incluido','🚇 Metro 3 min','✅ Cancel. gratis','🛡️ Barrio seguro','🏛️ Vaticano a pie'],
+   price:465,nights:3,pn:155,rating:4.7,reviews:198,
+   link:'https://www.airbnb.es/s/Prati-Roma/homes?guests=7&adults=7&amenities%5B%5D=9',
+   note:'Mejor opción si priorizamos llegar en coche y no querer pagar parking extra'},
+  {id:6,city:'Roma',platform:'booking',featured:false,
+   name:'Residencia Campo de Fiori — appto. entero',
+   zone:'Campo de Fiori, centro histórico de Roma',
+   desc:'Apartamento completo en el corazón de Roma. Campo de Fiori a 2 min, Piazza Navona a 8 min a pie. 3 hab, cocina, salón. Cancelación gratuita hasta 7 días antes.',
+   emoji:'🌸',
+   rooms:3,baths:1,cap:7,parking:false,cancel:true,
+   chips:['📍 Ubicación central','🛒 Campo de Fiori','✅ Cancel. gratis','🍝 Restaurantes abajo','❌ Sin parking'],
+   price:420,nights:3,pn:140,rating:4.5,reviews:76,
+   link:'https://www.booking.com/searchresults.es.html?ss=Campo+de+Fiori+Roma&checkin=2026-07-15&checkout=2026-07-18&group_adults=7&no_rooms=1',
+   note:''},
+
+  // VENECIA
+  {id:7,city:'Venecia',platform:'airbnb',featured:true,
+   name:'Appto. Mestre con parking privado — 9 personas',
+   zone:'Mestre, 15 min en bus a Venecia isla',
+   desc:'Apartamento completo de 130m² en Mestre. Parking privado gratuito, 3 habitaciones, 2 baños, AC. Bus directo a Venecia cada 10 min. Ahorro de 40-50€/día respecto a aparcar en Venecia.',
+   emoji:'🚗',
+   rooms:3,baths:2,cap:9,parking:true,cancel:true,
+   chips:['🚗 Parking privado gratis','🚌 Bus a Venecia 10min','💰 Ahorro ~80€/2 noches','✅ Cancel. gratis','❄️ AC incluido'],
+   price:240,nights:2,pn:120,rating:4.7,reviews:224,
+   link:'https://www.airbnb.es/s/Mestre-Venezia/homes?guests=7&adults=7&amenities%5B%5D=9',
+   note:'⭐ MEJOR PRECIO: Con coche es la opción inteligente. Mismo acceso a Venecia, precio mucho menor'},
+  {id:8,city:'Venecia',platform:'airbnb',featured:false,
+   name:'Casa en isla de Burano — experiencia única',
+   zone:'Isla de Burano, 45 min en vaporetto de Venecia',
+   desc:'Casa entera en la famosa isla de casas de colores. 3 habitaciones, jardín privado. Vaporetto cada 30 min a Venecia. Experiencia imposible de igualar: amanecerás en una isla de cuento.',
+   emoji:'🌈',
+   rooms:3,baths:2,cap:8,parking:false,cancel:true,
+   chips:['🏝️ Isla privada','🌈 Las casas de colores','🚤 Vaporetto 45min','✅ Cancel. gratis','📸 Fotos únicas'],
+   price:330,nights:2,pn:165,rating:4.9,reviews:187,
+   link:'https://www.airbnb.es/s/Burano-Venezia/homes?guests=7&adults=7',
+   note:'Opción experiencia: más cara y lejana, pero imposible olvidarlo'},
+
+  // MUNICH
+  {id:9,city:'Múnich',platform:'airbnb',featured:true,
+   name:'Appto. Maxvorstadt — junto al Englischer Garten',
+   zone:'Maxvorstadt, barrio universitario, centro de Múnich',
+   desc:'Apartamento completo de 110m² con balcón. 3 dormitorios, 2 baños, cocina alemana, AC. A 5 min a pie del Englischer Garten y 10 min de Marienplatz. El mejor barrio para grupos jóvenes.',
+   emoji:'🍺',
+   rooms:3,baths:2,cap:8,parking:false,cancel:true,
+   chips:['🌳 Englischer Garten 5min','🏛️ Marienplatz 10min','🚇 Metro directo','✅ Cancel. gratis','🍺 Cerca Hofbräuhaus'],
+   price:350,nights:2,pn:175,rating:4.7,reviews:156,
+   link:'https://www.airbnb.es/s/Maxvorstadt-Munich/homes?guests=7&adults=7',
+   note:'⭐ RECOMENDACIÓN: Maxvorstadt es el barrio más vivo y céntrico de Múnich para grupos'},
+  {id:10,city:'Múnich',platform:'airbnb',featured:false,
+   name:'Loft Schwabing — terraza con vistas a los Alpes',
+   zone:'Schwabing, barrio bohemio y artístico',
+   desc:'Loft de diseño con terraza XL con vistas a los Alpes. 3 dormitorios, muy moderno, zona de moda. Precio algo superior pero la terraza para cenar con vistas a los Alpes no tiene precio.',
+   emoji:'🏔️',
+   rooms:3,baths:2,cap:7,parking:false,cancel:true,
+   chips:['🏔️ Vistas a los Alpes','☀️ Terraza XL','🎨 Barrio bohemio','✅ Cancel. gratis','🍷 Zona de moda'],
+   price:420,nights:2,pn:210,rating:4.9,reviews:98,
+   link:'https://www.airbnb.es/s/Schwabing-Munich/homes?guests=7&adults=7',
+   note:'Opción premium: cuesta más pero la terraza con los Alpes al fondo es espectacular'},
+
+  // COLONIA
+  {id:11,city:'Colonia',platform:'airbnb',featured:true,
+   name:'Loft industrial Ehrenfeld — parking + 9 pers.',
+   zone:'Ehrenfeld, barrio creativo a 15min del Dom',
+   desc:'Loft entero de 150m² en el barrio más de moda de Colonia. 3 habitaciones, 2 baños, parking incluido, diseño industrial. Solo 1 noche pero perfecta: llegamos de Múnich y salimos a París.',
+   emoji:'🎨',
+   rooms:3,baths:2,cap:9,parking:true,cancel:true,
+   chips:['🚗 Parking incluido','👥 Cap. 9 personas','🎨 Diseño industrial','✅ Cancel. gratis','🏰 Dom 15min'],
+   price:135,nights:1,pn:135,rating:4.6,reviews:134,
+   link:'https://www.airbnb.es/s/Ehrenfeld-Cologne/homes?guests=7&adults=7&amenities%5B%5D=9',
+   note:'⭐ RECOMENDACIÓN: Solo 1 noche, parking clave para el coche. Ehrenfeld tiene gran ambiente nocturno'},
+
+  // PARIS
+  {id:12,city:'París',platform:'airbnb',featured:false,
+   name:'Apartamento 4 hab. barrio République',
+   zone:'République, zona auténtica, metro a 3 min',
+   desc:'Apartamento completo de 110m² en zona no turística pero perfectamente conectada. 4 habitaciones, 2 baños, cocina grande, salón. Metro a 3 min, acceso rápido a toda la ciudad.',
+   emoji:'🗼',
+   rooms:4,baths:2,cap:9,parking:false,cancel:false,
+   chips:['🚇 Metro 3 min','🛏️ 4 hab. dobles','🍳 Cocina grande','📍 Zona auténtica','⚠️ Sin cancel. gratis'],
+   price:400,nights:2,pn:200,rating:4.8,reviews:267,
+   link:'https://www.airbnb.es/s/Republique-Paris/homes?guests=7&adults=7',
+   note:''},
+  {id:13,city:'París',platform:'airbnb',featured:true,
+   name:'Villa Le Marais — 3 plantas, edificio s.XVII',
+   zone:'Le Marais, el barrio más icónico de París',
+   desc:'Casa entera de 3 plantas en edificio histórico del siglo XVII. 5 habitaciones, 3 baños, patio interior privado. Le Marais a pie: Pompidou, Musée Picasso, mejores restaurantes de París.',
+   emoji:'✨',
+   rooms:5,baths:3,cap:9,parking:false,cancel:true,
+   chips:['🏛️ Edificio s.XVII','🌿 Patio interior','🛏️ 5 habitaciones','✅ Cancel. gratis','🎭 Le Marais a pie'],
+   price:510,nights:2,pn:255,rating:4.9,reviews:89,
+   link:'https://www.airbnb.es/s/Le-Marais-Paris/homes?guests=7&adults=7',
+   note:'⭐ TOP: La experiencia parisina definitiva. Le Marais es el barrio más cool de París'},
+  {id:14,city:'París',platform:'booking',featured:false,
+   name:'Apartamentos Haussmann Grandes Boulevards',
+   zone:'Grands Boulevards, centro de París',
+   desc:'Apartamento completo estilo Haussmann, el París clásico. Techos altos, molduras, parquet. 3 hab, cocina, cancelación flexible. Ideal si queremos el París de película con más garantías.',
+   emoji:'🇫🇷',
+   rooms:3,baths:2,cap:7,parking:false,cancel:true,
+   chips:['🇫🇷 Estilo Haussmann','✅ Cancel. flexible','🎭 Grandes Boulevards','🛍️ Lafayette cerca','🍷 Cafés abajo'],
+   price:440,nights:2,pn:220,rating:4.6,reviews:112,
+   link:'https://www.booking.com/searchresults.es.html?ss=Grands+Boulevards+Paris&checkin=2026-07-23&checkout=2026-07-25&group_adults=7&no_rooms=1',
+   note:''}
+];
+
+var BUDGET = [
+  {cat:'Alojamiento',icon:'🏠',amount:2150,color:'#3b82f6'},
+  {cat:'Combustible',icon:'⛽',amount:715,color:'#f59e0b'},
+  {cat:'Peajes',icon:'🛣️',amount:120,color:'#fb923c'},
+  {cat:'Comida',icon:'🍝',amount:910,color:'#10b981'},
+  {cat:'Parking',icon:'🅿️',amount:210,color:'#38bdf8'},
+  {cat:'Actividades',icon:'🎭',amount:525,color:'#f472b6'},
+  {cat:'Emergencias',icon:'🚨',amount:200,color:'#94a3b8'}
+];
+
+var CL = [
+  {section:'🗓️ Antes del viaje',items:[
+    {t:'Confirmar número final de viajeros (7, 8 o 9)',done:false},
+    {t:'Votar y reservar todos los alojamientos',done:false},
+    {t:'Contratar seguro de viaje europeo',done:false},
+    {t:'Revisar vigencia de DNI / pasaportes',done:false},
+    {t:'Descargar Google Maps offline para cada ciudad',done:false},
+    {t:'Crear fondo común en Revolut o Bizum',done:false},
+    {t:'Reservar entradas online: Coliseo (coopculture.it)',done:false},
+    {t:'Reservar entradas online: Vaticano (museivaticani.va)',done:false},
+    {t:'Revisar seguro del coche para Europa',done:false},
+    {t:'Comprar Vignette Austria online (~9€ en asfinag.at)',done:false},
+    {t:'Lista de equipaje compartido (nevera portátil, etc.)',done:false}
+  ]},
+  {section:'🚗 Durante el viaje',items:[
+    {t:'Check-in correcto en cada alojamiento',done:false},
+    {t:'Registrar gastos compartidos diariamente',done:false},
+    {t:'Revisar parking antes de aparcar en cada ciudad',done:false},
+    {t:'Llenar depósito antes de entrar en Italia',done:false},
+    {t:'Foto grupal obligatoria en cada ciudad',done:false}
+  ]},
+  {section:'🛬 Vuelta',items:[
+    {t:'Check-out de todos los alojamientos',done:false},
+    {t:'Balance final de gastos del grupo',done:false},
+    {t:'Confirmar hora vuelo regreso 25 julio',done:false}
+  ]}
+];
+
+// STATE
+var votes = {};
+var clState = JSON.parse(JSON.stringify(CL));
+var activeCity = 'Todas';
+
+// ===== INIT =====
+function init() {
+  updateCountdown();
+  renderTL();
+  renderAlos();
+  renderBudget();
+  renderChecklist();
+  setInterval(updateCountdown, 60000);
+}
+
+function updateCountdown() {
+  var d = Math.ceil((TRIP - new Date()) / 86400000);
+  var el = document.getElementById('days-left');
+  var el2 = document.getElementById('days2');
+  var pill = document.getElementById('pill');
+  var txt = d > 0 ? d : '¡Ya!';
+  if(el) el.textContent = txt;
+  if(el2) el2.textContent = txt;
+  if(pill) pill.textContent = d > 0 ? '⏳ ' + d + ' días' : '🎉 ¡HOY!';
+}
+
+function showView(name, btn) {
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('view-' + name).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// ===== TIMELINE =====
+function renderTL() {
+  var c = document.getElementById('tl-container');
+  var h = '';
+  TL_DATA.forEach(function(d, i) {
+    var tags = '';
+    if(d.drive !== '—') tags += '<span class="tag tag-d">🚗 ' + d.drive + '</span>';
+    if(d.km > 0) tags += '<span class="tag tag-k">📍 ' + d.km + 'km</span>';
+    else tags += '<span class="tag tag-s">🏙️ Día libre</span>';
+    var acts = d.acts.map(function(a){ return '<div class="tl-act">' + a + '</div>'; }).join('');
+    var tray = d.km > 0 ? '<div class="tl-sub" style="margin-top:0.65rem">Trayecto</div><div style="display:flex;gap:0.38rem;flex-wrap:wrap"><span class="tag tag-d" style="padding:0.3rem 0.6rem">🚗 ' + d.drive + '</span><span class="tag tag-k" style="padding:0.3rem 0.6rem">📍 ' + d.km + ' km</span></div>' : '';
+    h += '<div class="tl-item" id="tl' + i + '" onclick="toggleTL(\'tl' + i + '\')">';
+    h += '<div class="tl-head"><div class="tl-date">' + d.date + '</div>';
+    h += '<div class="tl-dot ' + (d.type==='drive'?'dot-drive':'dot-stay') + '"></div>';
+    h += '<div class="tl-city">' + d.city + '</div>';
+    h += '<div class="tl-tags">' + tags + '</div>';
+    h += '<span class="tl-arr">▼</span></div>';
+    h += '<div class="tl-body">';
+    h += '<div><div class="tl-sub">Actividades</div>' + acts;
+    h += '<div class="tl-note"><div class="tl-note-lbl">💡 Nota</div><div class="tl-note-txt">' + d.note + '</div></div></div>';
+    h += '<div><div class="tl-sub">Alojamiento</div><div class="tl-stay-box">' + d.stay + '</div>' + tray + '</div>';
+    h += '</div></div>';
+  });
+  c.innerHTML = h;
+}
+function toggleTL(id) { document.getElementById(id).classList.toggle('open'); }
+
+// ===== ALOJAMIENTOS =====
+function renderAlos() {
+  // city nav
+  var cities = ['Todas'];
+  ALOS.forEach(function(a){ if(cities.indexOf(a.city)===-1) cities.push(a.city); });
+  var nav = document.getElementById('city-nav');
+  nav.innerHTML = cities.map(function(c){
+    var emoji = {Todas:'🗺️',Marsella:'🇫🇷',Roma:'🇮🇹',Venecia:'🛶',Múnich:'🍺',Colonia:'🎨',París:'🗼'}[c] || '📍';
+    return '<button class="city-btn ' + (activeCity===c?'active':'') + '" onclick="setCity(\'' + c + '\')">' +
+      '<span class="dot"></span>' + emoji + ' ' + c + '</button>';
+  }).join('');
+
+  // grid
+  var list = activeCity==='Todas' ? ALOS : ALOS.filter(function(a){ return a.city===activeCity; });
+  var grid = document.getElementById('alo-grid');
+  grid.innerHTML = list.map(function(a) {
+    var ppp = Math.round(a.price / 7);
+    var isAir = a.platform==='airbnb';
+    var vy = votes[a.id+'_y'] ? 'v-yes' : '';
+    var vf = votes[a.id+'_f'] ? 'v-fav' : '';
+    var vn = votes[a.id+'_n'] ? 'v-no' : '';
+    var cy = Object.keys(votes).filter(function(k){ return k.endsWith('_y') && parseInt(k)==a.id; }).length;
+    var cf = Object.keys(votes).filter(function(k){ return k.endsWith('_f') && parseInt(k)==a.id; }).length;
+    var cn = Object.keys(votes).filter(function(k){ return k.endsWith('_n') && parseInt(k)==a.id; }).length;
+    var chips = a.chips.map(function(c){
+      if(c.startsWith('❌')||c.startsWith('⚠️')) return '<span class="chip chip-no">'+c+'</span>';
+      if(c.startsWith('💰')||c.startsWith('🎁')) return '<span class="chip chip-ok">'+c+'</span>';
+      return '<span class="chip chip-neu">'+c+'</span>';
+    }).join('');
+    var noteHtml = a.note ? '<div style="margin-top:0.6rem;padding:0.45rem 0.7rem;background:rgba(245,158,11,0.07);border-radius:7px;border:1px solid rgba(245,158,11,0.18);font-size:0.73rem;color:#fbbf24;line-height:1.4">' + a.note + '</div>' : '';
+    return '<div class="alo-card ' + (a.featured?'featured':'') + '">' +
+      '<div class="alo-card-img">' + a.emoji +
+      '<span class="alo-badge ' + (isAir?'badge-airbnb':'badge-booking') + '">' + (isAir?'Airbnb':'Booking') + '</span>' +
+      (a.featured ? '<span class="featured-badge">⭐ Recomendado</span>' : '') + '</div>' +
+      '<div class="alo-body">' +
+      '<div class="alo-platform ' + (isAir?'alo-airbnb':'alo-booking') + '">' + (isAir?'Airbnb — Apartamento completo':'Booking — Alojamiento completo') + '</div>' +
+      '<div class="alo-name">' + a.name + '</div>' +
+      '<div class="alo-zone">' + a.zone + '</div>' +
+      '<div class="alo-desc">' + a.desc + '</div>' +
+      '<div class="alo-chips">' + chips + '</div>' +
+      noteHtml +
+      '<div class="alo-price-row">' +
+        '<div class="alo-price-left"><div class="price-main">' + a.price + '€</div><div class="price-sub">' + a.nights + ' noche' + (a.nights>1?'s':'') + ' · ' + a.pn + '€/noche</div></div>' +
+        '<div class="price-pp"><div class="price-pp-val">' + ppp + '€</div><div class="price-pp-lbl">por persona (7)</div></div>' +
+      '</div>' +
+      '<div class="rating-row"><span class="rating-stars">★★★★★</span><span class="rating-val">' + a.rating + '</span><span class="rating-count">(' + a.reviews + ' reseñas)</span></div>' +
+      '<div class="alo-actions" style="margin-bottom:0.5rem">' +
+        '<a href="' + a.link + '" target="_blank" class="btn-link ' + (isAir?'airbnb':'booking') + '">🔗 Ver en ' + (isAir?'Airbnb':'Booking') + '</a>' +
+      '</div>' +
+      '<div class="vote-btns">' +
+        '<button class="vbtn ' + vy + '" onclick="vote(' + a.id + ',\'y\',event)">✅ ' + cy + '</button>' +
+        '<button class="vbtn ' + vf + '" onclick="vote(' + a.id + ',\'f\',event)">⭐ ' + cf + '</button>' +
+        '<button class="vbtn ' + vn + '" onclick="vote(' + a.id + ',\'n\',event)">❌ ' + cn + '</button>' +
+      '</div>' +
+      '</div></div>';
+  }).join('');
+
+  renderRanking();
+}
+
+function getScore(id) {
+  var y = votes[id+'_y'] ? 2 : 0;
+  var f = votes[id+'_f'] ? 3 : 0;
+  var n = votes[id+'_n'] ? -1 : 0;
+  return y + f + n;
+}
+
+function renderRanking() {
+  var scored = ALOS.map(function(a){ return {id:a.id,name:a.name,city:a.city,score:getScore(a.id)}; });
+  scored.sort(function(a,b){ return b.score-a.score; });
+  var top = scored.filter(function(a){ return a.score > 0; });
+  if(top.length === 0) {
+    document.getElementById('ranking-list').innerHTML = '<div style="font-size:0.82rem;color:var(--muted);padding:0.5rem 0">Aún no hay votos. ¡Empieza a votar arriba!</div>';
+    return;
+  }
+  var medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+  document.getElementById('ranking-list').innerHTML = top.slice(0,8).map(function(a,i){
+    var col = i===0?'var(--gold)':i===1?'#94a3b8':i===2?'#cd7f32':'var(--muted)';
+    return '<div class="ranking-item">' +
+      '<div class="ranking-pos">' + (medals[i]||'·') + '</div>' +
+      '<div><div class="ranking-name">' + a.name + '</div><div class="ranking-city">' + a.city + '</div></div>' +
+      '<div class="ranking-score" style="color:' + col + '">' + a.score + ' pts</div>' +
+      '</div>';
+  }).join('');
+}
+
+function vote(id, type, e) {
+  e.stopPropagation();
+  var k = id + '_' + type;
+  if(votes[k]) { delete votes[k]; } else {
+    delete votes[id+'_y']; delete votes[id+'_f']; delete votes[id+'_n'];
+    votes[k] = true;
+  }
+  renderAlos();
+}
+
+function setCity(c) { activeCity = c; renderAlos(); }
+
+// ===== BUDGET =====
+function renderBudget() {
+  var total = BUDGET.reduce(function(s,b){ return s+b.amount; }, 0);
+  document.getElementById('budget-rows').innerHTML = BUDGET.map(function(b){
+    var pct = Math.round(b.amount/total*100);
+    return '<div style="display:grid;grid-template-columns:1fr auto auto;padding:0.7rem 0.9rem;border-bottom:1px solid var(--border);align-items:center">' +
+      '<div style="display:flex;align-items:center;gap:0.45rem;font-size:0.8rem"><span>' + b.icon + '</span>' +
+      '<div><div style="font-weight:500">' + b.cat + '</div>' +
+      '<div style="height:3px;background:var(--border);border-radius:2px;margin-top:0.22rem;width:70px"><div style="height:100%;border-radius:2px;width:' + pct + '%;background:' + b.color + '"></div></div></div></div>' +
+      '<div style="font-weight:700;font-size:0.82rem;padding-left:0.7rem">' + b.amount + '€</div>' +
+      '<div style="font-size:0.65rem;color:var(--muted);padding-left:0.45rem;min-width:28px">' + pct + '%</div>' +
+      '</div>';
+  }).join('');
+  // donut
+  var svg = document.getElementById('donut-svg');
+  var leg = document.getElementById('donut-legend');
+  var cx=75,cy=75,r=55,ir=35,a=-Math.PI/2,paths='';
+  BUDGET.forEach(function(b){
+    var pct=b.amount/total,ang=pct*2*Math.PI,end=a+ang;
+    var x1=cx+r*Math.cos(a),y1=cy+r*Math.sin(a);
+    var x2=cx+r*Math.cos(end),y2=cy+r*Math.sin(end);
+    var ix1=cx+ir*Math.cos(a),iy1=cy+ir*Math.sin(a);
+    var ix2=cx+ir*Math.cos(end),iy2=cy+ir*Math.sin(end);
+    var lg=ang>Math.PI?1:0;
+    paths+='<path d="M'+ix1+','+iy1+' L'+x1+','+y1+' A'+r+','+r+' 0 '+lg+' 1 '+x2+','+y2+' L'+ix2+','+iy2+' A'+ir+','+ir+' 0 '+lg+' 0 '+ix1+','+iy1+' Z" fill="'+b.color+'" opacity="0.9"/>';
+    a=end;
+  });
+  paths+='<text x="'+cx+'" y="'+(cy-5)+'" text-anchor="middle" font-size="13" font-weight="bold" fill="#e2e8f0" font-family="Inter">'+total+'€</text>';
+  paths+='<text x="'+cx+'" y="'+(cy+10)+'" text-anchor="middle" font-size="9" fill="#64748b" font-family="Inter">total grupo</text>';
+  svg.innerHTML = paths;
+  leg.innerHTML = BUDGET.map(function(b){
+    return '<div style="display:flex;align-items:center;gap:0.45rem;margin-bottom:0.45rem;font-size:0.75rem">' +
+      '<div style="width:8px;height:8px;border-radius:50%;background:'+b.color+';flex-shrink:0"></div>' +
+      '<span style="flex:1;color:var(--text)">'+b.icon+' '+b.cat+'</span>' +
+      '<span style="font-weight:700">'+b.amount+'€</span></div>';
+  }).join('');
+}
+
+// ===== CHECKLIST =====
+function renderChecklist() {
+  document.getElementById('checklist-cont').innerHTML = clState.map(function(s,si){
+    var done = s.items.filter(function(i){ return i.done; }).length;
+    return '<div style="margin-bottom:1.1rem">' +
+      '<div style="font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem">' +
+      s.section + '<span style="margin-left:auto;font-size:0.65rem;background:var(--card2);border:1px solid var(--border);padding:0.14rem 0.42rem;border-radius:4px">'+done+'/'+s.items.length+'</span></div>' +
+      s.items.map(function(item,ii){
+        return '<div onclick="toggleCL('+si+','+ii+')" style="display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.88rem;background:var(--card);border:1px solid var(--border);border-radius:8px;margin-bottom:0.35rem;cursor:pointer;opacity:'+(item.done?0.45:1)+';transition:all 0.18s">' +
+          '<div style="width:16px;height:16px;border-radius:4px;border:2px solid '+(item.done?'var(--green)':'var(--border)')+';flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:white;background:'+(item.done?'var(--green)':'transparent')+'">'+(item.done?'✓':'')+'</div>' +
+          '<span style="font-size:0.82rem;'+(item.done?'text-decoration:line-through':'')+'">'+item.t+'</span></div>';
+      }).join('') + '</div>';
+  }).join('');
+}
+function toggleCL(si,ii){ clState[si].items[ii].done=!clState[si].items[ii].done; renderChecklist(); }
+
+init();
+</script>
+</body>
+</html>
