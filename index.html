@@ -330,6 +330,10 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
         <label class="field-label">🔵 Booking — enlace a lista de guardados</label>
         <input class="field-input" id="input-book" type="url" placeholder="https://www.booking.com/saved.es.html?...">
       </div>
+      <div>
+        <label class="field-label">🔑 Token GitHub (no compartir)</label>
+        <input class="field-input" id="input-token" type="password" placeholder="ghp_..." oninput="GITHUB_TOKEN=this.value; localStorage.setItem('et2026_token',this.value)">
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
@@ -414,20 +418,59 @@ var CL = [
   ]}
 ];
 
-// STATE — links stored in memory (reset on reload; fine for demo)
-// To persist: replace with localStorage
-var links = {};
-CITIES.forEach(function(c){ links[c.id] = {air:'', book:''}; });
+// Links embedded directly in the HTML — edited via GitHub API
+var links = {
+  marsella: {air:'', book:''},
+  roma:     {air:'', book:''},
+  venecia:  {air:'', book:''},
+  munich:   {air:'', book:''},
+  colonia:  {air:'', book:''},
+  paris:    {air:'', book:''}
+};
+// LINKS_JSON_PLACEHOLDER
 
-// Load from localStorage if available
-function loadLinks(){
-  try {
-    var saved = localStorage.getItem('et2026_links');
-    if(saved) links = JSON.parse(saved);
-  } catch(e){}
-}
+var GITHUB_TOKEN = localStorage.getItem('et2026_token') || '';
+var GITHUB_REPO  = 'maicol919-gif/eurotrip2026';
+
+function loadLinks(){ /* already embedded above */ }
+
 function saveToStorage(){
-  try { localStorage.setItem('et2026_links', JSON.stringify(links)); } catch(e){}
+  // Save by pushing updated index.html to GitHub via API
+  var btn = document.querySelector('.btn-save');
+  if(btn){ btn.textContent = 'Guardando...'; btn.disabled = true; }
+
+  fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/index.html', {
+    headers: { 'Authorization': 'token ' + GITHUB_TOKEN, 'Accept': 'application/vnd.github.v3+json' }
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    var decoded = atob(data.content.replace(/\n/g,''));
+    // Replace the links block in the file
+    var updated = decoded.replace(
+      /var links = \{[\s\S]*?\};\s*\/\/ LINKS_JSON_PLACEHOLDER/,
+      'var links = ' + JSON.stringify(links, null, 2) + ';
+// LINKS_JSON_PLACEHOLDER'
+    );
+    var encoded = btoa(unescape(encodeURIComponent(updated)));
+    return fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/index.html', {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + GITHUB_TOKEN, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: '🔗 Actualizar enlaces alojamientos', content: encoded, sha: data.sha })
+    });
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.commit){
+      if(btn){ btn.textContent = '✓ Guardado'; setTimeout(function(){ btn.textContent='Guardar'; btn.disabled=false; }, 2000); }
+    } else {
+      alert('Error al guardar. Comprueba el token.');
+      if(btn){ btn.textContent = 'Guardar'; btn.disabled = false; }
+    }
+  })
+  .catch(function(e){
+    alert('Error de red: ' + e.message);
+    if(btn){ btn.textContent = 'Guardar'; btn.disabled = false; }
+  });
 }
 
 var editingCity = null;
@@ -507,6 +550,8 @@ function openModal(cityId){
   document.getElementById('input-air').value = links[cityId].air || '';
   document.getElementById('input-book').value = links[cityId].book || '';
   document.getElementById('modal').classList.add('open');
+  GITHUB_TOKEN = localStorage.getItem('et2026_token') || '';
+  document.getElementById('input-token').value = GITHUB_TOKEN;
   document.getElementById('input-air').focus();
 }
 
