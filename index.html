@@ -8,145 +8,73 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:100vh}
-
 .header{background:#0f172a;color:white;padding:1.1rem 2rem;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
 .header h1{font-size:1rem;font-weight:700;letter-spacing:-0.02em}
 .header p{font-size:0.7rem;color:#64748b;margin-top:0.1rem}
-.pill{background:#3b82f6;color:white;font-size:0.7rem;font-weight:700;padding:0.35rem 0.85rem;border-radius:20px}
-
+.pill{background:#3b82f6;color:white;font-size:0.7rem;font-weight:700;padding:0.35rem 0.85rem;border-radius:20px;white-space:nowrap}
 .nav{background:white;border-bottom:1px solid #e2e8f0;display:flex;overflow-x:auto;padding:0 2rem}
 .nb{background:none;border:none;border-bottom:2px solid transparent;color:#64748b;font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:500;padding:0.85rem 1rem;cursor:pointer;white-space:nowrap;transition:all .15s}
 .nb:hover{color:#0f172a}
 .nb.active{color:#3b82f6;border-bottom-color:#3b82f6;font-weight:600}
-
 .main{max-width:1000px;margin:0 auto;padding:2rem}
-.view{display:none}
-.view.active{display:block}
-
+.view{display:none}.view.active{display:block}
 .ptitle{font-size:1.3rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.3rem}
 .psub{font-size:0.82rem;color:#64748b;margin-bottom:1.75rem}
-
 /* DASHBOARD */
 .dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:0.85rem;margin-bottom:2rem}
 .dcard{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem}
 .dval{font-size:1.6rem;font-weight:800;letter-spacing:-0.03em;margin-bottom:0.18rem}
 .dlbl{font-size:0.7rem;color:#64748b}
 .dtag{display:inline-block;margin-top:0.38rem;font-size:0.6rem;font-weight:600;padding:0.14rem 0.4rem;border-radius:4px}
-.tb{background:#eff6ff;color:#3b82f6}
-.tg{background:#ecfdf5;color:#059669}
-.ta{background:#fffbeb;color:#d97706}
-.tr{background:#fef2f2;color:#dc2626}
-
+.tb{background:#eff6ff;color:#3b82f6}.tg{background:#ecfdf5;color:#059669}.ta{background:#fffbeb;color:#d97706}.tr{background:#fef2f2;color:#dc2626}
 .alerts{display:flex;flex-direction:column;gap:0.45rem}
 .alert{background:white;border-radius:10px;padding:0.8rem 1rem;border-left:3px solid;display:flex;flex-direction:column;gap:0.12rem}
 .alert.r{border-color:#ef4444}.alert.a{border-color:#f59e0b}.alert.b{border-color:#3b82f6}.alert.g{border-color:#10b981}
 .albl{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em}
 .alert.r .albl{color:#ef4444}.alert.a .albl{color:#d97706}.alert.b .albl{color:#3b82f6}.alert.g .albl{color:#10b981}
-.atitle{font-size:0.85rem;font-weight:600}
-.adesc{font-size:0.74rem;color:#64748b}
-
-/* ===== ALOJAMIENTOS ===== */
-.admin-banner{
-  background:#fefce8;border:1.5px solid #fde68a;border-radius:12px;
-  padding:1rem 1.25rem;margin-bottom:1.5rem;
-  display:flex;align-items:flex-start;gap:0.85rem;
-}
-.admin-banner-icon{font-size:1.25rem;flex-shrink:0;margin-top:0.1rem}
-.admin-banner h3{font-size:0.85rem;font-weight:700;margin-bottom:0.25rem;color:#92400e}
-.admin-banner p{font-size:0.75rem;color:#78350f;line-height:1.5}
-.admin-banner a{color:#d97706;font-weight:600;text-decoration:none}
-.admin-banner a:hover{text-decoration:underline}
-
-/* city blocks */
+.atitle{font-size:0.85rem;font-weight:600}.adesc{font-size:0.74rem;color:#64748b}
+/* ALOJAMIENTOS */
+.info-bar{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:0.85rem}
 .city-block{background:white;border:1.5px solid #e2e8f0;border-radius:14px;margin-bottom:1rem;overflow:hidden}
-.city-header{
-  display:flex;align-items:center;gap:1rem;
-  padding:1.1rem 1.25rem;border-bottom:1px solid #f1f5f9;
-}
+.city-header{display:flex;align-items:center;gap:1rem;padding:1.1rem 1.25rem;border-bottom:1px solid #f1f5f9;flex-wrap:wrap}
 .city-flag{font-size:1.5rem;flex-shrink:0}
-.city-info{flex:1}
 .city-name{font-size:1rem;font-weight:700;letter-spacing:-0.01em}
 .city-meta{font-size:0.72rem;color:#94a3b8;margin-top:0.12rem}
-.city-nights{
-  background:#f1f5f9;border-radius:8px;
-  padding:0.3rem 0.75rem;font-size:0.72rem;font-weight:600;color:#475569;
-  white-space:nowrap;
-}
-
+.city-nights{background:#f1f5f9;border-radius:8px;padding:0.3rem 0.75rem;font-size:0.72rem;font-weight:600;color:#475569;white-space:nowrap}
 .city-links{padding:1rem 1.25rem;display:flex;flex-direction:column;gap:0.6rem}
-
-.link-row{
-  display:flex;align-items:center;gap:0.85rem;
-  background:#f8fafc;border:1.5px solid #e2e8f0;
-  border-radius:10px;padding:0.75rem 1rem;
-  transition:border-color .15s;
-}
+.link-row{display:flex;align-items:center;gap:0.85rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.75rem 1rem;transition:border-color .15s}
 .link-row:hover{border-color:#cbd5e1}
-
-.link-platform{
-  display:flex;align-items:center;gap:0.45rem;
-  font-size:0.75rem;font-weight:700;min-width:90px;flex-shrink:0;
-}
+.link-platform{display:flex;align-items:center;gap:0.45rem;font-size:0.75rem;font-weight:700;min-width:80px;flex-shrink:0}
 .dot-air{width:8px;height:8px;border-radius:50%;background:#ff5a5f;flex-shrink:0}
 .dot-book{width:8px;height:8px;border-radius:50%;background:#003580;flex-shrink:0}
-.lbl-air{color:#ef4444}
-.lbl-book{color:#003580}
-
-.link-url{
-  flex:1;font-size:0.78rem;color:#64748b;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  font-family:monospace;
-}
-.link-url.empty{color:#cbd5e1;font-style:italic;font-family:'Inter',sans-serif}
-
-.btn-open{
-  display:inline-flex;align-items:center;gap:0.3rem;
-  background:#0f172a;color:white;
-  font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;
-  padding:0.42rem 0.85rem;border-radius:7px;text-decoration:none;
-  transition:background .15s;white-space:nowrap;flex-shrink:0;
-  border:none;cursor:pointer;
-}
+.lbl-air{color:#ef4444}.lbl-book{color:#003580}
+.link-desc{flex:1;font-size:0.78rem;color:#94a3b8;font-style:italic}
+.link-desc.has-link{color:#475569;font-style:normal;font-weight:500}
+.btn-open{display:inline-flex;align-items:center;gap:0.3rem;background:#0f172a;color:white;font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;padding:0.42rem 0.85rem;border-radius:7px;text-decoration:none;transition:background .15s;white-space:nowrap;flex-shrink:0;border:none;cursor:pointer}
 .btn-open:hover{background:#3b82f6}
-.btn-open.disabled{background:#e2e8f0;color:#94a3b8;cursor:not-allowed;pointer-events:none}
 .btn-open.air:hover{background:#ef4444}
 .btn-open.book:hover{background:#003580}
-
-/* ADMIN MODAL */
-.modal-overlay{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);
-  z-index:1000;align-items:center;justify-content:center;padding:1rem;
-}
-.modal-overlay.open{display:flex}
-.modal{
-  background:white;border-radius:16px;padding:1.75rem;
-  width:100%;max-width:520px;
-  display:flex;flex-direction:column;gap:1rem;
-}
-.modal h2{font-size:1rem;font-weight:700}
-.modal p{font-size:0.78rem;color:#64748b;line-height:1.5}
-.modal-fields{display:flex;flex-direction:column;gap:0.6rem}
-.field-label{font-size:0.7rem;font-weight:600;color:#374151;margin-bottom:0.25rem;display:block}
-.field-input{
-  width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;
-  border-radius:8px;padding:0.6rem 0.85rem;
-  font-family:'Inter',sans-serif;font-size:0.8rem;color:#0f172a;
-  outline:none;transition:border-color .15s;
-}
-.field-input:focus{border-color:#3b82f6}
-.field-input::placeholder{color:#cbd5e1}
-.modal-actions{display:flex;gap:0.5rem;justify-content:flex-end}
-.btn-cancel{background:none;border:1.5px solid #e2e8f0;color:#64748b;font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:600;padding:0.5rem 1rem;border-radius:8px;cursor:pointer}
-.btn-save{background:#0f172a;color:white;border:none;font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:700;padding:0.5rem 1.25rem;border-radius:8px;cursor:pointer}
-.btn-save:hover{background:#3b82f6}
-.btn-edit{
-  background:none;border:1.5px solid #e2e8f0;color:#64748b;
-  font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;
-  padding:0.3rem 0.7rem;border-radius:6px;cursor:pointer;
-  margin-left:auto;transition:all .15s;white-space:nowrap;flex-shrink:0;
-}
+.btn-edit{background:none;border:1.5px solid #e2e8f0;color:#64748b;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;padding:0.3rem 0.7rem;border-radius:6px;cursor:pointer;margin-left:auto;transition:all .15s;white-space:nowrap;flex-shrink:0}
 .btn-edit:hover{border-color:#3b82f6;color:#3b82f6}
-
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center;padding:1rem}
+.overlay.open{display:flex}
+.modal{background:white;border-radius:16px;padding:1.75rem;width:100%;max-width:500px;display:flex;flex-direction:column;gap:1rem}
+.modal h2{font-size:1rem;font-weight:700}
+.modal-desc{font-size:0.78rem;color:#64748b;line-height:1.5}
+.field{display:flex;flex-direction:column;gap:0.28rem}
+.field label{font-size:0.68rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em}
+.field input{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.6rem 0.85rem;font-family:'Inter',sans-serif;font-size:0.82rem;color:#0f172a;outline:none;transition:border-color .15s;width:100%}
+.field input:focus{border-color:#3b82f6}
+.field input::placeholder{color:#cbd5e1}
+.modal-actions{display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.25rem}
+.btn-cancel{background:none;border:1.5px solid #e2e8f0;color:#64748b;font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:600;padding:0.5rem 1rem;border-radius:8px;cursor:pointer}
+.btn-cancel:hover{border-color:#94a3b8}
+.btn-save{background:#0f172a;color:white;border:none;font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:700;padding:0.5rem 1.25rem;border-radius:8px;cursor:pointer;transition:background .15s}
+.btn-save:hover{background:#3b82f6}
+.btn-save:disabled{background:#94a3b8;cursor:not-allowed}
+.save-status{font-size:0.72rem;margin-right:auto;padding:0.5rem 0;color:#64748b}
+.save-status.ok{color:#059669}.save-status.err{color:#dc2626}
 /* TIMELINE */
 .tl-list{display:flex;flex-direction:column;gap:0.4rem}
 .tl-row{background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .15s}
@@ -169,7 +97,6 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 .tnote-l{font-size:0.6rem;font-weight:700;color:#3b82f6;margin-bottom:0.1rem}
 .tnote-t{font-size:0.76rem;color:#64748b;line-height:1.45}
 .tstay{background:#f8fafc;border-radius:7px;padding:0.5rem 0.75rem;font-size:0.8rem;color:#475569}
-
 /* PRESUPUESTO */
 .pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.85rem;margin-bottom:1.5rem}
 .pp-card{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1.1rem;text-align:center}
@@ -187,8 +114,6 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 .bud-fill{height:100%;border-radius:2px}
 .bud-amt{font-weight:700;font-size:0.83rem;padding-left:1rem}
 .bud-pct{font-size:0.63rem;color:#94a3b8;padding-left:0.45rem;min-width:26px;text-align:right}
-.bud-note{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem;font-size:0.78rem;color:#64748b;line-height:1.6}
-
 /* CHECKLIST */
 .cl-sec{margin-bottom:1.5rem}
 .cl-stitle{font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem}
@@ -200,18 +125,12 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 .cl-item.done .cl-box{background:#10b981;border-color:#10b981}
 .cl-txt{font-size:0.82rem}
 .cl-item.done .cl-txt{text-decoration:line-through}
-
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:2px}
-
 @media(max-width:680px){
-  .main{padding:1rem}
+  .main{padding:1rem}.header{padding:1rem}.nav{padding:0 1rem}
   .tl-row.open .tl-body{grid-template-columns:1fr}
-  .header{padding:1rem}
-  .nav{padding:0 1rem}
-  .city-header{flex-wrap:wrap;gap:0.6rem}
-  .link-row{flex-wrap:wrap}
-  .link-url{display:none}
+  .link-row{flex-wrap:wrap}.link-desc{display:none}
 }
 </style>
 </head>
@@ -244,7 +163,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
     <div class="dcard"><div class="dval">4.830€</div><div class="dlbl">Presupuesto total</div><span class="dtag tg">690€/persona</span></div>
     <div class="dcard"><div class="dval">7</div><div class="dlbl">Viajeros</div><span class="dtag ta">+2 posibles</span></div>
     <div class="dcard"><div class="dval">~6.200</div><div class="dlbl">Kilómetros</div><span class="dtag tb">ruta completa</span></div>
-    <div class="dcard"><div class="dval">5</div><div class="dlbl">Ciudades con Airbnb</div><span class="dtag tr">0 reservados</span></div>
+    <div class="dcard"><div class="dval">6</div><div class="dlbl">Ciudades con Airbnb</div><span class="dtag tr">0 reservados</span></div>
     <div class="dcard"><div class="dval">13</div><div class="dlbl">Noches</div><span class="dtag tg">12→24 jul</span></div>
   </div>
   <div style="font-size:0.88rem;font-weight:700;margin-bottom:0.75rem">Para decidir hoy</div>
@@ -253,28 +172,22 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
     <div class="alert a"><div class="albl">Decidir hoy</div><div class="atitle">¿Somos 7, 8 o 9?</div><div class="adesc">Afecta la capacidad mínima de cada apartamento y el precio por persona.</div></div>
     <div class="alert a"><div class="albl">Revisar</div><div class="atitle">Días 14 y 22 son muy intensos</div><div class="adesc">Marsella→Pisa→Roma (900km) y Colonia→Bruselas→París. ¿Dividimos alguna etapa?</div></div>
     <div class="alert b"><div class="albl">Obligatorio</div><div class="atitle">Vignette Austria ~9€ — asfinag.at</div><div class="adesc">Ruta Venecia→Múnich cruza Austria. Sin ella: multa de 120€ en carretera.</div></div>
-    <div class="alert g"><div class="albl">Antes de salir</div><div class="atitle">Reservar Coliseo y Vaticano online</div><div class="adesc">En julio sin reserva hay 2-3h de cola. Mismo precio, tiempo muy diferente.</div></div>
+    <div class="alert g"><div class="albl">Antes de salir</div><div class="atitle">Reservar Coliseo y Vaticano online</div><div class="adesc">En julio sin reserva hay 2-3h de cola. Mismo precio, mucho menos tiempo perdido.</div></div>
   </div>
 </div>
 
 <!-- ALOJAMIENTOS -->
 <div id="view-alojamientos" class="view">
   <div class="ptitle">Alojamientos</div>
-  <div class="psub">Apartamentos completos, privacidad total. Haz clic en cada ciudad para ver las opciones.</div>
-
-  <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:0.85rem">
-    <div style="font-size:1.25rem;flex-shrink:0;margin-top:0.1rem">🏠</div>
-    <div>
-      <div style="font-size:0.85rem;font-weight:700;margin-bottom:0.25rem">¿Cómo funciona esta sección?</div>
-      <div style="font-size:0.78rem;color:#64748b;line-height:1.55">
-        Para cada ciudad tenéis dos opciones: <strong>Airbnb</strong> (apartamentos completos, nuestra prioridad) y <strong>Booking</strong> como alternativa. 
-        Haced clic en el botón de cada ciudad para ver las opciones preseleccionadas. 
-        Buscad apartamentos enteros con <strong>mínimo 3 habitaciones</strong> para tener privacidad total. 
-        Recordad que <strong>julio se agota rápido</strong> — mejor decidir y reservar hoy.
-      </div>
+  <div class="psub">Apartamentos completos — privacidad total para los 7. Haz clic en "Ver opciones" para abrir directamente Airbnb o Booking.</div>
+  <div class="info-bar">
+    <div style="font-size:1.2rem;flex-shrink:0">🏠</div>
+    <div style="font-size:0.78rem;color:#64748b;line-height:1.55">
+      Buscad siempre <strong style="color:#0f172a">apartamento entero</strong> con mínimo 3 habitaciones para tener privacidad total.
+      Prioridad: <strong style="color:#0f172a">Airbnb</strong>. Booking como alternativa si no hay disponibilidad.
+      <strong style="color:#dc2626">Julio se agota rápido</strong> — mejor reservar hoy mismo tras la votación.
     </div>
   </div>
-
   <div id="city-blocks"></div>
 </div>
 
@@ -298,7 +211,8 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
     <div class="bud-th"><span>Categoría</span><span>Total grupo</span><span>%</span></div>
     <div id="bud-rows"></div>
   </div>
-  <div class="bud-note"><strong style="color:#0f172a">Cómo se calculó:</strong><br>
+  <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem;font-size:0.78rem;color:#64748b;line-height:1.6">
+    <strong style="color:#0f172a">Cómo se calculó:</strong><br>
     Alojamiento: precios reales Airbnb julio 2026 para 7 personas.<br>
     Combustible: 6.200 km × 7L/100km × 1,65€/L media Europa.<br>
     Peajes: Francia A7, Italia A1/A4, Bélgica — aprox. 120€ total.<br>
@@ -316,72 +230,109 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 
 </div>
 
-<!-- MODAL EDITAR LINKS -->
-<div class="modal-overlay" id="modal">
+<!-- MODAL -->
+<div class="overlay" id="overlay">
   <div class="modal">
-    <h2>✏️ Editar enlaces — <span id="modal-city"></span></h2>
-    <p>Pega aquí los enlaces de tus listas de favoritos en Airbnb y Booking. En Airbnb: Lista → Compartir → Copiar enlace.</p>
-    <div class="modal-fields">
-      <div>
-        <label class="field-label">🔴 Airbnb — enlace a lista de favoritos</label>
-        <input class="field-input" id="input-air" type="url" placeholder="https://www.airbnb.es/wishlists/...">
-      </div>
-      <div>
-        <label class="field-label">🔵 Booking — enlace a lista de guardados</label>
-        <input class="field-input" id="input-book" type="url" placeholder="https://www.booking.com/saved.es.html?...">
-      </div>
-      <div>
-        <label class="field-label">🔑 Token GitHub (no compartir)</label>
-        <input class="field-input" id="input-token" type="password" placeholder="ghp_..." oninput="GITHUB_TOKEN=this.value; localStorage.setItem('et2026_token',this.value)">
-      </div>
+    <h2 id="modal-title">Editar enlaces</h2>
+    <p class="modal-desc">
+      En Airbnb: crea una Lista de favoritos, guarda las opciones que te gusten, luego Compartir lista → Copiar enlace.<br>
+      En Booking: guarda propiedades en tu lista y copia el enlace público.
+    </p>
+    <div class="field">
+      <label>🔴 Airbnb — enlace a tu lista de favoritos</label>
+      <input type="url" id="inp-air" placeholder="https://www.airbnb.es/wishlists/...">
+    </div>
+    <div class="field">
+      <label>🔵 Booking — enlace a opciones guardadas</label>
+      <input type="url" id="inp-book" placeholder="https://www.booking.com/...">
+    </div>
+    <div class="field">
+      <label>🔑 Token GitHub (solo el organizador)</label>
+      <input type="password" id="inp-token" placeholder="ghp_...">
     </div>
     <div class="modal-actions">
+      <span class="save-status" id="save-status"></span>
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-      <button class="btn-save" onclick="saveLinks()">Guardar</button>
+      <button class="btn-save" id="btn-save" onclick="saveLinks()">Guardar</button>
     </div>
   </div>
 </div>
 
 <script>
-var TRIP = new Date('2026-07-12');
+// ---- CONFIG ----
+var REPO = 'maicol919-gif/eurotrip2026';
 
+// ---- CITIES ----
 var CITIES = [
-  {id:'marsella', name:'Marsella', flag:'🇫🇷', nights:2, dates:'12 → 14 jul', zone:'Vieux-Port / Le Panier', guests:7,
-   airbnbSearch:'https://www.airbnb.es/s/Marseille--France/homes?adults=7&checkin=2026-07-12&checkout=2026-07-14&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=3',
-   bookingSearch:'https://www.booking.com/searchresults.es.html?ss=Marseille&checkin=2026-07-12&checkout=2026-07-14&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
-  {id:'roma', name:'Roma', flag:'🇮🇹', nights:3, dates:'15 → 18 jul', zone:'Trastevere / Prati', guests:7,
-   airbnbSearch:'https://www.airbnb.es/s/Rome--Italy/homes?adults=7&checkin=2026-07-15&checkout=2026-07-18&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=3',
-   bookingSearch:'https://www.booking.com/searchresults.es.html?ss=Rome+city+centre&checkin=2026-07-15&checkout=2026-07-18&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
-  {id:'venecia', name:'Venecia', flag:'🇮🇹', nights:2, dates:'17 → 19 jul', zone:'Mestre (parking) / Burano', guests:7,
-   airbnbSearch:'https://www.airbnb.es/s/Mestre--Venice--Italy/homes?adults=7&checkin=2026-07-17&checkout=2026-07-19&room_types%5B%5D=Entire+home%2Fapt&amenities%5B%5D=9',
-   bookingSearch:'https://www.booking.com/searchresults.es.html?ss=Mestre+Venice&checkin=2026-07-17&checkout=2026-07-19&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
-  {id:'munich', name:'Múnich', flag:'🇩🇪', nights:2, dates:'19 → 21 jul', zone:'Maxvorstadt / Schwabing', guests:7,
-   airbnbSearch:'https://www.airbnb.es/s/Munich--Germany/homes?adults=7&checkin=2026-07-19&checkout=2026-07-21&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=3',
-   bookingSearch:'https://www.booking.com/searchresults.es.html?ss=Munich+city+centre&checkin=2026-07-19&checkout=2026-07-21&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
-  {id:'colonia', name:'Colonia', flag:'🇩🇪', nights:1, dates:'21 → 22 jul', zone:'Ehrenfeld / centro', guests:7,
-   airbnbSearch:'https://www.airbnb.es/s/Cologne--Germany/homes?adults=7&checkin=2026-07-21&checkout=2026-07-22&room_types%5B%5D=Entire+home%2Fapt&amenities%5B%5D=9',
-   bookingSearch:'https://www.booking.com/searchresults.es.html?ss=Cologne+city+centre&checkin=2026-07-21&checkout=2026-07-22&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
-  {id:'paris', name:'París', flag:'🇫🇷', nights:2, dates:'23 → 25 jul', zone:'Le Marais / République', guests:7,
-   airbnbSearch:'https://www.airbnb.es/s/Paris--France/homes?adults=7&checkin=2026-07-23&checkout=2026-07-25&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=4',
-   bookingSearch:'https://www.booking.com/searchresults.es.html?ss=Paris+city+centre&checkin=2026-07-23&checkout=2026-07-25&group_adults=7&no_rooms=1&nflt=ht_id%3D201'}
+  {id:'marsella', name:'Marsella', flag:'🇫🇷', nights:2, dates:'12 → 14 jul', zone:'Vieux-Port / Le Panier',
+   searchAir:'https://www.airbnb.es/s/Marseille--France/homes?adults=7&checkin=2026-07-12&checkout=2026-07-14&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=3',
+   searchBook:'https://www.booking.com/searchresults.es.html?ss=Marseille&checkin=2026-07-12&checkout=2026-07-14&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
+  {id:'roma', name:'Roma', flag:'🇮🇹', nights:3, dates:'15 → 18 jul', zone:'Trastevere / Prati',
+   searchAir:'https://www.airbnb.es/s/Rome--Italy/homes?adults=7&checkin=2026-07-15&checkout=2026-07-18&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=3',
+   searchBook:'https://www.booking.com/searchresults.es.html?ss=Rome&checkin=2026-07-15&checkout=2026-07-18&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
+  {id:'venecia', name:'Venecia', flag:'🇮🇹', nights:2, dates:'17 → 19 jul', zone:'Mestre (parking) / Burano',
+   searchAir:'https://www.airbnb.es/s/Mestre--Venice--Italy/homes?adults=7&checkin=2026-07-17&checkout=2026-07-19&room_types%5B%5D=Entire+home%2Fapt&amenities%5B%5D=9',
+   searchBook:'https://www.booking.com/searchresults.es.html?ss=Mestre+Venice&checkin=2026-07-17&checkout=2026-07-19&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
+  {id:'munich', name:'Múnich', flag:'🇩🇪', nights:2, dates:'19 → 21 jul', zone:'Maxvorstadt / Schwabing',
+   searchAir:'https://www.airbnb.es/s/Munich--Germany/homes?adults=7&checkin=2026-07-19&checkout=2026-07-21&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=3',
+   searchBook:'https://www.booking.com/searchresults.es.html?ss=Munich&checkin=2026-07-19&checkout=2026-07-21&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
+  {id:'colonia', name:'Colonia', flag:'🇩🇪', nights:1, dates:'21 → 22 jul', zone:'Ehrenfeld / centro',
+   searchAir:'https://www.airbnb.es/s/Cologne--Germany/homes?adults=7&checkin=2026-07-21&checkout=2026-07-22&room_types%5B%5D=Entire+home%2Fapt&amenities%5B%5D=9',
+   searchBook:'https://www.booking.com/searchresults.es.html?ss=Cologne&checkin=2026-07-21&checkout=2026-07-22&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
+  {id:'paris', name:'París', flag:'🇫🇷', nights:2, dates:'23 → 25 jul', zone:'Le Marais / République',
+   searchAir:'https://www.airbnb.es/s/Paris--France/homes?adults=7&checkin=2026-07-23&checkout=2026-07-25&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=4',
+   searchBook:'https://www.booking.com/searchresults.es.html?ss=Paris&checkin=2026-07-23&checkout=2026-07-25&group_adults=7&no_rooms=1&nflt=ht_id%3D201'}
 ];
 
+// ---- LINKS (edited via modal, saved to GitHub) ----
+// LINKS_START
+var LINKS = {"marsella":{"air":"","book":""},"roma":{"air":"","book":""},"venecia":{"air":"","book":""},"munich":{"air":"","book":""},"colonia":{"air":"","book":""},"paris":{"air":"","book":""}};
+// LINKS_END
+
+// ---- TIMELINE ----
 var TL = [
-  {date:'12 jul',city:'Alicante → Marsella',type:'d',km:620,drive:'6h 30min',acts:['Salida temprana (7:00h)','Parada en Montpellier (~30 min)','Llegada a Marsella por la tarde','Check-in y primer vistazo al puerto'],stay:'Airbnb Marsella (noche 1)',note:'Organizar turnos de conducción. Llevar snacks y lista de Spotify lista.'},
-  {date:'13 jul',city:'Marsella',type:'s',km:0,drive:'—',acts:['Vieux-Port de mañana','Basilique Notre-Dame de la Garde','Calanques de Cassis — imprescindible','Bouillabaisse en restaurante local'],stay:'Airbnb Marsella (noche 2)',note:'Las Calanques: reservar transporte con antelación. Llegar antes de las 9h para evitar el calor.'},
-  {date:'14 jul',city:'Marsella → Pisa → Roma',type:'d',km:900,drive:'8h 30min',acts:['Salida muy temprana (6:00h)','Parada ~1h en Pisa — Torre Inclinada','Autovía A1 hasta Roma','Check-in tarde-noche'],stay:'Airbnb Roma (noche 1)',note:'AVISO: 900km en un día es muy exigente. Alternativa: dormir en Pisa y llegar a Roma el día 15.'},
-  {date:'15 jul',city:'Roma',type:'s',km:0,drive:'—',acts:['Coliseo y Foro Romano (reservar online)','Barrio Palatino','Zona Monti para comer','Fontana di Trevi de noche'],stay:'Airbnb Roma (noche 2)',note:'Coliseo: reservar en coopculture.it — en julio sin reserva hay 2-3h de cola.'},
-  {date:'16 jul',city:'Roma',type:'s',km:0,drive:'—',acts:['Vaticano y Capilla Sixtina (madrugar)','Plaza San Pedro','Castel Sant\'Angelo','Trastevere de tarde y noche'],stay:'Airbnb Roma (noche 3)',note:'Vaticano: entrada en museivaticani.va. Ir a las 8h — se agota en julio días antes.'},
-  {date:'17 jul',city:'Roma → Venecia',type:'d',km:528,drive:'5h 30min',acts:['Salida a las 8:00h','Parada opcional en Florencia','Llegar a Mestre, aparcar','Check-in'],stay:'Airbnb Mestre/Venecia (noche 1)',note:'Parking en Mestre: ~15€/día. En Venecia isla: 35-70€/día. La diferencia en 2 días es de ~100€.'},
-  {date:'18 jul',city:'Venecia',type:'s',km:0,drive:'—',acts:['Plaza San Marcos antes de las 8h','Vaporetto línea 1 por el Canal Grande','Isla de Burano (casas de colores)','Barrio Dorsoduro (auténtico)'],stay:'Airbnb Mestre/Venecia (noche 2)',note:'Clave: madrugar. A las 7h Venecia está vacía y es mágica. A las 10h llega el caos.'},
-  {date:'19 jul',city:'Venecia → Múnich',type:'d',km:425,drive:'4h 30min',acts:['Salida a las 9:00h','Cruce de los Alpes austriacos','Vignette Austria OBLIGATORIA (~9€)','Tarde libre en Marienplatz'],stay:'Airbnb Múnich (noche 1)',note:'Sin vignette Austria: multa de 120€. Comprar online antes en asfinag.at.'},
-  {date:'20 jul',city:'Múnich',type:'s',km:0,drive:'—',acts:['Englischer Garten y río con surfistas','Marienplatz y Glockenspiel (11h/17h)','Hofbräuhaus — cerveza 1L ~12€','BMW Museum (opcional)'],stay:'Airbnb Múnich (noche 2)',note:'Day ticket transporte: 9€. Julio tiene festivales de verano al aire libre.'},
-  {date:'21 jul',city:'Múnich → Colonia',type:'d',km:574,drive:'5h 15min',acts:['Salida a las 8:30h','Autobahn sin límite de velocidad 🏎️','Parada descanso opcional en Nuremberg','Tarde en Colonia — Dom y barrio Ehrenfeld'],stay:'Airbnb Colonia (1 noche)',note:'El Dom de Colonia impresiona incluso desde fuera. Ehrenfeld tiene buen ambiente nocturno.'},
-  {date:'22 jul',city:'Colonia → Bruselas → París',type:'d',km:510,drive:'5h',acts:['Parada 2h en Bruselas — Grand Place','Manneken Pis y gofres belgas','Llegada a París por la tarde-noche'],stay:'Airbnb París (noche 1)',note:'AVISO: Máximo 2h en Bruselas. Salida temprana imprescindible.'},
-  {date:'23 jul',city:'París',type:'s',km:0,drive:'—',acts:['Torre Eiffel al amanecer (sin colas)','Le Marais y Centro Pompidou','Louvre o Musée d\'Orsay (reservar online)','Montmartre y Sacré-Cœur'],stay:'Airbnb París (noche 2)',note:'Baguette + jamón + queso junto al Sena = almuerzo perfecto por 5€.'},
-  {date:'24 jul',city:'París → Alicante',type:'d',km:1150,drive:'10h+',acts:['Salida muy temprana (5:00h)','Paradas cada 2h — obligatorio','Cruce de los Pirineos','Llegada a Alicante de noche'],stay:'🏠 Casa',note:'AVISO: 1.150km, el día más largo. Alternativa: dormir en Zaragoza y llegar el 25 de mañana.'}
+  {date:'12 jul',city:'Alicante → Marsella',type:'d',km:620,drive:'6h 30min',
+   acts:['Salida temprana (7:00h)','Parada en Montpellier (~30 min)','Llegada a Marsella por la tarde','Check-in y primer vistazo al puerto'],
+   stay:'Airbnb Marsella (noche 1)',note:'Organizar turnos de conducción. Llevar snacks y lista de Spotify lista.'},
+  {date:'13 jul',city:'Marsella',type:'s',km:0,drive:'—',
+   acts:['Vieux-Port de mañana','Basilique Notre-Dame de la Garde','Calanques de Cassis — imprescindible','Bouillabaisse en restaurante local'],
+   stay:'Airbnb Marsella (noche 2)',note:'Las Calanques: reservar transporte con antelación. Mejor antes de las 9h para evitar el calor.'},
+  {date:'14 jul',city:'Marsella → Pisa → Roma',type:'d',km:900,drive:'8h 30min',
+   acts:['Salida muy temprana (6:00h)','Parada ~1h en Pisa — Torre Inclinada','Autovía A1 hasta Roma','Check-in tarde-noche'],
+   stay:'Airbnb Roma (noche 1)',note:'AVISO: 900km en un día es muy exigente. Alternativa: dormir en Pisa y llegar a Roma el día 15.'},
+  {date:'15 jul',city:'Roma',type:'s',km:0,drive:'—',
+   acts:['Coliseo y Foro Romano (reservar online)','Barrio Palatino','Zona Monti para comer','Fontana di Trevi de noche'],
+   stay:'Airbnb Roma (noche 2)',note:'Coliseo: reservar en coopculture.it — en julio sin reserva hay 2-3h de cola.'},
+  {date:'16 jul',city:'Roma',type:'s',km:0,drive:'—',
+   acts:['Vaticano y Capilla Sixtina (madrugar)','Plaza San Pedro','Castel Sant\'Angelo','Trastevere de tarde y noche'],
+   stay:'Airbnb Roma (noche 3)',note:'Vaticano: entrada en museivaticani.va. Ir a las 8h — se agota en julio días antes.'},
+  {date:'17 jul',city:'Roma → Venecia',type:'d',km:528,drive:'5h 30min',
+   acts:['Salida a las 8:00h','Parada opcional en Florencia','Llegar a Mestre, aparcar','Check-in'],
+   stay:'Airbnb Mestre/Venecia (noche 1)',note:'Parking en Mestre: ~15€/día. En Venecia isla: 35-70€/día. La diferencia en 2 días es de ~100€.'},
+  {date:'18 jul',city:'Venecia',type:'s',km:0,drive:'—',
+   acts:['Plaza San Marcos antes de las 8h','Vaporetto línea 1 por el Canal Grande','Isla de Burano (casas de colores)','Barrio Dorsoduro (auténtico)'],
+   stay:'Airbnb Mestre/Venecia (noche 2)',note:'Clave: madrugar. A las 7h Venecia está vacía y es mágica. A las 10h llega el caos.'},
+  {date:'19 jul',city:'Venecia → Múnich',type:'d',km:425,drive:'4h 30min',
+   acts:['Salida a las 9:00h','Cruce de los Alpes austriacos','Vignette Austria OBLIGATORIA (~9€)','Tarde libre en Marienplatz'],
+   stay:'Airbnb Múnich (noche 1)',note:'Sin vignette Austria: multa de 120€. Comprar online antes en asfinag.at.'},
+  {date:'20 jul',city:'Múnich',type:'s',km:0,drive:'—',
+   acts:['Englischer Garten y río con surfistas','Marienplatz y Glockenspiel (11h/17h)','Hofbräuhaus — cerveza 1L ~12€','BMW Museum (opcional)'],
+   stay:'Airbnb Múnich (noche 2)',note:'Day ticket transporte: 9€. Julio tiene festivales de verano al aire libre.'},
+  {date:'21 jul',city:'Múnich → Colonia',type:'d',km:574,drive:'5h 15min',
+   acts:['Salida a las 8:30h','Autobahn sin límite de velocidad 🏎️','Parada descanso opcional en Nuremberg','Tarde en Colonia — Dom y barrio Ehrenfeld'],
+   stay:'Airbnb Colonia (1 noche)',note:'El Dom de Colonia impresiona incluso desde fuera. Ehrenfeld tiene buen ambiente nocturno.'},
+  {date:'22 jul',city:'Colonia → Bruselas → París',type:'d',km:510,drive:'5h',
+   acts:['Parada 2h en Bruselas — Grand Place','Manneken Pis y gofres belgas','Llegada a París por la tarde-noche'],
+   stay:'Airbnb París (noche 1)',note:'AVISO: Máximo 2h en Bruselas. Salida temprana imprescindible.'},
+  {date:'23 jul',city:'París',type:'s',km:0,drive:'—',
+   acts:['Torre Eiffel al amanecer (sin colas)','Le Marais y Centro Pompidou','Louvre o Musée d\'Orsay (reservar online)','Montmartre y Sacré-Cœur'],
+   stay:'Airbnb París (noche 2)',note:'Baguette + jamón + queso junto al Sena = almuerzo perfecto por 5€.'},
+  {date:'24 jul',city:'París → Alicante',type:'d',km:1150,drive:'10h+',
+   acts:['Salida muy temprana (5:00h)','Paradas cada 2h — obligatorio','Cruce de los Pirineos','Llegada a Alicante de noche'],
+   stay:'🏠 Casa',note:'AVISO: 1.150km, el día más largo. Alternativa: dormir en Zaragoza y llegar el 25 de mañana.'}
 ];
 
+// ---- BUDGET ----
 var BUDGET = [
   {cat:'Alojamiento',icon:'🏠',amount:2150,color:'#3b82f6'},
   {cat:'Combustible',icon:'⛽',amount:715,color:'#f59e0b'},
@@ -392,7 +343,8 @@ var BUDGET = [
   {cat:'Emergencias',icon:'🚨',amount:200,color:'#94a3b8'}
 ];
 
-var CL = [
+// ---- CHECKLIST ----
+var CL_DATA = [
   {s:'🗓️ Antes del viaje',items:[
     {t:'Confirmar número final de viajeros (7, 8 o 9)',done:false},
     {t:'Votar y reservar todos los alojamientos',done:false},
@@ -418,216 +370,223 @@ var CL = [
   ]}
 ];
 
-// Links embedded directly in the HTML — edited via GitHub API
-var links = {
-  marsella: {air:'', book:''},
-  roma:     {air:'', book:''},
-  venecia:  {air:'', book:''},
-  munich:   {air:'', book:''},
-  colonia:  {air:'', book:''},
-  paris:    {air:'', book:''}
-};
-// LINKS_JSON_PLACEHOLDER
+// ---- STATE ----
+var clState = JSON.parse(JSON.stringify(CL_DATA));
+var editCity = null;
 
-var GITHUB_TOKEN = localStorage.getItem('et2026_token') || '';
-var GITHUB_REPO  = 'maicol919-gif/eurotrip2026';
-
-function loadLinks(){ /* already embedded above */ }
-
-function saveToStorage(){
-  // Save by pushing updated index.html to GitHub via API
-  var btn = document.querySelector('.btn-save');
-  if(btn){ btn.textContent = 'Guardando...'; btn.disabled = true; }
-
-  fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/index.html', {
-    headers: { 'Authorization': 'token ' + GITHUB_TOKEN, 'Accept': 'application/vnd.github.v3+json' }
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(data){
-    var decoded = atob(data.content.replace(/\n/g,''));
-    // Replace the links block in the file
-    var updated = decoded.replace(
-      /var links = \{[\s\S]*?\};\s*\/\/ LINKS_JSON_PLACEHOLDER/,
-      'var links = ' + JSON.stringify(links, null, 2) + ';
-// LINKS_JSON_PLACEHOLDER'
-    );
-    var encoded = btoa(unescape(encodeURIComponent(updated)));
-    return fetch('https://api.github.com/repos/' + GITHUB_REPO + '/contents/index.html', {
-      method: 'PUT',
-      headers: { 'Authorization': 'token ' + GITHUB_TOKEN, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: '🔗 Actualizar enlaces alojamientos', content: encoded, sha: data.sha })
-    });
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d.commit){
-      if(btn){ btn.textContent = '✓ Guardado'; setTimeout(function(){ btn.textContent='Guardar'; btn.disabled=false; }, 2000); }
-    } else {
-      alert('Error al guardar. Comprueba el token.');
-      if(btn){ btn.textContent = 'Guardar'; btn.disabled = false; }
-    }
-  })
-  .catch(function(e){
-    alert('Error de red: ' + e.message);
-    if(btn){ btn.textContent = 'Guardar'; btn.disabled = false; }
-  });
-}
-
-var editingCity = null;
-
-function init(){
-  loadLinks();
+// ---- INIT ----
+function init() {
   updateCountdown();
-  renderCityBlocks();
+  renderCities();
   renderTL();
   renderBudget();
   renderCL();
   setInterval(updateCountdown, 60000);
 }
 
-function updateCountdown(){
-  var d = Math.ceil((TRIP - new Date())/86400000);
+function updateCountdown() {
+  var diff = Math.ceil((new Date('2026-07-12') - new Date()) / 86400000);
   var el = document.getElementById('days-left');
   var pill = document.getElementById('pill');
-  if(el) el.textContent = d > 0 ? d : '¡YA!';
-  if(pill) pill.textContent = d > 0 ? '⏳ ' + d + ' días' : '🎉 ¡HOY!';
+  if (el) el.textContent = diff > 0 ? diff : '¡YA!';
+  if (pill) pill.textContent = diff > 0 ? '⏳ ' + diff + ' días' : '🎉 ¡HOY!';
 }
 
-function showView(name, btn){
-  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
-  document.querySelectorAll('.nb').forEach(function(b){ b.classList.remove('active'); });
-  document.getElementById('view-'+name).classList.add('active');
-  if(btn) btn.classList.add('active');
+function showView(name, btn) {
+  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+  document.querySelectorAll('.nb').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('view-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
 }
 
-function renderCityBlocks(){
+// ---- CITIES ----
+function renderCities() {
   var html = '';
-  CITIES.forEach(function(c){
-    var airUrl = links[c.id] && links[c.id].air ? links[c.id].air : '';
-    var bookUrl = links[c.id] && links[c.id].book ? links[c.id].book : '';
-    var airHas = airUrl.length > 0;
-    var bookHas = bookUrl.length > 0;
-
-    html += '<div class="city-block">' +
-      '<div class="city-header">' +
-        '<div class="city-flag">'+c.flag+'</div>' +
-        '<div class="city-info">' +
-          '<div class="city-name">'+c.name+'</div>' +
-          '<div class="city-meta">'+c.dates+' · '+c.nights+' noche'+(c.nights>1?'s':'')+' · Zona recomendada: '+c.zone+'</div>' +
-        '</div>' +
-        '<div class="city-nights">'+c.nights+' noche'+(c.nights>1?'s':'')+' · 7 pers.</div>' +
-        '<button class="btn-edit" onclick="openModal(\''+c.id+'\')">✏️ Editar enlaces</button>' +
-      '</div>' +
-      '<div class="city-links">' +
-
-        // Airbnb row
-        '<div class="link-row">' +
-          '<div class="link-platform"><div class="dot-air"></div><span class="lbl-air">Airbnb</span></div>' +
-          '<div class="link-url '+(airHas?'':'empty')+'">'+(airHas ? airUrl : 'Sin enlace aún — haz clic en "Editar enlaces"')+'</div>' +
-          (airHas
-            ? '<a href="'+airUrl+'" target="_blank" class="btn-open air">Ver favoritos →</a>'
-            : '<a href="'+c.airbnbSearch+'" target="_blank" class="btn-open air" title="Buscar en Airbnb">Buscar en Airbnb ↗</a>') +
-        '</div>' +
-
-        // Booking row
-        '<div class="link-row">' +
-          '<div class="link-platform"><div class="dot-book"></div><span class="lbl-book">Booking</span></div>' +
-          '<div class="link-url '+(bookHas?'':'empty')+'">'+(bookHas ? bookUrl : 'Sin enlace aún — haz clic en "Editar enlaces"')+'</div>' +
-          (bookHas
-            ? '<a href="'+bookUrl+'" target="_blank" class="btn-open book">Ver guardados →</a>'
-            : '<a href="'+c.bookingSearch+'" target="_blank" class="btn-open book" title="Buscar en Booking">Buscar en Booking ↗</a>') +
-        '</div>' +
-
-      '</div></div>';
+  CITIES.forEach(function(c) {
+    var airUrl  = LINKS[c.id] ? LINKS[c.id].air  : '';
+    var bookUrl = LINKS[c.id] ? LINKS[c.id].book : '';
+    html += '<div class="city-block">';
+    html += '<div class="city-header">';
+    html += '<div class="city-flag">' + c.flag + '</div>';
+    html += '<div style="flex:1"><div class="city-name">' + c.name + '</div>';
+    html += '<div class="city-meta">' + c.dates + ' &nbsp;·&nbsp; ' + c.nights + ' noche' + (c.nights > 1 ? 's' : '') + ' &nbsp;·&nbsp; Zona: ' + c.zone + '</div></div>';
+    html += '<div class="city-nights">' + c.nights + ' noche' + (c.nights > 1 ? 's' : '') + ' · 7 pers.</div>';
+    html += '<button class="btn-edit" onclick="openModal(\'' + c.id + '\')">✏️ Editar</button>';
+    html += '</div>';
+    html += '<div class="city-links">';
+    // Airbnb row
+    html += '<div class="link-row">';
+    html += '<div class="link-platform"><div class="dot-air"></div><span class="lbl-air">Airbnb</span></div>';
+    if (airUrl) {
+      html += '<div class="link-desc has-link">Lista de favoritos guardada ✓</div>';
+      html += '<a href="' + airUrl + '" target="_blank" rel="noopener" class="btn-open air">Ver opciones →</a>';
+    } else {
+      html += '<div class="link-desc">Sin enlace — usa el botón de búsqueda</div>';
+      html += '<a href="' + c.searchAir + '" target="_blank" rel="noopener" class="btn-open air">Buscar en Airbnb ↗</a>';
+    }
+    html += '</div>';
+    // Booking row
+    html += '<div class="link-row">';
+    html += '<div class="link-platform"><div class="dot-book"></div><span class="lbl-book">Booking</span></div>';
+    if (bookUrl) {
+      html += '<div class="link-desc has-link">Lista guardada ✓</div>';
+      html += '<a href="' + bookUrl + '" target="_blank" rel="noopener" class="btn-open book">Ver opciones →</a>';
+    } else {
+      html += '<div class="link-desc">Sin enlace — usa el botón de búsqueda</div>';
+      html += '<a href="' + c.searchBook + '" target="_blank" rel="noopener" class="btn-open book">Buscar en Booking ↗</a>';
+    }
+    html += '</div>';
+    html += '</div></div>';
   });
   document.getElementById('city-blocks').innerHTML = html;
 }
 
-function openModal(cityId){
-  editingCity = cityId;
-  var c = CITIES.find(function(x){ return x.id===cityId; });
-  document.getElementById('modal-city').textContent = c.flag + ' ' + c.name;
-  document.getElementById('input-air').value = links[cityId].air || '';
-  document.getElementById('input-book').value = links[cityId].book || '';
-  document.getElementById('modal').classList.add('open');
-  GITHUB_TOKEN = localStorage.getItem('et2026_token') || '';
-  document.getElementById('input-token').value = GITHUB_TOKEN;
-  document.getElementById('input-air').focus();
+// ---- MODAL ----
+function openModal(cityId) {
+  editCity = cityId;
+  var c = CITIES.find(function(x) { return x.id === cityId; });
+  document.getElementById('modal-title').textContent = 'Editar enlaces — ' + c.flag + ' ' + c.name;
+  document.getElementById('inp-air').value  = (LINKS[cityId] && LINKS[cityId].air)  ? LINKS[cityId].air  : '';
+  document.getElementById('inp-book').value = (LINKS[cityId] && LINKS[cityId].book) ? LINKS[cityId].book : '';
+  document.getElementById('inp-token').value = localStorage.getItem('et_token') || '';
+  document.getElementById('save-status').textContent = '';
+  document.getElementById('save-status').className = 'save-status';
+  document.getElementById('btn-save').disabled = false;
+  document.getElementById('btn-save').textContent = 'Guardar';
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('inp-air').focus();
 }
 
-function closeModal(){
-  document.getElementById('modal').classList.remove('open');
-  editingCity = null;
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  editCity = null;
 }
 
-function saveLinks(){
-  if(!editingCity) return;
-  links[editingCity].air = document.getElementById('input-air').value.trim();
-  links[editingCity].book = document.getElementById('input-book').value.trim();
-  saveToStorage();
-  closeModal();
-  renderCityBlocks();
-}
-
-// Close modal on overlay click
-document.getElementById('modal').addEventListener('click', function(e){
-  if(e.target === this) closeModal();
+document.getElementById('overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && document.getElementById('overlay').classList.contains('open')) saveLinks();
 });
 
-// Enter to save
-document.addEventListener('keydown', function(e){
-  if(e.key === 'Enter' && document.getElementById('modal').classList.contains('open')) saveLinks();
-  if(e.key === 'Escape') closeModal();
-});
+function saveLinks() {
+  if (!editCity) return;
+  var token = document.getElementById('inp-token').value.trim();
+  if (!token) {
+    setStatus('Introduce el token de GitHub', 'err');
+    document.getElementById('inp-token').focus();
+    return;
+  }
+  localStorage.setItem('et_token', token);
 
-function renderTL(){
-  document.getElementById('tl-container').innerHTML = TL.map(function(d,i){
+  // Update local state immediately
+  if (!LINKS[editCity]) LINKS[editCity] = {air:'', book:''};
+  LINKS[editCity].air  = document.getElementById('inp-air').value.trim();
+  LINKS[editCity].book = document.getElementById('inp-book').value.trim();
+
+  var btn = document.getElementById('btn-save');
+  btn.textContent = 'Guardando...';
+  btn.disabled = true;
+  setStatus('Conectando con GitHub...', '');
+
+  // Fetch current file SHA + content
+  fetch('https://api.github.com/repos/' + REPO + '/contents/index.html', {
+    headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data.content) throw new Error('No se pudo leer el archivo');
+    var decoded = atob(data.content.replace(/\n/g, ''));
+    // Replace the LINKS block
+    var newBlock = '// LINKS_START\nvar LINKS = ' + JSON.stringify(LINKS) + ';\n// LINKS_END';
+    var updated = decoded.replace(/\/\/ LINKS_START[\s\S]*?\/\/ LINKS_END/, newBlock);
+    if (updated === decoded) throw new Error('No se encontró el bloque de links');
+    // Encode to base64 safely (handles UTF-8)
+    var encoded = btoa(unescape(encodeURIComponent(updated)));
+    setStatus('Guardando en GitHub...', '');
+    return fetch('https://api.github.com/repos/' + REPO + '/contents/index.html', {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Links ' + editCity + ' actualizados',
+        content: encoded,
+        sha: data.sha
+      })
+    });
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.commit) {
+      setStatus('✓ Guardado. Se actualiza en ~1 min.', 'ok');
+      btn.textContent = '✓ Guardado';
+      renderCities();
+      setTimeout(closeModal, 1500);
+    } else {
+      throw new Error(d.message || 'Error desconocido');
+    }
+  })
+  .catch(function(err) {
+    setStatus('Error: ' + err.message, 'err');
+    btn.textContent = 'Guardar';
+    btn.disabled = false;
+  });
+}
+
+function setStatus(msg, type) {
+  var el = document.getElementById('save-status');
+  el.textContent = msg;
+  el.className = 'save-status' + (type ? ' ' + type : '');
+}
+
+// ---- TIMELINE ----
+function renderTL() {
+  var html = '';
+  TL.forEach(function(d, i) {
     var tags = '';
-    if(d.drive!=='—') tags += '<span class="tpill pd">🚗 '+d.drive+'</span> ';
-    if(d.km>0) tags += '<span class="tpill pk">'+d.km+'km</span>';
-    else tags += '<span class="tpill ps">Día libre</span>';
-    var acts = d.acts.map(function(a){ return '<div class="tact">'+a+'</div>'; }).join('');
-    var tray = d.km>0 ? '<div class="tsub" style="margin-top:0.65rem">Trayecto</div><div style="display:flex;gap:0.38rem;flex-wrap:wrap;margin-top:0.25rem"><span class="tpill pd" style="padding:0.26rem 0.56rem">🚗 '+d.drive+'</span> <span class="tpill pk" style="padding:0.26rem 0.56rem">'+d.km+' km</span></div>' : '';
-    return '<div class="tl-row" id="tl'+i+'" onclick="toggleTL(\'tl'+i+'\')">' +
-      '<div class="tl-head"><div class="tl-date">'+d.date+'</div>' +
-      '<div class="tl-dot '+(d.type==='d'?'dd':'ds')+'"></div>' +
-      '<div class="tl-city">'+d.city+'</div>' +
-      '<div style="display:flex;gap:0.38rem;align-items:center">'+tags+'</div>' +
-      '<span class="tl-ch">▼</span></div>' +
-      '<div class="tl-body">' +
-        '<div><div class="tsub">Actividades</div>'+acts+
-        '<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div></div>' +
-        '<div><div class="tsub">Alojamiento</div><div class="tstay">'+d.stay+'</div>'+tray+'</div>' +
-      '</div></div>';
-  }).join('');
+    if (d.drive !== '—') tags += '<span class="tpill pd">🚗 ' + d.drive + '</span> ';
+    tags += d.km > 0 ? '<span class="tpill pk">' + d.km + 'km</span>' : '<span class="tpill ps">Día libre</span>';
+    var acts = d.acts.map(function(a) { return '<div class="tact">' + a + '</div>'; }).join('');
+    var tray = d.km > 0 ? '<div class="tsub" style="margin-top:0.65rem">Trayecto</div><div style="display:flex;gap:0.38rem;flex-wrap:wrap;margin-top:0.25rem"><span class="tpill pd" style="padding:0.26rem 0.56rem">🚗 ' + d.drive + '</span> <span class="tpill pk" style="padding:0.26rem 0.56rem">' + d.km + ' km</span></div>' : '';
+    html += '<div class="tl-row" id="tl' + i + '" onclick="toggleTL(\'tl' + i + '\')">';
+    html += '<div class="tl-head"><div class="tl-date">' + d.date + '</div>';
+    html += '<div class="tl-dot ' + (d.type === 'd' ? 'dd' : 'ds') + '"></div>';
+    html += '<div class="tl-city">' + d.city + '</div>';
+    html += '<div style="display:flex;gap:0.38rem;align-items:center">' + tags + '</div>';
+    html += '<span class="tl-ch">▼</span></div>';
+    html += '<div class="tl-body"><div><div class="tsub">Actividades</div>' + acts;
+    html += '<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">' + d.note + '</div></div></div>';
+    html += '<div><div class="tsub">Alojamiento</div><div class="tstay">' + d.stay + '</div>' + tray + '</div>';
+    html += '</div></div>';
+  });
+  document.getElementById('tl-container').innerHTML = html;
 }
-function toggleTL(id){ document.getElementById(id).classList.toggle('open'); }
+function toggleTL(id) { document.getElementById(id).classList.toggle('open'); }
 
-function renderBudget(){
-  var total = BUDGET.reduce(function(s,b){ return s+b.amount; },0);
-  document.getElementById('bud-rows').innerHTML = BUDGET.map(function(b){
-    var pct = Math.round(b.amount/total*100);
-    return '<div class="bud-row">' +
-      '<div class="bud-cat"><span>'+b.icon+'</span><div><div style="font-size:0.82rem;font-weight:500">'+b.cat+'</div>' +
-      '<div class="bud-bar"><div class="bud-fill" style="width:'+pct+'%;background:'+b.color+'"></div></div></div></div>' +
-      '<div class="bud-amt">'+b.amount+'€</div><div class="bud-pct">'+pct+'%</div></div>';
+// ---- BUDGET ----
+function renderBudget() {
+  var total = BUDGET.reduce(function(s, b) { return s + b.amount; }, 0);
+  document.getElementById('bud-rows').innerHTML = BUDGET.map(function(b) {
+    var pct = Math.round(b.amount / total * 100);
+    return '<div class="bud-row"><div class="bud-cat"><span>' + b.icon + '</span><div><div style="font-size:0.82rem;font-weight:500">' + b.cat + '</div><div class="bud-bar"><div class="bud-fill" style="width:' + pct + '%;background:' + b.color + '"></div></div></div></div><div class="bud-amt">' + b.amount + '€</div><div class="bud-pct">' + pct + '%</div></div>';
   }).join('');
 }
 
-var clState = JSON.parse(JSON.stringify(CL));
-function renderCL(){
-  document.getElementById('cl-container').innerHTML = clState.map(function(s,si){
-    var done = s.items.filter(function(i){ return i.done; }).length;
-    return '<div class="cl-sec"><div class="cl-stitle">'+s.s+
-      ' <span style="margin-left:auto;font-size:0.63rem;background:#f1f5f9;padding:0.12rem 0.38rem;border-radius:4px;color:#64748b">'+done+'/'+s.items.length+'</span></div>' +
-      s.items.map(function(item,ii){
-        return '<div class="cl-item'+(item.done?' done':'')+'" onclick="toggleCL('+si+','+ii+')">' +
-          '<div class="cl-box">'+(item.done?'✓':'')+'</div>' +
-          '<span class="cl-txt">'+item.t+'</span></div>';
-      }).join('')+'</div>';
+// ---- CHECKLIST ----
+function renderCL() {
+  document.getElementById('cl-container').innerHTML = clState.map(function(s, si) {
+    var done = s.items.filter(function(i) { return i.done; }).length;
+    return '<div class="cl-sec"><div class="cl-stitle">' + s.s + '<span style="margin-left:auto;font-size:0.63rem;background:#f1f5f9;padding:0.12rem 0.38rem;border-radius:4px;color:#64748b">' + done + '/' + s.items.length + '</span></div>' +
+      s.items.map(function(item, ii) {
+        return '<div class="cl-item' + (item.done ? ' done' : '') + '" onclick="toggleCL(' + si + ',' + ii + ')"><div class="cl-box">' + (item.done ? '✓' : '') + '</div><span class="cl-txt">' + item.t + '</span></div>';
+      }).join('') + '</div>';
   }).join('');
 }
-function toggleCL(si,ii){ clState[si].items[ii].done=!clState[si].items[ii].done; renderCL(); }
+function toggleCL(si, ii) { clState[si].items[ii].done = !clState[si].items[ii].done; renderCL(); }
 
 init();
 </script>
