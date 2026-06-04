@@ -262,22 +262,35 @@ var CITIES = [
 var LINKS = {"marsella":{"air":"","book":""},"roma":{"air":"","book":""},"venecia":{"air":"","book":""},"munich":{"air":"","book":""},"colonia":{"air":"","book":""},"paris":{"air":"","book":""}};
 var SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?output=csv";
 
+function parseCSV(csv) {
+  var rows = csv.trim().split('\n').slice(1);
+  rows.forEach(function(row) {
+    // handle quoted fields with commas inside
+    var cols = [];
+    var cur = ''; var inQ = false;
+    for (var i = 0; i < row.length; i++) {
+      var c = row[i];
+      if (c === '"') { inQ = !inQ; }
+      else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else { cur += c; }
+    }
+    cols.push(cur.trim());
+    var city = cols[0] ? cols[0].trim().toLowerCase() : '';
+    var air  = cols[1] ? cols[1].trim() : '';
+    var book = cols[2] ? cols[2].trim() : '';
+    if (city && LINKS[city] !== undefined) {
+      LINKS[city] = { air: air, book: book };
+    }
+  });
+}
+
 function loadFromSheets() {
-  return fetch(SHEET_CSV + '&t=' + Date.now())
-    .then(function(r) { return r.text(); })
-    .then(function(csv) {
-      var rows = csv.trim().split('\n').slice(1); // skip header
-      rows.forEach(function(row) {
-        var cols = row.split(',');
-        var city = cols[0] ? cols[0].trim().toLowerCase() : '';
-        var air  = cols[1] ? cols[1].trim().replace(/^"|"$/g,'') : '';
-        var book = cols[2] ? cols[2].trim().replace(/^"|"$/g,'') : '';
-        if (city && LINKS[city] !== undefined) {
-          LINKS[city] = { air: air, book: book };
-        }
-      });
-    })
-    .catch(function() {}); // silently fail, show defaults
+  // Use allorigins.win proxy to avoid CORS issues
+  var proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(SHEET_CSV);
+  return fetch(proxy)
+    .then(function(r) { return r.json(); })
+    .then(function(data) { if (data && data.contents) parseCSV(data.contents); })
+    .catch(function() {}); // silently fail, keep defaults
 }
 
 // ---- TIMELINE ----
@@ -369,9 +382,11 @@ var editCity = null;
 function init() {
   updateCountdown();
   setInterval(updateCountdown, 60000);
+  renderCities(); // render immediately with defaults
   renderTL();
   renderBudget();
   renderCL();
+  // load sheets in background and refresh cities if data arrives
   loadFromSheets().then(function() { renderCities(); });
 }
 
