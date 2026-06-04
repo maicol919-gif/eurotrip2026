@@ -260,7 +260,7 @@ var CITIES = [
 
 // ---- LINKS — loaded from Google Sheets ----
 var LINKS = {"marsella":{"air":"","book":""},"roma":{"air":"","book":""},"venecia":{"air":"","book":""},"munich":{"air":"","book":""},"colonia":{"air":"","book":""},"paris":{"air":"","book":""}};
-var SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?gid=0&single=true&output=csv";
+var SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?output=csv";
 
 function loadFromSheets() {
   return fetch(SHEET_CSV + '&t=' + Date.now())
