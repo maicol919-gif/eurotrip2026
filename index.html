@@ -377,11 +377,18 @@ var editCity = null;
 // ---- INIT ----
 function init() {
   updateCountdown();
-  renderCities();
+  setInterval(updateCountdown, 60000);
   renderTL();
   renderBudget();
   renderCL();
-  setInterval(updateCountdown, 60000);
+  // Load links.json from GitHub Pages (public file)
+  fetch('https://maicol919-gif.github.io/eurotrip2026/links.json?t=' + Date.now())
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(data) {
+      if (data) LINKS = data;
+      renderCities();
+    })
+    .catch(function() { renderCities(); });
 }
 
 function updateCountdown() {
@@ -480,7 +487,6 @@ function saveLinks() {
   }
   localStorage.setItem('et_token', token);
 
-  // Update local state immediately
   if (!LINKS[editCity]) LINKS[editCity] = {air:'', book:''};
   LINKS[editCity].air  = document.getElementById('inp-air').value.trim();
   LINKS[editCity].book = document.getElementById('inp-book').value.trim();
@@ -490,39 +496,33 @@ function saveLinks() {
   btn.disabled = true;
   setStatus('Conectando con GitHub...', '');
 
-  // Fetch current file SHA + content
-  fetch('https://api.github.com/repos/' + REPO + '/contents/index.html', {
+  var linksJson = JSON.stringify(LINKS);
+  var fileContent = linksJson;
+  var encoded = btoa(unescape(encodeURIComponent(fileContent)));
+
+  // Save to a separate links.json file — avoids encoding issues with the full HTML
+  fetch('https://api.github.com/repos/' + REPO + '/contents/links.json', {
     headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
   })
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    if (!data.content) throw new Error('No se pudo leer el archivo');
-    var decoded = atob(data.content.replace(/\n/g, ''));
-    // Replace the LINKS block
-    var newBlock = '// LINKS_START\nvar LINKS = ' + JSON.stringify(LINKS) + ';\n// LINKS_END';
-    var updated = decoded.replace(/\/\/ LINKS_START[\s\S]*?\/\/ LINKS_END/, newBlock);
-    if (updated === decoded) throw new Error('No se encontró el bloque de links');
-    // Encode to base64 safely (handles UTF-8)
-    var encoded = btoa(unescape(encodeURIComponent(updated)));
     setStatus('Guardando en GitHub...', '');
-    return fetch('https://api.github.com/repos/' + REPO + '/contents/index.html', {
+    var body = { message: 'Links ' + editCity + ' actualizados', content: encoded };
+    if (data.sha) body.sha = data.sha;
+    return fetch('https://api.github.com/repos/' + REPO + '/contents/links.json', {
       method: 'PUT',
       headers: {
         'Authorization': 'token ' + token,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        message: 'Links ' + editCity + ' actualizados',
-        content: encoded,
-        sha: data.sha
-      })
+      body: JSON.stringify(body)
     });
   })
   .then(function(r) { return r.json(); })
   .then(function(d) {
     if (d.commit) {
-      setStatus('✓ Guardado. Se actualiza en ~1 min.', 'ok');
+      setStatus('✓ Guardado correctamente', 'ok');
       btn.textContent = '✓ Guardado';
       renderCities();
       setTimeout(closeModal, 1500);
