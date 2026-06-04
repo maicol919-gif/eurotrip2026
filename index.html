@@ -253,17 +253,43 @@ var LINKS = {
 
 var SHEET_URL = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?output=csv');
 
+function parseCSV(text) {
+  // Parse CSV properly handling quoted fields with newlines inside
+  var result = [];
+  var row = [];
+  var field = '';
+  var inQuote = false;
+  for (var i = 0; i < text.length; i++) {
+    var ch = text[i];
+    if (ch === '"') {
+      if (inQuote && text[i+1] === '"') { field += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if (ch === ',' && !inQuote) {
+      row.push(field.trim()); field = '';
+    } else if ((ch === '\n' || ch === '\r') && !inQuote) {
+      if (ch === '\r' && text[i+1] === '\n') i++;
+      row.push(field.trim()); field = '';
+      result.push(row); row = [];
+    } else {
+      field += ch;
+    }
+  }
+  if (field || row.length) { row.push(field.trim()); result.push(row); }
+  return result;
+}
+
 function loadSheet() {
   fetch(SHEET_URL)
     .then(function(r) { return r.json(); })
     .then(function(data) {
       if (!data || !data.contents) return;
-      var lines = data.contents.trim().split('\n');
-      for (var i = 1; i < lines.length; i++) {
-        var cols = lines[i].split(',');
-        var city = cols[0] ? cols[0].trim().toLowerCase() : '';
-        var air  = cols[1] ? cols[1].trim() : '';
-        var book = cols[2] ? cols[2].trim() : '';
+      var rows = parseCSV(data.contents);
+      // rows[0] is header, skip it
+      for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        var city = row[0] ? row[0].toLowerCase().trim() : '';
+        var air  = row[1] ? row[1].trim() : '';
+        var book = row[2] ? row[2].trim() : '';
         if (city && LINKS[city] !== undefined) {
           LINKS[city] = {air: air, book: book};
         }
@@ -271,7 +297,7 @@ function loadSheet() {
       renderCities();
     })
     .catch(function() {
-      // Sheet failed — just show search buttons
+      // Sheet failed, keep search buttons
     });
 }
 
