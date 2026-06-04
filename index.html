@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>EuroTrip 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:100vh}
-.header{background:#0f172a;color:white;padding:1.1rem 2rem;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
-.header h1{font-size:1rem;font-weight:700;letter-spacing:-0.02em}
+body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a}
+.header{background:#0f172a;color:white;padding:1rem 2rem;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:1rem;font-weight:700}
 .header p{font-size:0.7rem;color:#64748b;margin-top:0.1rem}
 .pill{background:#3b82f6;color:white;font-size:0.7rem;font-weight:700;padding:0.35rem 0.85rem;border-radius:20px;white-space:nowrap}
 .nav{background:white;border-bottom:1px solid #e2e8f0;display:flex;overflow-x:auto;padding:0 2rem}
@@ -20,7 +20,6 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 .view{display:none}.view.active{display:block}
 .ptitle{font-size:1.3rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.3rem}
 .psub{font-size:0.82rem;color:#64748b;margin-bottom:1.75rem}
-/* DASHBOARD */
 .dgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:0.85rem;margin-bottom:2rem}
 .dcard{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem}
 .dval{font-size:1.6rem;font-weight:800;letter-spacing:-0.03em;margin-bottom:0.18rem}
@@ -28,56 +27,33 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 .dtag{display:inline-block;margin-top:0.38rem;font-size:0.6rem;font-weight:600;padding:0.14rem 0.4rem;border-radius:4px}
 .tb{background:#eff6ff;color:#3b82f6}.tg{background:#ecfdf5;color:#059669}.ta{background:#fffbeb;color:#d97706}.tr{background:#fef2f2;color:#dc2626}
 .alerts{display:flex;flex-direction:column;gap:0.45rem}
-.alert{background:white;border-radius:10px;padding:0.8rem 1rem;border-left:3px solid;display:flex;flex-direction:column;gap:0.12rem}
+.alert{background:white;border-radius:10px;padding:0.8rem 1rem;border-left:3px solid}
 .alert.r{border-color:#ef4444}.alert.a{border-color:#f59e0b}.alert.b{border-color:#3b82f6}.alert.g{border-color:#10b981}
-.albl{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em}
+.albl{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.1rem}
 .alert.r .albl{color:#ef4444}.alert.a .albl{color:#d97706}.alert.b .albl{color:#3b82f6}.alert.g .albl{color:#10b981}
-.atitle{font-size:0.85rem;font-weight:600}.adesc{font-size:0.74rem;color:#64748b}
-/* ALOJAMIENTOS */
+.atitle{font-size:0.85rem;font-weight:600;margin-bottom:0.1rem}
+.adesc{font-size:0.74rem;color:#64748b}
 .info-bar{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:0.85rem}
 .city-block{background:white;border:1.5px solid #e2e8f0;border-radius:14px;margin-bottom:1rem;overflow:hidden}
 .city-header{display:flex;align-items:center;gap:1rem;padding:1.1rem 1.25rem;border-bottom:1px solid #f1f5f9;flex-wrap:wrap}
 .city-flag{font-size:1.5rem;flex-shrink:0}
-.city-name{font-size:1rem;font-weight:700;letter-spacing:-0.01em}
-.city-meta{font-size:0.72rem;color:#94a3b8;margin-top:0.12rem}
+.city-name{font-size:1rem;font-weight:700}
+.city-meta{font-size:0.72rem;color:#94a3b8;margin-top:0.1rem}
 .city-nights{background:#f1f5f9;border-radius:8px;padding:0.3rem 0.75rem;font-size:0.72rem;font-weight:600;color:#475569;white-space:nowrap}
 .city-links{padding:1rem 1.25rem;display:flex;flex-direction:column;gap:0.6rem}
-.link-row{display:flex;align-items:center;gap:0.85rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.75rem 1rem;transition:border-color .15s}
-.link-row:hover{border-color:#cbd5e1}
+.link-row{display:flex;align-items:center;gap:0.85rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.75rem 1rem}
 .link-platform{display:flex;align-items:center;gap:0.45rem;font-size:0.75rem;font-weight:700;min-width:80px;flex-shrink:0}
 .dot-air{width:8px;height:8px;border-radius:50%;background:#ff5a5f;flex-shrink:0}
 .dot-book{width:8px;height:8px;border-radius:50%;background:#003580;flex-shrink:0}
 .lbl-air{color:#ef4444}.lbl-book{color:#003580}
 .link-desc{flex:1;font-size:0.78rem;color:#94a3b8;font-style:italic}
-.link-desc.has-link{color:#475569;font-style:normal;font-weight:500}
-.btn-open{display:inline-flex;align-items:center;gap:0.3rem;background:#0f172a;color:white;font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;padding:0.42rem 0.85rem;border-radius:7px;text-decoration:none;transition:background .15s;white-space:nowrap;flex-shrink:0;border:none;cursor:pointer}
-.btn-open:hover{background:#3b82f6}
-.btn-open.air:hover{background:#ef4444}
-.btn-open.book:hover{background:#003580}
-.btn-edit{background:none;border:1.5px solid #e2e8f0;color:#64748b;font-family:'Inter',sans-serif;font-size:0.7rem;font-weight:600;padding:0.3rem 0.7rem;border-radius:6px;cursor:pointer;margin-left:auto;transition:all .15s;white-space:nowrap;flex-shrink:0}
-.btn-edit:hover{border-color:#3b82f6;color:#3b82f6}
-/* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center;padding:1rem}
-.overlay.open{display:flex}
-.modal{background:white;border-radius:16px;padding:1.75rem;width:100%;max-width:500px;display:flex;flex-direction:column;gap:1rem}
-.modal h2{font-size:1rem;font-weight:700}
-.modal-desc{font-size:0.78rem;color:#64748b;line-height:1.5}
-.field{display:flex;flex-direction:column;gap:0.28rem}
-.field label{font-size:0.68rem;font-weight:700;color:#374151;text-transform:uppercase;letter-spacing:0.05em}
-.field input{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.6rem 0.85rem;font-family:'Inter',sans-serif;font-size:0.82rem;color:#0f172a;outline:none;transition:border-color .15s;width:100%}
-.field input:focus{border-color:#3b82f6}
-.field input::placeholder{color:#cbd5e1}
-.modal-actions{display:flex;gap:0.5rem;justify-content:flex-end;margin-top:0.25rem}
-.btn-cancel{background:none;border:1.5px solid #e2e8f0;color:#64748b;font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:600;padding:0.5rem 1rem;border-radius:8px;cursor:pointer}
-.btn-cancel:hover{border-color:#94a3b8}
-.btn-save{background:#0f172a;color:white;border:none;font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:700;padding:0.5rem 1.25rem;border-radius:8px;cursor:pointer;transition:background .15s}
-.btn-save:hover{background:#3b82f6}
-.btn-save:disabled{background:#94a3b8;cursor:not-allowed}
-.save-status{font-size:0.72rem;margin-right:auto;padding:0.5rem 0;color:#64748b}
-.save-status.ok{color:#059669}.save-status.err{color:#dc2626}
-/* TIMELINE */
+.link-desc.ok{color:#059669;font-style:normal;font-weight:600}
+.btn-ir{display:inline-flex;align-items:center;gap:0.3rem;color:white;font-family:'Inter',sans-serif;font-size:0.72rem;font-weight:600;padding:0.42rem 0.85rem;border-radius:7px;text-decoration:none;white-space:nowrap;flex-shrink:0;border:none;cursor:pointer}
+.btn-air{background:#ff5a5f}.btn-air:hover{background:#dc2626}
+.btn-book{background:#003580}.btn-book:hover{background:#1e40af}
+.btn-search{background:#0f172a}.btn-search:hover{background:#3b82f6}
 .tl-list{display:flex;flex-direction:column;gap:0.4rem}
-.tl-row{background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.tl-row{background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;cursor:pointer}
 .tl-row:hover,.tl-row.open{border-color:#3b82f6}
 .tl-head{display:flex;align-items:center;gap:0.8rem;padding:0.75rem 1.1rem}
 .tl-date{font-size:0.7rem;font-weight:700;color:#3b82f6;min-width:46px}
@@ -97,7 +73,6 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 .tnote-l{font-size:0.6rem;font-weight:700;color:#3b82f6;margin-bottom:0.1rem}
 .tnote-t{font-size:0.76rem;color:#64748b;line-height:1.45}
 .tstay{background:#f8fafc;border-radius:7px;padding:0.5rem 0.75rem;font-size:0.8rem;color:#475569}
-/* PRESUPUESTO */
 .pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.85rem;margin-bottom:1.5rem}
 .pp-card{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1.1rem;text-align:center}
 .pp-card.hl{border-color:#3b82f6}
@@ -114,23 +89,20 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 .bud-fill{height:100%;border-radius:2px}
 .bud-amt{font-weight:700;font-size:0.83rem;padding-left:1rem}
 .bud-pct{font-size:0.63rem;color:#94a3b8;padding-left:0.45rem;min-width:26px;text-align:right}
-/* CHECKLIST */
 .cl-sec{margin-bottom:1.5rem}
 .cl-stitle{font-size:0.7rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem}
 .cl-stitle::after{content:'';flex:1;height:1px;background:#e2e8f0}
-.cl-item{display:flex;align-items:center;gap:0.6rem;background:white;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.58rem 0.9rem;margin-bottom:0.32rem;cursor:pointer;transition:all .15s}
+.cl-item{display:flex;align-items:center;gap:0.6rem;background:white;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.58rem 0.9rem;margin-bottom:0.32rem;cursor:pointer}
 .cl-item:hover{border-color:#3b82f6}
 .cl-item.done{opacity:0.42}
-.cl-box{width:16px;height:16px;border-radius:4px;border:2px solid #e2e8f0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.58rem;color:white;transition:all .15s}
+.cl-box{width:16px;height:16px;border-radius:4px;border:2px solid #e2e8f0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.58rem;color:white}
 .cl-item.done .cl-box{background:#10b981;border-color:#10b981}
 .cl-txt{font-size:0.82rem}
 .cl-item.done .cl-txt{text-decoration:line-through}
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:2px}
 @media(max-width:680px){
   .main{padding:1rem}.header{padding:1rem}.nav{padding:0 1rem}
   .tl-row.open .tl-body{grid-template-columns:1fr}
-  .link-row{flex-wrap:wrap}.link-desc{display:none}
+  .link-row{flex-wrap:wrap}
 }
 </style>
 </head>
@@ -138,15 +110,15 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 
 <div class="header">
   <div>
-    <h1>🌍 EuroTrip 2026</h1>
-    <p>Alicante → Marsella → Pisa → Roma → Venecia → Múnich → Colonia → Bruselas → París → Alicante</p>
+    <h1>EuroTrip 2026</h1>
+    <p>Alicante - Marsella - Pisa - Roma - Venecia - Munich - Colonia - Bruselas - Paris - Alicante</p>
   </div>
-  <div class="pill" id="pill">⏳ ...</div>
+  <div class="pill" id="pill">Cargando...</div>
 </div>
 
 <div class="nav">
   <button class="nb active" onclick="showView('dashboard',this)">Resumen</button>
-  <button class="nb" onclick="showView('alojamientos',this)">🏠 Alojamientos</button>
+  <button class="nb" onclick="showView('alojamientos',this)">Alojamientos</button>
   <button class="nb" onclick="showView('timeline',this)">Itinerario</button>
   <button class="nb" onclick="showView('presupuesto',this)">Presupuesto</button>
   <button class="nb" onclick="showView('checklist',this)">Checklist</button>
@@ -154,74 +126,69 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 
 <div class="main">
 
-<!-- DASHBOARD -->
 <div id="view-dashboard" class="view active">
-  <div class="ptitle">¡La aventura se acerca! 🚗</div>
-  <div class="psub">12 — 24 julio 2026 · 7 personas · 9 ciudades · 13 noches</div>
+  <div class="ptitle">La aventura se acerca!</div>
+  <div class="psub">12 - 24 julio 2026 · 7 personas · 9 ciudades · 13 noches</div>
   <div class="dgrid">
-    <div class="dcard"><div class="dval" id="days-left">—</div><div class="dlbl">Días restantes</div><span class="dtag tb">12 julio 2026</span></div>
+    <div class="dcard"><div class="dval" id="days-left">-</div><div class="dlbl">Dias restantes</div><span class="dtag tb">12 julio 2026</span></div>
     <div class="dcard"><div class="dval">4.830€</div><div class="dlbl">Presupuesto total</div><span class="dtag tg">690€/persona</span></div>
     <div class="dcard"><div class="dval">7</div><div class="dlbl">Viajeros</div><span class="dtag ta">+2 posibles</span></div>
-    <div class="dcard"><div class="dval">~6.200</div><div class="dlbl">Kilómetros</div><span class="dtag tb">ruta completa</span></div>
+    <div class="dcard"><div class="dval">6.200km</div><div class="dlbl">Kilometros</div><span class="dtag tb">ruta completa</span></div>
     <div class="dcard"><div class="dval">6</div><div class="dlbl">Ciudades con Airbnb</div><span class="dtag tr">0 reservados</span></div>
-    <div class="dcard"><div class="dval">13</div><div class="dlbl">Noches</div><span class="dtag tg">12→24 jul</span></div>
+    <div class="dcard"><div class="dval">13</div><div class="dlbl">Noches</div><span class="dtag tg">12 al 24 jul</span></div>
   </div>
   <div style="font-size:0.88rem;font-weight:700;margin-bottom:0.75rem">Para decidir hoy</div>
   <div class="alerts">
-    <div class="alert r"><div class="albl">Urgente</div><div class="atitle">Votar y reservar alojamientos</div><div class="adesc">Julio se agota. Cuanto más tardemos, peor precio y peor ubicación.</div></div>
-    <div class="alert a"><div class="albl">Decidir hoy</div><div class="atitle">¿Somos 7, 8 o 9?</div><div class="adesc">Afecta la capacidad mínima de cada apartamento y el precio por persona.</div></div>
-    <div class="alert a"><div class="albl">Revisar</div><div class="atitle">Días 14 y 22 son muy intensos</div><div class="adesc">Marsella→Pisa→Roma (900km) y Colonia→Bruselas→París. ¿Dividimos alguna etapa?</div></div>
-    <div class="alert b"><div class="albl">Obligatorio</div><div class="atitle">Vignette Austria ~9€ — asfinag.at</div><div class="adesc">Ruta Venecia→Múnich cruza Austria. Sin ella: multa de 120€ en carretera.</div></div>
+    <div class="alert r"><div class="albl">Urgente</div><div class="atitle">Votar y reservar alojamientos</div><div class="adesc">Julio se agota. Cuanto mas tardemos, peor precio y peor ubicacion.</div></div>
+    <div class="alert a"><div class="albl">Decidir hoy</div><div class="atitle">Somos 7, 8 o 9?</div><div class="adesc">Afecta la capacidad minima de cada apartamento y el precio por persona.</div></div>
+    <div class="alert a"><div class="albl">Revisar</div><div class="atitle">Dias 14 y 22 son muy intensos</div><div class="adesc">Marsella-Pisa-Roma (900km) y Colonia-Bruselas-Paris. Dividimos alguna etapa?</div></div>
+    <div class="alert b"><div class="albl">Obligatorio</div><div class="atitle">Vignette Austria ~9 euros</div><div class="adesc">Ruta Venecia-Munich cruza Austria. Sin ella: multa de 120 euros.</div></div>
     <div class="alert g"><div class="albl">Antes de salir</div><div class="atitle">Reservar Coliseo y Vaticano online</div><div class="adesc">En julio sin reserva hay 2-3h de cola. Mismo precio, mucho menos tiempo perdido.</div></div>
   </div>
 </div>
 
-<!-- ALOJAMIENTOS -->
 <div id="view-alojamientos" class="view">
   <div class="ptitle">Alojamientos</div>
-  <div class="psub">Apartamentos completos — privacidad total para los 7. Haz clic en "Ver opciones" para abrir directamente Airbnb o Booking.</div>
+  <div class="psub">Apartamentos completos, privacidad total para los 7.</div>
   <div class="info-bar">
-    <div style="font-size:1.2rem;flex-shrink:0">🏠</div>
+    <div style="font-size:1.2rem">🏠</div>
     <div style="font-size:0.78rem;color:#64748b;line-height:1.55">
-      Buscad siempre <strong style="color:#0f172a">apartamento entero</strong> con mínimo 3 habitaciones para tener privacidad total.
-      Prioridad: <strong style="color:#0f172a">Airbnb</strong>. Booking como alternativa si no hay disponibilidad.
-      <strong style="color:#dc2626">Julio se agota rápido</strong> — mejor reservar hoy mismo tras la votación.
+      Buscad siempre <strong style="color:#0f172a">apartamento entero</strong> con minimo 3 habitaciones.
+      Prioridad: <strong style="color:#0f172a">Airbnb</strong>. Booking como alternativa.
+      <strong style="color:#dc2626">Julio se agota rapido</strong> — mejor reservar hoy.
     </div>
   </div>
-  <div id="city-blocks"></div>
+  <div id="city-blocks"><div style="padding:2rem;text-align:center;color:#64748b;font-size:0.85rem">Cargando opciones...</div></div>
 </div>
 
-<!-- TIMELINE -->
 <div id="view-timeline" class="view">
   <div class="ptitle">Itinerario</div>
-  <div class="psub">13 días · haz clic en cada día para ver el detalle</div>
+  <div class="psub">13 dias · haz clic en cada dia para ver el detalle</div>
   <div class="tl-list" id="tl-container"></div>
 </div>
 
-<!-- PRESUPUESTO -->
 <div id="view-presupuesto" class="view">
   <div class="ptitle">Presupuesto</div>
-  <div class="psub">Estimación realista para el viaje completo</div>
+  <div class="psub">Estimacion realista para el viaje completo</div>
   <div class="pp-grid">
     <div class="pp-card"><div class="pp-n">9 personas</div><div class="pp-v">537€</div><div class="pp-s">por persona</div></div>
     <div class="pp-card hl"><div class="pp-n">7 personas · confirmado</div><div class="pp-v">690€</div><div class="pp-s">total 4.830€</div></div>
     <div class="pp-card"><div class="pp-n">8 personas</div><div class="pp-v">604€</div><div class="pp-s">por persona</div></div>
   </div>
   <div class="bud-table">
-    <div class="bud-th"><span>Categoría</span><span>Total grupo</span><span>%</span></div>
+    <div class="bud-th"><span>Categoria</span><span>Total grupo</span><span>%</span></div>
     <div id="bud-rows"></div>
   </div>
   <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem;font-size:0.78rem;color:#64748b;line-height:1.6">
-    <strong style="color:#0f172a">Cómo se calculó:</strong><br>
+    <strong style="color:#0f172a">Como se calculo:</strong><br>
     Alojamiento: precios reales Airbnb julio 2026 para 7 personas.<br>
-    Combustible: 6.200 km × 7L/100km × 1,65€/L media Europa.<br>
-    Peajes: Francia A7, Italia A1/A4, Bélgica — aprox. 120€ total.<br>
-    Comida: 13€/persona/día (mercados + un restaurante por día).<br>
+    Combustible: 6.200 km x 7L/100km x 1,65 euros/L media Europa.<br>
+    Peajes: Francia A7, Italia A1/A4, Belgica — aprox. 120 euros total.<br>
+    Comida: 13 euros/persona/dia (mercados + un restaurante por dia).<br>
     Actividades: Coliseo, Vaticano, Louvre, Torre Eiffel repartidos.
   </div>
 </div>
 
-<!-- CHECKLIST -->
 <div id="view-checklist" class="view">
   <div class="ptitle">Checklist</div>
   <div class="psub">Tareas antes y durante el viaje</div>
@@ -230,364 +197,301 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 
 </div>
 
-<!-- No modal needed — links managed via Google Sheets -->
-
 <script>
-// ---- CONFIG ----
-var REPO = 'maicol919-gif/eurotrip2026';
-
-// ---- CITIES ----
-var CITIES = [
-  {id:'marsella', name:'Marsella', flag:'🇫🇷', nights:2, dates:'12 → 14 jul', zone:'Vieux-Port / Le Panier',
-   searchAir:'https://www.airbnb.es/s/Marseille--France/homes?adults=7&checkin=2026-07-12&checkout=2026-07-14&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=3',
-   searchBook:'https://www.booking.com/searchresults.es.html?ss=Marseille&checkin=2026-07-12&checkout=2026-07-14&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
-  {id:'roma', name:'Roma', flag:'🇮🇹', nights:3, dates:'15 → 18 jul', zone:'Trastevere / Prati',
-   searchAir:'https://www.airbnb.es/s/Rome--Italy/homes?adults=7&checkin=2026-07-15&checkout=2026-07-18&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=3',
-   searchBook:'https://www.booking.com/searchresults.es.html?ss=Rome&checkin=2026-07-15&checkout=2026-07-18&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
-  {id:'venecia', name:'Venecia', flag:'🇮🇹', nights:2, dates:'17 → 19 jul', zone:'Mestre (parking) / Burano',
-   searchAir:'https://www.airbnb.es/s/Mestre--Venice--Italy/homes?adults=7&checkin=2026-07-17&checkout=2026-07-19&room_types%5B%5D=Entire+home%2Fapt&amenities%5B%5D=9',
-   searchBook:'https://www.booking.com/searchresults.es.html?ss=Mestre+Venice&checkin=2026-07-17&checkout=2026-07-19&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
-  {id:'munich', name:'Múnich', flag:'🇩🇪', nights:2, dates:'19 → 21 jul', zone:'Maxvorstadt / Schwabing',
-   searchAir:'https://www.airbnb.es/s/Munich--Germany/homes?adults=7&checkin=2026-07-19&checkout=2026-07-21&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=3',
-   searchBook:'https://www.booking.com/searchresults.es.html?ss=Munich&checkin=2026-07-19&checkout=2026-07-21&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
-  {id:'colonia', name:'Colonia', flag:'🇩🇪', nights:1, dates:'21 → 22 jul', zone:'Ehrenfeld / centro',
-   searchAir:'https://www.airbnb.es/s/Cologne--Germany/homes?adults=7&checkin=2026-07-21&checkout=2026-07-22&room_types%5B%5D=Entire+home%2Fapt&amenities%5B%5D=9',
-   searchBook:'https://www.booking.com/searchresults.es.html?ss=Cologne&checkin=2026-07-21&checkout=2026-07-22&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
-  {id:'paris', name:'París', flag:'🇫🇷', nights:2, dates:'23 → 25 jul', zone:'Le Marais / République',
-   searchAir:'https://www.airbnb.es/s/Paris--France/homes?adults=7&checkin=2026-07-23&checkout=2026-07-25&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=4',
-   searchBook:'https://www.booking.com/searchresults.es.html?ss=Paris&checkin=2026-07-23&checkout=2026-07-25&group_adults=7&no_rooms=1&nflt=ht_id%3D201'}
-];
-
-// ---- LINKS — loaded from Google Sheets ----
-var LINKS = {"marsella":{"air":"","book":""},"roma":{"air":"","book":""},"venecia":{"air":"","book":""},"munich":{"air":"","book":""},"colonia":{"air":"","book":""},"paris":{"air":"","book":""}};
-var SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?output=csv";
-
-function parseCSV(csv) {
-  var rows = csv.trim().split('\n').slice(1);
-  rows.forEach(function(row) {
-    // handle quoted fields with commas inside
-    var cols = [];
-    var cur = ''; var inQ = false;
-    for (var i = 0; i < row.length; i++) {
-      var c = row[i];
-      if (c === '"') { inQ = !inQ; }
-      else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-      else { cur += c; }
-    }
-    cols.push(cur.trim());
-    var city = cols[0] ? cols[0].trim().toLowerCase() : '';
-    var air  = cols[1] ? cols[1].trim() : '';
-    var book = cols[2] ? cols[2].trim() : '';
-    if (city && LINKS[city] !== undefined) {
-      LINKS[city] = { air: air, book: book };
-    }
-  });
-}
-
-function loadFromSheets() {
-  // Use allorigins.win proxy to avoid CORS issues
-  var proxy = 'https://api.allorigins.win/get?url=' + encodeURIComponent(SHEET_CSV);
-  return fetch(proxy)
-    .then(function(r) { return r.json(); })
-    .then(function(data) { if (data && data.contents) parseCSV(data.contents); })
-    .catch(function() {}); // silently fail, keep defaults
-}
-
-// ---- TIMELINE ----
-var TL = [
-  {date:'12 jul',city:'Alicante → Marsella',type:'d',km:620,drive:'6h 30min',
-   acts:['Salida temprana (7:00h)','Parada en Montpellier (~30 min)','Llegada a Marsella por la tarde','Check-in y primer vistazo al puerto'],
-   stay:'Airbnb Marsella (noche 1)',note:'Organizar turnos de conducción. Llevar snacks y lista de Spotify lista.'},
-  {date:'13 jul',city:'Marsella',type:'s',km:0,drive:'—',
-   acts:['Vieux-Port de mañana','Basilique Notre-Dame de la Garde','Calanques de Cassis — imprescindible','Bouillabaisse en restaurante local'],
-   stay:'Airbnb Marsella (noche 2)',note:'Las Calanques: reservar transporte con antelación. Mejor antes de las 9h para evitar el calor.'},
-  {date:'14 jul',city:'Marsella → Pisa → Roma',type:'d',km:900,drive:'8h 30min',
-   acts:['Salida muy temprana (6:00h)','Parada ~1h en Pisa — Torre Inclinada','Autovía A1 hasta Roma','Check-in tarde-noche'],
-   stay:'Airbnb Roma (noche 1)',note:'AVISO: 900km en un día es muy exigente. Alternativa: dormir en Pisa y llegar a Roma el día 15.'},
-  {date:'15 jul',city:'Roma',type:'s',km:0,drive:'—',
-   acts:['Coliseo y Foro Romano (reservar online)','Barrio Palatino','Zona Monti para comer','Fontana di Trevi de noche'],
-   stay:'Airbnb Roma (noche 2)',note:'Coliseo: reservar en coopculture.it — en julio sin reserva hay 2-3h de cola.'},
-  {date:'16 jul',city:'Roma',type:'s',km:0,drive:'—',
-   acts:['Vaticano y Capilla Sixtina (madrugar)','Plaza San Pedro','Castel Sant'Angelo','Trastevere de tarde y noche'],
-   stay:'Airbnb Roma (noche 3)',note:'Vaticano: entrada en museivaticani.va. Ir a las 8h — se agota en julio días antes.'},
-  {date:'17 jul',city:'Roma → Venecia',type:'d',km:528,drive:'5h 30min',
-   acts:['Salida a las 8:00h','Parada opcional en Florencia','Llegar a Mestre, aparcar','Check-in'],
-   stay:'Airbnb Mestre/Venecia (noche 1)',note:'Parking en Mestre: ~15€/día. En Venecia isla: 35-70€/día. La diferencia en 2 días es de ~100€.'},
-  {date:'18 jul',city:'Venecia',type:'s',km:0,drive:'—',
-   acts:['Plaza San Marcos antes de las 8h','Vaporetto línea 1 por el Canal Grande','Isla de Burano (casas de colores)','Barrio Dorsoduro (auténtico)'],
-   stay:'Airbnb Mestre/Venecia (noche 2)',note:'Clave: madrugar. A las 7h Venecia está vacía y es mágica. A las 10h llega el caos.'},
-  {date:'19 jul',city:'Venecia → Múnich',type:'d',km:425,drive:'4h 30min',
-   acts:['Salida a las 9:00h','Cruce de los Alpes austriacos','Vignette Austria OBLIGATORIA (~9€)','Tarde libre en Marienplatz'],
-   stay:'Airbnb Múnich (noche 1)',note:'Sin vignette Austria: multa de 120€. Comprar online antes en asfinag.at.'},
-  {date:'20 jul',city:'Múnich',type:'s',km:0,drive:'—',
-   acts:['Englischer Garten y río con surfistas','Marienplatz y Glockenspiel (11h/17h)','Hofbräuhaus — cerveza 1L ~12€','BMW Museum (opcional)'],
-   stay:'Airbnb Múnich (noche 2)',note:'Day ticket transporte: 9€. Julio tiene festivales de verano al aire libre.'},
-  {date:'21 jul',city:'Múnich → Colonia',type:'d',km:574,drive:'5h 15min',
-   acts:['Salida a las 8:30h','Autobahn sin límite de velocidad 🏎️','Parada descanso opcional en Nuremberg','Tarde en Colonia — Dom y barrio Ehrenfeld'],
-   stay:'Airbnb Colonia (1 noche)',note:'El Dom de Colonia impresiona incluso desde fuera. Ehrenfeld tiene buen ambiente nocturno.'},
-  {date:'22 jul',city:'Colonia → Bruselas → París',type:'d',km:510,drive:'5h',
-   acts:['Parada 2h en Bruselas — Grand Place','Manneken Pis y gofres belgas','Llegada a París por la tarde-noche'],
-   stay:'Airbnb París (noche 1)',note:'AVISO: Máximo 2h en Bruselas. Salida temprana imprescindible.'},
-  {date:'23 jul',city:'París',type:'s',km:0,drive:'—',
-   acts:['Torre Eiffel al amanecer (sin colas)','Le Marais y Centro Pompidou','Louvre o Musée d'Orsay (reservar online)','Montmartre y Sacré-Cœur'],
-   stay:'Airbnb París (noche 2)',note:'Baguette + jamón + queso junto al Sena = almuerzo perfecto por 5€.'},
-  {date:'24 jul',city:'París → Alicante',type:'d',km:1150,drive:'10h+',
-   acts:['Salida muy temprana (5:00h)','Paradas cada 2h — obligatorio','Cruce de los Pirineos','Llegada a Alicante de noche'],
-   stay:'🏠 Casa',note:'AVISO: 1.150km, el día más largo. Alternativa: dormir en Zaragoza y llegar el 25 de mañana.'}
-];
-
-// ---- BUDGET ----
-var BUDGET = [
-  {cat:'Alojamiento',icon:'🏠',amount:2150,color:'#3b82f6'},
-  {cat:'Combustible',icon:'⛽',amount:715,color:'#f59e0b'},
-  {cat:'Peajes',icon:'🛣️',amount:120,color:'#fb923c'},
-  {cat:'Comida',icon:'🍝',amount:910,color:'#10b981'},
-  {cat:'Parking',icon:'🅿️',amount:210,color:'#38bdf8'},
-  {cat:'Actividades',icon:'🎭',amount:525,color:'#f472b6'},
-  {cat:'Emergencias',icon:'🚨',amount:200,color:'#94a3b8'}
-];
-
-// ---- CHECKLIST ----
-var CL_DATA = [
-  {s:'🗓️ Antes del viaje',items:[
-    {t:'Confirmar número final de viajeros (7, 8 o 9)',done:false},
-    {t:'Votar y reservar todos los alojamientos',done:false},
-    {t:'Contratar seguro de viaje europeo',done:false},
-    {t:'Revisar vigencia de DNI y pasaportes',done:false},
-    {t:'Descargar Google Maps offline para cada ciudad',done:false},
-    {t:'Crear fondo común en Revolut o Bizum',done:false},
-    {t:'Reservar entradas Coliseo — coopculture.it',done:false},
-    {t:'Reservar entradas Vaticano — museivaticani.va',done:false},
-    {t:'Revisar seguro del coche para Europa',done:false},
-    {t:'Comprar Vignette Austria online (~9€) — asfinag.at',done:false}
-  ]},
-  {s:'🚗 Durante el viaje',items:[
-    {t:'Check-in correcto en cada alojamiento',done:false},
-    {t:'Registrar gastos compartidos cada día',done:false},
-    {t:'Llenar depósito antes de entrar en Italia',done:false},
-    {t:'Foto grupal en cada ciudad',done:false}
-  ]},
-  {s:'🛬 De vuelta',items:[
-    {t:'Check-out de todos los alojamientos',done:false},
-    {t:'Balance final de gastos del grupo',done:false},
-    {t:'Confirmar hora del vuelo el 25 julio',done:false}
-  ]}
-];
-
-// ---- STATE ----
-var clState = JSON.parse(JSON.stringify(CL_DATA));
-var editCity = null;
-
-// ---- INIT ----
-function init() {
-  updateCountdown();
-  setInterval(updateCountdown, 60000);
-  renderCities(); // render immediately with defaults
-  renderTL();
-  renderBudget();
-  renderCL();
-  // load sheets in background and refresh cities if data arrives
-  loadFromSheets().then(function() { renderCities(); });
-}
-
-function updateCountdown() {
-  var diff = Math.ceil((new Date('2026-07-12') - new Date()) / 86400000);
-  var el = document.getElementById('days-left');
-  var pill = document.getElementById('pill');
-  if (el) el.textContent = diff > 0 ? diff : '¡YA!';
-  if (pill) pill.textContent = diff > 0 ? '⏳ ' + diff + ' días' : '🎉 ¡HOY!';
-}
-
+// Navigation
 function showView(name, btn) {
-  document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
-  document.querySelectorAll('.nb').forEach(function(b) { b.classList.remove('active'); });
+  var views = document.querySelectorAll('.view');
+  for (var i = 0; i < views.length; i++) views[i].classList.remove('active');
+  var btns = document.querySelectorAll('.nb');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
   document.getElementById('view-' + name).classList.add('active');
   if (btn) btn.classList.add('active');
 }
 
-// ---- CITIES ----
+// Countdown
+function updateCountdown() {
+  var trip = new Date(2026, 6, 12); // July 12 2026 (month is 0-indexed)
+  var now = new Date();
+  var diff = Math.ceil((trip - now) / 86400000);
+  var el = document.getElementById('days-left');
+  var pill = document.getElementById('pill');
+  if (el) el.textContent = diff > 0 ? diff : 'Ya!';
+  if (pill) pill.textContent = diff > 0 ? diff + ' dias' : 'Hoy!';
+}
+
+// Cities data
+var CITIES = [
+  {id:'marsella', name:'Marsella', flag:'FR', nights:2, dates:'12 al 14 jul', zone:'Vieux-Port / Le Panier',
+   searchAir:'https://www.airbnb.es/s/Marseille--France/homes?adults=7&checkin=2026-07-12&checkout=2026-07-14&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=3',
+   searchBook:'https://www.booking.com/searchresults.es.html?ss=Marseille&checkin=2026-07-12&checkout=2026-07-14&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
+  {id:'roma', name:'Roma', flag:'IT', nights:3, dates:'15 al 18 jul', zone:'Trastevere / Prati',
+   searchAir:'https://www.airbnb.es/s/Rome--Italy/homes?adults=7&checkin=2026-07-15&checkout=2026-07-18&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=3',
+   searchBook:'https://www.booking.com/searchresults.es.html?ss=Rome&checkin=2026-07-15&checkout=2026-07-18&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
+  {id:'venecia', name:'Venecia', flag:'IT', nights:2, dates:'17 al 19 jul', zone:'Mestre con parking / Burano',
+   searchAir:'https://www.airbnb.es/s/Mestre--Venice--Italy/homes?adults=7&checkin=2026-07-17&checkout=2026-07-19&room_types%5B%5D=Entire+home%2Fapt&amenities%5B%5D=9',
+   searchBook:'https://www.booking.com/searchresults.es.html?ss=Mestre+Venice&checkin=2026-07-17&checkout=2026-07-19&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
+  {id:'munich', name:'Munich', flag:'DE', nights:2, dates:'19 al 21 jul', zone:'Maxvorstadt / Schwabing',
+   searchAir:'https://www.airbnb.es/s/Munich--Germany/homes?adults=7&checkin=2026-07-19&checkout=2026-07-21&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=3',
+   searchBook:'https://www.booking.com/searchresults.es.html?ss=Munich&checkin=2026-07-19&checkout=2026-07-21&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
+  {id:'colonia', name:'Colonia', flag:'DE', nights:1, dates:'21 al 22 jul', zone:'Ehrenfeld / centro',
+   searchAir:'https://www.airbnb.es/s/Cologne--Germany/homes?adults=7&checkin=2026-07-21&checkout=2026-07-22&room_types%5B%5D=Entire+home%2Fapt&amenities%5B%5D=9',
+   searchBook:'https://www.booking.com/searchresults.es.html?ss=Cologne&checkin=2026-07-21&checkout=2026-07-22&group_adults=7&no_rooms=1&nflt=ht_id%3D201'},
+  {id:'paris', name:'Paris', flag:'FR', nights:2, dates:'23 al 25 jul', zone:'Le Marais / Republique',
+   searchAir:'https://www.airbnb.es/s/Paris--France/homes?adults=7&checkin=2026-07-23&checkout=2026-07-25&room_types%5B%5D=Entire+home%2Fapt&min_bedrooms=4',
+   searchBook:'https://www.booking.com/searchresults.es.html?ss=Paris&checkin=2026-07-23&checkout=2026-07-25&group_adults=7&no_rooms=1&nflt=ht_id%3D201'}
+];
+
+// Links loaded from Google Sheets
+var LINKS = {
+  marsella:{air:'',book:''},
+  roma:{air:'',book:''},
+  venecia:{air:'',book:''},
+  munich:{air:'',book:''},
+  colonia:{air:'',book:''},
+  paris:{air:'',book:''}
+};
+
+var SHEET_URL = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?output=csv');
+
+function loadSheet() {
+  fetch(SHEET_URL)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data || !data.contents) return;
+      var lines = data.contents.trim().split('\n');
+      for (var i = 1; i < lines.length; i++) {
+        var cols = lines[i].split(',');
+        var city = cols[0] ? cols[0].trim().toLowerCase() : '';
+        var air  = cols[1] ? cols[1].trim() : '';
+        var book = cols[2] ? cols[2].trim() : '';
+        if (city && LINKS[city] !== undefined) {
+          LINKS[city] = {air: air, book: book};
+        }
+      }
+      renderCities();
+    })
+    .catch(function() {
+      // Sheet failed — just show search buttons
+    });
+}
+
 function renderCities() {
   var html = '';
-  CITIES.forEach(function(c) {
+  for (var i = 0; i < CITIES.length; i++) {
+    var c = CITIES[i];
     var airUrl  = LINKS[c.id] ? LINKS[c.id].air  : '';
     var bookUrl = LINKS[c.id] ? LINKS[c.id].book : '';
     html += '<div class="city-block">';
     html += '<div class="city-header">';
-    html += '<div class="city-flag">' + c.flag + '</div>';
+    html += '<div class="city-flag" style="font-size:1.4rem">' + c.flag + '</div>';
     html += '<div style="flex:1"><div class="city-name">' + c.name + '</div>';
     html += '<div class="city-meta">' + c.dates + ' &nbsp;·&nbsp; ' + c.nights + ' noche' + (c.nights > 1 ? 's' : '') + ' &nbsp;·&nbsp; Zona: ' + c.zone + '</div></div>';
     html += '<div class="city-nights">' + c.nights + ' noche' + (c.nights > 1 ? 's' : '') + ' · 7 pers.</div>';
-    // edit button removed — use Google Sheets
     html += '</div>';
     html += '<div class="city-links">';
+
     // Airbnb row
     html += '<div class="link-row">';
     html += '<div class="link-platform"><div class="dot-air"></div><span class="lbl-air">Airbnb</span></div>';
     if (airUrl) {
-      html += '<div class="link-desc has-link">Lista de favoritos guardada ✓</div>';
-      html += '<a href="' + airUrl + '" target="_blank" rel="noopener" class="btn-open air">Ver opciones →</a>';
+      html += '<div class="link-desc ok">Lista de favoritos lista</div>';
+      html += '<a href="' + airUrl + '" target="_blank" class="btn-ir btn-air">Ver opciones en Airbnb</a>';
     } else {
-      html += '<div class="link-desc">Sin enlace — usa el botón de búsqueda</div>';
-      html += '<a href="' + c.searchAir + '" target="_blank" rel="noopener" class="btn-open air">Buscar en Airbnb ↗</a>';
+      html += '<div class="link-desc">Sin seleccion aun</div>';
+      html += '<a href="' + c.searchAir + '" target="_blank" class="btn-ir btn-search">Buscar en Airbnb</a>';
     }
     html += '</div>';
+
     // Booking row
     html += '<div class="link-row">';
     html += '<div class="link-platform"><div class="dot-book"></div><span class="lbl-book">Booking</span></div>';
     if (bookUrl) {
-      html += '<div class="link-desc has-link">Lista guardada ✓</div>';
-      html += '<a href="' + bookUrl + '" target="_blank" rel="noopener" class="btn-open book">Ver opciones →</a>';
+      html += '<div class="link-desc ok">Opciones guardadas listas</div>';
+      html += '<a href="' + bookUrl + '" target="_blank" class="btn-ir btn-book">Ver opciones en Booking</a>';
     } else {
-      html += '<div class="link-desc">Sin enlace — usa el botón de búsqueda</div>';
-      html += '<a href="' + c.searchBook + '" target="_blank" rel="noopener" class="btn-open book">Buscar en Booking ↗</a>';
+      html += '<div class="link-desc">Sin seleccion aun</div>';
+      html += '<a href="' + c.searchBook + '" target="_blank" class="btn-ir btn-search">Buscar en Booking</a>';
     }
     html += '</div>';
+
     html += '</div></div>';
-  });
+  }
   document.getElementById('city-blocks').innerHTML = html;
 }
 
-// ---- MODAL ----
-function openModal(cityId) {
-  editCity = cityId;
-  var c = CITIES.find(function(x) { return x.id === cityId; });
-  document.getElementById('modal-title').textContent = 'Editar enlaces — ' + c.flag + ' ' + c.name;
-  document.getElementById('inp-air').value  = (LINKS[cityId] && LINKS[cityId].air)  ? LINKS[cityId].air  : '';
-  document.getElementById('inp-book').value = (LINKS[cityId] && LINKS[cityId].book) ? LINKS[cityId].book : '';
-  document.getElementById('inp-token').value = localStorage.getItem('et_token') || '';
-  document.getElementById('save-status').textContent = '';
-  document.getElementById('save-status').className = 'save-status';
-  document.getElementById('btn-save').disabled = false;
-  document.getElementById('btn-save').textContent = 'Guardar';
-  document.getElementById('overlay').classList.add('open');
-  document.getElementById('inp-air').focus();
-}
+// Timeline data — NO apostrophes in JS strings
+var TL = [
+  {date:'12 jul',city:'Alicante a Marsella',drive:true,km:620,h:'6h 30min',
+   acts:['Salida temprana 7:00h','Parada en Montpellier 30 min','Llegada a Marsella por la tarde','Check-in y primer vistazo al puerto'],
+   stay:'Airbnb Marsella noche 1',note:'Organizar turnos de conduccion. Llevar snacks y musica para el camino.'},
+  {date:'13 jul',city:'Marsella',drive:false,km:0,h:'',
+   acts:['Vieux-Port de manana','Basilique Notre-Dame de la Garde','Calanques de Cassis, imprescindible','Bouillabaisse en restaurante local'],
+   stay:'Airbnb Marsella noche 2',note:'Las Calanques: reservar transporte con antelacion. Mejor antes de las 9h.'},
+  {date:'14 jul',city:'Marsella a Pisa a Roma',drive:true,km:900,h:'8h 30min',
+   acts:['Salida muy temprana 6:00h','Parada 1h en Pisa, Torre Inclinada','Autopista A1 hasta Roma','Check-in tarde-noche'],
+   stay:'Airbnb Roma noche 1',note:'AVISO: 900km en un dia es muy exigente. Alternativa: dormir en Pisa y llegar a Roma el dia 15.'},
+  {date:'15 jul',city:'Roma',drive:false,km:0,h:'',
+   acts:['Coliseo y Foro Romano, reservar online','Barrio Palatino','Zona Monti para comer','Fontana di Trevi de noche'],
+   stay:'Airbnb Roma noche 2',note:'Coliseo: reservar en coopculture.it, en julio sin reserva hay 2-3h de cola.'},
+  {date:'16 jul',city:'Roma',drive:false,km:0,h:'',
+   acts:['Vaticano y Capilla Sixtina, madrugar','Plaza San Pedro','Castel Sant Angelo','Trastevere de tarde y noche'],
+   stay:'Airbnb Roma noche 3',note:'Vaticano: entrada en museivaticani.va. Ir a las 8h, se agota en julio.'},
+  {date:'17 jul',city:'Roma a Venecia',drive:true,km:528,h:'5h 30min',
+   acts:['Salida a las 8:00h','Parada opcional en Florencia','Llegar a Mestre y aparcar','Check-in'],
+   stay:'Airbnb Mestre o Venecia noche 1',note:'Parking en Mestre: 15 euros/dia. En Venecia isla: 35-70 euros/dia. Diferencia de 100 euros en 2 dias.'},
+  {date:'18 jul',city:'Venecia',drive:false,km:0,h:'',
+   acts:['Plaza San Marcos antes de las 8h','Vaporetto linea 1 por el Canal Grande','Isla de Burano, casas de colores','Barrio Dorsoduro, autentico'],
+   stay:'Airbnb Mestre o Venecia noche 2',note:'Madrugar es clave. A las 7h Venecia esta vacia y es magica.'},
+  {date:'19 jul',city:'Venecia a Munich',drive:true,km:425,h:'4h 30min',
+   acts:['Salida a las 9:00h','Cruce de los Alpes austriacos','Vignette Austria OBLIGATORIA 9 euros','Tarde libre en Marienplatz'],
+   stay:'Airbnb Munich noche 1',note:'Sin vignette Austria: multa de 120 euros. Comprar online antes en asfinag.at.'},
+  {date:'20 jul',city:'Munich',drive:false,km:0,h:'',
+   acts:['Englischer Garten y rio con surfistas','Marienplatz y Glockenspiel a las 11h y 17h','Hofbrauhaus, cerveza 1L 12 euros','BMW Museum opcional'],
+   stay:'Airbnb Munich noche 2',note:'Day ticket transporte: 9 euros. Julio tiene festivales de verano al aire libre.'},
+  {date:'21 jul',city:'Munich a Colonia',drive:true,km:574,h:'5h 15min',
+   acts:['Salida a las 8:30h','Autobahn sin limite de velocidad','Parada descanso opcional en Nuremberg','Tarde en Colonia, Dom y barrio Ehrenfeld'],
+   stay:'Airbnb Colonia 1 noche',note:'El Dom de Colonia impresiona incluso desde fuera. Ehrenfeld tiene buen ambiente nocturno.'},
+  {date:'22 jul',city:'Colonia a Bruselas a Paris',drive:true,km:510,h:'5h',
+   acts:['Parada 2h en Bruselas, Grand Place','Manneken Pis y gofres belgas','Llegada a Paris por la tarde-noche'],
+   stay:'Airbnb Paris noche 1',note:'AVISO: Maximo 2h en Bruselas. Salida temprana imprescindible.'},
+  {date:'23 jul',city:'Paris',drive:false,km:0,h:'',
+   acts:['Torre Eiffel al amanecer sin colas','Le Marais y Centro Pompidou','Louvre o Musee d Orsay, reservar online','Montmartre y Sacre-Coeur'],
+   stay:'Airbnb Paris noche 2',note:'Baguette + jamon + queso junto al Sena = almuerzo perfecto por 5 euros.'},
+  {date:'24 jul',city:'Paris a Alicante',drive:true,km:1150,h:'10h o mas',
+   acts:['Salida muy temprana 5:00h','Paradas cada 2h obligatorio','Cruce de los Pirineos','Llegada a Alicante de noche'],
+   stay:'Casa',note:'AVISO: 1.150km, el dia mas largo. Alternativa: dormir en Zaragoza y llegar el 25 de manana.'}
+];
 
-function closeModal() {
-  document.getElementById('overlay').classList.remove('open');
-  editCity = null;
-}
-
-document.getElementById('overlay').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeModal();
-  if (e.key === 'Enter' && document.getElementById('overlay').classList.contains('open')) saveLinks();
-});
-
-function saveLinks() {
-  if (!editCity) return;
-  var token = document.getElementById('inp-token').value.trim();
-  if (!token) {
-    setStatus('Introduce el token de GitHub', 'err');
-    document.getElementById('inp-token').focus();
-    return;
-  }
-  localStorage.setItem('et_token', token);
-
-  if (!LINKS[editCity]) LINKS[editCity] = {air:'', book:''};
-  LINKS[editCity].air  = document.getElementById('inp-air').value.trim();
-  LINKS[editCity].book = document.getElementById('inp-book').value.trim();
-
-  var btn = document.getElementById('btn-save');
-  btn.textContent = 'Guardando...';
-  btn.disabled = true;
-  setStatus('Conectando con GitHub...', '');
-
-  var linksJson = JSON.stringify(LINKS);
-  var fileContent = linksJson;
-  var encoded = btoa(unescape(encodeURIComponent(fileContent)));
-
-  // Save to a separate links.json file — avoids encoding issues with the full HTML
-  fetch('https://api.github.com/repos/' + REPO + '/contents/links.json', {
-    headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    setStatus('Guardando en GitHub...', '');
-    var body = { message: 'Links ' + editCity + ' actualizados', content: encoded };
-    if (data.sha) body.sha = data.sha;
-    return fetch('https://api.github.com/repos/' + REPO + '/contents/links.json', {
-      method: 'PUT',
-      headers: {
-        'Authorization': 'token ' + token,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(d) {
-    if (d.commit) {
-      setStatus('✓ Guardado correctamente', 'ok');
-      btn.textContent = '✓ Guardado';
-      renderCities();
-      setTimeout(closeModal, 1500);
-    } else {
-      throw new Error(d.message || 'Error desconocido');
-    }
-  })
-  .catch(function(err) {
-    setStatus('Error: ' + err.message, 'err');
-    btn.textContent = 'Guardar';
-    btn.disabled = false;
-  });
-}
-
-function setStatus(msg, type) {
-  var el = document.getElementById('save-status');
-  el.textContent = msg;
-  el.className = 'save-status' + (type ? ' ' + type : '');
-}
-
-// ---- TIMELINE ----
 function renderTL() {
   var html = '';
-  TL.forEach(function(d, i) {
+  for (var i = 0; i < TL.length; i++) {
+    var d = TL[i];
     var tags = '';
-    if (d.drive !== '—') tags += '<span class="tpill pd">🚗 ' + d.drive + '</span> ';
-    tags += d.km > 0 ? '<span class="tpill pk">' + d.km + 'km</span>' : '<span class="tpill ps">Día libre</span>';
-    var acts = d.acts.map(function(a) { return '<div class="tact">' + a + '</div>'; }).join('');
-    var tray = d.km > 0 ? '<div class="tsub" style="margin-top:0.65rem">Trayecto</div><div style="display:flex;gap:0.38rem;flex-wrap:wrap;margin-top:0.25rem"><span class="tpill pd" style="padding:0.26rem 0.56rem">🚗 ' + d.drive + '</span> <span class="tpill pk" style="padding:0.26rem 0.56rem">' + d.km + ' km</span></div>' : '';
-    html += '<div class="tl-row" id="tl' + i + '" onclick="toggleTL(\'tl' + i + '\')">';
-    html += '<div class="tl-head"><div class="tl-date">' + d.date + '</div>';
-    html += '<div class="tl-dot ' + (d.type === 'd' ? 'dd' : 'ds') + '"></div>';
+    if (d.drive) tags += '<span class="tpill pd">Conduccion ' + d.h + '</span> ';
+    if (d.km > 0) tags += '<span class="tpill pk">' + d.km + 'km</span>';
+    else tags += '<span class="tpill ps">Dia libre</span>';
+    var acts = '';
+    for (var j = 0; j < d.acts.length; j++) {
+      acts += '<div class="tact">' + d.acts[j] + '</div>';
+    }
+    var tray = '';
+    if (d.km > 0) {
+      tray = '<div class="tsub" style="margin-top:0.65rem">Trayecto</div>';
+      tray += '<div style="display:flex;gap:0.38rem;flex-wrap:wrap;margin-top:0.25rem">';
+      tray += '<span class="tpill pd" style="padding:0.26rem 0.56rem">Conduccion ' + d.h + '</span>';
+      tray += '<span class="tpill pk" style="padding:0.26rem 0.56rem">' + d.km + ' km</span></div>';
+    }
+    html += '<div class="tl-row" id="tl' + i + '" onclick="toggleTL(' + i + ')">';
+    html += '<div class="tl-head">';
+    html += '<div class="tl-date">' + d.date + '</div>';
+    html += '<div class="tl-dot ' + (d.drive ? 'dd' : 'ds') + '"></div>';
     html += '<div class="tl-city">' + d.city + '</div>';
     html += '<div style="display:flex;gap:0.38rem;align-items:center">' + tags + '</div>';
-    html += '<span class="tl-ch">▼</span></div>';
-    html += '<div class="tl-body"><div><div class="tsub">Actividades</div>' + acts;
+    html += '<span class="tl-ch">v</span></div>';
+    html += '<div class="tl-body">';
+    html += '<div><div class="tsub">Actividades</div>' + acts;
     html += '<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">' + d.note + '</div></div></div>';
     html += '<div><div class="tsub">Alojamiento</div><div class="tstay">' + d.stay + '</div>' + tray + '</div>';
     html += '</div></div>';
-  });
+  }
   document.getElementById('tl-container').innerHTML = html;
 }
-function toggleTL(id) { document.getElementById(id).classList.toggle('open'); }
 
-// ---- BUDGET ----
+function toggleTL(i) {
+  var el = document.getElementById('tl' + i);
+  if (el) el.classList.toggle('open');
+}
+
+var BUDGET = [
+  {cat:'Alojamiento',icon:'Casa',amount:2150,color:'#3b82f6'},
+  {cat:'Combustible',icon:'Gas',amount:715,color:'#f59e0b'},
+  {cat:'Peajes',icon:'Via',amount:120,color:'#fb923c'},
+  {cat:'Comida',icon:'Comida',amount:910,color:'#10b981'},
+  {cat:'Parking',icon:'Park',amount:210,color:'#38bdf8'},
+  {cat:'Actividades',icon:'Act',amount:525,color:'#f472b6'},
+  {cat:'Emergencias',icon:'SOS',amount:200,color:'#94a3b8'}
+];
+
 function renderBudget() {
-  var total = BUDGET.reduce(function(s, b) { return s + b.amount; }, 0);
-  document.getElementById('bud-rows').innerHTML = BUDGET.map(function(b) {
+  var total = 0;
+  for (var i = 0; i < BUDGET.length; i++) total += BUDGET[i].amount;
+  var html = '';
+  for (var i = 0; i < BUDGET.length; i++) {
+    var b = BUDGET[i];
     var pct = Math.round(b.amount / total * 100);
-    return '<div class="bud-row"><div class="bud-cat"><span>' + b.icon + '</span><div><div style="font-size:0.82rem;font-weight:500">' + b.cat + '</div><div class="bud-bar"><div class="bud-fill" style="width:' + pct + '%;background:' + b.color + '"></div></div></div></div><div class="bud-amt">' + b.amount + '€</div><div class="bud-pct">' + pct + '%</div></div>';
-  }).join('');
+    html += '<div class="bud-row">';
+    html += '<div class="bud-cat"><span style="margin-right:0.3rem">' + b.cat + '</span>';
+    html += '<div class="bud-bar"><div class="bud-fill" style="width:' + pct + '%;background:' + b.color + '"></div></div></div>';
+    html += '<div class="bud-amt">' + b.amount + '€</div>';
+    html += '<div class="bud-pct">' + pct + '%</div>';
+    html += '</div>';
+  }
+  document.getElementById('bud-rows').innerHTML = html;
 }
 
-// ---- CHECKLIST ----
+var CL_DATA = [
+  {s:'Antes del viaje', items:[
+    'Confirmar numero final de viajeros 7, 8 o 9',
+    'Votar y reservar todos los alojamientos',
+    'Contratar seguro de viaje europeo',
+    'Revisar vigencia de DNI y pasaportes',
+    'Descargar Google Maps offline para cada ciudad',
+    'Crear fondo comun en Revolut o Bizum',
+    'Reservar entradas Coliseo en coopculture.it',
+    'Reservar entradas Vaticano en museivaticani.va',
+    'Revisar seguro del coche para Europa',
+    'Comprar Vignette Austria online 9 euros en asfinag.at'
+  ]},
+  {s:'Durante el viaje', items:[
+    'Check-in correcto en cada alojamiento',
+    'Registrar gastos compartidos cada dia',
+    'Llenar deposito antes de entrar en Italia',
+    'Foto grupal en cada ciudad'
+  ]},
+  {s:'De vuelta', items:[
+    'Check-out de todos los alojamientos',
+    'Balance final de gastos del grupo',
+    'Confirmar hora del vuelo el 25 julio'
+  ]}
+];
+
+var clDone = {};
+
 function renderCL() {
-  document.getElementById('cl-container').innerHTML = clState.map(function(s, si) {
-    var done = s.items.filter(function(i) { return i.done; }).length;
-    return '<div class="cl-sec"><div class="cl-stitle">' + s.s + '<span style="margin-left:auto;font-size:0.63rem;background:#f1f5f9;padding:0.12rem 0.38rem;border-radius:4px;color:#64748b">' + done + '/' + s.items.length + '</span></div>' +
-      s.items.map(function(item, ii) {
-        return '<div class="cl-item' + (item.done ? ' done' : '') + '" onclick="toggleCL(' + si + ',' + ii + ')"><div class="cl-box">' + (item.done ? '✓' : '') + '</div><span class="cl-txt">' + item.t + '</span></div>';
-      }).join('') + '</div>';
-  }).join('');
+  var html = '';
+  for (var si = 0; si < CL_DATA.length; si++) {
+    var sec = CL_DATA[si];
+    var doneCount = 0;
+    for (var ii = 0; ii < sec.items.length; ii++) {
+      if (clDone[si + '_' + ii]) doneCount++;
+    }
+    html += '<div class="cl-sec">';
+    html += '<div class="cl-stitle">' + sec.s + ' <span style="margin-left:auto;font-size:0.63rem;background:#f1f5f9;padding:0.12rem 0.38rem;border-radius:4px;color:#64748b">' + doneCount + '/' + sec.items.length + '</span></div>';
+    for (var ii = 0; ii < sec.items.length; ii++) {
+      var done = clDone[si + '_' + ii];
+      html += '<div class="cl-item' + (done ? ' done' : '') + '" onclick="toggleCL(' + si + ',' + ii + ')">';
+      html += '<div class="cl-box">' + (done ? 'OK' : '') + '</div>';
+      html += '<span class="cl-txt">' + sec.items[ii] + '</span></div>';
+    }
+    html += '</div>';
+  }
+  document.getElementById('cl-container').innerHTML = html;
 }
-function toggleCL(si, ii) { clState[si].items[ii].done = !clState[si].items[ii].done; renderCL(); }
 
-init();
+function toggleCL(si, ii) {
+  var k = si + '_' + ii;
+  clDone[k] = !clDone[k];
+  renderCL();
+}
+
+// Start everything
+updateCountdown();
+setInterval(updateCountdown, 60000);
+renderCities();
+renderTL();
+renderBudget();
+renderCL();
+loadSheet();
 </script>
 </body>
 </html>
