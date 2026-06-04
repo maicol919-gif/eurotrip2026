@@ -230,33 +230,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 
 </div>
 
-<!-- MODAL -->
-<div class="overlay" id="overlay">
-  <div class="modal">
-    <h2 id="modal-title">Editar enlaces</h2>
-    <p class="modal-desc">
-      En Airbnb: crea una Lista de favoritos, guarda las opciones que te gusten, luego Compartir lista → Copiar enlace.<br>
-      En Booking: guarda propiedades en tu lista y copia el enlace público.
-    </p>
-    <div class="field">
-      <label>🔴 Airbnb — enlace a tu lista de favoritos</label>
-      <input type="url" id="inp-air" placeholder="https://www.airbnb.es/wishlists/...">
-    </div>
-    <div class="field">
-      <label>🔵 Booking — enlace a opciones guardadas</label>
-      <input type="url" id="inp-book" placeholder="https://www.booking.com/...">
-    </div>
-    <div class="field">
-      <label>🔑 Token GitHub (solo el organizador)</label>
-      <input type="password" id="inp-token" placeholder="ghp_...">
-    </div>
-    <div class="modal-actions">
-      <span class="save-status" id="save-status"></span>
-      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-      <button class="btn-save" id="btn-save" onclick="saveLinks()">Guardar</button>
-    </div>
-  </div>
-</div>
+<!-- No modal needed — links managed via Google Sheets -->
 
 <script>
 // ---- CONFIG ----
@@ -284,10 +258,27 @@ var CITIES = [
    searchBook:'https://www.booking.com/searchresults.es.html?ss=Paris&checkin=2026-07-23&checkout=2026-07-25&group_adults=7&no_rooms=1&nflt=ht_id%3D201'}
 ];
 
-// ---- LINKS (edited via modal, saved to GitHub) ----
-// LINKS_START
+// ---- LINKS — loaded from Google Sheets ----
 var LINKS = {"marsella":{"air":"","book":""},"roma":{"air":"","book":""},"venecia":{"air":"","book":""},"munich":{"air":"","book":""},"colonia":{"air":"","book":""},"paris":{"air":"","book":""}};
-// LINKS_END
+var SHEET_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?gid=0&single=true&output=csv";
+
+function loadFromSheets() {
+  return fetch(SHEET_CSV + '&t=' + Date.now())
+    .then(function(r) { return r.text(); })
+    .then(function(csv) {
+      var rows = csv.trim().split('\n').slice(1); // skip header
+      rows.forEach(function(row) {
+        var cols = row.split(',');
+        var city = cols[0] ? cols[0].trim().toLowerCase() : '';
+        var air  = cols[1] ? cols[1].trim().replace(/^"|"$/g,'') : '';
+        var book = cols[2] ? cols[2].trim().replace(/^"|"$/g,'') : '';
+        if (city && LINKS[city] !== undefined) {
+          LINKS[city] = { air: air, book: book };
+        }
+      });
+    })
+    .catch(function() {}); // silently fail, show defaults
+}
 
 // ---- TIMELINE ----
 var TL = [
@@ -381,14 +372,7 @@ function init() {
   renderTL();
   renderBudget();
   renderCL();
-  // Load links.json from GitHub Pages (public file)
-  fetch('https://maicol919-gif.github.io/eurotrip2026/links.json?t=' + Date.now())
-    .then(function(r) { return r.ok ? r.json() : null; })
-    .then(function(data) {
-      if (data) LINKS = data;
-      renderCities();
-    })
-    .catch(function() { renderCities(); });
+  loadFromSheets().then(function() { renderCities(); });
 }
 
 function updateCountdown() {
@@ -418,7 +402,7 @@ function renderCities() {
     html += '<div style="flex:1"><div class="city-name">' + c.name + '</div>';
     html += '<div class="city-meta">' + c.dates + ' &nbsp;·&nbsp; ' + c.nights + ' noche' + (c.nights > 1 ? 's' : '') + ' &nbsp;·&nbsp; Zona: ' + c.zone + '</div></div>';
     html += '<div class="city-nights">' + c.nights + ' noche' + (c.nights > 1 ? 's' : '') + ' · 7 pers.</div>';
-    html += '<button class="btn-edit" onclick="openModal(\'' + c.id + '\')">✏️ Editar</button>';
+    // edit button removed — use Google Sheets
     html += '</div>';
     html += '<div class="city-links">';
     // Airbnb row
