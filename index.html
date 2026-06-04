@@ -251,7 +251,8 @@ var LINKS = {
   paris:{air:'',book:''}
 };
 
-var SHEET_URL = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?output=csv');
+var SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?output=csv';
+var SHEET_URL = 'https://corsproxy.io/?' + encodeURIComponent(SHEET_CSV);
 
 function parseCSV(text) {
   // Parse CSV properly handling quoted fields with newlines inside
@@ -280,10 +281,10 @@ function parseCSV(text) {
 
 function loadSheet() {
   fetch(SHEET_URL)
-    .then(function(r) { return r.json(); })
+    .then(function(r) { return r.text(); })
     .then(function(data) {
-      if (!data || !data.contents) return;
-      var rows = parseCSV(data.contents);
+      if (!data) return;
+      var rows = parseCSV(data);
       // rows[0] is header, skip it
       for (var i = 1; i < rows.length; i++) {
         var row = rows[i];
