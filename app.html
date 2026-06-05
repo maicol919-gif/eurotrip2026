@@ -391,22 +391,39 @@ function renderCities() {
   var html = '';
   for (var i = 0; i < CITIES.length; i++) {
     var c = CITIES[i];
-    var airUrl = LINKS[c.id] ? LINKS[c.id].air : '';
+    var airUrl  = LINKS[c.id] ? LINKS[c.id].air  : '';
+    var bookUrl = LINKS[c.id] ? LINKS[c.id].book : '';
     html += '<div class="city-block">';
+    // Header
     html += '<div class="city-header">';
-    html += '<div class="city-flag" style="font-size:1.4rem">' + c.flag + '</div>';
+    html += '<div style="font-size:1.4rem;flex-shrink:0">' + c.flag + '</div>';
     html += '<div style="flex:1"><div class="city-name">' + c.name + '</div>';
     html += '<div class="city-meta">' + c.dates + ' &nbsp;·&nbsp; ' + c.nights + ' noche' + (c.nights > 1 ? 's' : '') + ' &nbsp;·&nbsp; Zona: ' + c.zone + '</div></div>';
     html += '<div class="city-nights">' + c.nights + ' noche' + (c.nights > 1 ? 's' : '') + ' · 7 pers.</div>';
     html += '</div>';
-    html += '<div style="padding:1rem 1.25rem">';
+    // Links
+    html += '<div class="city-links">';
+    // Airbnb
+    html += '<div class="link-row">';
+    html += '<div class="link-platform"><div class="dot-air"></div><span class="lbl-air">Airbnb</span></div>';
     if (airUrl) {
-      html += '<a href="' + airUrl + '" target="_blank" class="btn-ir btn-air" style="width:100%;justify-content:center;padding:0.65rem">Ver opciones en Airbnb</a>';
+      html += '<div class="link-desc ok">Lista de favoritos lista</div>';
+      html += '<a href="' + airUrl + '" target="_blank" class="btn-ir btn-air">Ver opciones</a>';
     } else {
-      html += '<div style="font-size:0.8rem;color:#94a3b8;padding:0.5rem 0">Opciones de alojamiento proximamente...</div>';
+      html += '<div class="link-desc">Proximamente</div>';
     }
     html += '</div>';
+    // Booking
+    html += '<div class="link-row">';
+    html += '<div class="link-platform"><div class="dot-book"></div><span class="lbl-book">Booking</span></div>';
+    if (bookUrl) {
+      html += '<div class="link-desc ok">Opciones guardadas listas</div>';
+      html += '<a href="' + bookUrl + '" target="_blank" class="btn-ir btn-book">Ver opciones</a>';
+    } else {
+      html += '<div class="link-desc">Proximamente</div>';
+    }
     html += '</div>';
+    html += '</div></div>';
   }
   document.getElementById('city-blocks').innerHTML = html;
 }
@@ -587,5 +604,6 @@ renderCL();
 loadSheet();
   updateChecklistCard();
 </script>
+<!-- build:1780685933 -->
 </body>
 </html>
