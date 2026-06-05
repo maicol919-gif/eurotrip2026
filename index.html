@@ -99,6 +99,11 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a}
 .cl-item.done .cl-box{background:#10b981;border-color:#10b981}
 .cl-txt{font-size:0.82rem}
 .cl-item.done .cl-txt{text-decoration:line-through}
+.dcard-link{cursor:pointer;transition:all .18s;position:relative}
+.dcard-link:hover{border-color:#3b82f6;transform:translateY(-2px);box-shadow:0 4px 16px rgba(59,130,246,0.1)}
+.dcard-ico{font-size:1.4rem;margin-bottom:0.4rem}
+.dcard-hint{font-size:0.65rem;color:#3b82f6;font-weight:600;margin-top:0.5rem;opacity:0;transition:opacity .18s}
+.dcard-link:hover .dcard-hint{opacity:1}
 @media(max-width:680px){
   .main{padding:1rem}.header{padding:1rem}.nav{padding:0 1rem}
   .tl-row.open .tl-body{grid-template-columns:1fr}
@@ -130,12 +135,60 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a}
   <div class="ptitle">La aventura se acerca!</div>
   <div class="psub">12 - 24 julio 2026 · 7 personas · 9 ciudades · 13 noches</div>
   <div class="dgrid">
-    <div class="dcard"><div class="dval" id="days-left">-</div><div class="dlbl">Dias restantes</div><span class="dtag tb">12 julio 2026</span></div>
-    <div class="dcard"><div class="dval">4.830€</div><div class="dlbl">Presupuesto total</div><span class="dtag tg">690€/persona</span></div>
-    <div class="dcard"><div class="dval">7</div><div class="dlbl">Viajeros</div><span class="dtag ta">+2 posibles</span></div>
-    <div class="dcard"><div class="dval">6.200km</div><div class="dlbl">Kilometros</div><span class="dtag tb">ruta completa</span></div>
-    <div class="dcard"><div class="dval">6</div><div class="dlbl">Ciudades con Airbnb</div><span class="dtag tr">0 reservados</span></div>
-    <div class="dcard"><div class="dval">13</div><div class="dlbl">Noches</div><span class="dtag tg">12 al 24 jul</span></div>
+    <div class="dcard dcard-link" onclick="showView('timeline', document.querySelectorAll('.nb')[2])">
+      <div class="dcard-ico">📅</div>
+      <div class="dval" id="days-left">-</div>
+      <div class="dlbl">Dias para el viaje</div>
+      <span class="dtag tb">12 julio 2026</span>
+      <div class="dcard-hint">Ver itinerario →</div>
+    </div>
+    <div class="dcard dcard-link" onclick="showView('presupuesto', document.querySelectorAll('.nb')[3])">
+      <div class="dcard-ico">💶</div>
+      <div class="dval">4.830€</div>
+      <div class="dlbl">Presupuesto del grupo</div>
+      <span class="dtag tg">690€ por persona</span>
+      <div class="dcard-hint">Ver desglose →</div>
+    </div>
+    <div class="dcard dcard-link" onclick="toggleViajeros()">
+      <div class="dcard-ico">👥</div>
+      <div class="dval" id="viajeros-val">7</div>
+      <div class="dlbl">Viajeros confirmados</div>
+      <span class="dtag ta" id="viajeros-tag">+2 posibles</span>
+      <div class="dcard-hint">Ajustar numero →</div>
+    </div>
+    <div class="dcard dcard-link" onclick="showView('timeline', document.querySelectorAll('.nb')[2])">
+      <div class="dcard-ico">🛣️</div>
+      <div class="dval">6.200km</div>
+      <div class="dlbl">Kilometros totales</div>
+      <span class="dtag tb">ruta completa</span>
+      <div class="dcard-hint">Ver etapas →</div>
+    </div>
+    <div class="dcard dcard-link" onclick="showView('alojamientos', document.querySelectorAll('.nb')[1])">
+      <div class="dcard-ico">🏠</div>
+      <div class="dval">6</div>
+      <div class="dlbl">Ciudades con Airbnb</div>
+      <span class="dtag tr">0 reservados</span>
+      <div class="dcard-hint">Ver alojamientos →</div>
+    </div>
+    <div class="dcard dcard-link" onclick="showView('checklist', document.querySelectorAll('.nb')[4])">
+      <div class="dcard-ico">✅</div>
+      <div class="dval" id="checklist-pct">0%</div>
+      <div class="dlbl">Checklist completado</div>
+      <span class="dtag tg" id="checklist-done">0 de 17 tareas</span>
+      <div class="dcard-hint">Ver tareas →</div>
+    </div>
+  </div>
+
+  <!-- VIAJEROS POPUP -->
+  <div id="viajeros-popup" style="display:none;background:white;border:1.5px solid #e2e8f0;border-radius:14px;padding:1.25rem;margin-bottom:1rem;max-width:340px">
+    <div style="font-size:0.85rem;font-weight:700;margin-bottom:0.85rem">Ajustar numero de viajeros</div>
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.85rem">
+      <button onclick="ajustarViajeros(-1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1.2rem;cursor:pointer;font-weight:700">-</button>
+      <div style="font-size:2rem;font-weight:800;min-width:40px;text-align:center" id="viajeros-big">7</div>
+      <button onclick="ajustarViajeros(1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1.2rem;cursor:pointer;font-weight:700">+</button>
+      <div style="font-size:0.78rem;color:#64748b;line-height:1.4">personas<br><span id="viajeros-pp" style="font-weight:700;color:#3b82f6">690€/pers.</span></div>
+    </div>
+    <div style="font-size:0.72rem;color:#94a3b8">El precio por persona se recalcula automaticamente</div>
   </div>
   <div style="font-size:0.88rem;font-weight:700;margin-bottom:0.75rem">Para decidir hoy</div>
   <div class="alerts">
@@ -199,6 +252,38 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a}
 
 <script>
 // Navigation
+var nViajeros = 7;
+var totalBudget = 4830;
+
+function toggleViajeros() {
+  var p = document.getElementById('viajeros-popup');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
+function ajustarViajeros(delta) {
+  nViajeros = Math.max(7, Math.min(9, nViajeros + delta));
+  var pp = Math.round(totalBudget / nViajeros);
+  document.getElementById('viajeros-val').textContent = nViajeros;
+  document.getElementById('viajeros-big').textContent = nViajeros;
+  document.getElementById('viajeros-pp').textContent = pp + 'euros/pers.';
+  document.getElementById('viajeros-tag').textContent = nViajeros === 7 ? '+2 posibles' : nViajeros === 8 ? '+1 posible' : 'maximo';
+}
+
+function updateChecklistCard() {
+  var total = 0, done = 0;
+  for (var si = 0; si < CL_DATA.length; si++) {
+    for (var ii = 0; ii < CL_DATA[si].items.length; ii++) {
+      total++;
+      if (clDone[si + '_' + ii]) done++;
+    }
+  }
+  var pct = total > 0 ? Math.round(done / total * 100) : 0;
+  var el1 = document.getElementById('checklist-pct');
+  var el2 = document.getElementById('checklist-done');
+  if (el1) el1.textContent = pct + '%';
+  if (el2) el2.textContent = done + ' de ' + total + ' tareas';
+}
+
 function showView(name, btn) {
   var views = document.querySelectorAll('.view');
   for (var i = 0; i < views.length; i++) views[i].classList.remove('active');
@@ -509,6 +594,7 @@ function toggleCL(si, ii) {
   var k = si + '_' + ii;
   clDone[k] = !clDone[k];
   renderCL();
+  updateChecklistCard();
 }
 
 // Start everything
@@ -519,6 +605,7 @@ renderTL();
 renderBudget();
 renderCL();
 loadSheet();
+  updateChecklistCard();
 </script>
 </body>
 </html>
