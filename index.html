@@ -1405,17 +1405,19 @@ function renderExcluirBtns() {
   var html = '<div class="gasto-excluir"><div class="gasto-excluir-title">Excluir de este gasto (no participo)</div><div class="excluir-grid">';
   PEOPLE.forEach(function(p) {
     var ex = excluidos[p];
-    html += '<button class="excluir-btn' + (ex ? ' excluido' : '') + '" onclick="toggleExcluido('' + p + '')">' + p + '</button>';
+    html += '<button class="excluir-btn' + (ex ? ' excluido' : '') + '" onclick="toggleExcluido(this,\'' + p + '\')">' + p + '</button>';
   });
   html += '</div></div>';
   return html;
 }
 
-function toggleExcluido(p) {
+function toggleExcluido(btn, p) {
   excluidos[p] = !excluidos[p];
-  // Re-render excluir buttons inside form
-  var container = document.getElementById('excluir-container');
-  if (container) container.innerHTML = renderExcluirBtns();
+  if (excluidos[p]) {
+    btn.classList.add('excluido');
+  } else {
+    btn.classList.remove('excluido');
+  }
 }
 
 // ---- PWA INSTALL ----
