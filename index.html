@@ -209,7 +209,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <!-- DASHBOARD -->
 <div id="view-dashboard" class="view active">
-  <div class="ptitle">La aventura se acerca! 🚗</div>
+  <div class="ptitle">Inicio 🌍</div>
   <div class="psub">12 — 24 julio 2026 · 9 ciudades · 13 noches · ~6.200 km</div>
   <div class="dgrid">
     <div class="dcard" onclick="showView('timeline',2)">
@@ -250,6 +250,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <!-- ALOJAMIENTOS -->
 <div id="view-alojamientos" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
   <div class="ptitle">Alojamientos</div>
   <div class="psub">Votad vuestras opciones favoritas. Los links abren directamente las listas de Airbnb.</div>
   <div id="city-blocks"></div>
@@ -262,6 +263,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <!-- TIMELINE -->
 <div id="view-timeline" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
   <div class="ptitle">Itinerario</div>
   <div class="psub">13 dias. Toca cada dia para ver el detalle y abrir la ruta en Google Maps.</div>
   <div id="tl-container"></div>
@@ -269,6 +271,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <!-- PRESUPUESTO -->
 <div id="view-presupuesto" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
   <div class="ptitle">Presupuesto</div>
   <div class="psub">Estimacion realista para el viaje completo</div>
   <div class="pp-grid">
@@ -284,6 +287,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <!-- GASTOS -->
 <div id="view-gastos" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
   <div class="ptitle">Gastos compartidos</div>
   <div class="psub">Quien pago que. Los balances se calculan solos.</div>
   <div class="gf">
@@ -317,6 +321,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <!-- NOTAS -->
 <div id="view-notas" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
   <div class="ptitle">Notas por ciudad</div>
   <div class="psub">Restaurantes, lugares y consejos para cada parada.</div>
   <div class="ntabs" id="ntabs"></div>
@@ -325,6 +330,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <!-- CHECKLIST -->
 <div id="view-checklist" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
   <div class="ptitle">Checklist</div>
   <div class="psub">Tareas antes y durante el viaje. Cada una tiene responsable.</div>
   <div id="cl-cont"></div>
@@ -332,6 +338,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <!-- EMERGENCIAS -->
 <div id="view-emergencias" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
   <div class="ptitle">Emergencias y Documentos</div>
   <div class="psub">Telefonos clave y alertas importantes para el viaje.</div>
   <div class="em-grid">
