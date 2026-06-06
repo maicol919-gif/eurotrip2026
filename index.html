@@ -11,6 +11,9 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .header{background:#0f172a;padding:0.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:sticky;top:0;z-index:100}
 .hlogo{color:white;font-size:0.95rem;font-weight:700}
 .hbadge{font-size:0.65rem;font-weight:700;padding:0.25rem 0.7rem;border-radius:20px;background:rgba(255,255,255,0.1);color:#94a3b8;white-space:nowrap}
+.hcity{font-size:0.62rem;color:#64748b;cursor:pointer;transition:color .15s;white-space:nowrap}
+.hcity:hover{color:white;text-decoration:underline}
+.harr{font-size:0.55rem;color:#334155}
 .hbadge.live{background:rgba(16,185,129,0.2);color:#34d399}
 .bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
 .bnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.15rem;background:none;border:none;cursor:pointer;padding:0.5rem 0.1rem;font-family:inherit}
@@ -201,7 +204,26 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 <body>
 
 <div class="header">
-  <div class="hlogo">🌍 EuroTrip 2026</div>
+  <div style="display:flex;flex-direction:column;gap:0.18rem">
+    <div class="hlogo">🌍 EuroTrip 2026</div>
+    <div style="display:flex;align-items:center;gap:0.28rem;flex-wrap:wrap">
+      <span class="hcity" onclick="openCity('marsella')">Marsella</span>
+      <span class="harr">→</span>
+      <span class="hcity" onclick="openCity('pisa')">Pisa</span>
+      <span class="harr">→</span>
+      <span class="hcity" onclick="openCity('roma')">Roma</span>
+      <span class="harr">→</span>
+      <span class="hcity" onclick="openCity('venecia')">Venecia</span>
+      <span class="harr">→</span>
+      <span class="hcity" onclick="openCity('munich')">Munich</span>
+      <span class="harr">→</span>
+      <span class="hcity" onclick="openCity('colonia')">Colonia</span>
+      <span class="harr">→</span>
+      <span class="hcity" onclick="openCity('bruselas')">Bruselas</span>
+      <span class="harr">→</span>
+      <span class="hcity" onclick="openCity('paris')">Paris</span>
+    </div>
+  </div>
   <div class="hbadge" id="badge">⏳ Cargando...</div>
 </div>
 
@@ -368,6 +390,12 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
       <div class="em-item"><span class="em-l">Vaporetto Venecia</span><span class="em-v"><a href="https://www.veneziaunica.it" target="_blank">veneziaunica.it</a></span></div>
     </div>
   </div>
+</div>
+
+<!-- CIUDAD -->
+<div id="view-ciudad" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem">← Inicio</button>
+  <div id="ciudad-content"></div>
 </div>
 
 </div><!-- end main -->
@@ -851,6 +879,114 @@ function loadSheet() {
     if(cur.city&&LINKS[cur.city]!==undefined) LINKS[cur.city]={air:cur.air.replace(/"/g,''),book:cur.book.replace(/"/g,'')};
     renderCities();
   }).catch(function(){});
+}
+
+// ===== CIUDAD DETAIL =====
+var CITY_DAYS = {
+  marsella:[1,2], pisa:[2], roma:[3,4,5],
+  venecia:[6,7], munich:[8,9], colonia:[10],
+  bruselas:[11], paris:[12,13]
+};
+
+var CITY_META = {
+  marsella:{name:'Marsella', flag:'🇫🇷', nights:2, dates:'12-14 jul', zone:'Vieux-Port / Le Panier'},
+  pisa:    {name:'Pisa',     flag:'🇮🇹', nights:0, dates:'14 jul parada', zone:'Plaza dei Miracoli'},
+  roma:    {name:'Roma',     flag:'🇮🇹', nights:3, dates:'15-18 jul', zone:'Trastevere / Prati'},
+  venecia: {name:'Venecia',  flag:'🇮🇹', nights:2, dates:'17-19 jul', zone:'Mestre / Burano'},
+  munich:  {name:'Munich',   flag:'🇩🇪', nights:2, dates:'19-21 jul', zone:'Maxvorstadt / Schwabing'},
+  colonia: {name:'Colonia',  flag:'🇩🇪', nights:1, dates:'21-22 jul', zone:'Ehrenfeld / centro'},
+  bruselas:{name:'Bruselas', flag:'🇧🇪', nights:0, dates:'22 jul parada', zone:'Grand Place'},
+  paris:   {name:'Paris',    flag:'🇫🇷', nights:2, dates:'23-25 jul', zone:'Le Marais / Republique'}
+};
+
+var NOTAS_MAP = {
+  marsella:'Marsella', pisa:null, roma:'Roma',
+  venecia:'Venecia', munich:'Munich',
+  colonia:'Colonia', bruselas:'Bruselas', paris:'Paris'
+};
+
+function openCity(cityId) {
+  var m = CITY_META[cityId];
+  if(!m) return;
+  // Build city detail view
+  var html = '';
+  var ns = m.nights > 0 ? m.nights+' noche'+(m.nights>1?'s':'') : 'Parada de transito';
+
+  // Header info
+  html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.85rem">';
+  html += '<div style="font-size:2rem">'+m.flag+'</div>';
+  html += '<div><div style="font-size:1.1rem;font-weight:800;letter-spacing:-0.02em">'+m.name+'</div>';
+  html += '<div style="font-size:0.72rem;color:#64748b;margin-top:0.1rem">'+m.dates+' &nbsp;·&nbsp; '+ns+' &nbsp;·&nbsp; '+m.zone+'</div></div></div>';
+
+  // Alojamiento
+  if(LINKS[cityId]){
+    var air = LINKS[cityId].air;
+    var book = LINKS[cityId].book;
+    html += '<div class="st">Alojamiento</div>';
+    html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:1rem">';
+    html += '<div class="city-body">';
+    html += '<div class="lrow"><div class="lp"><div class="da"></div><span class="la">Airbnb</span></div>';
+    html += air ? '<div class="ldesc ok">Inicia sesion para ver opciones</div><a href="'+air+'" target="_blank" class="btn-ver ba">Ver</a>' : '<div class="ldesc">Proximamente</div>';
+    html += '</div>';
+    html += '<div class="lrow"><div class="lp"><div class="db"></div><span class="lb">Booking</span></div>';
+    html += book ? '<div class="ldesc ok">Inicia sesion para ver opciones</div><a href="'+book+'" target="_blank" class="btn-ver bb">Ver</a>' : '<div class="ldesc">Proximamente</div>';
+    html += '</div></div></div>';
+    // Votes
+    var vy = votes[cityId+'_y']?'vy':'';
+    var vf = votes[cityId+'_f']?'vf':'';
+    var vn = votes[cityId+'_n']?'vn':'';
+    html += '<div class="vrow" style="margin-bottom:1rem">';
+    html += '<button class="vb '+vy+'" onclick="vote(''+cityId+'','y')">👍 Me apunto</button>';
+    html += '<button class="vb '+vf+'" onclick="vote(''+cityId+'','f')">⭐ Favorita</button>';
+    html += '<button class="vb '+vn+'" onclick="vote(''+cityId+'','n')">👎 No</button>';
+    html += '</div>';
+  }
+
+  // Itinerario dias
+  var days = CITY_DAYS[cityId] || [];
+  if(days.length) {
+    html += '<div class="st">Dias en '+m.name+'</div>';
+    days.forEach(function(di){
+      var d = TL[di];
+      if(!d) return;
+      var acts = d.acts.map(function(a){return '<div class="tact">'+a+'</div>';}).join('');
+      var ztl = d.ztl ? '<div class="tztl"><div class="tztl-t">⚠️ ZTL: no entrar al centro con el coche. Multa 100-300 euros.</div></div>' : '';
+      var mBtn = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;text-decoration:none;margin-top:0.5rem">🗺 Google Maps</a>' : '';
+      html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:0.5rem">';
+      html += '<div style="display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.9rem;border-bottom:1px solid #f1f5f9">';
+      html += '<div style="font-size:0.65rem;font-weight:700;color:#3b82f6;min-width:40px">'+d.date+'</div>';
+      html += '<div style="font-size:0.82rem;font-weight:600;flex:1">'+d.city+'</div>';
+      if(d.drive) html += '<span class="tp tpd">🚗 '+d.h+'</span>';
+      html += '</div>';
+      html += '<div style="padding:0.78rem 0.9rem;display:grid;grid-template-columns:1fr 1fr;gap:0.85rem">';
+      html += '<div><div class="tsub">Actividades</div>'+acts+ztl+mBtn+'</div>';
+      html += '<div><div class="tsub">Alojamiento</div><div class="tstay">'+d.stay+'</div>';
+      if(d.km>0) html += '<div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-top:0.3rem"><span class="tp tpd">🚗 '+d.h+'</span><span class="tp tpk">'+d.km+' km</span></div>';
+      html += '</div></div><div style="padding:0 0.9rem 0.78rem"><div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div></div>';
+      html += '</div>';
+    });
+  }
+
+  // Notas
+  var nk = NOTAS_MAP[cityId];
+  if(nk && NOTAS[nk]){
+    var n = NOTAS[nk];
+    html += '<div class="st" style="margin-top:0.5rem">Notas y consejos</div>';
+    html += '<div class="ncard">';
+    [{t:'Restaurantes',k:'rest'},{t:'Lugares',k:'lug'},{t:'Consejos',k:'cons'}].forEach(function(s){
+      html += '<div class="nsec"><div class="nsec-t">'+s.t+'</div>';
+      n[s.k].forEach(function(i){html += '<div class="nitem"><span class="nd">●</span>'+i+'</div>';});
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Show ciudad view
+  document.getElementById('ciudad-content').innerHTML = html;
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.querySelectorAll('.bnb').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('view-ciudad').classList.add('active');
+  window.scrollTo(0,0);
 }
 
 // ===== INIT =====
