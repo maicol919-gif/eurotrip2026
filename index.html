@@ -11,8 +11,8 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .header{background:#0f172a;padding:0.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:sticky;top:0;z-index:100}
 .hlogo{color:white;font-size:0.95rem;font-weight:700}
 .hbadge{font-size:0.65rem;font-weight:700;padding:0.25rem 0.7rem;border-radius:20px;background:rgba(255,255,255,0.1);color:#94a3b8;white-space:nowrap}
-.hcity{font-size:0.62rem;color:#64748b;cursor:pointer;transition:color .15s;white-space:nowrap}
-.hcity:hover{color:white;text-decoration:underline}
+.hcity{font-size:0.62rem;color:#64748b;cursor:pointer;transition:color .15s;white-space:nowrap;padding:0.15rem 0.1rem;-webkit-tap-highlight-color:transparent}
+.hcity:hover,.hcity:active{color:white;text-decoration:underline}
 .harr{font-size:0.55rem;color:#334155}
 .hbadge.live{background:rgba(16,185,129,0.2);color:#34d399}
 .bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
@@ -207,24 +207,10 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
   <div style="display:flex;flex-direction:column;gap:0.18rem">
     <div class="hlogo">🌍 EuroTrip 2026</div>
     <div style="display:flex;align-items:center;gap:0.28rem;flex-wrap:wrap">
-      <span class="hcity" onclick="openCity('marsella')">Marsella</span>
-      <span class="harr">→</span>
-      <span class="hcity" onclick="openCity('pisa')">Pisa</span>
-      <span class="harr">→</span>
-      <span class="hcity" onclick="openCity('roma')">Roma</span>
-      <span class="harr">→</span>
-      <span class="hcity" onclick="openCity('venecia')">Venecia</span>
-      <span class="harr">→</span>
-      <span class="hcity" onclick="openCity('munich')">Munich</span>
-      <span class="harr">→</span>
-      <span class="hcity" onclick="openCity('colonia')">Colonia</span>
-      <span class="harr">→</span>
-      <span class="hcity" onclick="openCity('bruselas')">Bruselas</span>
-      <span class="harr">→</span>
-      <span class="hcity" onclick="openCity('paris')">Paris</span>
+      <span class="hcity" onclick="openCity('marsella')">Marsella</span><span class="harr">→</span><span class="hcity" onclick="openCity('pisa')">Pisa</span><span class="harr">→</span><span class="hcity" onclick="openCity('roma')">Roma</span><span class="harr">→</span><span class="hcity" onclick="openCity('venecia')">Venecia</span><span class="harr">→</span><span class="hcity" onclick="openCity('munich')">Munich</span><span class="harr">→</span><span class="hcity" onclick="openCity('colonia')">Colonia</span><span class="harr">→</span><span class="hcity" onclick="openCity('bruselas')">Bruselas</span><span class="harr">→</span><span class="hcity" onclick="openCity('paris')">Paris</span>
     </div>
   </div>
-  <div class="hbadge" id="badge">⏳ Cargando...</div>
+  <div class="hbadge" id="badge">🌍 EuroTrip</div>
 </div>
 
 <div class="main">
@@ -647,8 +633,8 @@ function loadData() {
 function setBadge(ok) {
   var b = document.getElementById('badge');
   if(!b) return;
-  if(ok){ b.textContent='⚡ En vivo'; b.className='hbadge live'; }
-  else  { b.textContent='Sin conexion'; b.className='hbadge'; }
+  if(ok){ b.textContent='⚡ Sync'; b.className='hbadge live'; }
+  // Don't show error - just stay neutral if no connection
 }
 
 // ===== ALOJAMIENTOS =====
@@ -905,7 +891,7 @@ var NOTAS_MAP = {
   colonia:'Colonia', bruselas:'Bruselas', paris:'Paris'
 };
 
-function openCity(cityId) {
+window.openCity = function openCity(cityId) {
   var m = CITY_META[cityId];
   if(!m) return;
   // Build city detail view
@@ -999,12 +985,14 @@ renderGastos();
 renderNotas();
 renderCL();
 
-// Load from Supabase
-loadData();
-// Poll every 10 seconds
-setInterval(loadData, 10000);
-// Load sheet links
+// Load sheet links immediately (Google Sheets for Airbnb links)
 loadSheet();
+
+// Try Supabase in background — don't block UI
+setTimeout(function() {
+  loadData();
+  setInterval(loadData, 15000);
+}, 500);
 
 // Show nombre modal if needed
 if(!NOMBRE){
