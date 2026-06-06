@@ -206,9 +206,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 <div class="header">
   <div style="display:flex;flex-direction:column;gap:0.18rem">
     <div class="hlogo" onclick="showView('dashboard',0)" style="cursor:pointer">🌍 EuroTrip 2026</div>
-    <div style="display:flex;align-items:center;gap:0.28rem;flex-wrap:wrap">
-      <span class="hcity" onclick="openCity('marsella')">Marsella</span><span class="harr">→</span><span class="hcity" onclick="openCity('pisa')">Pisa</span><span class="harr">→</span><span class="hcity" onclick="openCity('roma')">Roma</span><span class="harr">→</span><span class="hcity" onclick="openCity('venecia')">Venecia</span><span class="harr">→</span><span class="hcity" onclick="openCity('munich')">Munich</span><span class="harr">→</span><span class="hcity" onclick="openCity('colonia')">Colonia</span><span class="harr">→</span><span class="hcity" onclick="openCity('bruselas')">Bruselas</span><span class="harr">→</span><span class="hcity" onclick="openCity('paris')">Paris</span>
-    </div>
+    <div id="header-route" style="display:flex;align-items:center;gap:0.28rem;flex-wrap:wrap"></div>
   </div>
   <div class="hbadge" id="badge">🌍 EuroTrip</div>
 </div>
@@ -226,7 +224,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
     </div>
     <div class="dcard" onclick="showView('presupuesto',3)">
       <div class="di">💶</div><div class="dv" id="dash-pp">690€</div>
-      <div class="dl">Por persona</div><span class="dt tg">Total 4.830€</span>
+      <div class="dl">Por persona</div><span class="dt tg" id="dash-total-tag">Total 4.830€</span>
     </div>
     <div class="dcard" onclick="showView('alojamientos',1)">
       <div class="di">🏠</div><div class="dv">6</div>
@@ -245,6 +243,44 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
       <div class="dl">Emergencias</div><span class="dt tr">Toca aqui</span>
     </div>
   </div>
+  <!-- VIAJEROS + RUTA -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:1rem">
+    <!-- Viajeros -->
+    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem">
+      <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.65rem">Viajeros</div>
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem">
+        <button onclick="ajustarV(-1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit">−</button>
+        <div style="font-size:2rem;font-weight:800;letter-spacing:-0.03em;min-width:36px;text-align:center" id="v-num">7</div>
+        <button onclick="ajustarV(1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit">+</button>
+        <div style="font-size:0.75rem;color:#64748b;line-height:1.5">
+          personas<br>
+          <span style="font-weight:700;color:#3b82f6" id="v-pp">690€/pers.</span>
+        </div>
+      </div>
+      <div style="font-size:0.65rem;color:#94a3b8">Total del grupo: <span style="font-weight:700;color:#0f172a" id="v-total">4.830€</span></div>
+    </div>
+    <!-- Ruta -->
+    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem">
+      <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.65rem">Ruta del viaje</div>
+      <div id="ruta-chips" style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.55rem"></div>
+      <div style="display:flex;gap:0.4rem">
+        <select id="ruta-select" style="flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.5rem;font-family:inherit;font-size:0.72rem;color:#0f172a;outline:none">
+          <option value="">Añadir ciudad...</option>
+          <option value="alicante">Alicante</option>
+          <option value="marsella">Marsella</option>
+          <option value="pisa">Pisa</option>
+          <option value="roma">Roma</option>
+          <option value="venecia">Venecia</option>
+          <option value="munich">Munich</option>
+          <option value="colonia">Colonia</option>
+          <option value="bruselas">Bruselas</option>
+          <option value="paris">Paris</option>
+        </select>
+        <button onclick="addRuta()" style="background:#0f172a;color:white;border:none;border-radius:7px;padding:0.35rem 0.65rem;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:inherit">+</button>
+      </div>
+    </div>
+  </div>
+
   <div class="st">Para decidir hoy</div>
   <div class="alerts">
     <div class="al r"><div class="al-t">Votar y reservar alojamientos</div><div class="al-d">Julio se agota. Cuanto mas tardemos, peor precio y ubicacion.</div></div>
@@ -582,6 +618,63 @@ var TL = [
    acts:['Salida muy temprana 5:00h','Paradas cada 2h obligatorio','Cruce de los Pirineos','Llegada a Alicante de noche'],
    stay:'Casa', note:'AVISO: 1.150km, el dia mas largo. Alternativa: dormir en Zaragoza.'}
 ];
+
+// ===== VIAJEROS =====
+var nViajeros = 7;
+var BUDGET_TOTAL = 4830;
+function ajustarV(d) {
+  nViajeros = Math.max(1, nViajeros + d);
+  var pp = Math.round(BUDGET_TOTAL / nViajeros);
+  document.getElementById('v-num').textContent = nViajeros;
+  document.getElementById('v-pp').textContent = pp + '€/pers.';
+  document.getElementById('v-total').textContent = BUDGET_TOTAL + '€';
+  var dp = document.getElementById('dash-pp'); if(dp) dp.textContent = pp + '€';
+  var dt = document.getElementById('dash-total-tag'); if(dt) dt.textContent = 'Total ' + BUDGET_TOTAL + '€';
+}
+
+// ===== RUTA =====
+var miRuta = ['alicante','marsella','pisa','roma','venecia','munich','colonia','bruselas','paris'];
+var CITY_NAMES = {
+  alicante:'Alicante', marsella:'Marsella', pisa:'Pisa', roma:'Roma',
+  venecia:'Venecia', munich:'Munich', colonia:'Colonia', bruselas:'Bruselas', paris:'Paris'
+};
+var CITY_FLAGS = {
+  alicante:'🇪🇸', marsella:'🇫🇷', pisa:'🇮🇹', roma:'🇮🇹',
+  venecia:'🇮🇹', munich:'🇩🇪', colonia:'🇩🇪', bruselas:'🇧🇪', paris:'🇫🇷'
+};
+function renderRuta() {
+  var el = document.getElementById('ruta-chips');
+  if(!el) return;
+  if(!miRuta.length) { el.innerHTML='<span style="font-size:0.72rem;color:#94a3b8">Sin ciudades</span>'; return; }
+  el.innerHTML = miRuta.map(function(c, i) {
+    return (i>0?'<span style="font-size:0.6rem;color:#94a3b8;align-self:center">→</span>':'') +
+      '<span style="display:inline-flex;align-items:center;gap:0.25rem;background:#f1f5f9;border-radius:6px;padding:0.2rem 0.45rem;font-size:0.68rem;font-weight:600;cursor:pointer" onclick="openCity(\'' + c + '\')">' +
+      CITY_FLAGS[c]+' '+CITY_NAMES[c]+
+      '<span onclick="event.stopPropagation();removeRuta('+i+')" style="color:#94a3b8;margin-left:0.15rem;font-size:0.7rem;line-height:1">×</span></span>';
+  }).join('');
+  // Also update header route
+  updateHeaderRoute();
+}
+function addRuta() {
+  var sel = document.getElementById('ruta-select');
+  var val = sel.value;
+  if(!val || miRuta.indexOf(val) !== -1) return;
+  miRuta.push(val);
+  sel.value = '';
+  renderRuta();
+}
+function removeRuta(idx) {
+  miRuta.splice(idx, 1);
+  renderRuta();
+}
+function updateHeaderRoute() {
+  var el = document.getElementById('header-route');
+  if(!el) return;
+  el.innerHTML = miRuta.map(function(c, i) {
+    return (i>0?'<span class="harr">→</span>':'')+
+      '<span class="hcity" onclick="openCity(\'' + c + '\')">' + CITY_NAMES[c] + '</span>';
+  }).join('');
+}
 
 // ===== NAV =====
 var VIEWS = ['dashboard','alojamientos','timeline','presupuesto','gastos','notas','checklist','emergencias'];
@@ -994,6 +1087,8 @@ renderBudget();
 renderGastos();
 renderNotas();
 renderCL();
+
+renderRuta();
 
 // Load sheet links immediately (Google Sheets for Airbnb links)
 loadSheet();
