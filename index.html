@@ -775,8 +775,9 @@ function showView(name, btn) {
 
 // ---- COUNTDOWN ----
 function updateCountdown() {
-  var trip = new Date(2026,6,12);
-  var diff = Math.ceil((trip - new Date()) / 86400000);
+  var trip = new Date('2026-07-12T00:00:00');
+  var now = new Date();
+  var diff = Math.ceil((trip - now) / 86400000);
   var el = document.getElementById('days-left');
   var pill = document.getElementById('pill');
   if(el) el.textContent = diff > 0 ? diff : 'Ya!';
@@ -1243,27 +1244,19 @@ function loadFromSupabase() {
       renderCities();
     }
   });
+  // Show synced badge
+  var badge = document.getElementById('rt-badge');
+  if(badge){
+    badge.textContent = '⚡ Sincronizado';
+    badge.style.background = 'rgba(16,185,129,0.2)';
+    badge.style.color = '#34d399';
+  }
 }
 
-// Realtime subscriptions
+// Polling every 8 seconds instead of websockets
 function subscribeRealtime() {
-  db.channel('eurotrip-changes')
-    .on('postgres_changes', {event:'*', schema:'public', table:'votos'}, function() { loadFromSupabase(); })
-    .on('postgres_changes', {event:'*', schema:'public', table:'gastos'}, function() { loadFromSupabase(); })
-    .on('postgres_changes', {event:'*', schema:'public', table:'checklist'}, function() { loadFromSupabase(); })
-    .on('postgres_changes', {event:'*', schema:'public', table:'alojamientos_estado'}, function() { loadFromSupabase(); })
-    .subscribe(function(status) {
-      var badge = document.getElementById('rt-badge');
-      if (!badge) return;
-      if (status === 'SUBSCRIBED') {
-        badge.textContent = '⚡ En vivo';
-        badge.style.background = 'rgba(16,185,129,0.2)';
-        badge.style.color = '#34d399';
-      } else {
-        badge.textContent = '⚡ Conectando...';
-        badge.style.color = '#94a3b8';
-      }
-    });
+  loadFromSupabase();
+  setInterval(loadFromSupabase, 8000);
 }
 
 // Override vote to save to Supabase
