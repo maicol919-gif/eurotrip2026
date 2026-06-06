@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>EuroTrip 2026</title>
+<title>EuroTrip 2026</title><!-- v1780715315 -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -921,7 +921,8 @@ var CIUDAD_DAYS = {
 };
 
 function openCiudad(cityId) {
-  var c = CITIES.find(function(x){return x.id===cityId;});
+  var c = null;
+  for(var ci=0;ci<CITIES.length;ci++){if(CITIES[ci].id===cityId){c=CITIES[ci];break;}}
   if(!c) return;
 
   // Switch to ciudad view without nav active
