@@ -403,17 +403,19 @@ var SHEET  = 'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.
 // ===== SUPABASE REST =====
 function supa(method, table, body, params) {
   var url = SUPA + '/rest/v1/' + table + (params || '');
-  var opts = {
-    method: method,
-    headers: {
-      'apikey': KEY,
-      'Authorization': 'Bearer ' + KEY,
-      'Content-Type': 'application/json',
-      'Prefer': method === 'POST' ? 'return=representation' : ''
-    }
+  var headers = {
+    'apikey': KEY,
+    'Authorization': 'Bearer ' + KEY,
+    'Content-Type': 'application/json'
   };
+  if(method === 'POST') headers['Prefer'] = 'return=minimal';
+  if(method === 'DELETE') headers['Prefer'] = 'return=minimal';
+  var opts = {method: method, headers: headers};
   if (body) opts.body = JSON.stringify(body);
-  return fetch(url, opts).then(function(r) { return r.json(); });
+  return fetch(url, opts).then(function(r) {
+    if(r.status === 204 || r.status === 200 && method === 'DELETE') return {};
+    return r.json().catch(function(){ return {}; });
+  });
 }
 
 // ===== DATA =====
@@ -572,7 +574,7 @@ function showView(name, idx) {
 
 // ===== COUNTDOWN =====
 function updateCountdown() {
-  var diff = Math.ceil((new Date('2026-07-12') - new Date()) / 86400000);
+  var diff = Math.ceil((new Date(2026,6,12,0,0,0) - new Date()) / 86400000);
   var el = document.getElementById('days-left');
   if(el) el.textContent = diff > 0 ? diff : 'Ya!';
 }
@@ -656,10 +658,13 @@ function renderCities() {
 
 function vote(id, tipo) {
   if(!NOMBRE) return;
-  var body = {ciudad:id, tipo:tipo, usuario:NOMBRE};
-  supa('POST','votos',body,'?on_conflict=ciudad,usuario').then(function(){
-    loadData();
-  });
+  // Delete existing vote for this user+city, then insert new one
+  supa('DELETE','votos','','?ciudad=eq.'+id+'&usuario=eq.'+encodeURIComponent(NOMBRE))
+    .then(function(){
+      return supa('POST','votos',{ciudad:id, tipo:tipo, usuario:NOMBRE},'');
+    })
+    .then(function(){ loadData(); })
+    .catch(function(){ loadData(); });
 }
 
 function renderRanking() {
@@ -682,10 +687,11 @@ function renderTL() {
     if(d.drive) tags += '<span class="tp tpd">🚗 '+d.h+'</span> ';
     tags += d.km>0 ? '<span class="tp tpk">'+d.km+'km</span>' : '<span class="tp tps">Dia libre</span>';
     if(d.ztl) tags += ' <span class="tp tpz">⚠️ ZTL</span>';
+    if(d.maps) tags += ' <a href="'+d.maps+'" target="_blank" class="tp" style="background:#dbeafe;color:#2563eb;text-decoration:none;padding:0.12rem 0.4rem;border-radius:5px;font-size:0.58rem;font-weight:600">🗺 Maps</a>';
     var acts = d.acts.map(function(a){return '<div class="tact">'+a+'</div>';}).join('');
     var tray = d.km>0 ? '<div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-top:0.3rem"><span class="tp tpd">🚗 '+d.h+'</span><span class="tp tpk">'+d.km+' km</span></div>' : '';
     var ztl = d.ztl ? '<div class="tztl"><div class="tztl-t">⚠️ ZTL Italia: no entrar al centro con el coche. Multa 100-300 euros. Aparcar en la periferia.</div></div>' : '';
-    var mapsBtn = d.maps ? '<a href="'+d.maps+'" target="_blank" class="btn-maps">🗺 Abrir en Google Maps</a>' : '';
+    var mapsBtn = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;margin-top:0.5rem">🗺 Abrir en Google Maps</a>' : '';
     return '<div class="tl-row" id="tl'+i+'" onclick="toggleTL('+i+')">' +
       '<div class="tl-h"><div class="tl-date">'+d.date+'</div>' +
       '<div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>' +
@@ -818,7 +824,9 @@ function renderCL() {
 function toggleCL(si,ii){
   var k=si+'_'+ii;
   var newDone=!clDone[k];
-  supa('POST','checklist',{id:k,done:newDone,updated_at:new Date().toISOString()},'?on_conflict=id').then(function(){
+  supa('DELETE','checklist','','?id=eq.'+k)
+    .then(function(){ return supa('POST','checklist',{id:k,done:newDone},''); })
+    .then(function(){
     clDone[k]=newDone; renderCL();
   });
 }
