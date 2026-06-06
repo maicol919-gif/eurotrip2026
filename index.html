@@ -3,273 +3,198 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="EuroTrip 2026">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%230f172a'/><text y='130' font-size='120' text-anchor='middle' x='96'>🌍</text></svg>">
 <title>EuroTrip 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:100vh;padding-bottom:70px}
-/* HEADER */
-.header{background:#0f172a;color:white;padding:0.85rem 1.25rem;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:1rem}
-.hlogo{font-size:0.93rem;font-weight:700;white-space:nowrap}
-.hroute{display:flex;gap:0.35rem;align-items:center;flex-wrap:wrap;flex:1;justify-content:center}
-.rc{font-size:0.67rem;color:#64748b;cursor:pointer;transition:color .15s;padding:0.08rem 0;white-space:nowrap}
-.rc:hover{color:white;text-decoration:underline}
-.rcsep{font-size:0.58rem;color:#334155}
-.pill{background:#3b82f6;color:white;font-size:0.68rem;font-weight:700;padding:0.28rem 0.75rem;border-radius:20px;white-space:nowrap}
-/* BOTTOM NAV (mobile) */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:white;border-top:1px solid #e2e8f0;display:flex;padding:0.35rem 0;padding-bottom:max(0.35rem,env(safe-area-inset-bottom))}
-.bnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.18rem;background:none;border:none;cursor:pointer;padding:0.3rem 0.1rem;font-family:inherit;transition:all .15s}
-.bnb-ico{font-size:1.1rem;line-height:1}
-.bnb-lbl{font-size:0.56rem;font-weight:600;color:#94a3b8;transition:color .15s}
-.bnb.active .bnb-lbl{color:#3b82f6}
-.bnb.active .bnb-ico{transform:scale(1.1)}
-/* TOP NAV (desktop) */
-.top-nav{background:white;border-bottom:1px solid #e2e8f0;display:none;overflow-x:auto;padding:0 1.25rem}
-@media(min-width:640px){.top-nav{display:flex}.bottom-nav{display:none}.body{padding-bottom:0}}
-.nb{background:none;border:none;border-bottom:2.5px solid transparent;color:#64748b;font-family:inherit;font-size:0.78rem;font-weight:500;padding:0.8rem 0.85rem;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
-.nb:hover{color:#0f172a}
-.nb.active{color:#3b82f6;border-bottom-color:#3b82f6;font-weight:600}
-/* MAIN */
-.main{max-width:960px;margin:0 auto;padding:1.25rem}
+body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bottom:64px}
+.header{background:#0f172a;padding:0.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:sticky;top:0;z-index:100}
+.hlogo{color:white;font-size:0.95rem;font-weight:700}
+.hbadge{font-size:0.65rem;font-weight:700;padding:0.25rem 0.7rem;border-radius:20px;background:rgba(255,255,255,0.1);color:#94a3b8;white-space:nowrap}
+.hbadge.live{background:rgba(16,185,129,0.2);color:#34d399}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.bnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.15rem;background:none;border:none;cursor:pointer;padding:0.5rem 0.1rem;font-family:inherit}
+.bnb-i{font-size:1.05rem}
+.bnb-l{font-size:0.55rem;font-weight:600;color:#94a3b8}
+.bnb.active .bnb-l{color:#3b82f6}
+.main{max-width:900px;margin:0 auto;padding:1.25rem}
 .view{display:none}.view.active{display:block}
-.ptitle{font-size:1.2rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.22rem}
-.psub{font-size:0.78rem;color:#64748b;margin-bottom:1.35rem;line-height:1.5}
+.ptitle{font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.2rem}
+.psub{font-size:0.78rem;color:#64748b;margin-bottom:1.25rem}
+
 /* CARDS */
-.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.65rem;margin-bottom:1.1rem}
-.dcard{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.85rem;cursor:pointer;transition:all .18s}
-.dcard:hover{border-color:#3b82f6;transform:translateY(-2px);box-shadow:0 4px 14px rgba(59,130,246,0.1)}
-.dcard:hover .dhint{opacity:1}
-.dico{font-size:1.15rem;margin-bottom:0.3rem}
-.dval{font-size:1.35rem;font-weight:800;letter-spacing:-0.02em;line-height:1}
-.dlbl{font-size:0.64rem;color:#64748b;margin-top:0.15rem}
-.dtag{display:inline-block;margin-top:0.32rem;font-size:0.57rem;font-weight:600;padding:0.11rem 0.36rem;border-radius:4px}
-.dhint{font-size:0.58rem;color:#3b82f6;font-weight:600;margin-top:0.32rem;opacity:0;transition:opacity .18s}
-.tb{background:#eff6ff;color:#3b82f6}.tg{background:#ecfdf5;color:#059669}.ta{background:#fffbeb;color:#d97706}.tr{background:#fef2f2;color:#dc2626}.tp{background:#f5f3ff;color:#7c3aed}
-/* POPUP */
-.popup{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem;margin-bottom:1rem;display:none}
-.popup.open{display:block}
-.counter-row{display:flex;align-items:center;gap:1rem;margin-bottom:0.55rem}
-.cbtn{width:32px;height:32px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
-.cbtn:hover{border-color:#3b82f6;color:#3b82f6}
-.cnum{font-size:1.9rem;font-weight:800;min-width:42px;text-align:center;letter-spacing:-0.03em}
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem}
+.dcard{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.85rem;cursor:pointer;transition:all .18s}
+.dcard:hover{border-color:#3b82f6;transform:translateY(-2px)}
+.di{font-size:1.1rem;margin-bottom:0.3rem}
+.dv{font-size:1.3rem;font-weight:800;letter-spacing:-0.02em}
+.dl{font-size:0.63rem;color:#64748b;margin-top:0.15rem}
+.dt{display:inline-block;margin-top:0.3rem;font-size:0.57rem;font-weight:600;padding:0.1rem 0.35rem;border-radius:4px}
+.tb{background:#eff6ff;color:#3b82f6}.tg{background:#ecfdf5;color:#059669}
+.ta{background:#fffbeb;color:#d97706}.tr{background:#fef2f2;color:#dc2626}
+
 /* ALERTS */
-.alerts{display:flex;flex-direction:column;gap:0.35rem}
-.alert{background:white;border-radius:9px;padding:0.7rem 0.9rem;border-left:3px solid}
-.alert.r{border-color:#ef4444}.alert.a{border-color:#f59e0b}.alert.b{border-color:#3b82f6}.alert.g{border-color:#10b981}.alert.p{border-color:#8b5cf6}
-.albl{font-size:0.56rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.06rem}
-.alert.r .albl{color:#ef4444}.alert.a .albl{color:#d97706}.alert.b .albl{color:#3b82f6}.alert.g .albl{color:#10b981}.alert.p .albl{color:#8b5cf6}
-.atitle{font-size:0.81rem;font-weight:600;margin-bottom:0.05rem}
-.adesc{font-size:0.7rem;color:#64748b}
+.alerts{display:flex;flex-direction:column;gap:0.35rem;margin-top:1rem}
+.al{background:white;border-radius:9px;padding:0.68rem 0.9rem;border-left:3px solid}
+.al.r{border-color:#ef4444}.al.a{border-color:#f59e0b}.al.b{border-color:#3b82f6}.al.g{border-color:#10b981}
+.al-t{font-size:0.8rem;font-weight:600;margin-bottom:0.04rem}
+.al-d{font-size:0.7rem;color:#64748b}
+.al.r .al-t{color:#dc2626}.al.a .al-t{color:#d97706}.al.b .al-t{color:#2563eb}.al.g .al-t{color:#059669}
+
 /* STITLE */
-.stitle{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem}
-.stitle::after{content:'';flex:1;height:1px;background:#e2e8f0}
-/* BACK */
-.back-btn{background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-size:0.74rem;color:#64748b;font-family:inherit;transition:all .15s}
-.back-btn:hover{border-color:#3b82f6;color:#3b82f6}
+.st{font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem}
+.st::after{content:'';flex:1;height:1px;background:#e2e8f0}
+
 /* ALOJAMIENTOS */
-.info-bar{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.8rem 1rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:0.7rem;font-size:0.75rem;color:#64748b;line-height:1.5}
-/* Estado alojamiento */
-.alo-estado{display:flex;gap:0.38rem;margin-bottom:0.85rem;flex-wrap:wrap}
-.estado-btn{font-size:0.65rem;font-weight:700;padding:0.28rem 0.65rem;border-radius:6px;border:1.5px solid;cursor:pointer;font-family:inherit;transition:all .15s}
-.estado-btn.sin-buscar{border-color:#e2e8f0;color:#94a3b8;background:#f8fafc}
-.estado-btn.en-votacion{border-color:#f59e0b;color:#d97706;background:#fffbeb}
-.estado-btn.reservado{border-color:#10b981;color:#059669;background:#ecfdf5}
-.estado-badge{font-size:0.6rem;font-weight:700;padding:0.2rem 0.5rem;border-radius:5px;margin-left:auto}
-.badge-sb{background:#f1f5f9;color:#64748b}
-.badge-ev{background:#fffbeb;color:#d97706}
-.badge-re{background:#ecfdf5;color:#059669}
-/* City blocks */
-.city-block{background:white;border:1.5px solid #e2e8f0;border-radius:13px;margin-bottom:0.75rem;overflow:hidden}
-.city-hdr{display:flex;align-items:center;gap:0.8rem;padding:0.88rem 1.05rem;border-bottom:1px solid #f1f5f9;flex-wrap:wrap}
-.cflag{font-size:1.4rem;flex-shrink:0}
-.cname{font-size:0.9rem;font-weight:700}
-.cmeta{font-size:0.67rem;color:#94a3b8;margin-top:0.08rem}
-.cnights{background:#f1f5f9;border-radius:6px;padding:0.22rem 0.62rem;font-size:0.66rem;font-weight:600;color:#475569;white-space:nowrap;margin-left:auto}
-.city-links{padding:0.78rem 1.05rem;display:flex;flex-direction:column;gap:0.42rem}
-.lrow{display:flex;align-items:center;gap:0.65rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.58rem 0.82rem}
-.lp{display:flex;align-items:center;gap:0.35rem;font-size:0.69rem;font-weight:700;min-width:70px;flex-shrink:0}
-.da{width:7px;height:7px;border-radius:50%;background:#ff5a5f;flex-shrink:0}
-.db{width:7px;height:7px;border-radius:50%;background:#003580;flex-shrink:0}
-.la{color:#ef4444}.lb{color:#003580}
-.ldesc{flex:1;font-size:0.71rem;color:#94a3b8;font-style:italic}
+.city-block{background:white;border:1.5px solid #e2e8f0;border-radius:12px;margin-bottom:0.75rem;overflow:hidden}
+.city-h{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;border-bottom:1px solid #f1f5f9}
+.city-flag{font-size:1.3rem}
+.city-name{font-size:0.9rem;font-weight:700;flex:1}
+.city-meta{font-size:0.65rem;color:#94a3b8}
+.city-nights{background:#f1f5f9;border-radius:6px;padding:0.2rem 0.6rem;font-size:0.65rem;font-weight:600;color:#475569;white-space:nowrap}
+.city-body{padding:0.75rem 1rem;display:flex;flex-direction:column;gap:0.4rem}
+.lrow{display:flex;align-items:center;gap:0.65rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.55rem 0.8rem}
+.lp{display:flex;align-items:center;gap:0.35rem;font-size:0.68rem;font-weight:700;min-width:68px}
+.da{width:7px;height:7px;border-radius:50%;background:#ff5a5f}.la{color:#ef4444}
+.db{width:7px;height:7px;border-radius:50%;background:#003580}.lb{color:#003580}
+.ldesc{flex:1;font-size:0.7rem;color:#94a3b8;font-style:italic}
 .ldesc.ok{color:#059669;font-style:normal;font-weight:500}
-.btn-ir{display:inline-flex;align-items:center;color:white;font-family:inherit;font-size:0.68rem;font-weight:700;padding:0.36rem 0.72rem;border-radius:7px;text-decoration:none;white-space:nowrap;flex-shrink:0;border:none;cursor:pointer;transition:opacity .15s}
-.btn-ir:hover{opacity:0.85}
+.btn-ver{color:white;font-family:inherit;font-size:0.67rem;font-weight:700;padding:0.35rem 0.7rem;border-radius:7px;text-decoration:none;white-space:nowrap;border:none;cursor:pointer}
 .ba{background:#ff5a5f}.bb{background:#003580}
-/* VOTES */
-.vote-row{display:flex;gap:0.35rem;margin-top:0.52rem}
-.vbtn{flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.36rem 0.22rem;cursor:pointer;font-size:0.68rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:0.18rem;color:#64748b;transition:all .15s;font-family:inherit}
-.vbtn:hover{border-color:#94a3b8;color:#0f172a}
-.v-yes{border-color:#10b981 !important;background:#ecfdf5 !important;color:#059669 !important}
-.v-fav{border-color:#f59e0b !important;background:#fffbeb !important;color:#d97706 !important}
-.v-no{border-color:#ef4444 !important;background:#fef2f2 !important;color:#dc2626 !important}
-/* RANKING */
-.ranking-card{background:white;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-top:1.3rem}
-.rk-head{padding:0.68rem 1rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.65rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em}
-.rk-row{display:flex;align-items:center;gap:0.78rem;padding:0.62rem 1rem;border-bottom:1px solid #f1f5f9}
+.vrow{display:flex;gap:0.35rem;margin-top:0.4rem}
+.vb{flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.2rem;cursor:pointer;font-size:0.67rem;font-weight:600;color:#64748b;font-family:inherit;transition:all .15s}
+.vb:hover{border-color:#94a3b8}
+.vy{border-color:#10b981!important;background:#ecfdf5!important;color:#059669!important}
+.vf{border-color:#f59e0b!important;background:#fffbeb!important;color:#d97706!important}
+.vn{border-color:#ef4444!important;background:#fef2f2!important;color:#dc2626!important}
+.rk-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;overflow:hidden;margin-top:1.25rem}
+.rk-h{padding:0.65rem 1rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.63rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em}
+.rk-row{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;border-bottom:1px solid #f1f5f9;font-size:0.78rem}
 .rk-row:last-child{border-bottom:none}
-.rk-pos{font-size:0.92rem;min-width:24px}
-.rk-name{flex:1;font-size:0.79rem;font-weight:600}
-.rk-pts{font-size:0.8rem;font-weight:700;color:#3b82f6}
-.rk-empty{padding:1.05rem;font-size:0.79rem;color:#94a3b8;text-align:center}
+.rk-pos{min-width:22px;font-size:0.9rem}
+.rk-name{flex:1;font-weight:600}
+.rk-pts{font-weight:700;color:#3b82f6}
+.rk-empty{padding:1rem;font-size:0.78rem;color:#94a3b8;text-align:center}
+
 /* TIMELINE */
-.tl-list{display:flex;flex-direction:column;gap:0.35rem}
-.tl-row{background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .15s}
+.tl-row{background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;cursor:pointer;margin-bottom:0.38rem;transition:border-color .15s}
 .tl-row:hover,.tl-row.open{border-color:#3b82f6}
-.tl-head{display:flex;align-items:center;gap:0.68rem;padding:0.65rem 0.92rem}
+.tl-h{display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.9rem}
 .tl-date{font-size:0.65rem;font-weight:700;color:#3b82f6;min-width:40px}
 .tl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .ds{background:#3b82f6}.dd{background:#f59e0b}
 .tl-city{font-weight:600;font-size:0.82rem;flex:1}
-.tpill{font-size:0.58rem;font-weight:600;padding:0.13rem 0.4rem;border-radius:5px}
-.pd{background:#fffbeb;color:#d97706}.ps{background:#eff6ff;color:#3b82f6}.pk{background:#ecfdf5;color:#059669}
-.pill-ztl{background:#fef2f2;color:#dc2626;font-weight:700}
-.pill-maps{background:#eff6ff;color:#2563eb;cursor:pointer;text-decoration:none;display:inline-block}
-.pill-maps:hover{background:#dbeafe}
-.tl-ch{color:#94a3b8;font-size:0.58rem;transition:transform .15s;flex-shrink:0}
+.tp{font-size:0.58rem;font-weight:600;padding:0.12rem 0.4rem;border-radius:5px}
+.tpd{background:#fffbeb;color:#d97706}.tps{background:#eff6ff;color:#3b82f6}.tpk{background:#ecfdf5;color:#059669}.tpz{background:#fef2f2;color:#dc2626}
+.tl-ch{color:#94a3b8;font-size:0.58rem;transition:transform .15s}
 .tl-row.open .tl-ch{transform:rotate(180deg)}
-.tl-body{display:none;border-top:1px solid #f1f5f9;padding:0.78rem 0.92rem;grid-template-columns:1fr 1fr;gap:0.88rem}
+.tl-body{display:none;border-top:1px solid #f1f5f9;padding:0.78rem 0.9rem;grid-template-columns:1fr 1fr;gap:0.85rem}
 .tl-row.open .tl-body{display:grid}
-.tsub{font-size:0.58rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.24rem}
-.tact{font-size:0.76rem;color:#475569;padding-left:0.72rem;position:relative;margin-bottom:0.19rem;line-height:1.35}
+.tsub{font-size:0.58rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.25rem}
+.tact{font-size:0.76rem;color:#475569;padding-left:0.72rem;position:relative;margin-bottom:0.2rem;line-height:1.35}
 .tact::before{content:'·';position:absolute;left:0;color:#3b82f6}
-.tnote{margin-top:0.48rem;background:#f8fafc;border-radius:7px;padding:0.4rem 0.65rem}
+.tnote{margin-top:0.45rem;background:#f8fafc;border-radius:7px;padding:0.4rem 0.65rem}
 .tnote-l{font-size:0.56rem;font-weight:700;color:#3b82f6;margin-bottom:0.06rem}
 .tnote-t{font-size:0.72rem;color:#64748b;line-height:1.45}
 .tztl{margin-top:0.4rem;background:#fef2f2;border-radius:7px;padding:0.4rem 0.65rem;border:1px solid #fecaca}
-.tztl-l{font-size:0.56rem;font-weight:700;color:#dc2626;margin-bottom:0.06rem}
-.tztl-t{font-size:0.72rem;color:#dc2626;line-height:1.45}
+.tztl-t{font-size:0.7rem;color:#dc2626;line-height:1.4}
 .tstay{background:#f8fafc;border-radius:7px;padding:0.4rem 0.65rem;font-size:0.76rem;color:#475569}
-.btn-maps{display:inline-flex;align-items:center;gap:0.3rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.38rem 0.72rem;font-size:0.68rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;margin-top:0.55rem;transition:opacity .15s}
-.btn-maps:hover{opacity:0.88}
-/* CONDUCTORES */
-.driver-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.55rem;margin-bottom:0.85rem}
-.driver-card{background:white;border:1.5px solid #e2e8f0;border-radius:9px;padding:0.72rem;text-align:center;cursor:pointer;transition:all .15s}
-.driver-card:hover{border-color:#3b82f6}
-.driver-card.active{border-color:#3b82f6;background:#eff6ff}
-.driver-name{font-weight:700;font-size:0.8rem;margin-bottom:0.15rem}
-.driver-role{font-size:0.62rem;color:#64748b}
+.btn-maps{display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;margin-top:0.5rem}
+
 /* PRESUPUESTO */
-.pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.65rem;margin-bottom:1.05rem}
-.pp-card{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.88rem;text-align:center}
+.pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem}
+.pp-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.85rem;text-align:center}
 .pp-card.hl{border-color:#3b82f6}
 .pp-n{font-size:0.65rem;color:#94a3b8;margin-bottom:0.2rem}
-.pp-v{font-size:1.65rem;font-weight:800;letter-spacing:-0.03em}
+.pp-v{font-size:1.6rem;font-weight:800;letter-spacing:-0.03em}
 .pp-card.hl .pp-v{color:#3b82f6}
-.pp-s{font-size:0.62rem;color:#94a3b8;margin-top:0.13rem}
-.bud-table{background:white;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:1.05rem}
+.pp-s{font-size:0.62rem;color:#94a3b8;margin-top:0.12rem}
+.bud-t{background:white;border:1.5px solid #e2e8f0;border-radius:11px;overflow:hidden;margin-bottom:1rem}
 .bud-th{display:grid;grid-template-columns:1fr auto auto;padding:0.5rem 0.88rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.59rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em}
 .bud-row{display:grid;grid-template-columns:1fr auto auto;padding:0.6rem 0.88rem;border-bottom:1px solid #f1f5f9;align-items:center}
 .bud-row:last-child{border-bottom:none}
-.bud-cat{display:flex;align-items:center;gap:0.36rem;font-size:0.78rem}
+.bud-cat{display:flex;align-items:center;gap:0.38rem;font-size:0.78rem}
 .bud-bar{height:3px;background:#f1f5f9;border-radius:2px;margin-top:0.16rem;width:60px}
 .bud-fill{height:100%;border-radius:2px}
-.bud-amt{font-weight:700;font-size:0.79rem;padding-left:0.78rem}
-.bud-pct{font-size:0.59rem;color:#94a3b8;padding-left:0.36rem;min-width:24px;text-align:right}
+.bud-amt{font-weight:700;font-size:0.78rem;padding-left:0.75rem}
+.bud-pct{font-size:0.59rem;color:#94a3b8;padding-left:0.35rem;min-width:24px;text-align:right}
+
 /* GASTOS */
-.gasto-form{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.95rem;margin-bottom:1.05rem;display:grid;grid-template-columns:1fr 1fr;gap:0.52rem}
-.gasto-form-row{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr auto;gap:0.52rem;align-items:end}
-.flabel{display:block;font-size:0.59rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.22rem}
-.finput{width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.5rem 0.72rem;font-family:inherit;font-size:0.79rem;color:#0f172a;outline:none;transition:border-color .15s}
-.finput:focus{border-color:#3b82f6}
-.btn-add{background:#0f172a;color:white;border:none;font-family:inherit;font-weight:700;font-size:0.74rem;padding:0.5rem 0.88rem;border-radius:8px;cursor:pointer;white-space:nowrap;transition:background .15s;height:100%}
+.gf{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.9rem;margin-bottom:1rem;display:flex;flex-direction:column;gap:0.5rem}
+.fl{display:block;font-size:0.59rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.22rem}
+.fi{width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.5rem 0.72rem;font-family:inherit;font-size:0.79rem;color:#0f172a;outline:none;transition:border-color .15s}
+.fi:focus{border-color:#3b82f6}
+.gf-row{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem}
+.btn-add{background:#0f172a;color:white;border:none;font-family:inherit;font-weight:700;font-size:0.75rem;padding:0.52rem 1rem;border-radius:8px;cursor:pointer;transition:background .15s;width:100%}
 .btn-add:hover{background:#3b82f6}
-.gasto-list{display:flex;flex-direction:column;gap:0.36rem;margin-bottom:1.05rem}
-.gasto-item{background:white;border:1.5px solid #e2e8f0;border-radius:9px;padding:0.62rem 0.88rem;display:flex;align-items:center;gap:0.72rem}
-.gasto-desc{flex:1}
-.gasto-name{font-size:0.79rem;font-weight:500}
-.gasto-who{font-size:0.64rem;color:#94a3b8}
-.gasto-amt{font-weight:700;font-size:0.85rem;color:#3b82f6;white-space:nowrap}
-.gasto-del{background:none;border:none;color:#e2e8f0;cursor:pointer;font-size:0.85rem;padding:0.12rem;transition:color .15s}
-.gasto-del:hover{color:#ef4444}
-.balance-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:0.52rem;margin-bottom:1.05rem}
-.bal-card{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.75rem;text-align:center}
-.bal-name{font-weight:700;font-size:0.79rem;margin-bottom:0.16rem}
-.bal-amt{font-size:1.05rem;font-weight:800;letter-spacing:-0.02em}
+.glist{display:flex;flex-direction:column;gap:0.35rem;margin-bottom:1rem}
+.gi{background:white;border:1.5px solid #e2e8f0;border-radius:9px;padding:0.6rem 0.88rem;display:flex;align-items:center;gap:0.7rem}
+.gi-desc{flex:1}
+.gi-name{font-size:0.79rem;font-weight:500}
+.gi-who{font-size:0.63rem;color:#94a3b8}
+.gi-amt{font-weight:700;font-size:0.85rem;color:#3b82f6;white-space:nowrap}
+.gi-del{background:none;border:none;color:#e2e8f0;cursor:pointer;font-size:0.85rem;transition:color .15s}
+.gi-del:hover{color:#ef4444}
+.bal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:0.5rem;margin-bottom:1rem}
+.bal-c{background:white;border:1.5px solid #e2e8f0;border-radius:9px;padding:0.72rem;text-align:center}
+.bal-n{font-weight:700;font-size:0.78rem;margin-bottom:0.15rem}
+.bal-a{font-size:1rem;font-weight:800;letter-spacing:-0.02em}
 .bal-pos{color:#059669}.bal-neg{color:#ef4444}
-.bal-lbl{font-size:0.58rem;color:#94a3b8;margin-top:0.08rem}
-.bal-paid{font-size:0.61rem;color:#94a3b8;margin-top:0.07rem}
-.liquidacion-card{background:white;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden}
-.liq-head{padding:0.65rem 1rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.65rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em}
-.liq-row{display:flex;align-items:center;gap:0.65rem;padding:0.6rem 1rem;border-bottom:1px solid #f1f5f9;font-size:0.79rem}
+.bal-l{font-size:0.58rem;color:#94a3b8;margin-top:0.08rem}
+.liq-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;overflow:hidden}
+.liq-h{padding:0.62rem 1rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.63rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em}
+.liq-row{display:flex;align-items:center;gap:0.6rem;padding:0.58rem 1rem;border-bottom:1px solid #f1f5f9;font-size:0.78rem}
 .liq-row:last-child{border-bottom:none}
-.liq-arrow{color:#94a3b8;font-size:0.85rem}
+.liq-arr{color:#94a3b8}
 .liq-amt{font-weight:700;color:#3b82f6;margin-left:auto}
-.liq-empty{padding:1rem;font-size:0.79rem;color:#94a3b8;text-align:center}
+.liq-empty{padding:1rem;font-size:0.78rem;color:#94a3b8;text-align:center}
+
+/* NOTAS */
+.ntabs{display:flex;gap:0.35rem;margin-bottom:0.88rem;flex-wrap:wrap}
+.ntab{background:white;border:1.5px solid #e2e8f0;color:#64748b;font-family:inherit;font-size:0.7rem;font-weight:600;padding:0.32rem 0.7rem;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ntab.active{background:#0f172a;border-color:#0f172a;color:white}
+.ncard{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.95rem}
+.nsec{margin-bottom:0.88rem}
+.nsec:last-child{margin-bottom:0}
+.nsec-t{font-size:0.59rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.42rem}
+.nitem{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:0.42rem 0.7rem;font-size:0.77rem;margin-bottom:0.23rem;display:flex;align-items:flex-start;gap:0.36rem;line-height:1.4}
+.nd{color:#3b82f6;font-size:0.57rem;margin-top:0.19rem;flex-shrink:0}
+
 /* CHECKLIST */
 .cl-sec{margin-bottom:1.1rem}
-.cl-stitle{font-size:0.65rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.52rem;display:flex;align-items:center;gap:0.5rem}
-.cl-stitle::after{content:'';flex:1;height:1px;background:#e2e8f0}
-.cl-item{display:flex;align-items:center;gap:0.5rem;background:white;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.5rem 0.8rem;margin-bottom:0.27rem;cursor:pointer;transition:all .15s}
-.cl-item:hover{border-color:#3b82f6}
-.cl-item.done{opacity:0.42}
-.cl-item.urgent{border-left:3px solid #ef4444}
+.cl-st{font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem}
+.cl-st::after{content:'';flex:1;height:1px;background:#e2e8f0}
+.cl-i{display:flex;align-items:center;gap:0.5rem;background:white;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.5rem 0.8rem;margin-bottom:0.27rem;cursor:pointer;transition:all .15s}
+.cl-i:hover{border-color:#3b82f6}
+.cl-i.done{opacity:0.42}
 .cl-box{width:15px;height:15px;border-radius:4px;border:2px solid #e2e8f0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:white;transition:all .15s}
-.cl-item.done .cl-box{background:#10b981;border-color:#10b981}
+.cl-i.done .cl-box{background:#10b981;border-color:#10b981}
 .cl-txt{font-size:0.78rem;flex:1}
-.cl-item.done .cl-txt{text-decoration:line-through}
-.cl-owner{font-size:0.6rem;font-weight:700;color:#7c3aed;background:#f5f3ff;padding:0.12rem 0.38rem;border-radius:5px;white-space:nowrap;flex-shrink:0}
-.cl-deadline{font-size:0.58rem;color:#ef4444;font-weight:600;white-space:nowrap;flex-shrink:0}
-/* NOTAS */
-.notas-tabs{display:flex;gap:0.36rem;margin-bottom:0.88rem;flex-wrap:wrap}
-.ntab{background:white;border:1.5px solid #e2e8f0;color:#64748b;font-family:inherit;font-size:0.72rem;font-weight:600;padding:0.33rem 0.72rem;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap}
-.ntab:hover{color:#0f172a}
-.ntab.active{background:#0f172a;border-color:#0f172a;color:white}
-.nota-card{background:white;border:1.5px solid #e2e8f0;border-radius:13px;padding:0.95rem}
-.nota-sec{margin-bottom:0.88rem}
-.nota-sec:last-child{margin-bottom:0}
-.nota-sec-title{font-size:0.59rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.42rem}
-.nota-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:0.42rem 0.7rem;font-size:0.77rem;margin-bottom:0.23rem;display:flex;align-items:flex-start;gap:0.36rem;line-height:1.4}
-.ndot{color:#3b82f6;font-size:0.57rem;margin-top:0.19rem;flex-shrink:0}
+.cl-i.done .cl-txt{text-decoration:line-through}
+.cl-own{font-size:0.58rem;font-weight:700;color:#7c3aed;background:#f5f3ff;padding:0.1rem 0.35rem;border-radius:5px;white-space:nowrap}
+
 /* EMERGENCIAS */
-.emerg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.65rem;margin-bottom:1.1rem}
-.emerg-card{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem}
-.emerg-card-title{font-size:0.72rem;font-weight:700;margin-bottom:0.55rem;display:flex;align-items:center;gap:0.4rem}
-.emerg-item{display:flex;align-items:center;justify-content:space-between;padding:0.35rem 0;border-bottom:1px solid #f1f5f9;font-size:0.76rem}
-.emerg-item:last-child{border-bottom:none}
-.emerg-name{color:#64748b;font-size:0.72rem}
-.emerg-val{font-weight:700;color:#0f172a;font-size:0.76rem}
-.emerg-val a{color:#3b82f6;text-decoration:none}
-/* CONDUCTORES */
-.cond-day{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.88rem 1rem;margin-bottom:0.55rem;display:flex;align-items:center;gap:0.85rem;flex-wrap:wrap}
-.cond-day-info{flex:1;min-width:140px}
-.cond-day-date{font-size:0.7rem;font-weight:700;color:#3b82f6}
-.cond-day-route{font-size:0.83rem;font-weight:600;margin-top:0.06rem}
-.cond-day-km{font-size:0.67rem;color:#94a3b8;margin-top:0.04rem}
-.cond-day-critical{border-color:#fecaca;background:#fff8f8}
-.cond-select{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.42rem 0.7rem;font-family:inherit;font-size:0.78rem;color:#0f172a;outline:none;transition:border-color .15s;cursor:pointer}
-.cond-select:focus{border-color:#3b82f6}
-.cond-badge{font-size:0.6rem;font-weight:700;padding:0.18rem 0.48rem;border-radius:5px;white-space:nowrap}
-.cond-badge-day{background:#fffbeb;color:#d97706}
-.cond-badge-critical{background:#fef2f2;color:#dc2626}
-.cond-resumen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.55rem}
-.cond-res-card{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.78rem;text-align:center}
-.cond-res-name{font-weight:700;font-size:0.82rem;margin-bottom:0.2rem}
-.cond-res-days{font-size:1.3rem;font-weight:800;color:#3b82f6;letter-spacing:-0.02em}
-.cond-res-lbl{font-size:0.62rem;color:#94a3b8;margin-top:0.1rem}
-.cond-res-km{font-size:0.7rem;font-weight:600;color:#64748b;margin-top:0.12rem}
-/* GASTOS ASIMETRICOS */
-.gasto-excluir{margin-top:0.55rem;padding:0.6rem 0.75rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px}
-.gasto-excluir-title{font-size:0.62rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.45rem}
-.excluir-grid{display:flex;gap:0.38rem;flex-wrap:wrap}
-.excluir-btn{font-size:0.68rem;font-weight:600;padding:0.24rem 0.55rem;border-radius:6px;border:1.5px solid #e2e8f0;background:white;cursor:pointer;font-family:inherit;transition:all .15s;color:#64748b}
-.excluir-btn:hover{border-color:#ef4444;color:#dc2626}
-.excluir-btn.excluido{border-color:#ef4444;background:#fef2f2;color:#dc2626;text-decoration:line-through}
-/* RESPONSIVE */
-@media(max-width:640px){
-  .main{padding:0.88rem}
+.em-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:0.65rem}
+.em-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.88rem}
+.em-title{font-size:0.72rem;font-weight:700;margin-bottom:0.5rem}
+.em-item{display:flex;align-items:center;justify-content:space-between;padding:0.32rem 0;border-bottom:1px solid #f1f5f9;font-size:0.72rem}
+.em-item:last-child{border-bottom:none}
+.em-l{color:#64748b;font-size:0.7rem}
+.em-v{font-weight:700}
+.em-v a{color:#3b82f6;text-decoration:none}
+
+/* NOMBRE MODAL */
+.nmodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;padding:1rem}
+.nmodal.open{display:flex}
+.nmodal-box{background:white;border-radius:16px;padding:1.5rem;width:100%;max-width:320px}
+.nmodal-t{font-size:1rem;font-weight:700;margin-bottom:0.4rem}
+.nmodal-s{font-size:0.78rem;color:#64748b;margin-bottom:1rem}
+
+@media(max-width:600px){
   .dgrid{grid-template-columns:repeat(2,1fr)}
   .tl-row.open .tl-body{grid-template-columns:1fr}
-  .hroute{display:none}
-  .gasto-form{grid-template-columns:1fr}
-  .gasto-form-row{grid-template-columns:1fr auto}
+  .gf-row{grid-template-columns:1fr}
+  .main{padding:0.88rem}
 }
 </style>
 </head>
@@ -277,38 +202,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 
 <div class="header">
   <div class="hlogo">🌍 EuroTrip 2026</div>
-  <div class="hroute">
-    <span class="rc" onclick="openCiudad('alicante')">Alicante</span><span class="rcsep">→</span>
-    <span class="rc" onclick="openCiudad('marsella')">Marsella</span><span class="rcsep">→</span>
-    <span class="rc" onclick="openCiudad('pisa')">Pisa</span><span class="rcsep">→</span>
-    <span class="rc" onclick="openCiudad('roma')">Roma</span><span class="rcsep">→</span>
-    <span class="rc" onclick="openCiudad('venecia')">Venecia</span><span class="rcsep">→</span>
-    <span class="rc" onclick="openCiudad('munich')">Munich</span><span class="rcsep">→</span>
-    <span class="rc" onclick="openCiudad('colonia')">Colonia</span><span class="rcsep">→</span>
-    <span class="rc" onclick="openCiudad('bruselas')">Bruselas</span><span class="rcsep">→</span>
-    <span class="rc" onclick="openCiudad('paris')">Paris</span>
-  </div>
-  <div class="pill" id="pill">...</div>
-  <div id="install-banner" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0f172a;color:white;border-radius:14px;padding:0.85rem 1.25rem;font-size:0.78rem;font-weight:600;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,0.4);display:flex;align-items:center;gap:0.75rem;max-width:320px;width:calc(100% - 2rem)">
-  <span style="font-size:1.3rem">📱</span>
-  <div style="flex:1">Instala la app en tu movil para usarla sin internet</div>
-  <button id="install-btn" style="background:#3b82f6;color:white;border:none;border-radius:8px;padding:0.4rem 0.75rem;font-family:inherit;font-size:0.72rem;font-weight:700;cursor:pointer;white-space:nowrap">Instalar</button>
-  <button onclick="document.getElementById('install-banner').style.display='none'" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:1rem;padding:0">×</button>
-</div>
-<div id="rt-badge" style="font-size:0.6rem;font-weight:700;padding:0.22rem 0.6rem;border-radius:20px;background:rgba(255,255,255,0.1);color:#94a3b8;white-space:nowrap">⚡ Conectando...</div>
-</div>
-
-<!-- TOP NAV desktop -->
-<div class="top-nav">
-  <button class="nb active" onclick="showView('dashboard',this)">Resumen</button>
-  <button class="nb" onclick="showView('alojamientos',this)">🏠 Alojamientos</button>
-  <button class="nb" onclick="showView('timeline',this)">📅 Itinerario</button>
-  <button class="nb" onclick="showView('presupuesto',this)">💶 Presupuesto</button>
-  <button class="nb" onclick="showView('gastos',this)">🧾 Gastos</button>
-  <button class="nb" onclick="showView('notas',this)">📝 Notas</button>
-  <button class="nb" onclick="showView('checklist',this)">✅ Checklist</button>
-  <button class="nb" onclick="showView('conductores',this)">🚗 Conductores</button>
-  <button class="nb" onclick="showView('emergencias',this)">🆘 Emergencias</button>
+  <div class="hbadge" id="badge">⏳ Cargando...</div>
 </div>
 
 <div class="main">
@@ -316,84 +210,61 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 <!-- DASHBOARD -->
 <div id="view-dashboard" class="view active">
   <div class="ptitle">La aventura se acerca! 🚗</div>
-  <div class="psub">12 al 24 julio 2026 · 9 ciudades · 13 noches · ~6.200 km</div>
+  <div class="psub">12 — 24 julio 2026 · 9 ciudades · 13 noches · ~6.200 km</div>
   <div class="dgrid">
-    <div class="dcard" onclick="showView('timeline',null)">
-      <div class="dico">📅</div><div class="dval" id="days-left">—</div>
-      <div class="dlbl">Dias para el viaje</div><span class="dtag tb">12 julio 2026</span>
-      <div class="dhint">Ver itinerario →</div>
+    <div class="dcard" onclick="showView('timeline',2)">
+      <div class="di">📅</div><div class="dv" id="days-left">—</div>
+      <div class="dl">Dias restantes</div><span class="dt tb">12 jul 2026</span>
     </div>
-    <div class="dcard" onclick="showView('presupuesto',null)">
-      <div class="dico">💶</div><div class="dval" id="dash-pp">690€</div>
-      <div class="dlbl">Por persona</div><span class="dtag tg" id="dash-total">Total 4.830€</span>
-      <div class="dhint">Ver desglose →</div>
+    <div class="dcard" onclick="showView('presupuesto',3)">
+      <div class="di">💶</div><div class="dv" id="dash-pp">690€</div>
+      <div class="dl">Por persona</div><span class="dt tg">Total 4.830€</span>
     </div>
-    <div class="dcard" onclick="toggleViajeros()">
-      <div class="dico">👥</div><div class="dval" id="viajeros-val">7</div>
-      <div class="dlbl">Viajeros</div><span class="dtag ta">Toca para ajustar</span>
-      <div class="dhint">Ajustar →</div>
+    <div class="dcard" onclick="showView('alojamientos',1)">
+      <div class="di">🏠</div><div class="dv">6</div>
+      <div class="dl">Ciudades Airbnb</div><span class="dt tr">0 reservados</span>
     </div>
-    <div class="dcard" onclick="showView('alojamientos',null)">
-      <div class="dico">🏠</div><div class="dval">6</div>
-      <div class="dlbl">Ciudades con Airbnb</div><span class="dtag tr" id="dash-res">0 reservados</span>
-      <div class="dhint">Ver alojamientos →</div>
+    <div class="dcard" onclick="showView('gastos',4)">
+      <div class="di">🧾</div><div class="dv" id="dash-g">0€</div>
+      <div class="dl">Gastos</div><span class="dt tb" id="dash-gn">0 registros</span>
     </div>
-    <div class="dcard" onclick="showView('gastos',null)">
-      <div class="dico">🧾</div><div class="dval" id="dash-gastos">0€</div>
-      <div class="dlbl">Gastos registrados</div><span class="dtag tb" id="dash-gnr">0 movimientos</span>
-      <div class="dhint">Ver gastos →</div>
+    <div class="dcard" onclick="showView('checklist',5)">
+      <div class="di">✅</div><div class="dv" id="dash-cl">0%</div>
+      <div class="dl">Checklist</div><span class="dt tg" id="dash-cln">0 de 17</span>
     </div>
-    <div class="dcard" onclick="showView('checklist',null)">
-      <div class="dico">✅</div><div class="dval" id="dash-cl">0%</div>
-      <div class="dlbl">Checklist</div><span class="dtag tg" id="dash-cln">0 de 17 tareas</span>
-      <div class="dhint">Ver tareas →</div>
+    <div class="dcard" onclick="showView('emergencias',6)">
+      <div class="di">🆘</div><div class="dv">SOS</div>
+      <div class="dl">Emergencias</div><span class="dt tr">Toca aqui</span>
     </div>
   </div>
-  <div class="popup" id="vpopup">
-    <div style="font-size:0.82rem;font-weight:700;margin-bottom:0.75rem">Ajustar viajeros</div>
-    <div class="counter-row">
-      <button class="cbtn" onclick="ajustar(-1)">−</button>
-      <div class="cnum" id="vbig">7</div>
-      <button class="cbtn" onclick="ajustar(1)">+</button>
-      <div style="font-size:0.75rem;color:#64748b;line-height:1.55">
-        personas<br>
-        <span style="font-weight:700;color:#3b82f6;font-size:0.88rem" id="vpp">690€ por persona</span><br>
-        <span style="font-size:0.65rem;color:#94a3b8" id="vtotal">Total: 4.830€</span>
-      </div>
-    </div>
-  </div>
-  <div class="stitle">Para decidir en la reunion</div>
+  <div class="st">Para decidir hoy</div>
   <div class="alerts">
-    <div class="alert r"><div class="albl">Urgente</div><div class="atitle">Votar y reservar alojamientos</div><div class="adesc">Julio se agota. Cuanto mas tardemos, peor precio y ubicacion.</div></div>
-    <div class="alert a"><div class="albl">Decidir hoy</div><div class="atitle">Somos 7, 8 o 9 personas?</div><div class="adesc">Afecta la capacidad de los apartamentos y el precio por persona.</div></div>
-    <div class="alert a"><div class="albl">Revisar</div><div class="atitle">Dias 14 y 22 son muy exigentes</div><div class="adesc">Marsella-Pisa-Roma (900km) y Colonia-Bruselas-Paris. Dividimos alguna etapa?</div></div>
-    <div class="alert r"><div class="albl">Italia — ZTL</div><div class="atitle">Zonas de trafico limitado en Italia</div><div class="adesc">Roma, Pisa y Florencia tienen ZTL. Entrar con coche extranjero puede suponer multas de 100-300 euros.</div></div>
-    <div class="alert b"><div class="albl">Obligatorio</div><div class="atitle">Vignette Austria ~9 euros — asfinag.at</div><div class="adesc">Ruta Venecia-Munich cruza Austria. Sin ella multa de 120 euros.</div></div>
-    <div class="alert g"><div class="albl">Antes de salir</div><div class="atitle">Reservar Coliseo y Vaticano online</div><div class="adesc">Sin reserva en julio hay 2-3h de cola. Mismo precio, menos tiempo perdido.</div></div>
+    <div class="al r"><div class="al-t">Votar y reservar alojamientos</div><div class="al-d">Julio se agota. Cuanto mas tardemos, peor precio y ubicacion.</div></div>
+    <div class="al a"><div class="al-t">Somos 7, 8 o 9 personas?</div><div class="al-d">Afecta la capacidad de los apartamentos y el precio por persona.</div></div>
+    <div class="al a"><div class="al-t">Dias 14 y 22 son muy exigentes</div><div class="al-d">Marsella-Pisa-Roma (900km) y Colonia-Bruselas-Paris. Dividimos etapa?</div></div>
+    <div class="al r"><div class="al-t">ZTL Italia: no entrar al centro con el coche</div><div class="al-d">Roma, Pisa y Florencia tienen zona restringida. Multa de 100-300 euros.</div></div>
+    <div class="al b"><div class="al-t">Vignette Austria ~9 euros (asfinag.at)</div><div class="al-d">Ruta Venecia-Munich cruza Austria. Sin ella multa de 120 euros.</div></div>
+    <div class="al g"><div class="al-t">Reservar Coliseo y Vaticano online</div><div class="al-d">Sin reserva en julio hay 2-3h de cola. Hacedlo con antelacion.</div></div>
   </div>
 </div>
 
 <!-- ALOJAMIENTOS -->
 <div id="view-alojamientos" class="view">
   <div class="ptitle">Alojamientos</div>
-  <div class="psub">Apartamentos completos para los 7. Vota tus favoritos. El ranking se actualiza en tiempo real.</div>
-  <div class="info-bar">
-    <div style="font-size:1.05rem;flex-shrink:0">🏠</div>
-    <div>Buscad siempre <strong style="color:#0f172a">apartamento entero</strong> con minimo 3 habitaciones. Prioridad: <strong style="color:#0f172a">Airbnb</strong>. <strong style="color:#dc2626">Julio se agota rapido</strong> — reservad hoy tras la votacion.</div>
-  </div>
+  <div class="psub">Votad vuestras opciones favoritas. Los links abren directamente las listas de Airbnb.</div>
   <div id="city-blocks"></div>
-  <div class="stitle" style="margin-top:1.3rem">Ranking de votos</div>
-  <div class="ranking-card">
-    <div class="rk-head">Puntuacion en tiempo real</div>
-    <div id="ranking-list"><div class="rk-empty">Sin votos todavia. Votad en cada ciudad.</div></div>
+  <div class="st" style="margin-top:1.25rem">Ranking de votos</div>
+  <div class="rk-card">
+    <div class="rk-h">Puntuacion en tiempo real</div>
+    <div id="rk-list"><div class="rk-empty">Sin votos todavia.</div></div>
   </div>
 </div>
 
 <!-- TIMELINE -->
 <div id="view-timeline" class="view">
   <div class="ptitle">Itinerario</div>
-  <div class="psub">13 dias completos. Toca cada dia para ver el detalle y abrir la ruta en Google Maps.</div>
-  <div class="tl-list" id="tl-container"></div>
+  <div class="psub">13 dias. Toca cada dia para ver el detalle y abrir la ruta en Google Maps.</div>
+  <div id="tl-container"></div>
 </div>
 
 <!-- PRESUPUESTO -->
@@ -405,65 +276,41 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
     <div class="pp-card hl"><div class="pp-n">7 confirmados</div><div class="pp-v">690€</div><div class="pp-s">total 4.830€</div></div>
     <div class="pp-card"><div class="pp-n">8 personas</div><div class="pp-v">604€</div><div class="pp-s">por persona</div></div>
   </div>
-  <div class="bud-table">
-    <div class="bud-th"><span>Categoria</span><span>Total grupo</span><span>%</span></div>
+  <div class="bud-t">
+    <div class="bud-th"><span>Categoria</span><span>Total</span><span>%</span></div>
     <div id="bud-rows"></div>
-  </div>
-  <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.88rem;font-size:0.74rem;color:#64748b;line-height:1.65">
-    <strong style="color:#0f172a">Como se calculo:</strong><br>
-    Alojamiento: precios reales Airbnb julio 2026 para 7 personas.<br>
-    Combustible: 6.200km x 7L/100km x 1,65 euros/L media Europa.<br>
-    Peajes: Francia A7, Italia A1/A4, Belgica aprox 120 euros total.<br>
-    Comida: 13 euros/persona/dia (mercados + restaurante por dia).<br>
-    Actividades: Coliseo, Vaticano, Louvre, Torre Eiffel repartidos.
   </div>
 </div>
 
 <!-- GASTOS -->
 <div id="view-gastos" class="view">
   <div class="ptitle">Gastos compartidos</div>
-  <div class="psub">Registrad quien pago que. Los balances y la liquidacion optima se calculan solos.</div>
-  <div class="gasto-form">
-    <div><label class="flabel">Quien pago</label>
-      <select class="finput" id="g-payer">
-        <option value="">Seleccionar...</option>
-        <option>Carlos</option><option>Lucia</option><option>Marco</option>
-        <option>Sofia</option><option>Diego</option><option>Ana</option><option>Javi</option>
-      </select>
-    </div>
-    <div><label class="flabel">Descripcion</label>
-      <input class="finput" type="text" id="g-desc" placeholder="ej: Gasolina Francia">
-    </div>
-    <div class="gasto-form-row">
-      <div><label class="flabel">Monto (euros)</label>
-        <input class="finput" type="number" id="g-amt" placeholder="0.00" min="0" step="0.01">
-      </div>
-      <div><label class="flabel">Categoria</label>
-        <select class="finput" id="g-cat">
-          <option value="General">General</option>
-          <option value="Combustible">Combustible</option>
-          <option value="Peaje">Peaje</option>
-          <option value="Comida">Comida</option>
-          <option value="Alojamiento">Alojamiento</option>
-          <option value="Parking">Parking</option>
-          <option value="Actividad">Actividad</option>
+  <div class="psub">Quien pago que. Los balances se calculan solos.</div>
+  <div class="gf">
+    <div class="gf-row">
+      <div><label class="fl">Quien pago</label>
+        <select class="fi" id="g-payer">
+          <option value="">Seleccionar...</option>
+          <option>Carlos</option><option>Lucia</option><option>Marco</option>
+          <option>Sofia</option><option>Diego</option><option>Ana</option><option>Javi</option>
         </select>
       </div>
-      <button class="btn-add" onclick="addGasto()">Añadir</button>
+      <div><label class="fl">Monto (euros)</label>
+        <input class="fi" type="number" id="g-amt" placeholder="0.00" min="0" step="0.01">
+      </div>
     </div>
-    <div id="excluir-container"></div>
+    <div><label class="fl">Descripcion</label>
+      <input class="fi" type="text" id="g-desc" placeholder="ej: Gasolina Francia">
+    </div>
+    <button class="btn-add" onclick="addGasto()">+ Anadir gasto</button>
   </div>
-  <div class="stitle">Movimientos</div>
-  <div id="gasto-list" class="gasto-list"></div>
-  <div class="stitle">Balances</div>
-  <div style="background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.78rem 0.92rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:0.88rem;font-size:0.79rem">
-    <span style="color:#64748b">Total gastado</span>
-    <span style="font-weight:700;font-size:0.95rem" id="gtotal">0€</span>
-  </div>
-  <div class="balance-grid" id="balance-grid"></div>
-  <div class="stitle" style="margin-top:1rem">Liquidacion optima</div>
-  <div class="liquidacion-card">
-    <div class="liq-head">Transferencias minimas para saldar todas las deudas</div>
+  <div class="st">Movimientos</div>
+  <div id="glist" class="glist"></div>
+  <div class="st">Balances</div>
+  <div class="bal-grid" id="bal-grid"></div>
+  <div class="st" style="margin-top:0.75rem">Liquidacion optima</div>
+  <div class="liq-card">
+    <div class="liq-h">Minimas transferencias para saldar todo</div>
     <div id="liq-list"><div class="liq-empty">Sin gastos todavia.</div></div>
   </div>
 </div>
@@ -472,979 +319,526 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 <div id="view-notas" class="view">
   <div class="ptitle">Notas por ciudad</div>
   <div class="psub">Restaurantes, lugares y consejos para cada parada.</div>
-  <div class="notas-tabs" id="notas-tabs"></div>
-  <div class="nota-card" id="nota-content"></div>
+  <div class="ntabs" id="ntabs"></div>
+  <div class="ncard" id="ncontent"></div>
 </div>
 
 <!-- CHECKLIST -->
 <div id="view-checklist" class="view">
   <div class="ptitle">Checklist</div>
-  <div class="psub">Tareas antes y durante el viaje. Cada tarea tiene un responsable.</div>
-  <div id="cl-container"></div>
+  <div class="psub">Tareas antes y durante el viaje. Cada una tiene responsable.</div>
+  <div id="cl-cont"></div>
 </div>
 
 <!-- EMERGENCIAS -->
 <div id="view-emergencias" class="view">
   <div class="ptitle">Emergencias y Documentos</div>
-  <div class="psub">Telefonos clave, consulados y alertas importantes para el viaje.</div>
-  <div class="emerg-grid">
-    <div class="emerg-card">
-      <div class="emerg-card-title">🚨 Emergencias Europa</div>
-      <div class="emerg-item"><span class="emerg-name">Emergencias (toda Europa)</span><span class="emerg-val"><a href="tel:112">112</a></span></div>
-      <div class="emerg-item"><span class="emerg-name">Policia Francia</span><span class="emerg-val"><a href="tel:17">17</a></span></div>
-      <div class="emerg-item"><span class="emerg-name">Policia Italia</span><span class="emerg-val"><a href="tel:113">113</a></span></div>
-      <div class="emerg-item"><span class="emerg-name">Policia Alemania</span><span class="emerg-val"><a href="tel:110">110</a></span></div>
-      <div class="emerg-item"><span class="emerg-name">Ambulancia Francia</span><span class="emerg-val"><a href="tel:15">15</a></span></div>
-      <div class="emerg-item"><span class="emerg-name">Ambulancia Italia</span><span class="emerg-val"><a href="tel:118">118</a></span></div>
+  <div class="psub">Telefonos clave y alertas importantes para el viaje.</div>
+  <div class="em-grid">
+    <div class="em-card"><div class="em-title">🚨 Emergencias</div>
+      <div class="em-item"><span class="em-l">Toda Europa</span><span class="em-v"><a href="tel:112">112</a></span></div>
+      <div class="em-item"><span class="em-l">Policia Francia</span><span class="em-v"><a href="tel:17">17</a></span></div>
+      <div class="em-item"><span class="em-l">Policia Italia</span><span class="em-v"><a href="tel:113">113</a></span></div>
+      <div class="em-item"><span class="em-l">Policia Alemania</span><span class="em-v"><a href="tel:110">110</a></span></div>
+      <div class="em-item"><span class="em-l">Ambulancia Italia</span><span class="em-v"><a href="tel:118">118</a></span></div>
     </div>
-    <div class="emerg-card">
-      <div class="emerg-card-title">🏛️ Consulados Spain</div>
-      <div class="emerg-item"><span class="emerg-name">Embajada en Paris</span><span class="emerg-val"><a href="tel:+33144433518">+33 1 44 43 35 18</a></span></div>
-      <div class="emerg-item"><span class="emerg-name">Embajada en Roma</span><span class="emerg-val"><a href="tel:+390687114">+39 06 8711 4</a></span></div>
-      <div class="emerg-item"><span class="emerg-name">Embajada en Berlin</span><span class="emerg-val"><a href="tel:+4930254007330">+49 30 25400 733</a></span></div>
-      <div class="emerg-item"><span class="emerg-name">Embajada en Bruselas</span><span class="emerg-val"><a href="tel:+3225903800">+32 2 590 38 00</a></span></div>
+    <div class="em-card"><div class="em-title">🏛️ Consulados Spain</div>
+      <div class="em-item"><span class="em-l">Paris</span><span class="em-v"><a href="tel:+33144433518">+33 1 44 43 35 18</a></span></div>
+      <div class="em-item"><span class="em-l">Roma</span><span class="em-v"><a href="tel:+390687114">+39 06 8711 4</a></span></div>
+      <div class="em-item"><span class="em-l">Berlin</span><span class="em-v"><a href="tel:+4930254007330">+49 30 254 007 33</a></span></div>
+      <div class="em-item"><span class="em-l">Bruselas</span><span class="em-v"><a href="tel:+3225903800">+32 2 590 38 00</a></span></div>
     </div>
-    <div class="emerg-card">
-      <div class="emerg-card-title">🚗 Alertas del coche</div>
-      <div class="emerg-item"><span class="emerg-name">Vignette Austria</span><span class="emerg-val" style="color:#059669">9 euros</span></div>
-      <div class="emerg-item"><span class="emerg-name">ZTL Roma (multa)</span><span class="emerg-val" style="color:#dc2626">100-300 euros</span></div>
-      <div class="emerg-item"><span class="emerg-name">ZTL Pisa (multa)</span><span class="emerg-val" style="color:#dc2626">Evitar centro</span></div>
-      <div class="emerg-item"><span class="emerg-name">ZTL Florencia (multa)</span><span class="emerg-val" style="color:#dc2626">Evitar centro</span></div>
-      <div class="emerg-item"><span class="emerg-name">Matricula del coche</span><span class="emerg-val" id="matricula" onclick="editMatricula()" style="cursor:pointer;color:#3b82f6">Anadir →</span></div>
+    <div class="em-card"><div class="em-title">🚗 Alertas coche</div>
+      <div class="em-item"><span class="em-l">Vignette Austria</span><span class="em-v" style="color:#059669">~9 euros</span></div>
+      <div class="em-item"><span class="em-l">ZTL Roma</span><span class="em-v" style="color:#dc2626">100-300 euros</span></div>
+      <div class="em-item"><span class="em-l">ZTL Pisa</span><span class="em-v" style="color:#dc2626">Evitar centro</span></div>
+      <div class="em-item"><span class="em-l">Comprar vignette</span><span class="em-v"><a href="https://www.asfinag.at" target="_blank">asfinag.at</a></span></div>
     </div>
-    <div class="emerg-card">
-      <div class="emerg-card-title">📄 Seguros y datos</div>
-      <div class="emerg-item"><span class="emerg-name">N. poliza seguro viaje</span><span class="emerg-val" id="poliza" onclick="editPoliza()" style="cursor:pointer;color:#3b82f6">Anadir →</span></div>
-      <div class="emerg-item"><span class="emerg-name">Tel. asistencia seguro</span><span class="emerg-val" id="tel-seguro" onclick="editTelSeguro()" style="cursor:pointer;color:#3b82f6">Anadir →</span></div>
-      <div class="emerg-item"><span class="emerg-name">Seguro coche</span><span class="emerg-val" id="seguro-coche" onclick="editSeguroCoche()" style="cursor:pointer;color:#3b82f6">Anadir →</span></div>
-    </div>
-    <div class="emerg-card">
-      <div class="emerg-card-title">💊 Farmacias de guardia</div>
-      <div class="emerg-item"><span class="emerg-name">Francia</span><span class="emerg-val">Buscar "Pharmacie de garde"</span></div>
-      <div class="emerg-item"><span class="emerg-name">Italia</span><span class="emerg-val">Buscar "Farmacia di turno"</span></div>
-      <div class="emerg-item"><span class="emerg-name">Alemania</span><span class="emerg-val">Buscar "Notdienst Apotheke"</span></div>
-      <div class="emerg-item"><span class="emerg-name">Francia urgencias</span><span class="emerg-val"><a href="tel:15">15 (SAMU)</a></span></div>
-    </div>
-    <div class="emerg-card">
-      <div class="emerg-card-title">📱 Links utiles</div>
-      <div class="emerg-item"><span class="emerg-name">Vignette Austria</span><span class="emerg-val"><a href="https://www.asfinag.at" target="_blank">asfinag.at</a></span></div>
-      <div class="emerg-item"><span class="emerg-name">Coliseo entradas</span><span class="emerg-val"><a href="https://www.coopculture.it" target="_blank">coopculture.it</a></span></div>
-      <div class="emerg-item"><span class="emerg-name">Vaticano entradas</span><span class="emerg-val"><a href="https://www.museivaticani.va" target="_blank">museivaticani.va</a></span></div>
-      <div class="emerg-item"><span class="emerg-name">ZTL verificar Roma</span><span class="emerg-val"><a href="https://www.agenziamobilita.roma.it" target="_blank">agenziamobilita.roma.it</a></span></div>
+    <div class="em-card"><div class="em-title">📄 Links clave</div>
+      <div class="em-item"><span class="em-l">Coliseo entradas</span><span class="em-v"><a href="https://www.coopculture.it" target="_blank">coopculture.it</a></span></div>
+      <div class="em-item"><span class="em-l">Vaticano entradas</span><span class="em-v"><a href="https://www.museivaticani.va" target="_blank">museivaticani.va</a></span></div>
+      <div class="em-item"><span class="em-l">Louvre entradas</span><span class="em-v"><a href="https://www.ticketlouvre.fr" target="_blank">ticketlouvre.fr</a></span></div>
+      <div class="em-item"><span class="em-l">Vaporetto Venecia</span><span class="em-v"><a href="https://www.veneziaunica.it" target="_blank">veneziaunica.it</a></span></div>
     </div>
   </div>
 </div>
 
-<!-- CONDUCTORES -->
-<div id="view-conductores" class="view">
-  <div class="ptitle">Conductores</div>
-  <div class="psub">Organizad los turnos de conduccion por dia. Evitad la fatiga repartiendo bien.</div>
+</div><!-- end main -->
 
-  <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;padding:0.85rem 1rem;margin-bottom:1.25rem;font-size:0.78rem;color:#dc2626;line-height:1.5">
-    <strong>Dias criticos:</strong> Dia 14 (Marsella-Pisa-Roma, 900km) y Dia 24 (Paris-Alicante, 1.150km).
-    Asignad minimo 2 conductores por dia largo y planead paradas cada 2h.
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="bnb active" onclick="showView('dashboard',0)"><span class="bnb-i">🏠</span><span class="bnb-l">Inicio</span></button>
+  <button class="bnb" onclick="showView('alojamientos',1)"><span class="bnb-i">🛏</span><span class="bnb-l">Alojam.</span></button>
+  <button class="bnb" onclick="showView('timeline',2)"><span class="bnb-i">📅</span><span class="bnb-l">Ruta</span></button>
+  <button class="bnb" onclick="showView('gastos',4)"><span class="bnb-i">🧾</span><span class="bnb-l">Gastos</span></button>
+  <button class="bnb" onclick="showView('notas',5)"><span class="bnb-i">📝</span><span class="bnb-l">Notas</span></button>
+  <button class="bnb" onclick="showView('checklist',6)"><span class="bnb-i">✅</span><span class="bnb-l">Check</span></button>
+  <button class="bnb" onclick="showView('emergencias',7)"><span class="bnb-i">🆘</span><span class="bnb-l">SOS</span></button>
+</div>
+
+<!-- NOMBRE MODAL -->
+<div class="nmodal" id="nmodal">
+  <div class="nmodal-box">
+    <div class="nmodal-t">Bienvenido al EuroTrip 2026</div>
+    <div class="nmodal-s">Como te llamas? Asi identificamos tus votos y gastos.</div>
+    <input class="fi" id="ninput" type="text" placeholder="Tu nombre..." style="margin-bottom:0.75rem">
+    <button class="btn-add" onclick="guardarNombre()">Entrar</button>
   </div>
-
-  <div class="stitle">Asignar conductor por dia</div>
-  <div id="conductores-list"></div>
-
-  <div class="stitle" style="margin-top:1.25rem">Resumen por persona</div>
-  <div id="conductores-resumen"></div>
-</div>
-
-<!-- CIUDAD DETAIL -->
-<div id="view-ciudad" class="view">
-  <div style="display:flex;align-items:center;gap:0.72rem;margin-bottom:1.05rem">
-    <button class="back-btn" onclick="showView('dashboard',null)">← Volver</button>
-    <div>
-      <div class="ptitle" id="ciudad-title" style="margin-bottom:0"></div>
-      <div style="font-size:0.74rem;color:#64748b;margin-top:0.08rem" id="ciudad-sub"></div>
-    </div>
-  </div>
-  <div id="ciudad-content"></div>
-</div>
-
-</div>
-
-<!-- BOTTOM NAV mobile -->
-<div class="bottom-nav">
-  <button class="bnb active" onclick="showView('dashboard',this)"><span class="bnb-ico">🏠</span><span class="bnb-lbl">Resumen</span></button>
-  <button class="bnb" onclick="showView('alojamientos',this)"><span class="bnb-ico">🛏</span><span class="bnb-lbl">Alojar</span></button>
-  <button class="bnb" onclick="showView('timeline',this)"><span class="bnb-ico">📅</span><span class="bnb-lbl">Ruta</span></button>
-  <button class="bnb" onclick="showView('gastos',this)"><span class="bnb-ico">🧾</span><span class="bnb-lbl">Gastos</span></button>
-  <button class="bnb" onclick="showView('checklist',this)"><span class="bnb-ico">✅</span><span class="bnb-lbl">Check</span></button>
-  <button class="bnb" onclick="showView('notas',this)"><span class="bnb-ico">📝</span><span class="bnb-lbl">Notas</span></button>
-  <button class="bnb" onclick="showView('conductores',this)"><span class="bnb-ico">🚗</span><span class="bnb-lbl">Coche</span></button>
-  <button class="bnb" onclick="showView('emergencias',this)"><span class="bnb-ico">🆘</span><span class="bnb-lbl">SOS</span></button>
 </div>
 
 <script>
-var BUDGET_TOTAL = 4830;
-var nViajeros = 7;
-var votes = {};
+// ===== CONFIG =====
+var SUPA = 'https://nhblyxltpdpyxmvjtrmt.supabase.co';
+var KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU';
+var NOMBRE = localStorage.getItem('et_nombre') || '';
+var SHEET  = 'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?output=csv');
+
+// ===== SUPABASE REST =====
+function supa(method, table, body, params) {
+  var url = SUPA + '/rest/v1/' + table + (params || '');
+  var opts = {
+    method: method,
+    headers: {
+      'apikey': KEY,
+      'Authorization': 'Bearer ' + KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : ''
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(url, opts).then(function(r) { return r.json(); });
+}
+
+// ===== DATA =====
+var votes  = {};
 var gastos = [];
 var clDone = {};
 var activeNota = 'Marsella';
-var estadoAlo = {marsella:'sin-buscar',roma:'sin-buscar',venecia:'sin-buscar',munich:'sin-buscar',colonia:'sin-buscar',paris:'sin-buscar'};
 
 var LINKS = {
-  marsella:{air:'https://www.airbnb.es/wishlists/invite/f7787fdf-c64d-409f-871b-d259b62ba37d?s=67&unique_share_id=dbb79b38-03c9-4832-b6ec-bf966d181bf8',book:''},
-  roma:{air:'https://www.airbnb.es/wishlists/invite/68e72df8-718b-4bfc-bfa8-b46195ca67d9?s=67&unique_share_id=8bfb12b9-5b07-4818-b652-2268285130cd',book:''},
-  venecia:{air:'https://www.airbnb.es/wishlists/invite/bcb6a644-cafa-4fb5-a4fe-98616153cfd5?s=67&unique_share_id=3195d603-7614-4f0d-8923-70e19816fafd',book:''},
-  munich:{air:'https://www.airbnb.es/wishlists/invite/ff5569b9-a6c1-4936-a70f-d3eec36cd9f3?s=67&unique_share_id=6cd34cbb-c164-4d48-b651-5c0ff843acd3',book:''},
-  colonia:{air:'https://www.airbnb.es/wishlists/invite/4627c88a-9a5f-4589-bb79-1be6c8627442?s=67&unique_share_id=ca2d806e-402b-4ad2-b8e4-53411d3be3c1',book:''},
-  paris:{air:'https://www.airbnb.es/wishlists/invite/abb95041-b59b-4b22-ac85-65460cc5e80d?s=67&unique_share_id=5197016e-af28-45f7-a17c-83e2b5cc05ff',book:''}
+  marsella: {air:'https://www.airbnb.es/wishlists/invite/f7787fdf-c64d-409f-871b-d259b62ba37d?s=67&unique_share_id=dbb79b38-03c9-4832-b6ec-bf966d181bf8', book:''},
+  roma:     {air:'https://www.airbnb.es/wishlists/invite/68e72df8-718b-4bfc-bfa8-b46195ca67d9?s=67&unique_share_id=8bfb12b9-5b07-4818-b652-2268285130cd', book:''},
+  venecia:  {air:'https://www.airbnb.es/wishlists/invite/bcb6a644-cafa-4fb5-a4fe-98616153cfd5?s=67&unique_share_id=3195d603-7614-4f0d-8923-70e19816fafd', book:''},
+  munich:   {air:'https://www.airbnb.es/wishlists/invite/ff5569b9-a6c1-4936-a70f-d3eec36cd9f3?s=67&unique_share_id=6cd34cbb-c164-4d48-b651-5c0ff843acd3', book:''},
+  colonia:  {air:'https://www.airbnb.es/wishlists/invite/4627c88a-9a5f-4589-bb79-1be6c8627442?s=67&unique_share_id=ca2d806e-402b-4ad2-b8e4-53411d3be3c1', book:''},
+  paris:    {air:'https://www.airbnb.es/wishlists/invite/abb95041-b59b-4b22-ac85-65460cc5e80d?s=67&unique_share_id=5197016e-af28-45f7-a17c-83e2b5cc05ff', book:''}
 };
-
-var SHEET_URL = 'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?output=csv');
 
 var CITIES = [
-  {id:'alicante',name:'Alicante',flag:'ES',nights:0,dates:'12 jul salida',zone:'Puerto / Explanada'},
-  {id:'marsella',name:'Marsella',flag:'FR',nights:2,dates:'12 al 14 jul',zone:'Vieux-Port / Le Panier'},
-  {id:'pisa',name:'Pisa',flag:'IT',nights:0,dates:'14 jul parada',zone:'Plaza dei Miracoli'},
-  {id:'roma',name:'Roma',flag:'IT',nights:3,dates:'15 al 18 jul',zone:'Trastevere / Prati'},
-  {id:'venecia',name:'Venecia',flag:'IT',nights:2,dates:'17 al 19 jul',zone:'Mestre / Burano'},
-  {id:'munich',name:'Munich',flag:'DE',nights:2,dates:'19 al 21 jul',zone:'Maxvorstadt / Schwabing'},
-  {id:'colonia',name:'Colonia',flag:'DE',nights:1,dates:'21 al 22 jul',zone:'Ehrenfeld / centro'},
-  {id:'bruselas',name:'Bruselas',flag:'BE',nights:0,dates:'22 jul parada',zone:'Grand Place / centro'},
-  {id:'paris',name:'Paris',flag:'FR',nights:2,dates:'23 al 25 jul',zone:'Le Marais / Republique'}
+  {id:'marsella', name:'Marsella', flag:'🇫🇷', nights:2, dates:'12-14 jul', zone:'Vieux-Port / Le Panier'},
+  {id:'roma',     name:'Roma',     flag:'🇮🇹', nights:3, dates:'15-18 jul', zone:'Trastevere / Prati'},
+  {id:'venecia',  name:'Venecia',  flag:'🇮🇹', nights:2, dates:'17-19 jul', zone:'Mestre / Burano'},
+  {id:'munich',   name:'Munich',   flag:'🇩🇪', nights:2, dates:'19-21 jul', zone:'Maxvorstadt / Schwabing'},
+  {id:'colonia',  name:'Colonia',  flag:'🇩🇪', nights:1, dates:'21-22 jul', zone:'Ehrenfeld / centro'},
+  {id:'paris',    name:'Paris',    flag:'🇫🇷', nights:2, dates:'23-25 jul', zone:'Le Marais / Republique'}
 ];
-
-var FLAGS = {ES:'🇪🇸',FR:'🇫🇷',IT:'🇮🇹',DE:'🇩🇪',BE:'🇧🇪'};
-
-var CIUDAD_DAYS = {
-  alicante:[0],marsella:[1,2],pisa:[2],
-  roma:[3,4,5],venecia:[6,7],
-  munich:[8,9],colonia:[10],
-  bruselas:[11],paris:[12,13]
-};
-
-var NOTAS_DATA = {
-  Alicante:{
-    restaurantes:['La Taberna del Gourmet — tapas de nivel en el centro','El Portal — mariscos frescos junto al puerto','Mercado Central — desayuno tipico antes de salir'],
-    lugares:['Castillo de Santa Barbara — vistas panoramicas de toda la ciudad','Explanada de Espana — el paseo maritimo iconico con palmeras','Barrio de Santa Cruz — el casco antiguo mas fotografico'],
-    consejos:['Salida recomendada a las 7:00h para evitar trafico','Llenar el deposito antes de salir, gasolina mas barata que en Francia','Revisar que todos llevan DNI, cargadores y documentos del coche']
-  },
-  Marsella:{
-    restaurantes:['Le Miramar — bouillabaisse tradicional, reservar con antelacion','Chez Etienne — pizza napolitana famosa, siempre hay cola','Marche du Noailles — mercado multicultural, comida variada y barata'],
-    lugares:['Calanques de Cassis — excursion imprescindible, paisaje increible','Notre-Dame de la Garde — basilica con vistas panoramicas','MuCEM — museo contemporaneo con vistas al mar'],
-    consejos:['Las Calanques: reservar transporte con antelacion, llegar antes de las 9h','Metro L1 y L2 cubren todo el centro de Marsella','Parking Bourse mas barato que zona azul']
-  },
-  Pisa:{
-    restaurantes:['Osteria dei Cavalieri — pasta fresca excelente, precio justo','Il Montino — cecina tipica de Pisa','Mercato delle Vettovaglie — mercado cubierto con comida local'],
-    lugares:['Plaza dei Miracoli — Torre, Catedral y Baptisterio, imprescindible','La Torre Inclinada — se puede subir reservando online','Lungarni — paseos a orillas del Arno, muy fotograficos'],
-    consejos:['Solo tenemos 1h de parada — la plaza esta a 15 min de la autopista','AVISO ZTL: no entrar en el centro historico con el coche — multa segura','Parking gratuito fuera del centro en Piazza della Republica']
-  },
-  Roma:{
-    restaurantes:['Tonnarello en Trastevere — cacio e pepe legendaria','Suppli Roma — albondigas de arroz fritas para ir rapido','Mercato di Testaccio — comida local y barata, ambiente autentico'],
-    lugares:['Coliseo — reservar en coopculture.it, sin reserva hay 2-3h de cola','Vaticano — museivaticani.va, ir a las 8h en julio','Trastevere de noche — la mejor zona para cenar y pasear'],
-    consejos:['AVISO ZTL: Roma tiene zona restringida — aparcar fuera y usar metro','Fuentes nasoni: agua potable gratis por toda la ciudad','Metro cierra a las 23:30h, tenerlo en cuenta para la noche']
-  },
-  Venecia:{
-    restaurantes:['All Arco — cicchetti baratos y buenos','Osteria da Rioba — menu del dia razonable para la zona','Comprar en supermercado de Mestre, mitad de precio que en Venecia'],
-    lugares:['Plaza San Marcos — ir antes de las 8h para evitar masificacion','Isla de Burano — casas de colores, mucho mas tranquila','Dorsoduro — barrio autentico sin turistas masivos'],
-    consejos:['Parking Mestre: 15 euros/dia. Venecia isla: 35-70 euros/dia','Vaporetto linea 1 recorre todo el Canal Grande','Madrugar es la clave: a las 7h Venecia esta vacia y es magica']
-  },
-  Munich:{
-    restaurantes:['Hofbrauhaus — turistico pero obligatorio, cerveza 1L unos 12 euros','Viktualienmarkt — mercado con comida local y buen ambiente','Augustiner Biergarten — jardin de cerveza autentico, sin turistas'],
-    lugares:['Englischer Garten — rio artificial con surfistas en plena ciudad','Marienplatz y Glockenspiel — a las 11h y las 17h','Neuschwanstein — excursion de 90 min si queda tiempo'],
-    consejos:['Day ticket de transporte: 9 euros, cubre toda la ciudad','Julio tiene festivales de verano al aire libre','Desde Munich: excursion facil a los Alpes austriacos']
-  },
-  Colonia:{
-    restaurantes:['Frueh am Dom — cerveza Kolsch autentica junto al Dom','Haxenhaus — codillo aleman tradicional, muy abundante','Mercado de Ehrenfeld para comer barato y bien'],
-    lugares:['Dom de Colonia — impresionante por dentro y por fuera, entrada gratuita','Barrio Ehrenfeld — el mas animado y creativo de noche','Museo Ludwig — arte moderno y pop art, entrada razonable'],
-    consejos:['Solo 1 noche: llegar, cenar bien, descansar y salir temprano','El Dom se visita gratis por dentro','Tranvia desde Ehrenfeld al centro en 10 minutos']
-  },
-  Bruselas:{
-    restaurantes:['Fin de Siecle — cocina belga tradicional, precio muy justo','Maison Antoine — las mejores patatas fritas de Belgica','Gofres en cualquier puesto junto a la Grand Place'],
-    lugares:['Grand Place — una de las plazas mas bellas de Europa','Manneken Pis — el famoso nino, a 5 min de la Grand Place','Galeries Royales Saint-Hubert — galeria historica cubierta'],
-    consejos:['Tenemos solo 2h maximas — Grand Place, Manneken Pis, gofre y a Paris','Metro facil desde cualquier punto hasta el centro','Los gofres de puesto en la calle son mejores que los de restaurantes turisticos']
-  },
-  Paris:{
-    restaurantes:['As du Falafel en Le Marais — el mejor falafel de Europa y muy barato','Bouillon Chartier — cocina francesa clasica, precio muy justo','Baguette con jamon y queso en cualquier boulangerie: 5 euros'],
-    lugares:['Torre Eiffel al amanecer o de noche — sin colas y espectacular','Louvre — reservar online, necesitas minimo 3 horas','Montmartre y Sacre-Coeur de manana temprano antes del gentio'],
-    consejos:['Navigo Decouverte cubre metro y RER durante toda la semana','Paris Plages en julio: playas artificiales en las orillas del Sena','Le Marais es el barrio mas animado y abre los domingos']
-  }
-};
 
 var PEOPLE = ['Carlos','Lucia','Marco','Sofia','Diego','Ana','Javi'];
 
 var BUDGET = [
-  {cat:'Alojamiento',amount:2150,color:'#3b82f6'},
-  {cat:'Combustible',amount:715,color:'#f59e0b'},
-  {cat:'Peajes',amount:120,color:'#fb923c'},
-  {cat:'Comida',amount:910,color:'#10b981'},
-  {cat:'Parking',amount:210,color:'#38bdf8'},
-  {cat:'Actividades',amount:525,color:'#f472b6'},
-  {cat:'Emergencias',amount:200,color:'#94a3b8'}
+  {cat:'Alojamiento', amount:2150, color:'#3b82f6'},
+  {cat:'Combustible',  amount:715,  color:'#f59e0b'},
+  {cat:'Peajes',       amount:120,  color:'#fb923c'},
+  {cat:'Comida',       amount:910,  color:'#10b981'},
+  {cat:'Parking',      amount:210,  color:'#38bdf8'},
+  {cat:'Actividades',  amount:525,  color:'#f472b6'},
+  {cat:'Emergencias',  amount:200,  color:'#94a3b8'}
 ];
 
+var NOTAS = {
+  Marsella: {
+    rest: ['Le Miramar — bouillabaisse tradicional, reservar','Chez Etienne — pizza napolitana, siempre hay cola','Marche du Noailles — mercado multicultural, barato'],
+    lug:  ['Calanques de Cassis — excursion imprescindible','Notre-Dame de la Garde — vistas panoramicas','MuCEM — museo contemporaneo con vistas al mar'],
+    cons: ['Calanques: llegar antes de las 9h para evitar calor','Metro L1 y L2 cubren todo el centro','Parking Bourse mas barato que zona azul']
+  },
+  Roma: {
+    rest: ['Tonnarello en Trastevere — cacio e pepe legendaria','Suppli Roma — albondigas de arroz fritas','Mercato di Testaccio — comida local y barata'],
+    lug:  ['Coliseo — reservar en coopculture.it (sin reserva: 2-3h de cola)','Vaticano — museivaticani.va, ir a las 8h en julio','Trastevere de noche — la mejor zona para cenar'],
+    cons: ['ZTL: aparcar fuera del centro y usar metro o a pie','Fuentes nasoni: agua potable gratis por toda la ciudad','Metro cierra a las 23:30h']
+  },
+  Venecia: {
+    rest: ['All Arco — cicchetti baratos y buenos','Osteria da Rioba — menu del dia razonable','Supermercado en Mestre: mitad de precio que en Venecia'],
+    lug:  ['Plaza San Marcos — antes de las 8h para evitar masas','Isla de Burano — casas de colores, mucho mas tranquila','Dorsoduro — barrio autentico sin turistas'],
+    cons: ['Parking Mestre: 15 euros/dia vs 35-70 en Venecia isla','Vaporetto linea 1 recorre todo el Canal Grande','Madrugar es la clave: a las 7h Venecia es magica']
+  },
+  Munich: {
+    rest: ['Hofbrauhaus — turistico pero obligatorio, cerveza 1L 12 euros','Viktualienmarkt — mercado con comida local','Augustiner Biergarten — jardin de cerveza autentico'],
+    lug:  ['Englischer Garten — rio con surfistas en plena ciudad','Marienplatz y Glockenspiel a las 11h y 17h','BMW Museum — si os mola la automocion'],
+    cons: ['Day ticket transporte: 9 euros, cubre toda la ciudad','Julio tiene festivales de verano al aire libre','Excursion facil a los Alpes austriacos desde aqui']
+  },
+  Colonia: {
+    rest: ['Frueh am Dom — cerveza Kolsch autentica','Haxenhaus — codillo aleman tradicional','Mercado de Ehrenfeld para comer barato'],
+    lug:  ['Dom de Colonia — impresionante, entrada gratuita','Barrio Ehrenfeld — el mas animado de noche','Museo Ludwig — arte moderno, entrada razonable'],
+    cons: ['Solo 1 noche: llegar, cenar bien y descansar','Tranvia desde Ehrenfeld al centro en 10 min','El Dom se puede visitar gratis por dentro']
+  },
+  Paris: {
+    rest: ['As du Falafel en Le Marais — el mejor y muy barato','Bouillon Chartier — cocina francesa clasica, precio justo','Baguette mas jamon mas queso en boulangerie: 5 euros'],
+    lug:  ['Torre Eiffel al amanecer o de noche — sin colas','Louvre — reservar online, minimo 3 horas','Montmartre y Sacre-Coeur de manana temprano'],
+    cons: ['Navigo Decouverte cubre metro y RER toda la semana','Le Marais es el barrio mas cool, abierto los domingos','Paris Plages en julio: playas en el Sena']
+  }
+};
+
 var CL_DATA = [
-  {s:'Antes del viaje',items:[
-    {t:'Confirmar numero final de viajeros', owner:'Todos', deadline:'Jun 30'},
-    {t:'Votar y reservar todos los alojamientos', owner:'Todos', deadline:'Jun 30'},
-    {t:'Contratar seguro de viaje europeo', owner:'Carlos', deadline:'Jul 5'},
-    {t:'Revisar vigencia de DNI y pasaportes', owner:'Todos', deadline:'Jul 5'},
-    {t:'Descargar Google Maps offline para cada ciudad', owner:'Todos', deadline:'Jul 10'},
-    {t:'Crear fondo comun en Revolut o Bizum', owner:'Lucia', deadline:'Jun 30'},
-    {t:'Reservar entradas Coliseo en coopculture.it', owner:'Marco', deadline:'Jun 15'},
-    {t:'Reservar entradas Vaticano en museivaticani.va', owner:'Marco', deadline:'Jun 15'},
-    {t:'Revisar seguro del coche para Europa', owner:'Carlos', deadline:'Jul 5'},
-    {t:'Comprar Vignette Austria online 9 euros en asfinag.at', owner:'Javi', deadline:'Jul 10'}
+  {s:'Antes del viaje', items:[
+    {t:'Confirmar numero final de viajeros (7, 8 o 9)', own:'Todos'},
+    {t:'Votar y reservar todos los alojamientos', own:'Todos'},
+    {t:'Contratar seguro de viaje europeo', own:'Carlos'},
+    {t:'Revisar vigencia de DNI y pasaportes', own:'Todos'},
+    {t:'Descargar Google Maps offline para cada ciudad', own:'Todos'},
+    {t:'Crear fondo comun en Revolut o Bizum', own:'Lucia'},
+    {t:'Reservar entradas Coliseo — coopculture.it', own:'Marco'},
+    {t:'Reservar entradas Vaticano — museivaticani.va', own:'Marco'},
+    {t:'Revisar seguro del coche para Europa', own:'Carlos'},
+    {t:'Comprar Vignette Austria ~9 euros — asfinag.at', own:'Javi'}
   ]},
-  {s:'Durante el viaje',items:[
-    {t:'Check-in correcto en cada alojamiento', owner:'Todos', deadline:''},
-    {t:'Registrar gastos compartidos cada dia', owner:'Sofia', deadline:''},
-    {t:'Llenar deposito antes de entrar en Italia', owner:'Conductor', deadline:''},
-    {t:'Foto grupal en cada ciudad', owner:'Diego', deadline:''}
+  {s:'Durante el viaje', items:[
+    {t:'Check-in en cada alojamiento al llegar', own:'Todos'},
+    {t:'Registrar gastos compartidos cada dia', own:'Sofia'},
+    {t:'Llenar deposito antes de entrar en Italia', own:'Conductor'},
+    {t:'Foto grupal en cada ciudad', own:'Diego'}
   ]},
-  {s:'De vuelta',items:[
-    {t:'Check-out de todos los alojamientos', owner:'Todos', deadline:''},
-    {t:'Balance final de gastos del grupo', owner:'Sofia', deadline:''},
-    {t:'Confirmar hora del vuelo el 25 julio', owner:'Ana', deadline:'Jul 10'}
+  {s:'De vuelta', items:[
+    {t:'Check-out de todos los alojamientos', own:'Todos'},
+    {t:'Balance final de gastos del grupo', own:'Sofia'},
+    {t:'Confirmar hora del vuelo el 25 julio', own:'Ana'}
   ]}
 ];
 
-var MAPS_LINKS = [
-  'https://www.google.com/maps/dir/Alicante,+Spain/Marseille,+France',
-  '',
-  'https://www.google.com/maps/dir/Marseille,+France/Pisa,+Italy/Rome,+Italy',
-  '',
-  '',
-  'https://www.google.com/maps/dir/Rome,+Italy/Venice,+Italy',
-  '',
-  'https://www.google.com/maps/dir/Venice,+Italy/Munich,+Germany',
-  '',
-  'https://www.google.com/maps/dir/Munich,+Germany/Cologne,+Germany',
-  'https://www.google.com/maps/dir/Cologne,+Germany/Brussels,+Belgium/Paris,+France',
-  '',
-  'https://www.google.com/maps/dir/Paris,+France/Alicante,+Spain'
-];
-
-var ZTL_DAYS = {2:true, 3:true, 4:true};
-
 var TL = [
-  {date:'12 jul',city:'Alicante a Marsella',drive:true,km:620,h:'6h 30min',
+  {date:'12 jul', city:'Alicante a Marsella', drive:true, km:620, h:'6h 30min', ztl:false,
+   maps:'https://www.google.com/maps/dir/Alicante,+Spain/Marseille,+France',
    acts:['Salida temprana 7:00h','Parada en Montpellier 30 min','Llegada a Marsella por la tarde','Check-in y primer vistazo al puerto'],
-   stay:'Airbnb Marsella noche 1',note:'Organizar turnos de conduccion. Llevar snacks y musica para el camino.'},
-  {date:'13 jul',city:'Marsella',drive:false,km:0,h:'',
-   acts:['Vieux-Port de manana','Basilique Notre-Dame de la Garde','Calanques de Cassis imprescindible','Bouillabaisse en restaurante local'],
-   stay:'Airbnb Marsella noche 2',note:'Las Calanques: reservar transporte con antelacion. Antes de las 9h para evitar el calor.'},
-  {date:'14 jul',city:'Marsella a Pisa a Roma',drive:true,km:900,h:'8h 30min',
-   acts:['Salida muy temprana 6:00h','Parada 1h en Pisa - Torre Inclinada','Autopista A1 hasta Roma','Check-in tarde noche'],
-   stay:'Airbnb Roma noche 1',note:'AVISO: 900km en un dia es muy exigente. Alternativa: dormir en Pisa y llegar a Roma el dia 15.'},
-  {date:'15 jul',city:'Roma',drive:false,km:0,h:'',
-   acts:['Coliseo y Foro Romano reservar online','Barrio Palatino','Zona Monti para comer','Fontana di Trevi de noche'],
-   stay:'Airbnb Roma noche 2',note:'Coliseo: reservar en coopculture.it, sin reserva hay 2-3h de cola en julio.'},
-  {date:'16 jul',city:'Roma',drive:false,km:0,h:'',
-   acts:['Vaticano y Capilla Sixtina madrugar','Plaza San Pedro','Castel Sant Angelo','Trastevere de tarde y noche'],
-   stay:'Airbnb Roma noche 3',note:'Vaticano: museivaticani.va. Ir a las 8h, se agota en julio dias antes.'},
-  {date:'17 jul',city:'Roma a Venecia',drive:true,km:528,h:'5h 30min',
+   stay:'Airbnb Marsella noche 1', note:'Organizar turnos de conduccion. Llevar snacks y musica.'},
+  {date:'13 jul', city:'Marsella', drive:false, km:0, h:'', ztl:false, maps:'',
+   acts:['Vieux-Port de manana','Notre-Dame de la Garde','Calanques de Cassis','Bouillabaisse en restaurante local'],
+   stay:'Airbnb Marsella noche 2', note:'Las Calanques: reservar transporte con antelacion. Antes de las 9h.'},
+  {date:'14 jul', city:'Marsella a Pisa a Roma', drive:true, km:900, h:'8h 30min', ztl:true,
+   maps:'https://www.google.com/maps/dir/Marseille,+France/Pisa,+Italy/Rome,+Italy',
+   acts:['Salida muy temprana 6:00h','Parada 1h en Pisa — Torre Inclinada','Autopista A1 hasta Roma','Check-in tarde noche'],
+   stay:'Airbnb Roma noche 1', note:'AVISO: 900km en un dia es muy exigente. Alternativa: dormir en Pisa.'},
+  {date:'15 jul', city:'Roma', drive:false, km:0, h:'', ztl:true, maps:'',
+   acts:['Coliseo y Foro Romano — reservar online','Barrio Palatino','Zona Monti para comer','Fontana di Trevi de noche'],
+   stay:'Airbnb Roma noche 2', note:'Coliseo: coopculture.it — sin reserva hay 2-3h de cola en julio.'},
+  {date:'16 jul', city:'Roma', drive:false, km:0, h:'', ztl:true, maps:'',
+   acts:['Vaticano y Capilla Sixtina — madrugar','Plaza San Pedro','Castel Sant Angelo','Trastevere de tarde y noche'],
+   stay:'Airbnb Roma noche 3', note:'Vaticano: museivaticani.va. Ir a las 8h — se agota en julio.'},
+  {date:'17 jul', city:'Roma a Venecia', drive:true, km:528, h:'5h 30min', ztl:false,
+   maps:'https://www.google.com/maps/dir/Rome,+Italy/Venice,+Italy',
    acts:['Salida a las 8:00h','Parada opcional en Florencia','Llegar a Mestre y aparcar','Check-in'],
-   stay:'Airbnb Mestre o Venecia noche 1',note:'Parking Mestre: 15 euros/dia. Venecia isla: 35-70 euros/dia. Diferencia de 100 euros en 2 dias.'},
-  {date:'18 jul',city:'Venecia',drive:false,km:0,h:'',
-   acts:['Plaza San Marcos antes de las 8h','Vaporetto linea 1 Canal Grande','Isla de Burano casas de colores','Barrio Dorsoduro autentico'],
-   stay:'Airbnb Mestre o Venecia noche 2',note:'Madrugar es la clave. A las 7h Venecia esta vacia y es magica.'},
-  {date:'19 jul',city:'Venecia a Munich',drive:true,km:425,h:'4h 30min',
+   stay:'Airbnb Mestre noche 1', note:'Parking Mestre: 15 euros/dia. Venecia isla: 35-70 euros/dia.'},
+  {date:'18 jul', city:'Venecia', drive:false, km:0, h:'', ztl:false, maps:'',
+   acts:['Plaza San Marcos antes de las 8h','Vaporetto linea 1 Canal Grande','Isla de Burano','Barrio Dorsoduro'],
+   stay:'Airbnb Mestre noche 2', note:'Madrugar es la clave. A las 7h Venecia esta vacia y es magica.'},
+  {date:'19 jul', city:'Venecia a Munich', drive:true, km:425, h:'4h 30min', ztl:false,
+   maps:'https://www.google.com/maps/dir/Venice,+Italy/Munich,+Germany',
    acts:['Salida a las 9:00h','Cruce espectacular de los Alpes','Vignette Austria obligatoria 9 euros','Tarde libre en Marienplatz'],
-   stay:'Airbnb Munich noche 1',note:'Sin vignette Austria: multa de 120 euros. Comprar online en asfinag.at.'},
-  {date:'20 jul',city:'Munich',drive:false,km:0,h:'',
-   acts:['Englischer Garten y rio con surfistas','Marienplatz y Glockenspiel 11h y 17h','Hofbrauhaus cerveza 1L unos 12 euros','BMW Museum opcional'],
-   stay:'Airbnb Munich noche 2',note:'Day ticket transporte: 9 euros. Julio tiene festivales de verano al aire libre.'},
-  {date:'21 jul',city:'Munich a Colonia',drive:true,km:574,h:'5h 15min',
-   acts:['Salida a las 8:30h','Autobahn sin limite de velocidad','Parada descanso opcional','Tarde en Colonia Dom y barrio Ehrenfeld'],
-   stay:'Airbnb Colonia 1 noche',note:'Autobahn sin limite: experiencia unica. El Dom de Colonia impresiona incluso desde fuera.'},
-  {date:'22 jul',city:'Colonia a Bruselas a Paris',drive:true,km:510,h:'5h',
-   acts:['Parada 2h en Bruselas Grand Place','Manneken Pis y gofres belgas','Llegada a Paris tarde noche'],
-   stay:'Airbnb Paris noche 1',note:'AVISO: Maximo 2h en Bruselas o llegamos muy tarde. Salida temprana imprescindible.'},
-  {date:'23 jul',city:'Paris',drive:false,km:0,h:'',
-   acts:['Torre Eiffel al amanecer sin colas','Le Marais y Centro Pompidou','Louvre o Musee d Orsay reservar','Montmartre y Sacre Coeur'],
-   stay:'Airbnb Paris noche 2',note:'Baguette mas jamon mas queso junto al Sena es el almuerzo perfecto por 5 euros.'},
-  {date:'24 jul',city:'Paris a Alicante',drive:true,km:1150,h:'10h o mas',
+   stay:'Airbnb Munich noche 1', note:'Sin vignette Austria: multa de 120 euros. Comprar en asfinag.at.'},
+  {date:'20 jul', city:'Munich', drive:false, km:0, h:'', ztl:false, maps:'',
+   acts:['Englischer Garten y rio con surfistas','Marienplatz y Glockenspiel 11h y 17h','Hofbrauhaus cerveza 1L 12 euros','BMW Museum opcional'],
+   stay:'Airbnb Munich noche 2', note:'Day ticket transporte: 9 euros. Julio tiene festivales de verano.'},
+  {date:'21 jul', city:'Munich a Colonia', drive:true, km:574, h:'5h 15min', ztl:false,
+   maps:'https://www.google.com/maps/dir/Munich,+Germany/Cologne,+Germany',
+   acts:['Salida a las 8:30h','Autobahn sin limite de velocidad','Parada descanso opcional','Tarde en Colonia'],
+   stay:'Airbnb Colonia 1 noche', note:'Autobahn sin limite: experiencia unica. El Dom impresiona desde fuera.'},
+  {date:'22 jul', city:'Colonia a Bruselas a Paris', drive:true, km:510, h:'5h', ztl:false,
+   maps:'https://www.google.com/maps/dir/Cologne,+Germany/Brussels,+Belgium/Paris,+France',
+   acts:['Parada 2h en Bruselas — Grand Place','Manneken Pis y gofres belgas','Llegada a Paris tarde noche'],
+   stay:'Airbnb Paris noche 1', note:'AVISO: Maximo 2h en Bruselas. Salida temprana imprescindible.'},
+  {date:'23 jul', city:'Paris', drive:false, km:0, h:'', ztl:false, maps:'',
+   acts:['Torre Eiffel al amanecer sin colas','Le Marais y Centro Pompidou','Louvre o Musee d Orsay','Montmartre y Sacre Coeur'],
+   stay:'Airbnb Paris noche 2', note:'Baguette mas jamon mas queso junto al Sena: almuerzo por 5 euros.'},
+  {date:'24 jul', city:'Paris a Alicante', drive:true, km:1150, h:'10h o mas', ztl:false,
+   maps:'https://www.google.com/maps/dir/Paris,+France/Alicante,+Spain',
    acts:['Salida muy temprana 5:00h','Paradas cada 2h obligatorio','Cruce de los Pirineos','Llegada a Alicante de noche'],
-   stay:'Casa',note:'AVISO: 1.150km, el dia mas largo. Alternativa: dormir en Zaragoza y llegar el 25 de manana.'}
+   stay:'Casa', note:'AVISO: 1.150km, el dia mas largo. Alternativa: dormir en Zaragoza.'}
 ];
 
-// ---- NAVIGATION ----
-function showView(name, btn) {
+// ===== NAV =====
+var VIEWS = ['dashboard','alojamientos','timeline','presupuesto','gastos','notas','checklist','emergencias'];
+function showView(name, idx) {
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
-  document.querySelectorAll('.nb,.bnb').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.bnb').forEach(function(b){b.classList.remove('active');});
   document.getElementById('view-'+name).classList.add('active');
-  if(btn) btn.classList.add('active');
+  var btns = document.querySelectorAll('.bnb');
+  if(btns[idx]) btns[idx].classList.add('active');
 }
 
-// ---- COUNTDOWN ----
+// ===== COUNTDOWN =====
 function updateCountdown() {
-  var trip = new Date('2026-07-12T00:00:00');
-  var now = new Date();
-  var diff = Math.ceil((trip - now) / 86400000);
+  var diff = Math.ceil((new Date('2026-07-12') - new Date()) / 86400000);
   var el = document.getElementById('days-left');
-  var pill = document.getElementById('pill');
   if(el) el.textContent = diff > 0 ? diff : 'Ya!';
-  if(pill) pill.textContent = diff > 0 ? diff+' dias' : 'Hoy!';
 }
 
-// ---- VIAJEROS ----
-function toggleViajeros() {
-  document.getElementById('vpopup').classList.toggle('open');
-}
-function ajustar(d) {
-  nViajeros = Math.max(1, nViajeros+d);
-  var pp = Math.round(BUDGET_TOTAL/nViajeros);
-  document.getElementById('viajeros-val').textContent = nViajeros;
-  document.getElementById('vbig').textContent = nViajeros;
-  document.getElementById('vpp').textContent = pp+' euros por persona';
-  document.getElementById('vtotal').textContent = 'Total: '+BUDGET_TOTAL+' euros';
-  document.getElementById('dash-pp').textContent = pp+'€';
-  document.getElementById('dash-total').textContent = 'Total '+BUDGET_TOTAL+'€';
+// ===== NOMBRE =====
+function guardarNombre() {
+  var v = document.getElementById('ninput').value.trim();
+  if(!v) return;
+  NOMBRE = v;
+  localStorage.setItem('et_nombre', v);
+  document.getElementById('nmodal').classList.remove('open');
 }
 
-// ---- SHEETS ----
-function loadSheet() {
-  fetch(SHEET_URL)
-    .then(function(r){return r.text();})
-    .then(function(txt){
-      if(!txt || txt.indexOf('ciudad')===-1) return;
-      var lines = txt.trim().split('\n');
-      var cur = {city:'',air:'',book:''};
-      for(var i=1;i<lines.length;i++){
-        var cols = lines[i].split(',');
-        var city = cols[0]?cols[0].trim().toLowerCase():'';
-        if(city && LINKS[city]!==undefined){
-          if(cur.city && cur.city!==city) LINKS[cur.city]={air:cur.air.replace(/"/g,''),book:cur.book.replace(/"/g,'')};
-          cur={city:city,air:cols[1]?cols[1].trim():'',book:cols[2]?cols[2].trim():''};
-        } else if(cur.city){
-          if(cols[1]) cur.air+=cols[1].trim();
-          if(cols[2]) cur.book+=cols[2].trim();
-        }
-      }
-      if(cur.city && LINKS[cur.city]!==undefined) LINKS[cur.city]={air:cur.air.replace(/"/g,''),book:cur.book.replace(/"/g,'')};
-      renderCities();
-    })
-    .catch(function(){});
+// ===== SUPABASE LOAD =====
+function loadData() {
+  // Votos
+  supa('GET','votos','','?select=*').then(function(data) {
+    if(!Array.isArray(data)) return;
+    votes = {};
+    data.forEach(function(v){ votes[v.ciudad+'_'+v.tipo] = v.usuario; });
+    renderCities();
+    setBadge(true);
+  }).catch(function(){ setBadge(false); });
+
+  // Gastos
+  supa('GET','gastos','','?select=*&order=created_at').then(function(data) {
+    if(!Array.isArray(data)) return;
+    gastos = data.map(function(g){
+      return {id:g.id, payer:g.payer, desc:g.descripcion, amt:parseFloat(g.monto)};
+    });
+    renderGastos();
+  });
+
+  // Checklist
+  supa('GET','checklist','','?select=*').then(function(data) {
+    if(!Array.isArray(data)) return;
+    data.forEach(function(c){ if(c.done) clDone[c.id]=true; });
+    renderCL();
+  });
 }
 
-// ---- ALOJAMIENTOS ----
-function setEstado(cityId, estado) {
-  estadoAlo[cityId] = estado;
-  renderCities();
-  updateDashReservados();
-}
-function updateDashReservados() {
-  var res = Object.values(estadoAlo).filter(function(e){return e==='reservado';}).length;
-  var el = document.getElementById('dash-res');
-  if(el) el.textContent = res+' reservados';
+function setBadge(ok) {
+  var b = document.getElementById('badge');
+  if(!b) return;
+  if(ok){ b.textContent='⚡ En vivo'; b.className='hbadge live'; }
+  else  { b.textContent='Sin conexion'; b.className='hbadge'; }
 }
 
+// ===== ALOJAMIENTOS =====
 function renderCities() {
   var html = '';
-  for(var i=0;i<CITIES.length;i++){
-    var c = CITIES[i];
-    if(!LINKS[c.id]) continue;
-    var airUrl = LINKS[c.id].air;
-    var bookUrl = LINKS[c.id].book;
-    var vy = votes[c.id+'_y']?'v-yes':'';
-    var vf = votes[c.id+'_f']?'v-fav':'';
-    var vn = votes[c.id+'_n']?'v-no':'';
-    var est = estadoAlo[c.id]||'sin-buscar';
-    var badgeMap = {'sin-buscar':'badge-sb','en-votacion':'badge-ev','reservado':'badge-re'};
-    var badgeClass = badgeMap[est]||'badge-sb';
-    var labelMap = {'sin-buscar':'Sin buscar','en-votacion':'En votacion','reservado':'Reservado'};
-    var badgeLabel = labelMap[est]||'Sin buscar';
+  CITIES.forEach(function(c) {
+    var air = LINKS[c.id] ? LINKS[c.id].air : '';
+    var book = LINKS[c.id] ? LINKS[c.id].book : '';
+    var vy = votes[c.id+'_y'] ? 'vy' : '';
+    var vf = votes[c.id+'_f'] ? 'vf' : '';
+    var vn = votes[c.id+'_n'] ? 'vn' : '';
     html += '<div class="city-block">';
-    html += '<div class="city-hdr"><div class="cflag">'+FLAGS[c.flag]+'</div>';
-    html += '<div style="flex:1"><div class="cname">'+c.name+'</div>';
-    html += '<div class="cmeta">'+c.dates+' · '+(c.nights>0?c.nights+' noches':'parada')+' · '+c.zone+'</div></div>';
-    html += '<span class="estado-badge '+badgeClass+'">'+badgeLabel+'</span>';
-    html += '<div class="cnights">'+(c.nights>0?c.nights+(c.nights>1?' noches':' noche'):'Parada')+'</div></div>';
-    html += '<div class="city-links">';
-    // Estado buttons
-    html += '<div class="alo-estado">';
-    html += '<button class="estado-btn '+(est==='sin-buscar'?'sin-buscar':'')+'" onclick="setEstado(\''+c.id+'\',\'sin-buscar\')">Sin buscar</button>';
-    html += '<button class="estado-btn '+(est==='en-votacion'?'en-votacion':'')+'" onclick="setEstado(\''+c.id+'\',\'en-votacion\')">En votacion</button>';
-    html += '<button class="estado-btn '+(est==='reservado'?'reservado':'')+'" onclick="setEstado(\''+c.id+'\',\'reservado\')">Reservado</button>';
-    html += '</div>';
-    // Airbnb
+    html += '<div class="city-h"><div class="city-flag">'+c.flag+'</div>';
+    html += '<div style="flex:1"><div class="city-name">'+c.name+'</div>';
+    html += '<div class="city-meta">'+c.dates+' · '+c.zone+'</div></div>';
+    html += '<div class="city-nights">'+c.nights+(c.nights>1?' noches':' noche')+'</div></div>';
+    html += '<div class="city-body">';
     html += '<div class="lrow"><div class="lp"><div class="da"></div><span class="la">Airbnb</span></div>';
-    if(airUrl){
-      html += '<div class="ldesc ok">Inicia sesion en Airbnb para ver las opciones</div>';
-      html += '<a href="'+airUrl+'" target="_blank" class="btn-ir ba">Ver opciones</a>';
-    } else {
-      html += '<div class="ldesc">Proximamente</div>';
-    }
+    if(air){ html += '<div class="ldesc ok">Inicia sesion en Airbnb para ver</div><a href="'+air+'" target="_blank" class="btn-ver ba">Ver</a>'; }
+    else   { html += '<div class="ldesc">Proximamente</div>'; }
     html += '</div>';
-    // Booking
     html += '<div class="lrow"><div class="lp"><div class="db"></div><span class="lb">Booking</span></div>';
-    if(bookUrl){
-      html += '<div class="ldesc ok">Inicia sesion en Booking para ver las opciones</div>';
-      html += '<a href="'+bookUrl+'" target="_blank" class="btn-ir bb">Ver opciones</a>';
-    } else {
-      html += '<div class="ldesc">Proximamente</div>';
-    }
+    if(book){ html += '<div class="ldesc ok">Inicia sesion en Booking para ver</div><a href="'+book+'" target="_blank" class="btn-ver bb">Ver</a>'; }
+    else    { html += '<div class="ldesc">Proximamente</div>'; }
     html += '</div>';
-    // Votes
-    html += '<div class="vote-row">';
-    html += '<button class="vbtn '+vy+'" onclick="vote(\''+c.id+'\',\'y\')">👍 Me apunto</button>';
-    html += '<button class="vbtn '+vf+'" onclick="vote(\''+c.id+'\',\'f\')">⭐ Favorita</button>';
-    html += '<button class="vbtn '+vn+'" onclick="vote(\''+c.id+'\',\'n\')">👎 Prefiero otra</button>';
+    html += '<div class="vrow">';
+    html += '<button class="vb '+vy+'" onclick="vote(\''+c.id+'\',\'y\')">👍 Me apunto</button>';
+    html += '<button class="vb '+vf+'" onclick="vote(\''+c.id+'\',\'f\')">⭐ Favorita</button>';
+    html += '<button class="vb '+vn+'" onclick="vote(\''+c.id+'\',\'n\')">👎 No</button>';
     html += '</div></div></div>';
-  }
+  });
   document.getElementById('city-blocks').innerHTML = html;
   renderRanking();
 }
 
-function vote(id,type){
-  var k=id+'_'+type;
-  if(votes[k]){delete votes[k];}
-  else{delete votes[id+'_y'];delete votes[id+'_f'];delete votes[id+'_n'];votes[k]=true;}
-  renderCities();
+function vote(id, tipo) {
+  if(!NOMBRE) return;
+  var body = {ciudad:id, tipo:tipo, usuario:NOMBRE};
+  supa('POST','votos',body,'?on_conflict=ciudad,usuario').then(function(){
+    loadData();
+  });
 }
 
-function getScore(id){return (votes[id+'_y']?2:0)+(votes[id+'_f']?3:0)+(votes[id+'_n']?-1:0);}
-
-function renderRanking(){
-  var scored=[];
-  for(var i=0;i<CITIES.length;i++){
-    var s=getScore(CITIES[i].id);
-    if(s!==0) scored.push({name:CITIES[i].name,flag:FLAGS[CITIES[i].flag],score:s});
-  }
-  scored.sort(function(a,b){return b.score-a.score;});
-  if(!scored.length){document.getElementById('ranking-list').innerHTML='<div class="rk-empty">Sin votos todavia.</div>';return;}
-  var medals=['🥇','🥈','🥉'];
-  var html='';
-  for(var i=0;i<Math.min(scored.length,6);i++){
-    html+='<div class="rk-row"><div class="rk-pos">'+(medals[i]||'·')+'</div>';
-    html+='<div class="rk-name">'+scored[i].flag+' '+scored[i].name+'</div>';
-    html+='<div class="rk-pts">'+scored[i].score+' pts</div></div>';
-  }
-  document.getElementById('ranking-list').innerHTML=html;
-}
-
-// ---- TIMELINE ----
-function renderTL(){
-  var html='';
-  for(var i=0;i<TL.length;i++){
-    var d=TL[i];
-    var tags='';
-    if(d.drive) tags+='<span class="tpill pd">🚗 '+d.h+'</span> ';
-    tags+=d.km>0?'<span class="tpill pk">'+d.km+'km</span>':'<span class="tpill ps">Dia libre</span>';
-    if(ZTL_DAYS[i]) tags+=' <span class="tpill pill-ztl">⚠️ ZTL Italia</span>';
-    var acts='';
-    for(var j=0;j<d.acts.length;j++) acts+='<div class="tact">'+d.acts[j]+'</div>';
-    var tray='';
-    if(d.km>0){
-      tray='<div class="tsub" style="margin-top:0.5rem">Trayecto</div>';
-      tray+='<div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-top:0.18rem">';
-      tray+='<span class="tpill pd" style="padding:0.2rem 0.48rem">🚗 '+d.h+'</span>';
-      tray+='<span class="tpill pk" style="padding:0.2rem 0.48rem">'+d.km+' km</span></div>';
-    }
-    var mapsBtn='';
-    if(MAPS_LINKS[i]){
-      mapsBtn='<a href="'+MAPS_LINKS[i]+'" target="_blank" class="btn-maps">🗺 Abrir en Google Maps</a>';
-    }
-    var ztlWarn='';
-    if(ZTL_DAYS[i]){
-      ztlWarn='<div class="tztl"><div class="tztl-l">⚠️ Zona ZTL Italia</div><div class="tztl-t">No entrar al centro historico con el coche. Multas entre 100 y 300 euros. Aparcar en la periferia y usar transporte publico.</div></div>';
-    }
-    html+='<div class="tl-row" id="tl'+i+'" onclick="toggleTL('+i+')">';
-    html+='<div class="tl-head"><div class="tl-date">'+d.date+'</div>';
-    html+='<div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>';
-    html+='<div class="tl-city">'+d.city+'</div>';
-    html+='<div style="display:flex;gap:0.28rem;align-items:center;flex-wrap:wrap">'+tags+'</div>';
-    html+='<span class="tl-ch">▾</span></div>';
-    html+='<div class="tl-body"><div><div class="tsub">Actividades</div>'+acts;
-    html+=ztlWarn;
-    html+='<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div>';
-    html+=mapsBtn+'</div>';
-    html+='<div><div class="tsub">Alojamiento</div><div class="tstay">'+d.stay+'</div>'+tray+'</div>';
-    html+='</div></div>';
-  }
-  document.getElementById('tl-container').innerHTML=html;
-}
-function toggleTL(i){document.getElementById('tl'+i).classList.toggle('open');}
-
-// ---- BUDGET ----
-function renderBudget(){
-  var total=BUDGET.reduce(function(s,b){return s+b.amount;},0);
-  document.getElementById('bud-rows').innerHTML=BUDGET.map(function(b){
-    var pct=Math.round(b.amount/total*100);
-    return '<div class="bud-row"><div class="bud-cat"><span>'+b.cat+'</span><div class="bud-bar"><div class="bud-fill" style="width:'+pct+'%;background:'+b.color+'"></div></div></div><div class="bud-amt">'+b.amount+'€</div><div class="bud-pct">'+pct+'%</div></div>';
+function renderRanking() {
+  var sc = CITIES.map(function(c){
+    return {name:c.name, flag:c.flag,
+      score:(votes[c.id+'_y']?2:0)+(votes[c.id+'_f']?3:0)+(votes[c.id+'_n']?-1:0)};
+  }).filter(function(x){return x.score!==0;});
+  sc.sort(function(a,b){return b.score-a.score;});
+  if(!sc.length){ document.getElementById('rk-list').innerHTML='<div class="rk-empty">Sin votos todavia.</div>'; return; }
+  var m=['🥇','🥈','🥉'];
+  document.getElementById('rk-list').innerHTML = sc.slice(0,6).map(function(x,i){
+    return '<div class="rk-row"><span class="rk-pos">'+(m[i]||'·')+'</span><span class="rk-name">'+x.flag+' '+x.name+'</span><span class="rk-pts">'+x.score+' pts</span></div>';
   }).join('');
 }
 
-// ---- GASTOS + LIQUIDACION ----
-function addGasto(){
-  var payer=document.getElementById('g-payer').value;
-  var desc=document.getElementById('g-desc').value.trim();
-  var amt=parseFloat(document.getElementById('g-amt').value);
-  var cat=document.getElementById('g-cat').value;
-  if(!payer||!desc||!amt||amt<=0) return;
-  gastos.push({payer:payer,desc:desc,amt:amt,cat:cat});
-  document.getElementById('g-desc').value='';
-  document.getElementById('g-amt').value='';
-  renderGastos();
+// ===== TIMELINE =====
+function renderTL() {
+  document.getElementById('tl-container').innerHTML = TL.map(function(d,i){
+    var tags = '';
+    if(d.drive) tags += '<span class="tp tpd">🚗 '+d.h+'</span> ';
+    tags += d.km>0 ? '<span class="tp tpk">'+d.km+'km</span>' : '<span class="tp tps">Dia libre</span>';
+    if(d.ztl) tags += ' <span class="tp tpz">⚠️ ZTL</span>';
+    var acts = d.acts.map(function(a){return '<div class="tact">'+a+'</div>';}).join('');
+    var tray = d.km>0 ? '<div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-top:0.3rem"><span class="tp tpd">🚗 '+d.h+'</span><span class="tp tpk">'+d.km+' km</span></div>' : '';
+    var ztl = d.ztl ? '<div class="tztl"><div class="tztl-t">⚠️ ZTL Italia: no entrar al centro con el coche. Multa 100-300 euros. Aparcar en la periferia.</div></div>' : '';
+    var mapsBtn = d.maps ? '<a href="'+d.maps+'" target="_blank" class="btn-maps">🗺 Abrir en Google Maps</a>' : '';
+    return '<div class="tl-row" id="tl'+i+'" onclick="toggleTL('+i+')">' +
+      '<div class="tl-h"><div class="tl-date">'+d.date+'</div>' +
+      '<div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>' +
+      '<div class="tl-city">'+d.city+'</div>' +
+      '<div style="display:flex;gap:0.28rem;align-items:center;flex-wrap:wrap">'+tags+'</div>' +
+      '<span class="tl-ch">▾</span></div>' +
+      '<div class="tl-body">' +
+        '<div><div class="tsub">Actividades</div>'+acts+ztl+
+        '<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div>'+mapsBtn+'</div>' +
+        '<div><div class="tsub">Alojamiento</div><div class="tstay">'+d.stay+'</div>'+tray+'</div>' +
+      '</div></div>';
+  }).join('');
 }
-function renderGastos(){
-  var html='';
-  if(!gastos.length){html='<div style="font-size:0.78rem;color:#94a3b8;padding:0.48rem 0">Sin gastos todavia.</div>';}
-  else{
-    for(var i=0;i<gastos.length;i++){
-      var g=gastos[i];
-      html+='<div class="gasto-item">';
-      html+='<div class="gasto-desc"><div class="gasto-name">'+g.desc+' <span style="font-size:0.62rem;color:#94a3b8;background:#f1f5f9;padding:0.08rem 0.32rem;border-radius:4px">'+g.cat+'</span></div>';
-      html+='<div class="gasto-who">Pago: '+g.payer+'</div></div>';
-      html+='<div class="gasto-amt">'+g.amt.toFixed(2)+'€</div>';
-      html+='<button class="gasto-del" onclick="deleteGasto(\''+g.id+'\')">×</button></div>';
-    }
-  }
-  document.getElementById('gasto-list').innerHTML=html;
-  renderBalances();
-  var total=gastos.reduce(function(s,g){return s+g.amt;},0);
-  var dge=document.getElementById('dash-gastos');
-  var dgn=document.getElementById('dash-gnr');
-  if(dge) dge.textContent=total.toFixed(0)+'€';
-  if(dgn) dgn.textContent=gastos.length+' movimiento'+(gastos.length!==1?'s':'');
-}
+function toggleTL(i){ document.getElementById('tl'+i).classList.toggle('open'); }
 
-function renderBalances(){
-  var total=gastos.reduce(function(s,g){return s+g.amt;},0);
-  var paid={};
-  var owes={};
-  PEOPLE.forEach(function(p){paid[p]=0;owes[p]=0;});
-  gastos.forEach(function(g){
-    if(paid[g.payer]!==undefined) paid[g.payer]+=g.amt;
-    // Asymmetric: split only among participants
-    var parts = g.participantes ? g.participantes.split(',') : PEOPLE;
-    var share = g.amt / parts.length;
-    parts.forEach(function(p){ if(owes[p]!==undefined) owes[p]+=share; });
-  });
-  document.getElementById('gtotal').textContent=total.toFixed(2)+'€';
-  var html='';
-  PEOPLE.forEach(function(p){
-    var bal=(paid[p]||0)-(owes[p]||0);
-    var pos=bal>=0;
-    html+='<div class="bal-card"><div class="bal-name">'+p+'</div>';
-    html+='<div class="bal-amt '+(pos?'bal-pos':'bal-neg')+'">'+(pos?'+':'')+bal.toFixed(0)+'€</div>';
-    html+='<div class="bal-lbl">'+(pos?'Le deben':'Debe')+'</div>';
-    html+='<div class="bal-paid">Pago: '+(paid[p]||0).toFixed(0)+'€</div></div>';
-  });
-  document.getElementById('balance-grid').innerHTML=html;
-  renderLiquidacion(paid, owes);
-}
-
-function renderLiquidacion(paid, owes){
-  var balances = {};
-  PEOPLE.forEach(function(p){ balances[p] = (paid[p]||0) - (owes[p]||0); });
-
-  var debtors = [], creditors = [];
-  PEOPLE.forEach(function(p){
-    if(balances[p] < -0.01) debtors.push({name:p, amt:-balances[p]});
-    else if(balances[p] > 0.01) creditors.push({name:p, amt:balances[p]});
-  });
-
-  debtors.sort(function(a,b){return b.amt-a.amt;});
-  creditors.sort(function(a,b){return b.amt-a.amt;});
-
-  var transfers = [];
-  var di=0, ci=0;
-  var dCopy = debtors.map(function(x){return {name:x.name,amt:x.amt};});
-  var cCopy = creditors.map(function(x){return {name:x.name,amt:x.amt};});
-
-  while(di<dCopy.length && ci<cCopy.length){
-    var amt = Math.min(dCopy[di].amt, cCopy[ci].amt);
-    if(amt > 0.01) transfers.push({from:dCopy[di].name, to:cCopy[ci].name, amt:amt});
-    dCopy[di].amt -= amt;
-    cCopy[ci].amt -= amt;
-    if(dCopy[di].amt < 0.01) di++;
-    if(cCopy[ci].amt < 0.01) ci++;
-  }
-
-  if(!transfers.length){
-    document.getElementById('liq-list').innerHTML='<div class="liq-empty">'+(total<0.01?'Sin gastos todavia.':'Todo en orden, nadie debe nada.')+'</div>';
-    return;
-  }
-  document.getElementById('liq-list').innerHTML=transfers.map(function(t){
-    return '<div class="liq-row"><strong>'+t.from+'</strong><span class="liq-arrow">→</span><strong>'+t.to+'</strong><span class="liq-amt">'+t.amt.toFixed(2)+'€</span></div>';
+// ===== PRESUPUESTO =====
+function renderBudget() {
+  var total = BUDGET.reduce(function(s,b){return s+b.amount;},0);
+  document.getElementById('bud-rows').innerHTML = BUDGET.map(function(b){
+    var pct = Math.round(b.amount/total*100);
+    return '<div class="bud-row"><div class="bud-cat"><span>'+b.cat+'</span>' +
+      '<div class="bud-bar"><div class="bud-fill" style="width:'+pct+'%;background:'+b.color+'"></div></div></div>' +
+      '<div class="bud-amt">'+b.amount+'€</div><div class="bud-pct">'+pct+'%</div></div>';
   }).join('');
 }
 
-// ---- NOTAS ----
-function renderNotas(){
-  var cities=Object.keys(NOTAS_DATA);
-  var html='';
-  cities.forEach(function(c){html+='<button class="ntab'+(activeNota===c?' active':'')+'" onclick="setNota(\''+c+'\')">'+c+'</button>';});
-  document.getElementById('notas-tabs').innerHTML=html;
-  var n=NOTAS_DATA[activeNota];
-  var secs=[{t:'Restaurantes',items:n.restaurantes},{t:'Lugares imprescindibles',items:n.lugares},{t:'Consejos locales',items:n.consejos}];
-  var chtml='';
-  secs.forEach(function(s){
-    chtml+='<div class="nota-sec"><div class="nota-sec-title">'+s.t+'</div>';
-    s.items.forEach(function(item){chtml+='<div class="nota-item"><span class="ndot">●</span>'+item+'</div>';});
-    chtml+='</div>';
-  });
-  document.getElementById('nota-content').innerHTML=chtml;
-}
-function setNota(c){activeNota=c;renderNotas();}
-
-// ---- CHECKLIST ----
-function renderCL(){
-  var html='';
-  var totalItems=0,doneItems=0;
-  var today = new Date();
-  CL_DATA.forEach(function(sec,si){
-    var done=sec.items.filter(function(_,ii){return clDone[si+'_'+ii];}).length;
-    totalItems+=sec.items.length; doneItems+=done;
-    html+='<div class="cl-sec"><div class="cl-stitle">'+sec.s;
-    html+=' <span style="margin-left:auto;font-size:0.6rem;background:#f1f5f9;padding:0.1rem 0.35rem;border-radius:4px;color:#64748b">'+done+'/'+sec.items.length+'</span></div>';
-    sec.items.forEach(function(item,ii){
-      var d=clDone[si+'_'+ii];
-      var isUrgent=false;
-      if(item.deadline && !d){
-        var dl=new Date(2026,5,parseInt(item.deadline.split(' ')[1]));
-        if(item.deadline.indexOf('Jul')!==-1) dl=new Date(2026,6,parseInt(item.deadline.split(' ')[1]));
-        isUrgent=(dl-today)<(15*86400000);
-      }
-      html+='<div class="cl-item'+(d?' done':'')+(isUrgent?' urgent':'')+'" onclick="toggleCL('+si+','+ii+')">';
-      html+='<div class="cl-box">'+(d?'✓':'')+'</div>';
-      html+='<span class="cl-txt">'+item.t+'</span>';
-      if(item.owner) html+='<span class="cl-owner">'+item.owner+'</span>';
-      if(item.deadline && !d) html+='<span class="cl-deadline">'+item.deadline+'</span>';
-      html+='</div>';
-    });
-    html+='</div>';
-  });
-  document.getElementById('cl-container').innerHTML=html;
-  var pct=totalItems?Math.round(doneItems/totalItems*100):0;
-  var e1=document.getElementById('dash-cl');
-  var e2=document.getElementById('dash-cln');
-  if(e1) e1.textContent=pct+'%';
-  if(e2) e2.textContent=doneItems+' de '+totalItems+' tareas';
-}
-function toggleCL(si,ii){clDone[si+'_'+ii]=!clDone[si+'_'+ii];renderCL();}
-
-// ---- EMERGENCIAS ----
-function editField(id, label){
-  var val=prompt('Introducir '+label+':',document.getElementById(id).textContent==='Anadir →'?'':document.getElementById(id).textContent);
-  if(val!==null && val.trim()){document.getElementById(id).textContent=val.trim();document.getElementById(id).style.color='#0f172a';document.getElementById(id).style.cursor='default';}
-}
-function editMatricula(){editField('matricula','matricula del coche');}
-function editPoliza(){editField('poliza','numero de poliza del seguro');}
-function editTelSeguro(){editField('tel-seguro','telefono de asistencia del seguro');}
-function editSeguroCoche(){editField('seguro-coche','compania de seguro del coche');}
-
-// ---- CIUDAD DETAIL ----
-function openCiudad(cityId){
-  var c=null;
-  for(var i=0;i<CITIES.length;i++){if(CITIES[i].id===cityId){c=CITIES[i];break;}}
-  if(!c) return;
-  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
-  document.querySelectorAll('.nb,.bnb').forEach(function(b){b.classList.remove('active');});
-  document.getElementById('view-ciudad').classList.add('active');
-  document.getElementById('ciudad-title').textContent=FLAGS[c.flag]+' '+c.name;
-  var ns=c.nights>0?c.nights+' noche'+(c.nights>1?'s':''):'Parada de transito';
-  document.getElementById('ciudad-sub').textContent=c.dates+' · '+ns+' · '+c.zone;
-  var html='';
-  // Alojamiento
-  if(LINKS[c.id]){
-    var aU=LINKS[c.id].air,bU=LINKS[c.id].book;
-    html+='<div class="stitle">Alojamiento</div>';
-    html+='<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:1.05rem"><div class="city-links">';
-    html+='<div class="lrow"><div class="lp"><div class="da"></div><span class="la">Airbnb</span></div>';
-    html+=aU?'<div class="ldesc ok">Inicia sesion para ver opciones</div><a href="'+aU+'" target="_blank" class="btn-ir ba">Ver opciones</a>':'<div class="ldesc">Proximamente</div>';
-    html+='</div><div class="lrow"><div class="lp"><div class="db"></div><span class="lb">Booking</span></div>';
-    html+=bU?'<div class="ldesc ok">Inicia sesion para ver opciones</div><a href="'+bU+'" target="_blank" class="btn-ir bb">Ver opciones</a>':'<div class="ldesc">Proximamente</div>';
-    html+='</div></div></div>';
-  }
-  // Dias
-  var days=CIUDAD_DAYS[c.id]||[];
-  if(days.length){
-    html+='<div class="stitle">Dias en '+c.name+'</div><div class="tl-list" style="margin-bottom:1.05rem">';
-    days.forEach(function(di){
-      var d=TL[di];
-      if(!d) return;
-      var acts=d.acts.map(function(a){return '<div class="tact">'+a+'</div>';}).join('');
-      var mBtn=MAPS_LINKS[di]?'<a href="'+MAPS_LINKS[di]+'" target="_blank" class="btn-maps">🗺 Abrir en Google Maps</a>':'';
-      var ztl=ZTL_DAYS[di]?'<div class="tztl"><div class="tztl-l">ZTL Italia</div><div class="tztl-t">No entrar al centro con el coche. Multa de 100-300 euros.</div></div>':'';
-      html+='<div class="tl-row open" id="cd'+di+'" onclick="this.classList.toggle(\'open\')">';
-      html+='<div class="tl-head"><div class="tl-date">'+d.date+'</div><div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>';
-      html+='<div class="tl-city">'+d.city+'</div>';
-      if(d.drive) html+='<span class="tpill pd">🚗 '+d.h+'</span>';
-      html+='<span class="tl-ch">▾</span></div>';
-      html+='<div class="tl-body"><div><div class="tsub">Actividades</div>'+acts+ztl;
-      html+='<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div>'+mBtn+'</div>';
-      html+='<div><div class="tsub">Alojamiento</div><div class="tstay">'+d.stay+'</div></div></div></div>';
-    });
-    html+='</div>';
-  }
-  // Notas
-  var nk=c.name;
-  var notas=NOTAS_DATA[nk];
-  if(notas){
-    html+='<div class="stitle">Notas y consejos</div><div class="nota-card" style="margin-bottom:1.05rem">';
-    [{t:'Restaurantes',items:notas.restaurantes},{t:'Lugares',items:notas.lugares},{t:'Consejos',items:notas.consejos}].forEach(function(s){
-      html+='<div class="nota-sec"><div class="nota-sec-title">'+s.t+'</div>';
-      s.items.forEach(function(item){html+='<div class="nota-item"><span class="ndot">●</span>'+item+'</div>';});
-      html+='</div>';
-    });
-    html+='</div>';
-  }
-  // Voto
-  if(LINKS[c.id]){
-    var vy=votes[c.id+'_y']?'v-yes':'';
-    var vf=votes[c.id+'_f']?'v-fav':'';
-    var vn=votes[c.id+'_n']?'v-no':'';
-    html+='<div class="stitle">Tu voto</div><div class="vote-row">';
-    html+='<button class="vbtn '+vy+'" onclick="vote(\''+c.id+'\',\'y\');document.getElementById(\'ciudad-content\').querySelectorAll(\'.vbtn\')[0].className=\'vbtn v-yes\'">👍 Me apunto</button>';
-    html+='<button class="vbtn '+vf+'" onclick="vote(\''+c.id+'\',\'f\');document.getElementById(\'ciudad-content\').querySelectorAll(\'.vbtn\')[1].className=\'vbtn v-fav\'">⭐ Favorita</button>';
-    html+='<button class="vbtn '+vn+'" onclick="vote(\''+c.id+'\',\'n\');document.getElementById(\'ciudad-content\').querySelectorAll(\'.vbtn\')[2].className=\'vbtn v-no\'">👎 Prefiero otra</button>';
-    html+='</div>';
-  }
-  document.getElementById('ciudad-content').innerHTML=html;
-  window.scrollTo(0,0);
-}
-
-// ---- SUPABASE ----
-var SUPA_URL = 'https://nhblyxltpdpyxmvjtrmt.supabase.co';
-var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU';
-var db = supabase.createClient(SUPA_URL, SUPA_KEY);
-
-// Ask for user name once
-var MI_NOMBRE = localStorage.getItem('et_nombre') || 'Yo';
-
-// Load all data from Supabase
-function loadFromSupabase() {
-  // Load votos
-  db.from('votos').select('*').then(function(res) {
-    if (res.data) {
-      votes = {};
-      res.data.forEach(function(v) { votes[v.ciudad+'_'+v.tipo] = v.usuario; });
-      renderCities();
-    }
-  });
-  // Load gastos
-  db.from('gastos').select('*').order('created_at').then(function(res) {
-    if (res.data) {
-      gastos = res.data.map(function(g) {
-        return {id:g.id, payer:g.payer, desc:g.descripcion, amt:parseFloat(g.monto), cat:g.categoria, participantes:g.participantes||''};
-      });
-      renderGastos();
-    }
-  });
-  // Load checklist
-  db.from('checklist').select('*').then(function(res) {
-    if (res.data) {
-      res.data.forEach(function(c) { if(c.done) clDone[c.id] = true; });
-      renderCL();
-    }
-  });
-  // Load estados alojamientos
-  db.from('alojamientos_estado').select('*').then(function(res) {
-    if (res.data) {
-      res.data.forEach(function(e) { estadoAlo[e.ciudad] = e.estado; });
-      renderCities();
-    }
-  });
-  // Show synced badge
-  var badge = document.getElementById('rt-badge');
-  if(badge){
-    badge.textContent = '⚡ Sincronizado';
-    badge.style.background = 'rgba(16,185,129,0.2)';
-    badge.style.color = '#34d399';
-  }
-}
-
-// Polling every 8 seconds instead of websockets
-function subscribeRealtime() {
-  loadFromSupabase();
-  setInterval(loadFromSupabase, 8000);
-}
-
-// Override vote to save to Supabase
-var _voteLocal = vote;
-function vote(id, type) {
-  var k = id+'_'+type;
-  // Upsert to Supabase
-  db.from('votos').upsert({ciudad:id, tipo:type, usuario:MI_NOMBRE}, {onConflict:'ciudad,usuario'}).then(function() {
-    loadFromSupabase();
-  });
-}
-
-// Override addGasto to save to Supabase
+// ===== GASTOS =====
 function addGasto() {
   var payer = document.getElementById('g-payer').value;
-  var desc = document.getElementById('g-desc').value.trim();
-  var amt = parseFloat(document.getElementById('g-amt').value);
-  var cat = document.getElementById('g-cat').value;
-  if (!payer || !desc || !amt || amt <= 0) return;
-  // Calculate participants (exclude those marked)
-  var participantes = PEOPLE.filter(function(p){ return !excluidos[p]; });
-  if (participantes.length === 0) participantes = PEOPLE;
-  var participantesStr = participantes.join(',');
-  db.from('gastos').insert({payer:payer, descripcion:desc, monto:amt, categoria:cat, participantes:participantesStr}).then(function() {
-    document.getElementById('g-desc').value = '';
-    document.getElementById('g-amt').value = '';
-    excluidos = {};
-    var ec = document.getElementById('excluir-container');
-    if(ec) ec.innerHTML = renderExcluirBtns();
-    loadFromSupabase();
+  var desc  = document.getElementById('g-desc').value.trim();
+  var amt   = parseFloat(document.getElementById('g-amt').value);
+  if(!payer||!desc||!amt||amt<=0) return;
+  supa('POST','gastos',{payer:payer, descripcion:desc, monto:amt},'').then(function(){
+    document.getElementById('g-desc').value='';
+    document.getElementById('g-amt').value='';
+    loadData();
   });
 }
-
-// Override deleteGasto to delete from Supabase
-function deleteGasto(gastoId) {
-  db.from('gastos').delete().eq('id', gastoId).then(function() { loadFromSupabase(); });
+function deleteGasto(id) {
+  supa('DELETE','gastos','','?id=eq.'+id).then(loadData);
 }
+function renderGastos() {
+  var html = gastos.length ? gastos.map(function(g){
+    return '<div class="gi"><div class="gi-desc"><div class="gi-name">'+g.desc+'</div>' +
+      '<div class="gi-who">Pago: '+g.payer+'</div></div>' +
+      '<div class="gi-amt">'+g.amt.toFixed(2)+'€</div>' +
+      '<button class="gi-del" onclick="deleteGasto(\''+g.id+'\')">×</button></div>';
+  }).join('') : '<div style="font-size:0.78rem;color:#94a3b8">Sin gastos todavia.</div>';
+  document.getElementById('glist').innerHTML = html;
 
-// Override toggleCL to save to Supabase
-function toggleCL(si, ii) {
-  var k = si+'_'+ii;
-  var newDone = !clDone[k];
-  db.from('checklist').upsert({id:k, done:newDone, updated_at:new Date().toISOString()}, {onConflict:'id'}).then(function() {
-    loadFromSupabase();
+  var total = gastos.reduce(function(s,g){return s+g.amt;},0);
+  var share = total/PEOPLE.length;
+  var paid  = {};
+  PEOPLE.forEach(function(p){paid[p]=0;});
+  gastos.forEach(function(g){if(paid[g.payer]!==undefined) paid[g.payer]+=g.amt;});
+
+  document.getElementById('bal-grid').innerHTML = PEOPLE.map(function(p){
+    var bal = (paid[p]||0)-share;
+    return '<div class="bal-c"><div class="bal-n">'+p+'</div>' +
+      '<div class="bal-a '+(bal>=0?'bal-pos':'bal-neg')+'">'+(bal>=0?'+':'')+bal.toFixed(0)+'€</div>' +
+      '<div class="bal-l">'+(bal>=0?'Le deben':'Debe')+'</div></div>';
+  }).join('');
+
+  // Liquidacion optima
+  var deb=[],cre=[];
+  PEOPLE.forEach(function(p){
+    var b=(paid[p]||0)-share;
+    if(b<-0.01) deb.push({name:p,amt:-b});
+    else if(b>0.01) cre.push({name:p,amt:b});
   });
-}
-
-// Override setEstado to save to Supabase
-function setEstado(cityId, estado) {
-  db.from('alojamientos_estado').upsert({ciudad:cityId, estado:estado, updated_at:new Date().toISOString()}, {onConflict:'ciudad'}).then(function() {
-    loadFromSupabase();
-  });
-}
-
-// ---- CONDUCTORES ----
-var DRIVING_DAYS = [
-  {date:'12 jul', route:'Alicante a Marsella', km:620, critical:false},
-  {date:'14 jul', route:'Marsella a Pisa a Roma', km:900, critical:true},
-  {date:'17 jul', route:'Roma a Venecia', km:528, critical:false},
-  {date:'19 jul', route:'Venecia a Munich', km:425, critical:false},
-  {date:'21 jul', route:'Munich a Colonia', km:574, critical:false},
-  {date:'22 jul', route:'Colonia a Bruselas a Paris', km:510, critical:false},
-  {date:'24 jul', route:'Paris a Alicante', km:1150, critical:true}
-];
-
-var conductores = {};
-var copiltos = {};
-
-function renderConductores() {
-  var html = '';
-  DRIVING_DAYS.forEach(function(d, i) {
-    var cond = conductores[i] || '';
-    var cop = copiltos[i] || '';
-    html += '<div class="cond-day' + (d.critical ? ' cond-day-critical' : '') + '">';
-    html += '<div class="cond-day-info">';
-    html += '<div class="cond-day-date">' + d.date + '</div>';
-    html += '<div class="cond-day-route">' + d.route + '</div>';
-    html += '<div class="cond-day-km">' + d.km + ' km';
-    if (d.critical) html += ' <span class="cond-badge cond-badge-critical">Dia critico</span>';
-    html += '</div></div>';
-    html += '<div style="display:flex;flex-direction:column;gap:0.38rem">';
-    html += '<div style="display:flex;align-items:center;gap:0.5rem">';
-    html += '<span style="font-size:0.65rem;color:#64748b;min-width:55px">Conductor</span>';
-    html += '<select class="cond-select" onchange="setConductor(' + i + ','cond',this.value)">';
-    html += '<option value="">Seleccionar...</option>';
-    PEOPLE.forEach(function(p) {
-      html += '<option value="' + p + '"' + (cond === p ? ' selected' : '') + '>' + p + '</option>';
-    });
-    html += '</select></div>';
-    html += '<div style="display:flex;align-items:center;gap:0.5rem">';
-    html += '<span style="font-size:0.65rem;color:#64748b;min-width:55px">Copiloto</span>';
-    html += '<select class="cond-select" onchange="setConductor(' + i + ','cop',this.value)">';
-    html += '<option value="">Ninguno</option>';
-    PEOPLE.forEach(function(p) {
-      html += '<option value="' + p + '"' + (cop === p ? ' selected' : '') + '>' + p + '</option>';
-    });
-    html += '</select></div>';
-    html += '</div></div>';
-  });
-  document.getElementById('conductores-list').innerHTML = html;
-  renderResumenConductores();
-}
-
-function setConductor(idx, role, val) {
-  if (role === 'cond') conductores[idx] = val;
-  else copiltos[idx] = val;
-  renderResumenConductores();
-}
-
-function renderResumenConductores() {
-  var stats = {};
-  PEOPLE.forEach(function(p) { stats[p] = {days:0, km:0}; });
-  DRIVING_DAYS.forEach(function(d, i) {
-    if (conductores[i]) { stats[conductores[i]].days++; stats[conductores[i]].km += d.km; }
-    if (copiltos[i]) { stats[copiltos[i]].days++; stats[copiltos[i]].km += d.km; }
-  });
-  var html = '<div class="cond-resumen-grid">';
-  PEOPLE.forEach(function(p) {
-    var s = stats[p];
-    html += '<div class="cond-res-card">';
-    html += '<div class="cond-res-name">' + p + '</div>';
-    html += '<div class="cond-res-days">' + s.days + '</div>';
-    html += '<div class="cond-res-lbl">dias al volante</div>';
-    html += '<div class="cond-res-km">' + s.km + ' km</div>';
-    html += '</div>';
-  });
-  html += '</div>';
-  document.getElementById('conductores-resumen').innerHTML = html;
-}
-
-// ---- GASTOS ASIMETRICOS ----
-var excluidos = {};
-
-function renderExcluirBtns() {
-  var html = '<div class="gasto-excluir"><div class="gasto-excluir-title">Excluir de este gasto (no participo)</div><div class="excluir-grid">';
-  PEOPLE.forEach(function(p) {
-    var ex = excluidos[p];
-    html += '<button class="excluir-btn' + (ex ? ' excluido' : '') + '" onclick="toggleExcluido(this,\'' + p + '\')">' + p + '</button>';
-  });
-  html += '</div></div>';
-  return html;
-}
-
-function toggleExcluido(btn, p) {
-  excluidos[p] = !excluidos[p];
-  if (excluidos[p]) {
-    btn.classList.add('excluido');
-  } else {
-    btn.classList.remove('excluido');
+  deb.sort(function(a,b){return b.amt-a.amt;});
+  cre.sort(function(a,b){return b.amt-a.amt;});
+  var transfers=[];
+  var di=0,ci=0;
+  while(di<deb.length&&ci<cre.length){
+    var amt=Math.min(deb[di].amt,cre[ci].amt);
+    if(amt>0.01) transfers.push({from:deb[di].name,to:cre[ci].name,amt:amt});
+    deb[di].amt-=amt; cre[ci].amt-=amt;
+    if(deb[di].amt<0.01) di++;
+    if(cre[ci].amt<0.01) ci++;
   }
+  document.getElementById('liq-list').innerHTML = transfers.length ?
+    transfers.map(function(t){
+      return '<div class="liq-row"><strong>'+t.from+'</strong><span class="liq-arr">→</span>' +
+        '<strong>'+t.to+'</strong><span class="liq-amt">'+t.amt.toFixed(2)+'€</span></div>';
+    }).join('') : '<div class="liq-empty">'+(total<0.01?'Sin gastos todavia.':'Todo en orden.')+'</div>';
+
+  var dge=document.getElementById('dash-g');
+  var dgn=document.getElementById('dash-gn');
+  if(dge) dge.textContent=total.toFixed(0)+'€';
+  if(dgn) dgn.textContent=gastos.length+' registro'+(gastos.length!==1?'s':'');
 }
 
-// ---- NOMBRE ----
-function guardarNombre() {
-  var val = document.getElementById('nombre-input').value.trim();
-  if (!val) return;
-  MI_NOMBRE = val;
-  localStorage.setItem('et_nombre', val);
-  document.getElementById('nombre-modal').style.display = 'none';
+// ===== NOTAS =====
+function renderNotas() {
+  var cities = Object.keys(NOTAS);
+  document.getElementById('ntabs').innerHTML = cities.map(function(c){
+    return '<button class="ntab'+(activeNota===c?' active':'')+'" onclick="setNota(\''+c+'\')">'+c+'</button>';
+  }).join('');
+  var n = NOTAS[activeNota];
+  var secs = [{t:'Restaurantes',k:'rest'},{t:'Lugares imprescindibles',k:'lug'},{t:'Consejos',k:'cons'}];
+  document.getElementById('ncontent').innerHTML = secs.map(function(s){
+    return '<div class="nsec"><div class="nsec-t">'+s.t+'</div>'+
+      n[s.k].map(function(i){return '<div class="nitem"><span class="nd">●</span>'+i+'</div>';}).join('')+
+      '</div>';
+  }).join('');
 }
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && document.getElementById('nombre-modal').style.display === 'flex') guardarNombre();
-});
+function setNota(c){ activeNota=c; renderNotas(); }
 
-// ---- PWA INSTALL ----
-var deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
-  deferredPrompt = e;
-  var banner = document.getElementById('install-banner');
-  if (banner) banner.style.display = 'flex';
-});
-document.addEventListener('click', function(e) {
-  if (e.target && e.target.id === 'install-btn' && deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(function(result) {
-      deferredPrompt = null;
-      document.getElementById('install-banner').style.display = 'none';
-    });
-  }
-});
-window.addEventListener('appinstalled', function() {
-  document.getElementById('install-banner').style.display = 'none';
-  var badge = document.getElementById('rt-badge');
-  if(badge) { badge.textContent = '📱 App instalada'; }
-});
+// ===== CHECKLIST =====
+function renderCL() {
+  var total=0, done=0;
+  document.getElementById('cl-cont').innerHTML = CL_DATA.map(function(sec,si){
+    var d=sec.items.filter(function(_,ii){return clDone[si+'_'+ii];}).length;
+    total+=sec.items.length; done+=d;
+    return '<div class="cl-sec"><div class="cl-st">'+sec.s+
+      ' <span style="margin-left:auto;font-size:0.6rem;background:#f1f5f9;padding:0.1rem 0.35rem;border-radius:4px;color:#64748b">'+d+'/'+sec.items.length+'</span></div>'+
+      sec.items.map(function(item,ii){
+        var dk=clDone[si+'_'+ii];
+        return '<div class="cl-i'+(dk?' done':'')+'" onclick="toggleCL('+si+','+ii+')">' +
+          '<div class="cl-box">'+(dk?'✓':'')+'</div>' +
+          '<span class="cl-txt">'+item.t+'</span>' +
+          '<span class="cl-own">'+item.own+'</span></div>';
+      }).join('')+'</div>';
+  }).join('');
+  var pct=total?Math.round(done/total*100):0;
+  var e1=document.getElementById('dash-cl'); if(e1) e1.textContent=pct+'%';
+  var e2=document.getElementById('dash-cln'); if(e2) e2.textContent=done+' de '+total;
+}
+function toggleCL(si,ii){
+  var k=si+'_'+ii;
+  var newDone=!clDone[k];
+  supa('POST','checklist',{id:k,done:newDone,updated_at:new Date().toISOString()},'?on_conflict=id').then(function(){
+    clDone[k]=newDone; renderCL();
+  });
+}
 
-// ---- INIT ----
+// ===== GOOGLE SHEETS =====
+function loadSheet() {
+  fetch(SHEET).then(function(r){return r.text();}).then(function(txt){
+    if(!txt||txt.indexOf('ciudad')===-1) return;
+    var lines=txt.trim().split('\n');
+    var cur={city:'',air:'',book:''};
+    for(var i=1;i<lines.length;i++){
+      var cols=lines[i].split(',');
+      var city=cols[0]?cols[0].trim().toLowerCase():'';
+      if(city&&LINKS[city]!==undefined){
+        if(cur.city&&cur.city!==city) LINKS[cur.city]={air:cur.air.replace(/"/g,''),book:cur.book.replace(/"/g,'')};
+        cur={city:city,air:cols[1]?cols[1].trim():'',book:cols[2]?cols[2].trim():''};
+      } else if(cur.city){
+        if(cols[1]) cur.air+=cols[1].trim();
+        if(cols[2]) cur.book+=cols[2].trim();
+      }
+    }
+    if(cur.city&&LINKS[cur.city]!==undefined) LINKS[cur.city]={air:cur.air.replace(/"/g,''),book:cur.book.replace(/"/g,'')};
+    renderCities();
+  }).catch(function(){});
+}
+
+// ===== INIT =====
 updateCountdown();
 setInterval(updateCountdown, 60000);
 renderCities();
@@ -1453,43 +847,23 @@ renderBudget();
 renderGastos();
 renderNotas();
 renderCL();
-renderConductores();
-var ec = document.getElementById('excluir-container');
-if(ec) ec.innerHTML = renderExcluirBtns();
+
+// Load from Supabase
+loadData();
+// Poll every 10 seconds
+setInterval(loadData, 10000);
+// Load sheet links
 loadSheet();
-// Delay Supabase so page renders instantly first
-setTimeout(function() {
-  loadFromSupabase();
-  subscribeRealtime();
-}, 100);
 
-// Show name modal if needed (non-blocking)
-if (!localStorage.getItem('et_nombre')) {
-  var modal = document.getElementById('nombre-modal');
-  if(modal) {
-    modal.style.display = 'flex';
-    setTimeout(function() { var inp = document.getElementById('nombre-input'); if(inp) inp.focus(); }, 100);
-  }
+// Show nombre modal if needed
+if(!NOMBRE){
+  document.getElementById('nmodal').classList.add('open');
+  setTimeout(function(){ var i=document.getElementById('ninput'); if(i) i.focus(); },100);
 }
-</script>
-<!-- NOMBRE MODAL -->
-<div id="nombre-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;padding:1rem">
-  <div style="background:white;border-radius:16px;padding:1.5rem;width:100%;max-width:340px">
-    <div style="font-size:1rem;font-weight:700;margin-bottom:0.5rem">Bienvenido al EuroTrip 2026</div>
-    <div style="font-size:0.8rem;color:#64748b;margin-bottom:1rem">Como te llamas? Asi identificamos tus votos y gastos.</div>
-    <input id="nombre-input" type="text" placeholder="Tu nombre..." style="width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.6rem 0.85rem;font-family:Inter,sans-serif;font-size:0.85rem;outline:none;margin-bottom:0.75rem">
-    <button onclick="guardarNombre()" style="width:100%;background:#0f172a;color:white;border:none;border-radius:8px;padding:0.6rem;font-family:Inter,sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer">Entrar</button>
-  </div>
-</div>
 
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/eurotrip2026/sw.js')
-      .then(function(reg) { console.log('SW registrado:', reg.scope); })
-      .catch(function(err) { console.log('SW error:', err); });
-  });
-}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&document.getElementById('nmodal').classList.contains('open')) guardarNombre();
+});
 </script>
 </body>
 </html>
