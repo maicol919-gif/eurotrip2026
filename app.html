@@ -226,11 +226,14 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
   <div class="header-left">
     <h1>🌍 EuroTrip 2026</h1>
     <p id="route-strip">
+      <span class="route-city-link" onclick="openCiudad('alicante')">Alicante</span> ·
       <span class="route-city-link" onclick="openCiudad('marsella')">Marsella</span> ·
+      <span class="route-city-link" onclick="openCiudad('pisa')">Pisa</span> ·
       <span class="route-city-link" onclick="openCiudad('roma')">Roma</span> ·
       <span class="route-city-link" onclick="openCiudad('venecia')">Venecia</span> ·
       <span class="route-city-link" onclick="openCiudad('munich')">Munich</span> ·
       <span class="route-city-link" onclick="openCiudad('colonia')">Colonia</span> ·
+      <span class="route-city-link" onclick="openCiudad('bruselas')">Bruselas</span> ·
       <span class="route-city-link" onclick="openCiudad('paris')">Paris</span>
     </p>
   </div>
@@ -454,11 +457,14 @@ var SHEET_URL = 'https://corsproxy.io/?' + encodeURIComponent(SHEET_CSV);
 
 // CITIES
 var CITIES = [
+  {id:'alicante',name:'Alicante',flag:'🇪🇸',nights:0,dates:'12 jul — salida',zone:'Puerto / Explanada'},
   {id:'marsella',name:'Marsella',flag:'🇫🇷',nights:2,dates:'12 al 14 jul',zone:'Vieux-Port / Le Panier'},
+  {id:'pisa',name:'Pisa',flag:'🇮🇹',nights:0,dates:'14 jul — parada',zone:'Plaza dei Miracoli'},
   {id:'roma',name:'Roma',flag:'🇮🇹',nights:3,dates:'15 al 18 jul',zone:'Trastevere / Prati'},
   {id:'venecia',name:'Venecia',flag:'🇮🇹',nights:2,dates:'17 al 19 jul',zone:'Mestre con parking / Burano'},
   {id:'munich',name:'Munich',flag:'🇩🇪',nights:2,dates:'19 al 21 jul',zone:'Maxvorstadt / Schwabing'},
   {id:'colonia',name:'Colonia',flag:'🇩🇪',nights:1,dates:'21 al 22 jul',zone:'Ehrenfeld / centro'},
+  {id:'bruselas',name:'Bruselas',flag:'🇧🇪',nights:0,dates:'22 jul — parada',zone:'Grand Place / centro'},
   {id:'paris',name:'Paris',flag:'🇫🇷',nights:2,dates:'23 al 25 jul',zone:'Le Marais / Republique'}
 ];
 
@@ -471,6 +477,24 @@ var PEOPLE = ['Carlos','Lucia','Marco','Sofia','Diego','Ana','Javi'];
 
 // NOTAS
 var NOTAS = {
+  Alicante:{
+    restaurantes:['Restaurante La Taberna del Gourmet — tapas de nivel en el centro','El Portal — mariscos frescos junto al puerto','Mercado Central — desayuno tipico antes de salir'],
+    lugares:['Castillo de Santa Barbara — vistas panoramicas de la ciudad','Explanada de Espana — paseo maritimo icónico','Barrio de Santa Cruz — el casco antiguo mas bonito'],
+    consejos:['Salida recomendada a las 7:00h para evitar trafico','Llenar el deposito antes de salir — gasolina mas barata que en Francia','Revisar que todos llevan DNI, cargadores y documentos del coche'],
+    links:['alicante.es','costablanca.org']
+  },
+  Pisa:{
+    restaurantes:['Osteria dei Cavalieri — pasta fresca excelente, precio justo','Pizzeria Il Montino — cecina (torta de garbanzo) tipica de Pisa','Mercato delle Vettovaglie — mercado cubierto con comida local'],
+    lugares:['Plaza dei Miracoli — Torre, Catedral y Baptisterio (imprescindible)','Torre Inclinada — subir reservando online si hay tiempo','Lungarni — los paseos a orillas del Arno, muy fotograficos'],
+    consejos:['Solo tenemos ~1h de parada — la Plaza dei Miracoli esta a 15min a pie de la autopista','Parking gratuito cerca de la Torre en Piazza della Republica','No es necesario subir la Torre si el tiempo es justo — la foto vale la pena'],
+    links:['opapisa.it','turismo.pisa.it']
+  },
+  Bruselas:{
+    restaurantes:['Fin de Siecle — cocina belga tradicional, precio muy justo','Maison Antoine — las mejores patatas fritas de Belgica','Cualquier wafflerie cerca de la Grand Place — imprescindible'],
+    lugares:['Grand Place — una de las plazas mas bellas de Europa','Manneken Pis — el famoso nino, a 5 min de la Grand Place','Galeries Royales Saint-Hubert — galeria comercial historica cubierta'],
+    consejos:['Solo tenemos 2h maximas — Grand Place + Manneken Pis + gofre y a correr','Metro facil desde cualquier punto al centro','Los gofres de la calle son mejores que los de los restaurantes turisticos'],
+    links:['visitbrussels.be']
+  },
   Marsella:{
     restaurantes:['Le Miramar — bouillabaisse tradicional, reservar','Chez Etienne — pizza napolitana famosa, siempre hay cola','Marche du Noailles — mercado multicultural, comida barata'],
     lugares:['Calanques de Cassis — excursion imprescindible','Chateau d\'If — isla del Conde de Montecristo','MuCEM — museo con vistas al mar, arquitectura espectacular'],
@@ -912,12 +936,15 @@ function updateChecklistCard(){
 
 // ---- CIUDAD DETAIL ----
 var CIUDAD_DAYS = {
-  marsella: [0,1,2],
+  alicante: [0],
+  marsella: [1,2],
+  pisa: [2],
   roma: [3,4,5],
   venecia: [6,7],
   munich: [8,9],
   colonia: [10],
-  paris: [11,12]
+  bruselas: [11],
+  paris: [12,13]
 };
 
 function openCiudad(cityId) {
@@ -931,7 +958,8 @@ function openCiudad(cityId) {
   document.getElementById('view-ciudad').classList.add('active');
 
   document.getElementById('ciudad-title').textContent = c.flag+' '+c.name;
-  document.getElementById('ciudad-sub').textContent = c.dates+' · '+c.nights+' noche'+(c.nights>1?'s':'')+' · '+c.zone;
+  var nightsStr = c.nights > 0 ? c.nights+' noche'+(c.nights>1?'s':'') : 'Parada de transito';
+  document.getElementById('ciudad-sub').textContent = c.dates+' · '+nightsStr+' · '+c.zone;
 
   var airUrl  = LINKS[c.id]?LINKS[c.id].air:'';
   var bookUrl = LINKS[c.id]?LINKS[c.id].book:'';
