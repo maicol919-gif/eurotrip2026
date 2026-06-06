@@ -14,6 +14,8 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 .header-left h1{font-size:1rem;font-weight:700;letter-spacing:-0.01em}
 .header-left p{font-size:0.68rem;color:#475569;margin-top:0.1rem}
 .pill{background:#3b82f6;color:white;font-size:0.72rem;font-weight:700;padding:0.35rem 0.9rem;border-radius:20px;white-space:nowrap}
+.route-city-link{cursor:pointer;color:#94a3b8;transition:color .15s;font-size:0.68rem}
+.route-city-link:hover{color:white;text-decoration:underline}
 
 /* NAV */
 .nav{background:white;border-bottom:1px solid #e2e8f0;display:flex;overflow-x:auto;padding:0 1.5rem;-webkit-overflow-scrolling:touch}
@@ -223,7 +225,14 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 <div class="header">
   <div class="header-left">
     <h1>🌍 EuroTrip 2026</h1>
-    <p>Alicante · Marsella · Roma · Venecia · Munich · Colonia · Paris · Alicante</p>
+    <p id="route-strip">
+      <span class="route-city-link" onclick="openCiudad('marsella')">Marsella</span> ·
+      <span class="route-city-link" onclick="openCiudad('roma')">Roma</span> ·
+      <span class="route-city-link" onclick="openCiudad('venecia')">Venecia</span> ·
+      <span class="route-city-link" onclick="openCiudad('munich')">Munich</span> ·
+      <span class="route-city-link" onclick="openCiudad('colonia')">Colonia</span> ·
+      <span class="route-city-link" onclick="openCiudad('paris')">Paris</span>
+    </p>
   </div>
   <div class="pill" id="pill">...</div>
 </div>
@@ -410,6 +419,18 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
   <div class="ptitle">Checklist</div>
   <div class="psub">Todo lo que hay que hacer antes y durante el viaje</div>
   <div id="cl-container"></div>
+</div>
+
+<!-- CIUDAD DETAIL -->
+<div id="view-ciudad" class="view">
+  <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem">
+    <button onclick="showView('dashboard',document.querySelectorAll('.nb')[0])" style="background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.38rem 0.75rem;cursor:pointer;font-size:0.78rem;color:#64748b;font-family:Inter,sans-serif">← Volver</button>
+    <div>
+      <div class="ptitle" id="ciudad-title" style="margin-bottom:0"></div>
+      <div class="psub" id="ciudad-sub" style="margin-bottom:0"></div>
+    </div>
+  </div>
+  <div id="ciudad-content"></div>
 </div>
 
 </div>
@@ -611,13 +632,13 @@ function toggleViajeros() {
   p.classList.toggle('open');
 }
 function ajustarViajeros(d) {
-  nViajeros = Math.max(7, Math.min(9, nViajeros+d));
+  nViajeros = Math.max(1, Math.min(20, nViajeros+d));
   var pp = Math.round(TOTAL_BUDGET/nViajeros);
   document.getElementById('viajeros-val').textContent = nViajeros;
   document.getElementById('viajeros-big').textContent = nViajeros;
   document.getElementById('viajeros-pp').textContent = pp+'€ por persona';
   document.getElementById('viajeros-total').textContent = 'Total: '+TOTAL_BUDGET+'€';
-  document.getElementById('viajeros-tag').textContent = nViajeros===7?'+2 posibles':nViajeros===8?'+1 posible':'maximo';
+  document.getElementById('viajeros-tag').textContent = 'Total: '+(TOTAL_BUDGET)+' euros';
   document.getElementById('dash-pp').textContent = pp+'€';
   document.getElementById('dash-total').textContent = 'Total '+TOTAL_BUDGET+'€';
 }
@@ -886,6 +907,123 @@ function updateChecklistCard(){
   var e2=document.getElementById('dash-cl-n');
   if(e1) e1.textContent=pct+'%';
   if(e2) e2.textContent=done+' de '+total+' tareas';
+}
+
+
+// ---- CIUDAD DETAIL ----
+var CIUDAD_DAYS = {
+  marsella: [0,1,2],
+  roma: [3,4,5],
+  venecia: [6,7],
+  munich: [8,9],
+  colonia: [10],
+  paris: [11,12]
+};
+
+function openCiudad(cityId) {
+  var c = CITIES.find(function(x){return x.id===cityId;});
+  if(!c) return;
+
+  // Switch to ciudad view without nav active
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('view-ciudad').classList.add('active');
+
+  document.getElementById('ciudad-title').textContent = c.flag+' '+c.name;
+  document.getElementById('ciudad-sub').textContent = c.dates+' · '+c.nights+' noche'+(c.nights>1?'s':'')+' · '+c.zone;
+
+  var airUrl  = LINKS[c.id]?LINKS[c.id].air:'';
+  var bookUrl = LINKS[c.id]?LINKS[c.id].book:'';
+  var notas   = NOTAS[c.name]||null;
+  var days    = CIUDAD_DAYS[c.id]||[];
+
+  var html = '';
+
+  // ALOJAMIENTO
+  html += '<div class="stitle">Alojamiento</div>';
+  html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:1.25rem">';
+  html += '<div class="city-links">';
+  html += '<div class="link-row"><div class="lp"><div class="dot-a"></div><span class="la">Airbnb</span></div>';
+  if(airUrl){
+    html += '<div class="ldesc ok">Inicia sesion en Airbnb para ver las opciones</div>';
+    html += '<a href="'+airUrl+'" target="_blank" class="btn-ir ba">Ver opciones</a>';
+  } else {
+    html += '<div class="ldesc">Proximamente</div>';
+  }
+  html += '</div>';
+  html += '<div class="link-row"><div class="lp"><div class="dot-b"></div><span class="lb">Booking</span></div>';
+  if(bookUrl){
+    html += '<div class="ldesc ok">Inicia sesion en Booking para ver las opciones</div>';
+    html += '<a href="'+bookUrl+'" target="_blank" class="btn-ir bb">Ver opciones</a>';
+  } else {
+    html += '<div class="ldesc">Proximamente</div>';
+  }
+  html += '</div></div></div>';
+
+  // ITINERARIO DIAS
+  html += '<div class="stitle">Dias en '+c.name+'</div>';
+  html += '<div class="tl-list" style="margin-bottom:1.25rem">';
+  for(var di=0;di<days.length;di++){
+    var d = TL[days[di]];
+    if(!d) continue;
+    var acts = d.acts.map(function(a){return '<div class="tact">'+a+'</div>';}).join('');
+    var tray = d.km>0?'<div class="tsub" style="margin-top:0.6rem">Trayecto</div><div style="display:flex;gap:0.35rem;flex-wrap:wrap;margin-top:0.22rem"><span class="tpill pd" style="padding:0.24rem 0.52rem">🚗 '+d.h+'</span><span class="tpill pk" style="padding:0.24rem 0.52rem">'+d.km+' km</span></div>':'';
+    html += '<div class="tl-row open" id="cd'+di+'">';
+    html += '<div class="tl-head" onclick="toggleTL2('cd'+di+'')"><div class="tl-date">'+d.date+'</div>';
+    html += '<div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>';
+    html += '<div class="tl-city">'+d.city+'</div>';
+    if(d.drive) html += '<span class="tpill pd">🚗 '+d.h+'</span>';
+    html += '<span class="tl-ch">▾</span></div>';
+    html += '<div class="tl-body"><div><div class="tsub">Actividades</div>'+acts;
+    html += '<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div></div>';
+    html += '<div><div class="tsub">Alojamiento</div><div class="tstay">'+d.stay+'</div>'+tray+'</div></div></div>';
+  }
+  html += '</div>';
+
+  // NOTAS
+  if(notas){
+    html += '<div class="stitle">Notas y consejos</div>';
+    html += '<div class="nota-card" style="margin-bottom:1.25rem">';
+    var secs=[
+      {t:'🍽️ Restaurantes',items:notas.restaurantes},
+      {t:'🏛️ Lugares',items:notas.lugares},
+      {t:'💡 Consejos',items:notas.consejos},
+      {t:'🔗 Links',items:notas.links}
+    ];
+    secs.forEach(function(s){
+      html += '<div class="nota-sec"><div class="nota-sec-title">'+s.t+'</div>';
+      s.items.forEach(function(item){html += '<div class="nota-item"><span class="ndot">●</span>'+item+'</div>';});
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // VOTACION
+  var vy = votes[c.id+'_y']?'v-yes':'';
+  var vf = votes[c.id+'_f']?'v-fav':'';
+  var vn = votes[c.id+'_n']?'v-no':'';
+  html += '<div class="stitle">Tu voto para esta ciudad</div>';
+  html += '<div class="vote-row" style="margin-bottom:1.25rem">';
+  html += '<button class="vbtn '+vy+'" onclick="vote(''+c.id+'','y',event);renderCiudadVotes(''+c.id+'')">👍 Me apunto</button>';
+  html += '<button class="vbtn '+vf+'" onclick="vote(''+c.id+'','f',event);renderCiudadVotes(''+c.id+'')">⭐ Mi favorita</button>';
+  html += '<button class="vbtn '+vn+'" onclick="vote(''+c.id+'','n',event);renderCiudadVotes(''+c.id+'')">👎 Prefiero otra</button>';
+  html += '</div>';
+
+  document.getElementById('ciudad-content').innerHTML = html;
+}
+
+function toggleTL2(id){document.getElementById(id).classList.toggle('open');}
+
+function renderCiudadVotes(cityId){
+  // refresh vote buttons in ciudad view without full re-render
+  var vy = votes[cityId+'_y']?'v-yes':'';
+  var vf = votes[cityId+'_f']?'v-fav':'';
+  var vn = votes[cityId+'_n']?'v-no':'';
+  var btns = document.querySelectorAll('#ciudad-content .vote-row .vbtn');
+  if(btns[0]) btns[0].className='vbtn '+vy;
+  if(btns[1]) btns[1].className='vbtn '+vf;
+  if(btns[2]) btns[2].className='vbtn '+vn;
+  renderRanking();
 }
 
 init();
