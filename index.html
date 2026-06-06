@@ -408,6 +408,13 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 </div>
 
 <script>
+// openCity available globally from start
+function openCity(cityId) {
+  // Will be populated after full script loads
+  if(typeof _openCity === 'function') _openCity(cityId);
+  else setTimeout(function(){ if(typeof _openCity==='function') _openCity(cityId); }, 200);
+}
+
 // ===== CONFIG =====
 var SUPA = 'https://nhblyxltpdpyxmvjtrmt.supabase.co';
 var KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU';
@@ -448,12 +455,12 @@ var LINKS = {
 };
 
 var CITIES = [
-  {id:'marsella', name:'Marsella', flag:'🇫🇷', nights:2, dates:'12-14 jul', zone:'Vieux-Port / Le Panier'},
-  {id:'roma',     name:'Roma',     flag:'🇮🇹', nights:3, dates:'15-18 jul', zone:'Trastevere / Prati'},
-  {id:'venecia',  name:'Venecia',  flag:'🇮🇹', nights:2, dates:'17-19 jul', zone:'Mestre / Burano'},
-  {id:'munich',   name:'Munich',   flag:'🇩🇪', nights:2, dates:'19-21 jul', zone:'Maxvorstadt / Schwabing'},
-  {id:'colonia',  name:'Colonia',  flag:'🇩🇪', nights:1, dates:'21-22 jul', zone:'Ehrenfeld / centro'},
-  {id:'paris',    name:'Paris',    flag:'🇫🇷', nights:2, dates:'23-25 jul', zone:'Le Marais / Republique'}
+  {id:'marsella', name:'Marsella', flag:'FR', nights:2, dates:'12-14 jul', zone:'Vieux-Port / Le Panier'},
+  {id:'roma',     name:'Roma',     flag:'IT', nights:3, dates:'15-18 jul', zone:'Trastevere / Prati'},
+  {id:'venecia',  name:'Venecia',  flag:'IT', nights:2, dates:'17-19 jul', zone:'Mestre / Burano'},
+  {id:'munich',   name:'Munich',   flag:'DE', nights:2, dates:'19-21 jul', zone:'Maxvorstadt / Schwabing'},
+  {id:'colonia',  name:'Colonia',  flag:'DE', nights:1, dates:'21-22 jul', zone:'Ehrenfeld / centro'},
+  {id:'paris',    name:'Paris',    flag:'FR', nights:2, dates:'23-25 jul', zone:'Le Marais / Republique'}
 ];
 
 var PEOPLE = ['Carlos','Lucia','Marco','Sofia','Diego','Ana','Javi'];
@@ -875,14 +882,14 @@ var CITY_DAYS = {
 };
 
 var CITY_META = {
-  marsella:{name:'Marsella', flag:'🇫🇷', nights:2, dates:'12-14 jul', zone:'Vieux-Port / Le Panier'},
-  pisa:    {name:'Pisa',     flag:'🇮🇹', nights:0, dates:'14 jul parada', zone:'Plaza dei Miracoli'},
-  roma:    {name:'Roma',     flag:'🇮🇹', nights:3, dates:'15-18 jul', zone:'Trastevere / Prati'},
-  venecia: {name:'Venecia',  flag:'🇮🇹', nights:2, dates:'17-19 jul', zone:'Mestre / Burano'},
-  munich:  {name:'Munich',   flag:'🇩🇪', nights:2, dates:'19-21 jul', zone:'Maxvorstadt / Schwabing'},
-  colonia: {name:'Colonia',  flag:'🇩🇪', nights:1, dates:'21-22 jul', zone:'Ehrenfeld / centro'},
-  bruselas:{name:'Bruselas', flag:'🇧🇪', nights:0, dates:'22 jul parada', zone:'Grand Place'},
-  paris:   {name:'Paris',    flag:'🇫🇷', nights:2, dates:'23-25 jul', zone:'Le Marais / Republique'}
+  marsella:{name:'Marsella', flag:'FR', nights:2, dates:'12-14 jul', zone:'Vieux-Port / Le Panier'},
+  pisa:    {name:'Pisa',     flag:'IT', nights:0, dates:'14 jul parada', zone:'Plaza dei Miracoli'},
+  roma:    {name:'Roma',     flag:'IT', nights:3, dates:'15-18 jul', zone:'Trastevere / Prati'},
+  venecia: {name:'Venecia',  flag:'IT', nights:2, dates:'17-19 jul', zone:'Mestre / Burano'},
+  munich:  {name:'Munich',   flag:'DE', nights:2, dates:'19-21 jul', zone:'Maxvorstadt / Schwabing'},
+  colonia: {name:'Colonia',  flag:'DE', nights:1, dates:'21-22 jul', zone:'Ehrenfeld / centro'},
+  bruselas:{name:'Bruselas', flag:'BE', nights:0, dates:'22 jul parada', zone:'Grand Place'},
+  paris:   {name:'Paris',    flag:'FR', nights:2, dates:'23-25 jul', zone:'Le Marais / Republique'}
 };
 
 var NOTAS_MAP = {
@@ -891,16 +898,19 @@ var NOTAS_MAP = {
   colonia:'Colonia', bruselas:'Bruselas', paris:'Paris'
 };
 
-window.openCity = function openCity(cityId) {
+var _openCity = function(cityId) {
   var m = CITY_META[cityId];
   if(!m) return;
+  var FLAGS = {FR:'🇫🇷',IT:'🇮🇹',DE:'🇩🇪',BE:'🇧🇪',ES:'🇪🇸'};
+  m = JSON.parse(JSON.stringify(m)); // clone
+  m.flagEmoji = FLAGS[m.flag] || m.flag;
   // Build city detail view
   var html = '';
   var ns = m.nights > 0 ? m.nights+' noche'+(m.nights>1?'s':'') : 'Parada de transito';
 
   // Header info
   html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.85rem">';
-  html += '<div style="font-size:2rem">'+m.flag+'</div>';
+  html += '<div style="font-size:2rem">'+m.flagEmoji+'</div>';
   html += '<div><div style="font-size:1.1rem;font-weight:800;letter-spacing:-0.02em">'+m.name+'</div>';
   html += '<div style="font-size:0.72rem;color:#64748b;margin-top:0.1rem">'+m.dates+' &nbsp;·&nbsp; '+ns+' &nbsp;·&nbsp; '+m.zone+'</div></div></div>';
 
@@ -922,9 +932,9 @@ window.openCity = function openCity(cityId) {
     var vf = votes[cityId+'_f']?'vf':'';
     var vn = votes[cityId+'_n']?'vn':'';
     html += '<div class="vrow" style="margin-bottom:1rem">';
-    html += '<button class="vb '+vy+'" onclick="vote(''+cityId+'','y')">👍 Me apunto</button>';
-    html += '<button class="vb '+vf+'" onclick="vote(''+cityId+'','f')">⭐ Favorita</button>';
-    html += '<button class="vb '+vn+'" onclick="vote(''+cityId+'','n')">👎 No</button>';
+    html += '<button class="vb '+vy+'" onclick="vote(\''+cityId+'\',\'y\')">👍 Me apunto</button>';
+    html += '<button class="vb '+vf+'" onclick="vote(\''+cityId+'\',\'f\')">⭐ Favorita</button>';
+    html += '<button class="vb '+vn+'" onclick="vote(\''+cityId+'\',\'n\')">👎 No</button>';
     html += '</div>';
   }
 
