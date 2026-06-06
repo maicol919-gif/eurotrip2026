@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>EuroTrip 2026</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:100vh;padding-bottom:70px}
@@ -257,6 +258,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
     <span class="rc" onclick="openCiudad('paris')">Paris</span>
   </div>
   <div class="pill" id="pill">...</div>
+  <div id="rt-badge" style="font-size:0.6rem;font-weight:700;padding:0.22rem 0.6rem;border-radius:20px;background:rgba(255,255,255,0.1);color:#94a3b8;white-space:nowrap">⚡ Conectando...</div>
 </div>
 
 <!-- TOP NAV desktop -->
@@ -924,8 +926,6 @@ function addGasto(){
   document.getElementById('g-amt').value='';
   renderGastos();
 }
-function deleteGasto(i){gastos.splice(i,1);renderGastos();}
-
 function renderGastos(){
   var html='';
   if(!gastos.length){html='<div style="font-size:0.78rem;color:#94a3b8;padding:0.48rem 0">Sin gastos todavia.</div>';}
@@ -936,7 +936,7 @@ function renderGastos(){
       html+='<div class="gasto-desc"><div class="gasto-name">'+g.desc+' <span style="font-size:0.62rem;color:#94a3b8;background:#f1f5f9;padding:0.08rem 0.32rem;border-radius:4px">'+g.cat+'</span></div>';
       html+='<div class="gasto-who">Pago: '+g.payer+'</div></div>';
       html+='<div class="gasto-amt">'+g.amt.toFixed(2)+'€</div>';
-      html+='<button class="gasto-del" onclick="deleteGasto('+i+')">×</button></div>';
+      html+='<button class="gasto-del" onclick="deleteGasto(\''+g.id+'\')">×</button></div>';
     }
   }
   document.getElementById('gasto-list').innerHTML=html;
@@ -1140,6 +1140,119 @@ function openCiudad(cityId){
   window.scrollTo(0,0);
 }
 
+// ---- SUPABASE ----
+var SUPA_URL = 'https://nhblyxltpdpyxmvjtrmt.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU';
+var db = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// Ask for user name once
+var MI_NOMBRE = localStorage.getItem('et_nombre');
+if (!MI_NOMBRE) {
+  MI_NOMBRE = prompt('Como te llamas? (para identificar tus votos y gastos)', '') || 'Anonimo';
+  localStorage.setItem('et_nombre', MI_NOMBRE);
+}
+
+// Load all data from Supabase
+function loadFromSupabase() {
+  // Load votos
+  db.from('votos').select('*').then(function(res) {
+    if (res.data) {
+      votes = {};
+      res.data.forEach(function(v) { votes[v.ciudad+'_'+v.tipo] = v.usuario; });
+      renderCities();
+    }
+  });
+  // Load gastos
+  db.from('gastos').select('*').order('created_at').then(function(res) {
+    if (res.data) {
+      gastos = res.data.map(function(g) {
+        return {id:g.id, payer:g.payer, desc:g.descripcion, amt:parseFloat(g.monto), cat:g.categoria};
+      });
+      renderGastos();
+    }
+  });
+  // Load checklist
+  db.from('checklist').select('*').then(function(res) {
+    if (res.data) {
+      res.data.forEach(function(c) { if(c.done) clDone[c.id] = true; });
+      renderCL();
+    }
+  });
+  // Load estados alojamientos
+  db.from('alojamientos_estado').select('*').then(function(res) {
+    if (res.data) {
+      res.data.forEach(function(e) { estadoAlo[e.ciudad] = e.estado; });
+      renderCities();
+    }
+  });
+}
+
+// Realtime subscriptions
+function subscribeRealtime() {
+  db.channel('eurotrip-changes')
+    .on('postgres_changes', {event:'*', schema:'public', table:'votos'}, function() { loadFromSupabase(); })
+    .on('postgres_changes', {event:'*', schema:'public', table:'gastos'}, function() { loadFromSupabase(); })
+    .on('postgres_changes', {event:'*', schema:'public', table:'checklist'}, function() { loadFromSupabase(); })
+    .on('postgres_changes', {event:'*', schema:'public', table:'alojamientos_estado'}, function() { loadFromSupabase(); })
+    .subscribe(function(status) {
+      var badge = document.getElementById('rt-badge');
+      if (!badge) return;
+      if (status === 'SUBSCRIBED') {
+        badge.textContent = '⚡ En vivo';
+        badge.style.background = 'rgba(16,185,129,0.2)';
+        badge.style.color = '#34d399';
+      } else {
+        badge.textContent = '⚡ Conectando...';
+        badge.style.color = '#94a3b8';
+      }
+    });
+}
+
+// Override vote to save to Supabase
+var _voteLocal = vote;
+function vote(id, type) {
+  var k = id+'_'+type;
+  // Upsert to Supabase
+  db.from('votos').upsert({ciudad:id, tipo:type, usuario:MI_NOMBRE}, {onConflict:'ciudad,usuario'}).then(function() {
+    loadFromSupabase();
+  });
+}
+
+// Override addGasto to save to Supabase
+function addGasto() {
+  var payer = document.getElementById('g-payer').value;
+  var desc = document.getElementById('g-desc').value.trim();
+  var amt = parseFloat(document.getElementById('g-amt').value);
+  var cat = document.getElementById('g-cat').value;
+  if (!payer || !desc || !amt || amt <= 0) return;
+  db.from('gastos').insert({payer:payer, descripcion:desc, monto:amt, categoria:cat}).then(function() {
+    document.getElementById('g-desc').value = '';
+    document.getElementById('g-amt').value = '';
+    loadFromSupabase();
+  });
+}
+
+// Override deleteGasto to delete from Supabase
+function deleteGasto(gastoId) {
+  db.from('gastos').delete().eq('id', gastoId).then(function() { loadFromSupabase(); });
+}
+
+// Override toggleCL to save to Supabase
+function toggleCL(si, ii) {
+  var k = si+'_'+ii;
+  var newDone = !clDone[k];
+  db.from('checklist').upsert({id:k, done:newDone, updated_at:new Date().toISOString()}, {onConflict:'id'}).then(function() {
+    loadFromSupabase();
+  });
+}
+
+// Override setEstado to save to Supabase
+function setEstado(cityId, estado) {
+  db.from('alojamientos_estado').upsert({ciudad:cityId, estado:estado, updated_at:new Date().toISOString()}, {onConflict:'ciudad'}).then(function() {
+    loadFromSupabase();
+  });
+}
+
 // ---- INIT ----
 updateCountdown();
 setInterval(updateCountdown, 60000);
@@ -1150,6 +1263,8 @@ renderGastos();
 renderNotas();
 renderCL();
 loadSheet();
+loadFromSupabase();
+subscribeRealtime();
 </script>
 </body>
 </html>
