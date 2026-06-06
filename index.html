@@ -237,6 +237,31 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
 .emerg-name{color:#64748b;font-size:0.72rem}
 .emerg-val{font-weight:700;color:#0f172a;font-size:0.76rem}
 .emerg-val a{color:#3b82f6;text-decoration:none}
+/* CONDUCTORES */
+.cond-day{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.88rem 1rem;margin-bottom:0.55rem;display:flex;align-items:center;gap:0.85rem;flex-wrap:wrap}
+.cond-day-info{flex:1;min-width:140px}
+.cond-day-date{font-size:0.7rem;font-weight:700;color:#3b82f6}
+.cond-day-route{font-size:0.83rem;font-weight:600;margin-top:0.06rem}
+.cond-day-km{font-size:0.67rem;color:#94a3b8;margin-top:0.04rem}
+.cond-day-critical{border-color:#fecaca;background:#fff8f8}
+.cond-select{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.42rem 0.7rem;font-family:inherit;font-size:0.78rem;color:#0f172a;outline:none;transition:border-color .15s;cursor:pointer}
+.cond-select:focus{border-color:#3b82f6}
+.cond-badge{font-size:0.6rem;font-weight:700;padding:0.18rem 0.48rem;border-radius:5px;white-space:nowrap}
+.cond-badge-day{background:#fffbeb;color:#d97706}
+.cond-badge-critical{background:#fef2f2;color:#dc2626}
+.cond-resumen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:0.55rem}
+.cond-res-card{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.78rem;text-align:center}
+.cond-res-name{font-weight:700;font-size:0.82rem;margin-bottom:0.2rem}
+.cond-res-days{font-size:1.3rem;font-weight:800;color:#3b82f6;letter-spacing:-0.02em}
+.cond-res-lbl{font-size:0.62rem;color:#94a3b8;margin-top:0.1rem}
+.cond-res-km{font-size:0.7rem;font-weight:600;color:#64748b;margin-top:0.12rem}
+/* GASTOS ASIMETRICOS */
+.gasto-excluir{margin-top:0.55rem;padding:0.6rem 0.75rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px}
+.gasto-excluir-title{font-size:0.62rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.45rem}
+.excluir-grid{display:flex;gap:0.38rem;flex-wrap:wrap}
+.excluir-btn{font-size:0.68rem;font-weight:600;padding:0.24rem 0.55rem;border-radius:6px;border:1.5px solid #e2e8f0;background:white;cursor:pointer;font-family:inherit;transition:all .15s;color:#64748b}
+.excluir-btn:hover{border-color:#ef4444;color:#dc2626}
+.excluir-btn.excluido{border-color:#ef4444;background:#fef2f2;color:#dc2626;text-decoration:line-through}
 /* RESPONSIVE */
 @media(max-width:640px){
   .main{padding:0.88rem}
@@ -282,6 +307,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
   <button class="nb" onclick="showView('gastos',this)">🧾 Gastos</button>
   <button class="nb" onclick="showView('notas',this)">📝 Notas</button>
   <button class="nb" onclick="showView('checklist',this)">✅ Checklist</button>
+  <button class="nb" onclick="showView('conductores',this)">🚗 Conductores</button>
   <button class="nb" onclick="showView('emergencias',this)">🆘 Emergencias</button>
 </div>
 
@@ -425,6 +451,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
       </div>
       <button class="btn-add" onclick="addGasto()">Añadir</button>
     </div>
+    <div id="excluir-container"></div>
   </div>
   <div class="stitle">Movimientos</div>
   <div id="gasto-list" class="gasto-list"></div>
@@ -508,6 +535,23 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
   </div>
 </div>
 
+<!-- CONDUCTORES -->
+<div id="view-conductores" class="view">
+  <div class="ptitle">Conductores</div>
+  <div class="psub">Organizad los turnos de conduccion por dia. Evitad la fatiga repartiendo bien.</div>
+
+  <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:12px;padding:0.85rem 1rem;margin-bottom:1.25rem;font-size:0.78rem;color:#dc2626;line-height:1.5">
+    <strong>Dias criticos:</strong> Dia 14 (Marsella-Pisa-Roma, 900km) y Dia 24 (Paris-Alicante, 1.150km).
+    Asignad minimo 2 conductores por dia largo y planead paradas cada 2h.
+  </div>
+
+  <div class="stitle">Asignar conductor por dia</div>
+  <div id="conductores-list"></div>
+
+  <div class="stitle" style="margin-top:1.25rem">Resumen por persona</div>
+  <div id="conductores-resumen"></div>
+</div>
+
 <!-- CIUDAD DETAIL -->
 <div id="view-ciudad" class="view">
   <div style="display:flex;align-items:center;gap:0.72rem;margin-bottom:1.05rem">
@@ -530,6 +574,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;min-height:
   <button class="bnb" onclick="showView('gastos',this)"><span class="bnb-ico">🧾</span><span class="bnb-lbl">Gastos</span></button>
   <button class="bnb" onclick="showView('checklist',this)"><span class="bnb-ico">✅</span><span class="bnb-lbl">Check</span></button>
   <button class="bnb" onclick="showView('notas',this)"><span class="bnb-ico">📝</span><span class="bnb-lbl">Notas</span></button>
+  <button class="bnb" onclick="showView('conductores',this)"><span class="bnb-ico">🚗</span><span class="bnb-lbl">Coche</span></button>
   <button class="bnb" onclick="showView('emergencias',this)"><span class="bnb-ico">🆘</span><span class="bnb-lbl">SOS</span></button>
 </div>
 
@@ -962,14 +1007,20 @@ function renderGastos(){
 
 function renderBalances(){
   var total=gastos.reduce(function(s,g){return s+g.amt;},0);
-  var share=total/PEOPLE.length;
   var paid={};
-  PEOPLE.forEach(function(p){paid[p]=0;});
-  gastos.forEach(function(g){if(paid[g.payer]!==undefined) paid[g.payer]+=g.amt;});
+  var owes={};
+  PEOPLE.forEach(function(p){paid[p]=0;owes[p]=0;});
+  gastos.forEach(function(g){
+    if(paid[g.payer]!==undefined) paid[g.payer]+=g.amt;
+    // Asymmetric: split only among participants
+    var parts = g.participantes ? g.participantes.split(',') : PEOPLE;
+    var share = g.amt / parts.length;
+    parts.forEach(function(p){ if(owes[p]!==undefined) owes[p]+=share; });
+  });
   document.getElementById('gtotal').textContent=total.toFixed(2)+'€';
   var html='';
   PEOPLE.forEach(function(p){
-    var bal=(paid[p]||0)-share;
+    var bal=(paid[p]||0)-(owes[p]||0);
     var pos=bal>=0;
     html+='<div class="bal-card"><div class="bal-name">'+p+'</div>';
     html+='<div class="bal-amt '+(pos?'bal-pos':'bal-neg')+'">'+(pos?'+':'')+bal.toFixed(0)+'€</div>';
@@ -977,13 +1028,12 @@ function renderBalances(){
     html+='<div class="bal-paid">Pago: '+(paid[p]||0).toFixed(0)+'€</div></div>';
   });
   document.getElementById('balance-grid').innerHTML=html;
-  renderLiquidacion(paid, total);
+  renderLiquidacion(paid, owes);
 }
 
-function renderLiquidacion(paid, total){
-  var share = total / PEOPLE.length;
+function renderLiquidacion(paid, owes){
   var balances = {};
-  PEOPLE.forEach(function(p){ balances[p] = (paid[p]||0) - share; });
+  PEOPLE.forEach(function(p){ balances[p] = (paid[p]||0) - (owes[p]||0); });
 
   var debtors = [], creditors = [];
   PEOPLE.forEach(function(p){
@@ -1178,7 +1228,7 @@ function loadFromSupabase() {
   db.from('gastos').select('*').order('created_at').then(function(res) {
     if (res.data) {
       gastos = res.data.map(function(g) {
-        return {id:g.id, payer:g.payer, desc:g.descripcion, amt:parseFloat(g.monto), cat:g.categoria};
+        return {id:g.id, payer:g.payer, desc:g.descripcion, amt:parseFloat(g.monto), cat:g.categoria, participantes:g.participantes||''};
       });
       renderGastos();
     }
@@ -1237,9 +1287,16 @@ function addGasto() {
   var amt = parseFloat(document.getElementById('g-amt').value);
   var cat = document.getElementById('g-cat').value;
   if (!payer || !desc || !amt || amt <= 0) return;
-  db.from('gastos').insert({payer:payer, descripcion:desc, monto:amt, categoria:cat}).then(function() {
+  // Calculate participants (exclude those marked)
+  var participantes = PEOPLE.filter(function(p){ return !excluidos[p]; });
+  if (participantes.length === 0) participantes = PEOPLE;
+  var participantesStr = participantes.join(',');
+  db.from('gastos').insert({payer:payer, descripcion:desc, monto:amt, categoria:cat, participantes:participantesStr}).then(function() {
     document.getElementById('g-desc').value = '';
     document.getElementById('g-amt').value = '';
+    excluidos = {};
+    var ec = document.getElementById('excluir-container');
+    if(ec) ec.innerHTML = renderExcluirBtns();
     loadFromSupabase();
   });
 }
@@ -1263,6 +1320,102 @@ function setEstado(cityId, estado) {
   db.from('alojamientos_estado').upsert({ciudad:cityId, estado:estado, updated_at:new Date().toISOString()}, {onConflict:'ciudad'}).then(function() {
     loadFromSupabase();
   });
+}
+
+// ---- CONDUCTORES ----
+var DRIVING_DAYS = [
+  {date:'12 jul', route:'Alicante a Marsella', km:620, critical:false},
+  {date:'14 jul', route:'Marsella a Pisa a Roma', km:900, critical:true},
+  {date:'17 jul', route:'Roma a Venecia', km:528, critical:false},
+  {date:'19 jul', route:'Venecia a Munich', km:425, critical:false},
+  {date:'21 jul', route:'Munich a Colonia', km:574, critical:false},
+  {date:'22 jul', route:'Colonia a Bruselas a Paris', km:510, critical:false},
+  {date:'24 jul', route:'Paris a Alicante', km:1150, critical:true}
+];
+
+var conductores = {};
+var copiltos = {};
+
+function renderConductores() {
+  var html = '';
+  DRIVING_DAYS.forEach(function(d, i) {
+    var cond = conductores[i] || '';
+    var cop = copiltos[i] || '';
+    html += '<div class="cond-day' + (d.critical ? ' cond-day-critical' : '') + '">';
+    html += '<div class="cond-day-info">';
+    html += '<div class="cond-day-date">' + d.date + '</div>';
+    html += '<div class="cond-day-route">' + d.route + '</div>';
+    html += '<div class="cond-day-km">' + d.km + ' km';
+    if (d.critical) html += ' <span class="cond-badge cond-badge-critical">Dia critico</span>';
+    html += '</div></div>';
+    html += '<div style="display:flex;flex-direction:column;gap:0.38rem">';
+    html += '<div style="display:flex;align-items:center;gap:0.5rem">';
+    html += '<span style="font-size:0.65rem;color:#64748b;min-width:55px">Conductor</span>';
+    html += '<select class="cond-select" onchange="setConductor(' + i + ','cond',this.value)">';
+    html += '<option value="">Seleccionar...</option>';
+    PEOPLE.forEach(function(p) {
+      html += '<option value="' + p + '"' + (cond === p ? ' selected' : '') + '>' + p + '</option>';
+    });
+    html += '</select></div>';
+    html += '<div style="display:flex;align-items:center;gap:0.5rem">';
+    html += '<span style="font-size:0.65rem;color:#64748b;min-width:55px">Copiloto</span>';
+    html += '<select class="cond-select" onchange="setConductor(' + i + ','cop',this.value)">';
+    html += '<option value="">Ninguno</option>';
+    PEOPLE.forEach(function(p) {
+      html += '<option value="' + p + '"' + (cop === p ? ' selected' : '') + '>' + p + '</option>';
+    });
+    html += '</select></div>';
+    html += '</div></div>';
+  });
+  document.getElementById('conductores-list').innerHTML = html;
+  renderResumenConductores();
+}
+
+function setConductor(idx, role, val) {
+  if (role === 'cond') conductores[idx] = val;
+  else copiltos[idx] = val;
+  renderResumenConductores();
+}
+
+function renderResumenConductores() {
+  var stats = {};
+  PEOPLE.forEach(function(p) { stats[p] = {days:0, km:0}; });
+  DRIVING_DAYS.forEach(function(d, i) {
+    if (conductores[i]) { stats[conductores[i]].days++; stats[conductores[i]].km += d.km; }
+    if (copiltos[i]) { stats[copiltos[i]].days++; stats[copiltos[i]].km += d.km; }
+  });
+  var html = '<div class="cond-resumen-grid">';
+  PEOPLE.forEach(function(p) {
+    var s = stats[p];
+    html += '<div class="cond-res-card">';
+    html += '<div class="cond-res-name">' + p + '</div>';
+    html += '<div class="cond-res-days">' + s.days + '</div>';
+    html += '<div class="cond-res-lbl">dias al volante</div>';
+    html += '<div class="cond-res-km">' + s.km + ' km</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+  document.getElementById('conductores-resumen').innerHTML = html;
+}
+
+// ---- GASTOS ASIMETRICOS ----
+var excluidos = {};
+
+function renderExcluirBtns() {
+  var html = '<div class="gasto-excluir"><div class="gasto-excluir-title">Excluir de este gasto (no participo)</div><div class="excluir-grid">';
+  PEOPLE.forEach(function(p) {
+    var ex = excluidos[p];
+    html += '<button class="excluir-btn' + (ex ? ' excluido' : '') + '" onclick="toggleExcluido('' + p + '')">' + p + '</button>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+function toggleExcluido(p) {
+  excluidos[p] = !excluidos[p];
+  // Re-render excluir buttons inside form
+  var container = document.getElementById('excluir-container');
+  if (container) container.innerHTML = renderExcluirBtns();
 }
 
 // ---- PWA INSTALL ----
@@ -1297,6 +1450,9 @@ renderBudget();
 renderGastos();
 renderNotas();
 renderCL();
+renderConductores();
+var ec = document.getElementById('excluir-container');
+if(ec) ec.innerHTML = renderExcluirBtns();
 loadSheet();
 loadFromSupabase();
 subscribeRealtime();
