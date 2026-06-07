@@ -1195,12 +1195,15 @@ function simCalc(){
   document.getElementById('sim-total-fuel').textContent='~'+fuel+' EUR';
 }
 
+var SIM_NAMES={alicante:'Alicante',montpellier:'Montpellier',paris:'Paris',colmar:'Colmar',
+  milan:'Milan',venecia:'Venecia',roma:'Roma',niza:'Niza',
+  pisa:'Pisa',monaco:'Monaco',barcelona:'Barcelona',florencia:'Florencia',marsella:'Marsella'};
+var SIM_FLAGS={alicante:'ES',montpellier:'FR',paris:'FR',colmar:'FR',milan:'IT',
+  venecia:'IT',roma:'IT',niza:'FR',pisa:'IT',monaco:'MC',barcelona:'ES',florencia:'IT',marsella:'FR'};
+
 function simRenderRoute(){
-  var names={alicante:'Alicante',montpellier:'Montpellier',paris:'Paris',colmar:'Colmar',
-    milan:'Milan',venecia:'Venecia',roma:'Roma',niza:'Niza',
-    pisa:'Pisa',monaco:'Monaco',barcelona:'Barcelona',florencia:'Florencia',marsella:'Marsella'};
-  var flags={alicante:'ES',montpellier:'FR',paris:'FR',colmar:'FR',milan:'IT',
-    venecia:'IT',roma:'IT',niza:'FR',pisa:'IT',monaco:'MC',barcelona:'ES',florencia:'IT',marsella:'FR'};
+  var names=SIM_NAMES;
+  var flags=SIM_FLAGS;
   document.getElementById('sim-ruta').innerHTML=simRoute.map(function(c,i){
     var km=i<simRoute.length-1?simGetKm(c,simRoute[i+1]):0;
     var isAdded=simAdded.indexOf(c)!==-1;
@@ -1252,7 +1255,7 @@ function simAdd(id){
   simRoute.splice(afterIdx>=0?afterIdx+1:simRoute.length-1,0,id);
   simAdded.push(id);
   simRenderRoute();simRenderCandidates();
-  document.getElementById('sim-alert').textContent=(id.charAt(0).toUpperCase()+id.slice(1))+' anadida. Ruta oficial sin cambios.';
+  document.getElementById('sim-alert').textContent=(SIM_NAMES[id]||id)+' anadida. Ruta oficial sin cambios.';
   document.getElementById('sim-alert').style.display='block';
   setTimeout(function(){document.getElementById('sim-alert').style.display='none';},3500);
 }
