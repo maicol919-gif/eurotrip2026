@@ -1214,26 +1214,38 @@ function simRenderRoute(){
       '<span style="font-size:0.9rem;margin-right:2px">'+flags[c]+'</span>'+
       '<span class="sim-name">'+names[c]+(isAdded?' <span style="font-size:0.58rem;background:#dbeafe;color:#2563eb;padding:0.1rem 0.3rem;border-radius:4px">+SIMULADA</span>':'')+'</span>'+
       (km>0?'<div class="sim-meta"><div class="sim-km">'+km+'km</div>'+(km/80).toFixed(1)+'h</div>':'<div class="sim-meta" style="color:#10b981;font-weight:700">FIN</div>')+
-      (isAdded?'<button onclick="simRemove(\'+c+\')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1rem;line-height:1;padding:0 2px">x</button>':'')+
+      (isAdded?'<button data-city="'+c+'" class="sim-rm-btn" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1rem;line-height:1;padding:0 2px">x</button>':'')+
       '</div>';
   }).join('');
   simCalc();
+  // Event delegation for remove buttons
+  document.getElementById('sim-ruta').onclick=function(e){
+    var btn=e.target.closest('.sim-rm-btn');
+    if(btn) simRemove(btn.getAttribute('data-city'));
+  };
 }
 function simRenderCandidates(){
-  document.getElementById('sim-candidates').innerHTML=SIM_CANDIDATES.map(function(c){
+  var el=document.getElementById('sim-candidates');
+  el.innerHTML='';
+  SIM_CANDIDATES.forEach(function(c){
     var inRoute=simRoute.indexOf(c.id)!==-1;
-    return '<div class="sim-cand">'+
-      '<span style="font-size:0.9rem">'+c.flag+'</span>'+
+    var div=document.createElement('div');
+    div.className='sim-cand';
+    div.innerHTML='<span style="font-size:0.9rem">'+c.flag+'</span>'+
       '<div class="sim-cand-info">'+
         '<div class="sim-cand-name">'+c.name+'</div>'+
         '<div class="sim-cand-note">'+c.note+'</div>'+
         '<div class="sim-cand-impact">'+c.impact+'</div>'+
-      '</div>'+
-      '<button class="btn-sim-add'+(inRoute?' added':'')+'" onclick="simAdd(\'+c.id+\')">'+
-        (inRoute?'En ruta':'+ Probar')+
-      '</button></div>';
-  }).join('');
+      '</div>';
+    var btn=document.createElement('button');
+    btn.className='btn-sim-add'+(inRoute?' added':'');
+    btn.textContent=inRoute?'En ruta':'+ Probar';
+    (function(id){ btn.onclick=function(){ simAdd(id); }; })(c.id);
+    div.appendChild(btn);
+    el.appendChild(div);
+  });
 }
+
 function simDS(e,i){dragSrc=i;}
 function simDO(e){e.preventDefault();e.currentTarget.classList.add('dragover');}
 function simDL(e){e.currentTarget.classList.remove('dragover');}
