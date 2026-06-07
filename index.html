@@ -1542,9 +1542,12 @@ function simGenerateCity(){
   // Determine neighboring cities in current route for context
   var routeNames=simRoute.map(function(r){return SIM_NAMES[r]||r;}).join(' → ');
 
-  fetch('https://api.anthropic.com/v1/messages',{
+  fetch('https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy',{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{
+      'Content-Type':'application/json',
+      'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU'
+    },
     body:JSON.stringify({
       model:'claude-sonnet-4-20250514',
       max_tokens:1000,
