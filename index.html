@@ -447,21 +447,25 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 
 <div id="view-simulador" class="view">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.2rem">
-    <div class="ptitle" style="margin:0">Simulador de Ruta</div>
-    <button onclick="simShowPIN()" id="sim-admin-btn" style="background:#0f172a;color:white;border:none;border-radius:8px;padding:0.4rem 0.9rem;font-family:inherit;font-weight:700;font-size:0.72rem;cursor:pointer">🔐 Admin</button>
+
+  <!-- Header con nombre usuario -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+    <div>
+      <div class="ptitle" style="margin:0">Simulador de Ruta</div>
+      <div style="font-size:0.72rem;color:#94a3b8;margin-top:2px">Hola, <span id="sim-username" style="color:#3b82f6;font-weight:600">...</span></div>
+    </div>
   </div>
-  <div class="psub">Prueba ciudades. Solo el admin puede añadir al itinerario oficial.</div>
 
   <div class="sim-alert" id="sim-alert" style="display:none"></div>
 
   <!-- PIN modal -->
-  <div id="sim-pin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;display:none;align-items:center;justify-content:center">
-    <div style="background:white;border-radius:16px;padding:24px;width:280px;text-align:center">
-      <div style="font-weight:800;font-size:1rem;margin-bottom:8px">Acceso Admin</div>
-      <div style="font-size:0.78rem;color:#64748b;margin-bottom:16px">Introduce el PIN para gestionar el itinerario oficial</div>
+  <div id="sim-pin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+      <div style="font-size:1.5rem;margin-bottom:8px">🔐</div>
+      <div style="font-weight:800;font-size:1rem;margin-bottom:6px">Acceso Admin</div>
+      <div style="font-size:0.76rem;color:#64748b;margin-bottom:16px">Solo el admin puede modificar el itinerario oficial</div>
       <input id="sim-pin-input" type="password" placeholder="PIN" maxlength="6"
-        style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px;text-align:center;font-size:1.2rem;letter-spacing:0.3em;outline:none;margin-bottom:12px">
+        style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px;text-align:center;font-size:1.4rem;letter-spacing:0.4em;outline:none;margin-bottom:12px;font-family:monospace">
       <div style="display:flex;gap:8px">
         <button onclick="simCheckPIN()" style="flex:1;background:#0f172a;color:white;border:none;border-radius:8px;padding:10px;font-family:inherit;font-weight:700;cursor:pointer">Entrar</button>
         <button onclick="document.getElementById('sim-pin-modal').style.display='none'" style="flex:1;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px;font-family:inherit;cursor:pointer">Cancelar</button>
@@ -470,25 +474,45 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
     </div>
   </div>
 
-  <div class="sim-summary">
-    <div><div class="sim-sum-v" id="sim-total-km">4.800</div><div class="sim-sum-l">km coche</div></div>
-    <div><div class="sim-sum-v" id="sim-total-h">~52h</div><div class="sim-sum-l">conduccion</div></div>
-    <div><div class="sim-sum-v" id="sim-total-fuel">~350 EUR</div><div class="sim-sum-l">gasolina est.</div></div>
+  <!-- Live stats bar — siempre visible, se actualiza al mover -->
+  <div id="sim-live-bar" style="background:#0f172a;border-radius:12px;padding:0.75rem 1rem;margin-bottom:0.75rem;display:grid;grid-template-columns:repeat(4,1fr);gap:0.25rem;text-align:center;position:sticky;top:68px;z-index:10">
+    <div>
+      <div class="sim-sum-v" id="sim-total-km" style="font-size:1.1rem">4.800</div>
+      <div class="sim-sum-l">km</div>
+    </div>
+    <div>
+      <div class="sim-sum-v" id="sim-total-h" style="font-size:1.1rem">~52h</div>
+      <div class="sim-sum-l">conduccion</div>
+    </div>
+    <div>
+      <div class="sim-sum-v" id="sim-total-fuel" style="font-size:1.1rem">~350€</div>
+      <div class="sim-sum-l">gasolina</div>
+    </div>
+    <div>
+      <div class="sim-sum-v" id="sim-max-day" style="font-size:1.1rem">10h</div>
+      <div class="sim-sum-l">etapa max</div>
+    </div>
   </div>
 
+  <!-- Segment warnings -->
+  <div id="sim-warnings" style="margin-bottom:0.5rem"></div>
+
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
-    <div class="st" style="margin:0;flex:1">Ruta actual</div>
+    <div class="st" style="margin:0;flex:1">Ruta — arrastra para reordenar</div>
     <button class="btn-sim-reset" onclick="simReset()">Restaurar</button>
   </div>
   <div id="sim-ruta" class="sim-ruta"></div>
 
-  <div class="st" style="margin-top:0.75rem">Probar nueva ciudad</div>
+  <div class="st" style="margin-top:0.75rem">Analizar nueva ciudad</div>
   <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">
     <input id="sim-new-city" class="fi" placeholder="Ej: Zurich, Cinque Terre, Bruselas..." style="flex:1;font-size:0.82rem;padding:0.5rem 0.75rem">
     <button onclick="simGenerateCity()" style="background:#0f172a;color:white;border:none;border-radius:8px;padding:0.5rem 1rem;font-family:inherit;font-weight:700;font-size:0.78rem;cursor:pointer;white-space:nowrap">✨ Analizar</button>
   </div>
 
-  <div class="st">Ciudades candidatas <span id="sim-cand-count" style="font-size:0.65rem;color:#94a3b8;font-weight:400;margin-left:4px"></span></div>
+  <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:0.5rem">
+    <div class="st" style="margin:0">Ciudades candidatas</div>
+    <span id="sim-cand-count" style="font-size:0.65rem;color:#94a3b8"></span>
+  </div>
   <div id="sim-candidates"></div>
 
   <!-- Preview panel -->
@@ -496,9 +520,9 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
     <div id="sim-preview-impact" style="display:none"></div>
     <div id="sim-preview-tl"></div>
     <div style="display:flex;gap:0.5rem;margin-top:0.75rem;flex-wrap:wrap">
-      <button onclick="simSaveCandidate()" style="flex:1;min-width:140px;background:#3b82f6;color:white;border:none;border-radius:8px;padding:0.6rem;font-family:inherit;font-weight:700;font-size:0.78rem;cursor:pointer">📌 Guardar en candidatas</button>
-      <button id="sim-confirm-btn" onclick="simConfirmOfficial()" style="display:none;flex:1;min-width:140px;background:#10b981;color:white;border:none;border-radius:8px;padding:0.6rem;font-family:inherit;font-weight:700;font-size:0.78rem;cursor:pointer">✓ Añadir al oficial</button>
-      <button onclick="simClosePreview()" style="background:none;border:1.5px solid #e2e8f0;color:#64748b;border-radius:8px;padding:0.6rem 1rem;font-family:inherit;font-weight:600;font-size:0.78rem;cursor:pointer">Descartar</button>
+      <button onclick="simSaveCandidate()" id="sim-save-btn" style="flex:1;min-width:130px;background:#3b82f6;color:white;border:none;border-radius:8px;padding:0.65rem;font-family:inherit;font-weight:700;font-size:0.78rem;cursor:pointer">📌 Guardar en candidatas</button>
+      <button onclick="simConfirmOfficial()" style="flex:1;min-width:130px;background:#10b981;color:white;border:none;border-radius:8px;padding:0.65rem;font-family:inherit;font-weight:700;font-size:0.78rem;cursor:pointer">✓ Añadir al oficial</button>
+      <button onclick="simClosePreview()" style="background:none;border:1.5px solid #e2e8f0;color:#64748b;border-radius:8px;padding:0.65rem 1rem;font-family:inherit;font-weight:600;font-size:0.78rem;cursor:pointer">Descartar</button>
     </div>
   </div>
 </div>
@@ -1259,6 +1283,7 @@ document.addEventListener('keydown',function(e){
 // ===== SIMULADOR =====
 var ADMIN_PIN = '2026';
 var simIsAdmin = false;
+var simPendingAction = null; // action to run after PIN confirmed
 
 var SIM_KM = {
   'alicante|montpellier':620,'montpellier|alicante':620,
@@ -1298,37 +1323,50 @@ var simCityCache = {};
 var simRoute = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
 var simAdded = [];
 var simPreviewing = null;
-var simCandidatas = []; // loaded from Supabase
+var simCandidatas = [];
 var dragSrc = null;
 
 // ===== PIN ADMIN =====
-function simShowPIN(){
+function simRequestAdmin(action){
+  if(simIsAdmin){ action(); return; }
+  simPendingAction=action;
   var modal=document.getElementById('sim-pin-modal');
   modal.style.display='flex';
   document.getElementById('sim-pin-input').value='';
   document.getElementById('sim-pin-error').style.display='none';
+  setTimeout(function(){document.getElementById('sim-pin-input').focus();},100);
 }
 function simCheckPIN(){
   var pin=document.getElementById('sim-pin-input').value;
   if(pin===ADMIN_PIN){
     simIsAdmin=true;
     document.getElementById('sim-pin-modal').style.display='none';
-    document.getElementById('sim-admin-btn').textContent='✓ Admin activo';
-    document.getElementById('sim-admin-btn').style.background='#10b981';
-    // Show confirm btn if preview open
-    if(simPreviewing) document.getElementById('sim-confirm-btn').style.display='flex';
-    simRenderCandidates();
     simShowMsg('Modo admin activado.');
+    simRenderCandidates();
+    if(simPendingAction){ simPendingAction(); simPendingAction=null; }
   } else {
     document.getElementById('sim-pin-error').style.display='block';
+    document.getElementById('sim-pin-input').value='';
   }
+}
+// Allow Enter key in PIN input
+document.addEventListener('DOMContentLoaded',function(){
+  var pi=document.getElementById('sim-pin-input');
+  if(pi) pi.addEventListener('keydown',function(e){if(e.key==='Enter') simCheckPIN();});
+});
+
+// ===== USERNAME =====
+function simUpdateUsername(){
+  var name=localStorage.getItem('et26_name')||'';
+  var el=document.getElementById('sim-username');
+  if(el) el.textContent=name||'invitado';
 }
 
 // ===== SUPABASE CANDIDATAS =====
 function simLoadCandidatas(){
+  simUpdateUsername();
   supa('GET','candidatas?order=created_at.desc').then(function(rows){
     simCandidatas=rows||[];
-    // Populate cache from Supabase data
     simCandidatas.forEach(function(row){
       if(!simCityCache[row.city_id]){
         simCityCache[row.city_id]=row.datos;
@@ -1346,37 +1384,27 @@ function simSaveCandidate(){
   if(!c) return;
   var cityId=simPreviewing;
   var userName=localStorage.getItem('et26_name')||'Alguien';
-
-  // Check if already saved
   var exists=simCandidatas.find(function(r){return r.city_id===cityId;});
   if(exists){
     simShowMsg((SIM_NAMES[cityId]||cityId)+' ya esta en candidatas.');
-    simClosePreview();
-    return;
+    simClosePreview();return;
   }
-
   supa('POST','candidatas',{
-    city_id: cityId,
-    name: SIM_NAMES[cityId]||c.name||cityId,
-    flag: SIM_FLAGS[cityId]||c.flag||'',
-    datos: c,
-    propuesta_por: userName
+    city_id:cityId,name:SIM_NAMES[cityId]||c.name||cityId,
+    flag:SIM_FLAGS[cityId]||c.flag||'',datos:c,propuesta_por:userName
   }).then(function(){
-    simLoadCandidatas();
-    simClosePreview();
-    simShowMsg('📌 '+(SIM_NAMES[cityId]||cityId)+' guardada en candidatas. Todo el grupo puede verla.');
-  }).catch(function(e){
-    console.error(e);
-    simShowMsg('Error al guardar. Intentalo de nuevo.');
-  });
+    simLoadCandidatas();simClosePreview();
+    simShowMsg('📌 '+(SIM_NAMES[cityId]||cityId)+' guardada. Todo el grupo puede verla.');
+  }).catch(function(){simShowMsg('Error al guardar.');});
 }
 
 function simDeleteCandidate(cityId){
-  if(!simIsAdmin){ simShowMsg('Solo el admin puede eliminar candidatas.'); return; }
-  supa('DELETE','candidatas?city_id=eq.'+cityId).then(function(){
-    simCandidatas=simCandidatas.filter(function(r){return r.city_id!==cityId;});
-    simRenderCandidates();
-    simShowMsg('Candidata eliminada.');
+  simRequestAdmin(function(){
+    supa('DELETE','candidatas?city_id=eq.'+cityId).then(function(){
+      simCandidatas=simCandidatas.filter(function(r){return r.city_id!==cityId;});
+      simRenderCandidates();
+      simShowMsg('Candidata eliminada.');
+    });
   });
 }
 
@@ -1384,8 +1412,7 @@ function simDeleteCandidate(cityId){
 function simGetKm(a,b){ return SIM_KM[a+'|'+b]||SIM_KM[b+'|'+a]||400; }
 
 function simFindBestInsert(id){
-  var bestIdx=simRoute.length-1;
-  var bestExtra=999999;
+  var bestIdx=simRoute.length-1,bestExtra=999999;
   for(var i=0;i<simRoute.length-1;i++){
     var extra=simGetKm(simRoute[i],id)+simGetKm(id,simRoute[i+1])-simGetKm(simRoute[i],simRoute[i+1]);
     if(extra<bestExtra){bestExtra=extra;bestIdx=i+1;}
@@ -1394,11 +1421,38 @@ function simFindBestInsert(id){
 }
 
 function simCalc(){
-  var km=0,h=0;
-  for(var i=0;i<simRoute.length-1;i++){var d=simGetKm(simRoute[i],simRoute[i+1]);km+=d;h+=d/80;}
+  var km=0,maxSeg=0,maxSegName='';
+  var warnings=[];
+  for(var i=0;i<simRoute.length-1;i++){
+    var d=simGetKm(simRoute[i],simRoute[i+1]);
+    var h=d/80;
+    km+=d;
+    if(d>maxSeg){
+      maxSeg=d;
+      maxSegName=(SIM_NAMES[simRoute[i]]||simRoute[i])+' → '+(SIM_NAMES[simRoute[i+1]]||simRoute[i+1]);
+    }
+    if(h>9) warnings.push({seg:maxSegName,h:h.toFixed(1)});
+  }
+  var totalH=km/80;
+  var fuel=Math.round((km/100)*7.5*1.75*2);
+
+  // Update live bar
   document.getElementById('sim-total-km').textContent=km.toLocaleString();
-  document.getElementById('sim-total-h').textContent='~'+Math.round(h)+'h';
-  document.getElementById('sim-total-fuel').textContent='~'+Math.round((km/100)*7.5*1.75*2)+' EUR';
+  document.getElementById('sim-total-h').textContent='~'+Math.round(totalH)+'h';
+  document.getElementById('sim-total-fuel').textContent='~'+fuel+'€';
+  
+  var maxEl=document.getElementById('sim-max-day');
+  var maxH=(maxSeg/80).toFixed(1);
+  maxEl.textContent=maxH+'h';
+  maxEl.style.color=parseFloat(maxH)>9?'#ef4444':parseFloat(maxH)>7?'#f59e0b':'#4ade80';
+
+  // Warnings
+  var wEl=document.getElementById('sim-warnings');
+  if(warnings.length){
+    wEl.innerHTML=warnings.map(function(w){
+      return '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:0.4rem 0.7rem;font-size:0.72rem;color:#dc2626;margin-bottom:4px">⚠️ '+w.seg+' supera las 9h ('+w.h+'h)</div>';
+    }).join('');
+  } else { wEl.innerHTML=''; }
 }
 
 // ===== RENDER ROUTE =====
@@ -1407,7 +1461,9 @@ function simRenderRoute(){
   el.innerHTML='';
   simRoute.forEach(function(c,i){
     var km=i<simRoute.length-1?simGetKm(c,simRoute[i+1]):0;
+    var h=km>0?(km/80).toFixed(1):0;
     var isAdded=simAdded.indexOf(c)!==-1;
+    var isOver=parseFloat(h)>9;
     var div=document.createElement('div');
     div.className='sim-city';div.draggable=true;div.dataset.i=i;
     div.innerHTML='<span class="sim-handle">&#9776;</span>'+
@@ -1415,8 +1471,9 @@ function simRenderRoute(){
       '<span class="sim-name">'+(SIM_NAMES[c]||c)+
         (isAdded?' <span style="font-size:0.58rem;background:#dbeafe;color:#2563eb;padding:0.1rem 0.3rem;border-radius:4px">+SIM</span>':'')+
       '</span>'+
-      (km>0?'<div class="sim-meta"><div class="sim-km">'+km+'km</div>'+(km/80).toFixed(1)+'h</div>':
-            '<div class="sim-meta" style="color:#10b981;font-weight:700">FIN</div>');
+      (km>0?'<div class="sim-meta" style="'+(isOver?'color:#ef4444':'')+'">'+
+        '<div class="sim-km" style="'+(isOver?'color:#ef4444':'')+'">'+km+'km</div>'+h+'h'+(isOver?' ⚠️':'')+'</div>':
+        '<div class="sim-meta" style="color:#10b981;font-weight:700">FIN</div>');
     if(isAdded){
       var rmBtn=document.createElement('button');
       rmBtn.style.cssText='background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1.1rem;padding:0 4px';
@@ -1424,20 +1481,26 @@ function simRenderRoute(){
       (function(city){rmBtn.onclick=function(e){e.stopPropagation();simRemove(city);};})(c);
       div.appendChild(rmBtn);
     }
-    div.ondragstart=function(e){dragSrc=parseInt(e.currentTarget.dataset.i);};
+    div.ondragstart=function(e){
+      dragSrc=parseInt(e.currentTarget.dataset.i);
+      e.currentTarget.style.opacity='0.4';
+    };
+    div.ondragend=function(e){ e.currentTarget.style.opacity='1'; };
     div.ondragover=function(e){e.preventDefault();e.currentTarget.classList.add('dragover');};
     div.ondragleave=function(e){e.currentTarget.classList.remove('dragover');};
     div.ondrop=function(e){
-      e.preventDefault();e.currentTarget.classList.remove('dragover');
+      e.preventDefault();
+      e.currentTarget.classList.remove('dragover');
       var target=parseInt(e.currentTarget.dataset.i);
       if(dragSrc===null||dragSrc===target){dragSrc=null;return;}
       var moved=simRoute.splice(dragSrc,1)[0];
       simRoute.splice(target,0,moved);
-      dragSrc=null;simRenderRoute();
+      dragSrc=null;
+      simRenderRoute(); // re-render updates live bar automatically
     };
     el.appendChild(div);
   });
-  simCalc();
+  simCalc(); // always update stats after render
 }
 
 // ===== RENDER CANDIDATES =====
@@ -1445,14 +1508,12 @@ function simRenderCandidates(){
   var el=document.getElementById('sim-candidates');
   el.innerHTML='';
   var count=document.getElementById('sim-cand-count');
-
   if(!simCandidatas.length){
-    el.innerHTML='<div style="font-size:0.78rem;color:#94a3b8;padding:0.75rem 0">Ninguna ciudad candidata todavia. Usa el campo de arriba para analizar una.</div>';
+    el.innerHTML='<div style="font-size:0.78rem;color:#94a3b8;padding:0.75rem 0">Ninguna ciudad candidata todavia. Analiza una arriba.</div>';
     if(count) count.textContent='';
     return;
   }
   if(count) count.textContent='('+simCandidatas.length+')';
-
   simCandidatas.forEach(function(row){
     var cityId=row.city_id;
     var inRoute=simRoute.indexOf(cityId)!==-1;
@@ -1462,22 +1523,17 @@ function simRenderCandidates(){
       '<span style="font-size:0.9rem">'+(SIM_FLAGS[cityId]||row.flag||'')+'</span>'+
       '<div class="sim-cand-info">'+
         '<div class="sim-cand-name">'+(SIM_NAMES[cityId]||row.name)+'</div>'+
-        '<div class="sim-cand-note" style="font-size:0.68rem;color:#94a3b8">Propuesta por '+row.propuesta_por+'</div>'+
+        '<div class="sim-cand-note">Propuesta por <strong>'+row.propuesta_por+'</strong></div>'+
       '</div>';
-
-    // Preview btn
     var prevBtn=document.createElement('button');
     prevBtn.className='btn-sim-add'+(inRoute?' added':'');
     prevBtn.textContent=inRoute?'En ruta':'Ver impacto';
     (function(id){prevBtn.onclick=function(){simPreview(id);};})(cityId);
     div.appendChild(prevBtn);
-
-    // Admin delete btn
     if(simIsAdmin){
       var delBtn=document.createElement('button');
-      delBtn.style.cssText='background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.75rem;padding:0 6px;margin-left:4px';
+      delBtn.style.cssText='background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.8rem;padding:0 6px;margin-left:4px';
       delBtn.textContent='✕';
-      delBtn.title='Eliminar candidata';
       (function(id){delBtn.onclick=function(){simDeleteCandidate(id);};})(cityId);
       div.appendChild(delBtn);
     }
@@ -1485,7 +1541,7 @@ function simRenderCandidates(){
   });
 }
 
-// ===== PREVIEW =====
+// ===== PREVIEW (with quick stats panel) =====
 function simPreview(cityId){
   var c=simCityCache[cityId];
   if(!c){simShowMsg('Cargando datos...');return;}
@@ -1497,11 +1553,9 @@ function simPreview(cityId){
   var afterCity=simRoute[insertAt-1]||simRoute[0];
   var nextCity=simRoute[insertAt]||simRoute[simRoute.length-1];
 
-  // Build new route for diff
   var newRoute=simRoute.slice();
   newRoute.splice(insertAt,0,cityId);
 
-  // Totals
   var kmBefore=0,kmAfter=0;
   for(var i=0;i<simRoute.length-1;i++) kmBefore+=simGetKm(simRoute[i],simRoute[i+1]);
   for(var j=0;j<newRoute.length-1;j++) kmAfter+=simGetKm(newRoute[j],newRoute[j+1]);
@@ -1509,12 +1563,36 @@ function simPreview(cityId){
   var extraH=(extraKm/80).toFixed(1);
   var extraFuel=Math.round((extraKm/100)*7.5*1.75*2);
 
-  // AI verdict from datos
+  // Verdict
   var verdict=c.verdict||null;
   var pros=c.pros||[];
   var cons=c.cons||[];
+  var verdictHtml='';
+  if(verdict||pros.length||cons.length){
+    var vBg=verdict==='conviene'?'#f0fdf4':'#fef2f2';
+    var vBorder=verdict==='conviene'?'#86efac':'#fca5a5';
+    var vIcon=verdict==='conviene'?'✅ Conviene añadirla':verdict==='no_conviene'?'❌ No conviene':'⚠️ Depende del grupo';
+    verdictHtml='<div style="background:'+vBg+';border:1.5px solid '+vBorder+';border-radius:10px;padding:0.7rem;margin-bottom:0.6rem">'+
+      '<div style="font-weight:700;font-size:0.82rem;margin-bottom:0.4rem">'+vIcon+'</div>'+
+      (pros.length?'<div style="font-size:0.72rem;margin-bottom:0.25rem"><strong>✓</strong> '+pros.join(' · ')+'</div>':'')+
+      (cons.length?'<div style="font-size:0.72rem"><strong>✗</strong> '+cons.join(' · ')+'</div>':'')+
+      '</div>';
+  }
 
-  // Build diff rows
+  // Quick impact summary (mini live bar style)
+  var affected=(SIM_NAMES[afterCity]||afterCity)+' → '+(SIM_NAMES[cityId]||cityId)+' → '+(SIM_NAMES[nextCity]||nextCity);
+  var affectedKm=simGetKm(afterCity,cityId)+simGetKm(cityId,nextCity);
+  var affectedH=(affectedKm/80).toFixed(1);
+  var overLimit=parseFloat(affectedH)>9;
+
+  var impactBar='<div style="background:#0f172a;border-radius:10px;padding:0.6rem 0.75rem;display:grid;grid-template-columns:repeat(3,1fr);gap:0.3rem;text-align:center;margin-bottom:0.6rem">'+
+    '<div><div style="font-size:0.95rem;font-weight:800;color:white">+'+(extraKm>0?extraKm:0)+'km</div><div style="font-size:0.58rem;color:#94a3b8;text-transform:uppercase">total extra</div></div>'+
+    '<div><div style="font-size:0.95rem;font-weight:800;color:white">+'+extraH+'h</div><div style="font-size:0.58rem;color:#94a3b8;text-transform:uppercase">conduccion</div></div>'+
+    '<div><div style="font-size:0.95rem;font-weight:800;color:white">+'+extraFuel+'€</div><div style="font-size:0.58rem;color:#94a3b8;text-transform:uppercase">gasolina</div></div>'+
+    '</div>'+
+    (overLimit?'<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:0.45rem 0.7rem;font-size:0.72rem;color:#dc2626;margin-bottom:0.6rem">⚠️ '+affected+': '+affectedH+'h — supera el limite de 9h</div>':'');
+
+  // Full diff rows
   var rows='';
   for(var k=0;k<newRoute.length-1;k++){
     var fc=newRoute[k],tc=newRoute[k+1];
@@ -1522,100 +1600,71 @@ function simPreview(cityId){
     var segH=(segKm/80).toFixed(1);
     var isNew=(fc===afterCity&&tc===cityId)||(fc===cityId&&tc===nextCity);
     var bg=isNew?'background:#dcfce7;border-left:3px solid #16a34a':'';
-    var badge=isNew?'<span style="font-size:0.58rem;background:#16a34a;color:white;padding:0.1rem 0.35rem;border-radius:3px;margin-left:5px">NUEVO</span>':'';
-    var warn=parseFloat(segH)>9?'<span style="color:#ef4444;font-size:0.62rem;margin-left:4px">⚠️</span>':'';
-    rows+='<div style="display:grid;grid-template-columns:24px 1fr auto;gap:6px;align-items:center;padding:0.45rem 0.7rem;border-bottom:1px solid #f1f5f9;'+bg+'">'+
-      '<span style="font-size:0.6rem;color:#94a3b8;font-weight:700">D'+(k+1)+'</span>'+
-      '<span style="font-size:0.76rem;font-weight:500">'+(SIM_NAMES[fc]||fc)+' → '+(SIM_NAMES[tc]||tc)+badge+'</span>'+
-      '<div style="text-align:right"><div style="font-size:0.72rem;font-weight:700">'+segKm+'km</div>'+
-      '<div style="font-size:0.62rem;color:#94a3b8">'+segH+'h'+warn+'</div></div>'+
-      '</div>';
+    var badge=isNew?'<span style="font-size:0.56rem;background:#16a34a;color:white;padding:0.1rem 0.3rem;border-radius:3px;margin-left:5px">NUEVO</span>':'';
+    var warn=parseFloat(segH)>9?'<span style="color:#ef4444;font-size:0.6rem;margin-left:3px">⚠️</span>':'';
+    rows+='<div style="display:grid;grid-template-columns:22px 1fr auto;gap:6px;align-items:center;padding:0.42rem 0.65rem;border-bottom:1px solid #f1f5f9;'+bg+'">'+
+      '<span style="font-size:0.58rem;color:#94a3b8;font-weight:700">D'+(k+1)+'</span>'+
+      '<span style="font-size:0.74rem;font-weight:500">'+(SIM_NAMES[fc]||fc)+' → '+(SIM_NAMES[tc]||tc)+badge+'</span>'+
+      '<div style="text-align:right"><div style="font-size:0.7rem;font-weight:700">'+segKm+'km</div>'+
+      '<div style="font-size:0.6rem;color:#94a3b8">'+segH+'h'+warn+'</div></div></div>';
   }
 
-  // Verdict block
-  var verdictHtml='';
-  if(verdict||pros.length||cons.length){
-    var vColor=verdict==='conviene'?'#f0fdf4;border-color:#86efac':verdict==='no_conviene'?'#fef2f2;border-color:#fca5a5':'#fefce8;border-color:#fde68a';
-    var vIcon=verdict==='conviene'?'✅ Conviene añadirla':verdict==='no_conviene'?'❌ No conviene':'⚠️ Depende del grupo';
-    verdictHtml='<div style="background:'+vColor+';border:1px solid;border-radius:10px;padding:0.7rem;margin-bottom:0.6rem">'+
-      '<div style="font-weight:700;font-size:0.8rem;margin-bottom:0.4rem">'+vIcon+'</div>'+
-      (pros.length?'<div style="font-size:0.72rem;margin-bottom:0.3rem"><strong>✓ Pros:</strong> '+pros.join(' · ')+'</div>':'')+
-      (cons.length?'<div style="font-size:0.72rem"><strong>✗ Contras:</strong> '+cons.join(' · ')+'</div>':'')+
-      '</div>';
-  }
-
-  // City schedule
-  var scheduleHtml=(c.acts||[]).slice(0,5).map(function(a){
+  // Schedule
+  var schedHtml=(c.acts||[]).slice(0,5).map(function(a){
     var m=a.match(/^(\d{2}:\d{2})\s+(.*)/);
-    if(m) return '<div style="display:flex;gap:8px;padding:0.28rem 0;border-bottom:1px solid #f8fafc;font-size:0.74rem">'+
-      '<span style="font-family:monospace;color:#3b82f6;font-weight:700;flex-shrink:0;width:36px">'+m[1]+'</span>'+
+    if(m) return '<div style="display:flex;gap:8px;padding:0.26rem 0;border-bottom:1px solid #f8fafc;font-size:0.73rem">'+
+      '<span style="font-family:monospace;color:#3b82f6;font-weight:700;flex-shrink:0;width:38px">'+m[1]+'</span>'+
       '<span>'+m[2]+'</span></div>';
-    return '<div style="padding:0.28rem 0;font-size:0.74rem;border-bottom:1px solid #f8fafc">'+a+'</div>';
+    return '<div style="padding:0.26rem 0;font-size:0.73rem;border-bottom:1px solid #f8fafc">'+a+'</div>';
   }).join('');
 
-  var html=
-    verdictHtml+
+  var html=verdictHtml+impactBar+
     '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:0.6rem">'+
-      '<div style="padding:0.5rem 0.7rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.62rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em">Itinerario con '+(SIM_NAMES[cityId]||cityId)+'</div>'+
+      '<div style="padding:0.48rem 0.65rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em">Itinerario con '+(SIM_NAMES[cityId]||cityId)+'</div>'+
       rows+
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);padding:0.55rem 0.7rem;gap:0.4rem;background:#f8fafc;border-top:1.5px solid #e2e8f0">'+
-        '<div style="text-align:center"><div style="font-size:0.95rem;font-weight:800;color:#0f172a">+'+(extraKm>0?extraKm:0)+'km</div><div style="font-size:0.58rem;color:#94a3b8;text-transform:uppercase">km extra</div></div>'+
-        '<div style="text-align:center"><div style="font-size:0.95rem;font-weight:800;color:#0f172a">+'+extraH+'h</div><div style="font-size:0.58rem;color:#94a3b8;text-transform:uppercase">conduccion</div></div>'+
-        '<div style="text-align:center"><div style="font-size:0.95rem;font-weight:800;color:#0f172a">+'+extraFuel+'€</div><div style="font-size:0.58rem;color:#94a3b8;text-transform:uppercase">gasolina</div></div>'+
-      '</div>'+
     '</div>'+
-    (scheduleHtml?'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:0.65rem;margin-bottom:0.6rem">'+
-      '<div style="font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:0.4rem">Horario en '+(SIM_NAMES[cityId]||cityId)+'</div>'+
-      scheduleHtml+
-      (c.note?'<div style="margin-top:0.5rem;font-size:0.68rem;color:#64748b">📌 '+c.note+'</div>':'')+
+    (schedHtml?'<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:0.65rem;margin-bottom:0.5rem">'+
+      '<div style="font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:0.35rem">Horario en '+(SIM_NAMES[cityId]||cityId)+'</div>'+
+      schedHtml+(c.note?'<div style="margin-top:0.45rem;font-size:0.68rem;color:#64748b">📌 '+c.note+'</div>':'')+
     '</div>':'');
 
   document.getElementById('sim-preview-tl').innerHTML=html;
   document.getElementById('sim-preview').style.display='block';
-  // Show confirm btn only for admin
-  document.getElementById('sim-confirm-btn').style.display=simIsAdmin?'flex':'none';
   document.getElementById('sim-preview').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 function simConfirmOfficial(){
-  if(!simIsAdmin){simShowMsg('Solo el admin puede añadir al itinerario oficial.');return;}
-  if(!simPreviewing) return;
-  var c=simCityCache[simPreviewing];
-  var cityId=simPreviewing;
-
-  // Add to simRoute
-  var preferredAfter=c?c.after:'';
-  var afterIdx=preferredAfter?simRoute.indexOf(preferredAfter):-1;
-  var insertAt=afterIdx>=0?afterIdx+1:simFindBestInsert(cityId);
-  if(simRoute.indexOf(cityId)===-1){
-    simRoute.splice(insertAt,0,cityId);
-    if(simAdded.indexOf(cityId)===-1) simAdded.push(cityId);
-  }
-
-  // Add to TL
-  var afterCity=simRoute[insertAt-1]||simRoute[0];
-  var nextCity=simRoute[insertAt+1]||simRoute[simRoute.length-1];
-  var tlIdx=-1;
-  TL.forEach(function(d,i){if(d.city.toLowerCase().indexOf((SIM_NAMES[afterCity]||afterCity).toLowerCase().split(' ')[0])!==-1) tlIdx=i;});
-  var newDay={
-    date:'? jul',
-    city:(SIM_NAMES[afterCity]||afterCity)+' → '+(SIM_NAMES[cityId]||cityId)+' → '+(SIM_NAMES[nextCity]||nextCity),
-    drive:true, km:simGetKm(afterCity,cityId)+simGetKm(cityId,nextCity),
-    h:((simGetKm(afterCity,cityId)+simGetKm(cityId,nextCity))/80).toFixed(1)+'h',
-    ztl:c?c.ztl||false:false, maps:'',
-    acts:c?c.acts||[]:[],
-    stay:c?c.stay||'Por confirmar':'Por confirmar',
-    note:c?c.note||'':'Añadida desde el simulador'
-  };
-  if(tlIdx>=0) TL.splice(tlIdx+1,0,newDay);
-
-  // Mark as oficial in Supabase
-  supa('PATCH','candidatas?city_id=eq.'+cityId,{en_oficial:true}).catch(function(){});
-
-  renderTL();
-  simRenderRoute();
-  simClosePreview();
-  simShowMsg('✓ '+(SIM_NAMES[cityId]||cityId)+' añadida al itinerario oficial. Ve a la pestaña Ruta.');
+  simRequestAdmin(function(){
+    if(!simPreviewing) return;
+    var c=simCityCache[simPreviewing];
+    var cityId=simPreviewing;
+    var preferredAfter=c?c.after:'';
+    var afterIdx=preferredAfter?simRoute.indexOf(preferredAfter):-1;
+    var insertAt=afterIdx>=0?afterIdx+1:simFindBestInsert(cityId);
+    if(simRoute.indexOf(cityId)===-1){
+      simRoute.splice(insertAt,0,cityId);
+      if(simAdded.indexOf(cityId)===-1) simAdded.push(cityId);
+    }
+    var afterCity=simRoute[Math.max(0,insertAt-1)];
+    var nextCity=simRoute[Math.min(simRoute.length-1,insertAt+1)];
+    var tlIdx=-1;
+    TL.forEach(function(d,i){
+      if(d.city.toLowerCase().indexOf((SIM_NAMES[afterCity]||afterCity).toLowerCase())!==-1) tlIdx=i;
+    });
+    var newDay={
+      date:'? jul',
+      city:(SIM_NAMES[afterCity]||afterCity)+' → '+(SIM_NAMES[cityId]||cityId)+' → '+(SIM_NAMES[nextCity]||nextCity),
+      drive:true,km:simGetKm(afterCity,cityId)+simGetKm(cityId,nextCity),
+      h:((simGetKm(afterCity,cityId)+simGetKm(cityId,nextCity))/80).toFixed(1)+'h',
+      ztl:c?c.ztl||false:false,maps:'',
+      acts:c?c.acts||[]:[],stay:c?c.stay||'Por confirmar':'Por confirmar',
+      note:c?c.note||'':'Añadida desde el simulador'
+    };
+    if(tlIdx>=0) TL.splice(tlIdx+1,0,newDay);
+    supa('PATCH','candidatas?city_id=eq.'+cityId,{en_oficial:true}).catch(function(){});
+    renderTL();simRenderRoute();simClosePreview();
+    simShowMsg('✓ '+(SIM_NAMES[cityId]||cityId)+' añadida al itinerario oficial.');
+  });
 }
 
 function simClosePreview(){
@@ -1632,8 +1681,7 @@ function simRemove(id){
 
 function simReset(){
   simRoute=['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
-  simAdded=[];simClosePreview();
-  simRenderRoute();simRenderCandidates();
+  simAdded=[];simClosePreview();simRenderRoute();simRenderCandidates();
   document.getElementById('sim-alert').style.display='none';
 }
 
@@ -1643,12 +1691,11 @@ function simShowMsg(msg){
   setTimeout(function(){el.style.display='none';},4000);
 }
 
-// ===== GENERATE VIA GROQ (con veredicto IA) =====
+// ===== GENERATE VIA GROQ =====
 function simGenerateCity(){
   var input=document.getElementById('sim-new-city');
   var cityName=input.value.trim();
   if(!cityName) return;
-
   var btn=input.nextElementSibling;
   btn.innerHTML='<span class="sim-spinner"></span>Analizando...';
   btn.disabled=true;input.disabled=true;
@@ -1656,13 +1703,16 @@ function simGenerateCity(){
   var cityId=cityName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]/g,'');
   var routeNames=simRoute.map(function(r){return SIM_NAMES[r]||r;}).join(' → ');
 
-  // Check Supabase cache first
-  var existing=simCandidatas.find(function(r){return r.city_id===cityId||r.name.toLowerCase()===cityName.toLowerCase();});
+  var existing=simCandidatas.find(function(r){
+    return r.city_id===cityId||r.name.toLowerCase()===cityName.toLowerCase();
+  });
   if(existing){
     input.value='';btn.innerHTML='✨ Analizar';btn.disabled=false;input.disabled=false;
-    simPreviewing=existing.city_id;
-    simPreview(existing.city_id);
-    return;
+    simPreview(existing.city_id);return;
+  }
+  if(simCityCache[cityId]){
+    input.value='';btn.innerHTML='✨ Analizar';btn.disabled=false;input.disabled=false;
+    simPreview(cityId);return;
   }
 
   fetch('https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy',{
@@ -1670,22 +1720,9 @@ function simGenerateCity(){
     headers:{'Content-Type':'application/json','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU'},
     body:JSON.stringify({messages:[{role:'user',content:
       'Eres experto en road trips por Europa para grupos. Analiza anadir "'+cityName+'" al itinerario: '+routeNames+'.\n\n'+
-      'El grupo son 7 personas en 2 coches viajando en julio. Maximo recomendado por etapa: 9h de conduccion.\n\n'+
-      'Responde SOLO con JSON valido sin texto adicional:\n'+
-      '{\n'+
-      '  "name": "nombre oficial",\n'+
-      '  "flag": "codigo pais 2 letras (ES/FR/IT/DE/etc)",\n'+
-      '  "after": "ciudad del itinerario ANTES de donde se insertaria (en minusculas sin tildes: alicante/montpellier/paris/colmar/milan/venecia/roma/niza)",\n'+
-      '  "ztl": false,\n'+
-      '  "acts": ["HH:MM descripcion actividad (Xh/Xmin)", "HH:MM ...", "HH:MM Salida hacia siguiente destino"],\n'+
-      '  "stay": "descripcion alojamiento o parada sin noche",\n'+
-      '  "note": "consejo practico mas importante",\n'+
-      '  "km_from_prev": 0,\n'+
-      '  "km_to_next": 0,\n'+
-      '  "verdict": "conviene|no_conviene|depende",\n'+
-      '  "pros": ["pro1", "pro2"],\n'+
-      '  "cons": ["con1", "con2"]\n'+
-      '}'
+      'Grupo: 7 personas, 2 coches, julio. Limite recomendado por etapa: 9h conduccion.\n\n'+
+      'Responde SOLO con JSON valido sin texto extra ni markdown:\n'+
+      '{"name":"nombre oficial","flag":"ES/FR/IT/DE/etc","after":"ciudad anterior en minusculas sin tildes (alicante/montpellier/paris/colmar/milan/venecia/roma/niza)","ztl":false,"acts":["HH:MM actividad (Xh)","HH:MM Salida hacia siguiente"],"stay":"sin noche o nombre zona","note":"consejo clave","km_from_prev":0,"km_to_next":0,"verdict":"conviene/no_conviene/depende","pros":["pro1","pro2"],"cons":["con1","con2"]}'
     }]})
   })
   .then(function(r){return r.json();})
@@ -1705,7 +1742,6 @@ function simGenerateCity(){
       if(nxt){SIM_KM[cityId+'|'+nxt]=city.km_to_next;SIM_KM[nxt+'|'+cityId]=city.km_to_next;}
     }
     input.value='';btn.innerHTML='✨ Analizar';btn.disabled=false;input.disabled=false;
-    simPreviewing=cityId;
     simPreview(cityId);
   })
   .catch(function(err){
@@ -1720,6 +1756,9 @@ showView=function(name,idx){
   _origSV(name,idx);
   if(name==='simulador'){simRenderRoute();simLoadCandidatas();}
 };
+// Show username in sim on load if already set
+var _et26name=localStorage.getItem('et26_name');
+if(_et26name){var _suu=document.getElementById('sim-username');if(_suu)_suu.textContent=_et26name;}
 
 </script>
 </body>
