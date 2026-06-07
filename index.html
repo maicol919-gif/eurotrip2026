@@ -220,6 +220,10 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .btn-sim-add.added{background:#10b981}
 .btn-sim-reset{background:none;border:1.5px solid #e2e8f0;color:#64748b;border-radius:8px;padding:0.38rem 0.8rem;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:inherit}
 .sim-alert{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.72rem;color:#92400e;margin-bottom:0.75rem;line-height:1.5}
+
+.sim-generating{opacity:0.6;pointer-events:none}
+.sim-spinner{display:inline-block;width:12px;height:12px;border:2px solid #e2e8f0;border-top-color:#3b82f6;border-radius:50%;animation:spin 0.6s linear infinite;margin-right:6px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -444,20 +448,44 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <div id="view-simulador" class="view">
   <div class="ptitle">Simulador de Ruta</div>
-  <div class="psub">Prueba ciudades nuevas sin confirmar nada. La ruta oficial no cambia.</div>
+  <div class="psub">Prueba cualquier ciudad. La ruta oficial no cambia hasta que lo confirmes.</div>
+
   <div class="sim-alert" id="sim-alert" style="display:none"></div>
+
   <div class="sim-summary">
     <div><div class="sim-sum-v" id="sim-total-km">4.800</div><div class="sim-sum-l">km coche</div></div>
     <div><div class="sim-sum-v" id="sim-total-h">~52h</div><div class="sim-sum-l">conduccion</div></div>
     <div><div class="sim-sum-v" id="sim-total-fuel">~350 EUR</div><div class="sim-sum-l">gasolina est.</div></div>
   </div>
+
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
-    <div class="st" style="margin:0;flex:1">Ruta — arrastra para reordenar</div>
+    <div class="st" style="margin:0;flex:1">Ruta actual</div>
     <button class="btn-sim-reset" onclick="simReset()">Restaurar</button>
   </div>
   <div id="sim-ruta" class="sim-ruta"></div>
-  <div class="st" style="margin-top:0.75rem">Ciudades candidatas</div>
+
+  <div class="st" style="margin-top:0.75rem">Probar nueva ciudad</div>
+  <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">
+    <input id="sim-new-city" class="fi" placeholder="Escribe una ciudad..." style="flex:1;font-size:0.82rem;padding:0.5rem 0.75rem">
+    <button onclick="simGenerateCity()" style="background:#0f172a;color:white;border:none;border-radius:8px;padding:0.5rem 1rem;font-family:inherit;font-weight:700;font-size:0.78rem;cursor:pointer;white-space:nowrap">✨ Generar</button>
+  </div>
+
+  <div class="st">Ciudades candidatas</div>
   <div id="sim-candidates"></div>
+
+  <!-- Preview panel -->
+  <div id="sim-preview" style="display:none;margin-top:1rem">
+    <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:0.75rem 1rem;margin-bottom:0.75rem">
+      <div style="font-size:0.7rem;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.25rem">Vista previa del impacto</div>
+      <div id="sim-preview-impact" style="font-size:0.82rem;color:#1e40af"></div>
+    </div>
+    <div class="st">Asi quedaria ese dia</div>
+    <div id="sim-preview-tl"></div>
+    <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+      <button id="sim-confirm-btn" onclick="simConfirm()" style="flex:1;background:#10b981;color:white;border:none;border-radius:8px;padding:0.6rem;font-family:inherit;font-weight:700;font-size:0.82rem;cursor:pointer">✓ Añadir al itinerario oficial</button>
+      <button onclick="simClosePreview()" style="background:none;border:1.5px solid #e2e8f0;color:#64748b;border-radius:8px;padding:0.6rem 1rem;font-family:inherit;font-weight:600;font-size:0.78rem;cursor:pointer">Cancelar</button>
+    </div>
+  </div>
 </div>
 
 </div><!-- end main -->
@@ -620,36 +648,94 @@ var CL_DATA = [
 var TL = [
   {date:'14 jul', city:'Alicante - Barcelona - Montpellier', drive:true, km:830, h:'9h 30min', ztl:false,
    maps:'https://www.google.com/maps/dir/Alicante,+Spain/Barcelona,+Spain/Montpellier,+France',
-   acts:['Salida temprana 7:00h, llenar tanques en Alicante','Parada almuerzo en Barcelona (3h30 de ruta)','Tapas en el Born o Barceloneta, 1.5h de parada','Llegada Montpellier 19:00h, primera noche en Francia'],
+   acts:[
+     '07:00 Salida desde Alicante — llenar tanques (15 min)',
+     '10:30 Llegada Barcelona — parada almuerzo en el Born o Barceloneta (1h 30min)',
+     '12:00 Salida hacia Montpellier',
+     '15:30 Parada descanso en autopista AP-7 (20 min)',
+     '19:00 Llegada Montpellier — check-in y cena cerca del centre historique'
+   ],
    stay:'Hotel o Airbnb Montpellier (noche 1)', note:'Primera etapa larga. Turnos de conduccion desde Alicante. Llevar nevera con snacks.'},
   {date:'15 jul', city:'Montpellier - Clermont-Ferrand - Paris', drive:true, km:780, h:'8h 45min', ztl:false,
    maps:'https://www.google.com/maps/dir/Montpellier,+France/Clermont-Ferrand,+France/Paris,+France',
-   acts:['Salida 8:00h desde Montpellier','Parada almuerzo Clermont-Ferrand (4h de ruta)','Ciudad volcanica bajo el Puy de Dome','Llegada Paris 19:00h, 2 noches en la ciudad'],
-   stay:'Airbnb Paris (noche 1 de 2)', note:'Clermont-Ferrand: perfecta parada a mitad. Puy de Dome opcional si hay energia (+30min desvio).'},
-  {date:'16 jul', city:'Paris - dia libre', drive:false, km:0, h:'', ztl:false,
+   acts:[
+     '08:00 Salida desde Montpellier',
+     '11:30 Llegada Clermont-Ferrand — almuerzo bajo el Puy de Dome (1h 30min)',
+     '13:00 Salida hacia Paris — A71 directo',
+     '16:00 Parada descanso en area de servicio (20 min)',
+     '19:00 Llegada Paris — check-in y primera impresion de la ciudad'
+   ],
+   stay:'Airbnb Paris (noche 1 de 2)', note:'Clermont-Ferrand es perfecta parada a mitad. El Puy de Dome se ve desde la ciudad.'},
+  {date:'16 jul', city:'Paris — dia libre', drive:false, km:0, h:'', ztl:false,
    maps:'https://www.google.com/maps/search/Paris+France',
-   acts:['Torre Eiffel al amanecer o de noche, sin colas','Louvre, reservar en ticketlouvre.fr','Le Marais por la tarde, el barrio mas cool','Montmartre y Sacre-Coeur al atardecer'],
-   stay:'Airbnb Paris (noche 2 de 2)', note:'El dia parisino que queria el grupo. Navigo semana: 30 euros por persona, cubre todo el metro.'},
+   acts:[
+     '07:30 Torre Eiffel al amanecer — sin colas, luz perfecta (1h)',
+     '09:00 Desayuno en boulangerie del barrio (30 min)',
+     '10:00 Louvre — llegar al abrir, evitar colas (3h)',
+     '13:30 Almuerzo en Le Marais — As du Falafel o picnic en el Sena (1h 30min)',
+     '15:00 Paseo por Le Marais y Centre Pompidou (2h)',
+     '17:30 Montmartre y Sacre-Coeur al atardecer (1h 30min)',
+     '20:00 Cena en Montmartre o Republique'
+   ],
+   stay:'Airbnb Paris (noche 2 de 2)', note:'Navigo semana: 30 euros por persona, cubre todo el metro y RER.'},
   {date:'17 jul', city:'Paris - Colmar - Milan', drive:true, km:890, h:'10h 00min', ztl:false,
    maps:'https://www.google.com/maps/dir/Paris,+France/Colmar,+France/Milan,+Italy',
-   acts:['Salida 7:30h, desayuno rapido frances','Parada Colmar, Alsacia (4h desde Paris)','El pueblo mas bonito de Francia, 1.5h de paseo','Llegada Milan 19:30h, coches quedan aqui 2 noches'],
-   stay:'Airbnb o Hotel Milan (noche 1)', note:'Colmar imprescindible: casas medievales de colores junto al rio. Parking en Milán: Autosilos Sammartini cerca de Centrale.'},
+   acts:[
+     '07:30 Salida desde Paris — desayuno rapido',
+     '11:30 Llegada Colmar, Alsacia — aparcar en P+R periferia (4h de ruta)',
+     '11:30 Paseo por La Petite Venise y Rue des Marchands (1h 30min)',
+     '13:00 Almuerzo alsaciano en Winstub del centro (1h)',
+     '14:00 Salida hacia Milan',
+     '19:30 Llegada Milan — coches quedan aparcados aqui hasta el regreso'
+   ],
+   stay:'Airbnb o Hotel Milan (noche 1)', note:'Colmar imprescindible: casas medievales de colores. Parking Autosilos Sammartini en Milan, 5min de Centrale.'},
   {date:'18 jul', city:'Milan - Venecia - Roma (tren AV)', drive:false, km:650, h:'5h tren AV', ztl:true,
    maps:'https://www.trenitalia.com',
-   acts:['Tren AV Milano Centrale a Venezia (2h30)','Venecia: 2-3h, Rialto, San Marco, vaporetto','Tren AV Venezia a Roma Termini (3h30)','Llegada Roma 18:00h, manana es el cumpleanos!'],
-   stay:'Airbnb Roma (noche 1 de 2)', note:'RESERVAR TRENES YA en trenitalia.com (35-55 euros/persona). Coches quedan en parking Milan. ZTL activa en Roma: no conducir.'},
-  {date:'19 jul', city:'Roma - Dia del Cumpleanos', drive:false, km:0, h:'', ztl:true,
+   acts:[
+     '08:30 Salida desde Milano Centrale en tren AV',
+     '11:00 Llegada Venezia Santa Lucia — guardar maletas en consigna',
+     '11:00 Puente de Rialto y mercado (45 min)',
+     '12:00 Vaporetto linea 1 por el Canal Grande (45 min)',
+     '13:00 Plaza San Marcos — llegar antes del pico de calor (45 min)',
+     '14:00 Almuerzo cicchetti en bar local (45 min)',
+     '15:00 Tren AV Venezia a Roma Termini',
+     '18:30 Llegada Roma Termini — manana es el cumpleanos'
+   ],
+   stay:'Airbnb Roma (noche 1 de 2)', note:'Reservar trenes YA en trenitalia.com. Coches quedan en Milan. ZTL activa en Roma.'},
+  {date:'19 jul', city:'Roma — Dia del Cumpleanos', drive:false, km:0, h:'', ztl:true,
    maps:'https://www.google.com/maps/search/Roma+centro+storico',
-   acts:['Coliseo y Foro Romano, llegar al abrir 9:00h','Fontana di Trevi y Panteon (5 euros, reservar)','Vaticano y Capilla Sixtina, ir a las 8h','Cena especial de cumpleanos en Trastevere'],
-   stay:'Airbnb Roma (noche 2 de 2)', note:'El dia grande! Coliseo: coopculture.it. Vaticano: museivaticani.va. Ambos se agotan en julio. ZTL: todo a pie o metro.'},
+   acts:[
+     '08:00 Vaticano y Capilla Sixtina — madrugar evita las colas (3h)',
+     '11:30 Castel Sant Angelo — exterior y vistas (30 min)',
+     '12:30 Almuerzo en Prati, el barrio del Vaticano (1h)',
+     '14:00 Coliseo y Foro Romano — entradas reservadas (2h)',
+     '16:30 Fontana di Trevi y Panteon — a pie por el centro (1h 30min)',
+     '19:00 Aperitivo en Trastevere',
+     '20:30 Cena especial de cumpleanos en Trastevere'
+   ],
+   stay:'Airbnb Roma (noche 2 de 2)', note:'Coliseo: coopculture.it. Vaticano: museivaticani.va. Reservar ambos con antelacion.'},
   {date:'20 jul', city:'Roma - Milan (tren) - Niza (coche)', drive:true, km:640, h:'3h tren + 3h coche', ztl:false,
    maps:'https://www.google.com/maps/dir/Milan,+Italy/Nice,+France',
-   acts:['Tren AV Roma a Milan (3h, salida 9:00h)','Recuperar los 2 coches en parking de Milan','Parada breve para comer en Navigli','Llegada Niza 18:00h, ultima noche internacional'],
-   stay:'Hotel o Airbnb Niza (noche 1)', note:'Reservar tren Roma-Milan YA en trenitalia.com. Milan a Niza: A7+A10, 3h por la Riviera italiana.'},
+   acts:[
+     '08:30 Tren AV Roma Termini a Milano Centrale (3h)',
+     '11:30 Llegada Milan — recuperar los 2 coches del parking',
+     '12:30 Parada almuerzo rapido en Navigli (1h)',
+     '13:30 Salida en coche hacia Niza por la A10',
+     '16:30 Llegada Niza — check-in',
+     '18:00 Paseo por la Promenade des Anglais al atardecer',
+     '20:30 Cena de celebracion final en el Casco Antiguo'
+   ],
+   stay:'Hotel o Airbnb Niza (noche 1)', note:'Reservar tren Roma-Milan YA en trenitalia.com. Milan a Niza 3h por la Riviera italiana.'},
   {date:'21 jul', city:'Niza - Alicante', drive:true, km:640, h:'7h 30min', ztl:false,
    maps:'https://www.google.com/maps/dir/Nice,+France/Alicante,+Spain',
-   acts:['Salida 8:00h, ultimo desayuno frances','Parada a mitad en Montpellier o Perpignan','Cruce de los Pirineos por La Junquera','Llegada Alicante 17:00h - FIN DEL EUROTRIP 2026'],
-   stay:'Casa', note:'El dia mas corto del regreso. Llenar deposito en Francia antes de cruzar a Espana.'}
+   acts:[
+     '08:00 Salida desde Niza — ultimo desayuno frances',
+     '09:00 Autopista A8 hacia Marseille, luego A9 hacia Espana',
+     '11:45 Parada descanso en Montpellier o Perpignan — llenar deposito (45 min)',
+     '13:00 Cruce de los Pirineos por La Junquera',
+     '17:00 Llegada Alicante — FIN DEL EUROTRIP 2026'
+   ],
+   stay:'Casa', note:'Llenar deposito en Francia antes de cruzar a Espana, algo mas barato.'}
 ];
 
 // ===== VIAJEROS =====
@@ -830,31 +916,42 @@ function renderRanking() {
 }
 
 // ===== TIMELINE =====
-function renderTL() {
-  document.getElementById('tl-container').innerHTML = TL.map(function(d,i){
+function renderTL(tlData, containerId) {
+  var data = tlData || TL;
+  var cid = containerId || 'tl-container';
+  document.getElementById(cid).innerHTML = data.map(function(d,i){
     var tags = '';
     if(d.drive) tags += '<span class="tp tpd">🚗 '+d.h+'</span> ';
     tags += d.km>0 ? '<span class="tp tpk">'+d.km+'km</span>' : '<span class="tp tps">Dia libre</span>';
     if(d.ztl) tags += ' <span class="tp tpz">⚠️ ZTL</span>';
-    if(d.maps) tags += ' <a href="'+d.maps+'" target="_blank" class="tp" style="background:#dbeafe;color:#2563eb;text-decoration:none;padding:0.12rem 0.4rem;border-radius:5px;font-size:0.58rem;font-weight:600">🗺 Maps</a>';
-    var acts = d.acts.map(function(a){return '<div class="tact">'+a+'</div>';}).join('');
+    // Parse activities: lines starting with HH:MM get special treatment
+    var acts = d.acts.map(function(a){
+      var timeMatch = a.match(/^(\d{2}:\d{2})\s+(.*)/);
+      if(timeMatch){
+        return '<div class="tact" style="display:flex;gap:0.5rem;align-items:baseline">'+
+          '<span style="font-family:monospace;font-size:0.65rem;color:#3b82f6;font-weight:700;flex-shrink:0;min-width:36px">'+timeMatch[1]+'</span>'+
+          '<span>'+timeMatch[2]+'</span></div>';
+      }
+      return '<div class="tact">'+a+'</div>';
+    }).join('');
     var tray = d.km>0 ? '<div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-top:0.3rem"><span class="tp tpd">🚗 '+d.h+'</span><span class="tp tpk">'+d.km+' km</span></div>' : '';
     var ztl = d.ztl ? '<div class="tztl"><div class="tztl-t">⚠️ ZTL Italia: no entrar al centro con el coche. Multa 100-300 euros. Aparcar en la periferia.</div></div>' : '';
     var mapsBtn = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;margin-top:0.5rem">🗺 Abrir en Google Maps</a>' : '';
-    return '<div class="tl-row" id="tl'+i+'" onclick="toggleTL('+i+')">' +
-      '<div class="tl-h"><div class="tl-date">'+d.date+'</div>' +
-      '<div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>' +
-      '<div class="tl-city">'+d.city+'</div>' +
-      '<div style="display:flex;gap:0.28rem;align-items:center;flex-wrap:wrap">'+tags+'</div>' +
-      '<span class="tl-ch">▾</span></div>' +
-      '<div class="tl-body">' +
-        '<div><div class="tsub">Actividades</div>'+acts+ztl+
-        '<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div>'+mapsBtn+'</div>' +
-        '<div><div class="tsub">Alojamiento</div><div class="tstay">'+d.stay+'</div>'+tray+'</div>' +
+    var prefix = containerId ? 'sim-tl-' : 'tl';
+    return '<div class="tl-row" id="'+prefix+i+'" onclick="toggleTL(this)">'+
+      '<div class="tl-h"><div class="tl-date">'+d.date+'</div>'+
+      '<div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>'+
+      '<div class="tl-city">'+d.city+'</div>'+
+      '<div style="display:flex;gap:0.28rem;align-items:center;flex-wrap:wrap">'+tags+'</div>'+
+      '<span class="tl-ch">▾</span></div>'+
+      '<div class="tl-body">'+
+        '<div><div class="tsub">Horario del dia</div>'+acts+ztl+
+        '<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div>'+mapsBtn+'</div>'+
+        '<div><div class="tsub">Alojamiento</div><div class="tstay">'+d.stay+'</div>'+tray+'</div>'+
       '</div></div>';
   }).join('');
 }
-function toggleTL(i){ document.getElementById('tl'+i).classList.toggle('open'); }
+function toggleTL(el){ el.classList.toggle('open'); }
 
 // ===== PRESUPUESTO =====
 function renderBudget() {
@@ -1150,8 +1247,6 @@ var SIM_KM = {
   'alicante|barcelona':310,'barcelona|alicante':310,
   'barcelona|montpellier':310,'montpellier|barcelona':310,
   'montpellier|paris':750,'paris|montpellier':750,
-  'montpellier|clermont':330,'clermont|montpellier':330,
-  'clermont|paris':420,'paris|clermont':420,
   'paris|colmar':490,'colmar|paris':490,
   'paris|milan':850,'milan|paris':850,
   'colmar|milan':510,'milan|colmar':510,
@@ -1167,21 +1262,63 @@ var SIM_KM = {
   'monaco|milan':310,'milan|monaco':310,
   'niza|alicante':650,'alicante|niza':650,
   'marsella|milan':650,'milan|marsella':650,
-  'barcelona|paris':1040,'paris|barcelona':1040
+  'paris|barcelona':1040,'barcelona|paris':1040,
+  'florencia|roma':280,'roma|florencia':280,
+  'florencia|milan':300,'milan|florencia':300,
+  'florencia|pisa':80,'pisa|florencia':80,
+  'marsella|montpellier':170,'montpellier|marsella':170,
+  'marsella|niza':200,'niza|marsella':200,
+  'marsella|barcelona':500,'barcelona|marsella':500
 };
-function simGetKm(a,b){return SIM_KM[a+'|'+b]||SIM_KM[b+'|'+a]||400;}
 
-var SIM_CANDIDATES = [
-  {id:'pisa',      name:'Pisa',      flag:'IT', note:'Torre Inclinada — parada entre Milan y Roma o Venecia', impact:'+270km, +2.7h vs Milan directo a Roma', after:'milan'},
-  {id:'monaco',    name:'Monaco',    flag:'MC', note:'El mini estado mas glamuroso de Europa', impact:'+20km desde Niza, casi gratis anyadirlo', after:'niza'},
-  {id:'barcelona', name:'Barcelona', flag:'ES', note:'Parada almuerzo obligatoria en el dia 1', impact:'Ya incluida como parada — sin coste extra', after:'alicante'},
-  {id:'marsella',  name:'Marsella',  flag:'FR', note:'Puerto historico, alternativa a Montpellier', impact:'+130km vs ir directo a Montpellier', after:'barcelona'},
-  {id:'florencia', name:'Florencia', flag:'IT', note:'A 1h de Pisa y 3h de Roma por la A1', impact:'+100km si se anade con Pisa', after:'pisa'}
-];
+var SIM_NAMES={alicante:'Alicante',montpellier:'Montpellier',paris:'Paris',colmar:'Colmar',
+  milan:'Milan',venecia:'Venecia',roma:'Roma',niza:'Niza',
+  pisa:'Pisa',monaco:'Monaco',barcelona:'Barcelona',florencia:'Florencia',marsella:'Marsella'};
+var SIM_FLAGS={alicante:'ES',montpellier:'FR',paris:'FR',colmar:'FR',milan:'IT',
+  venecia:'IT',roma:'IT',niza:'FR',pisa:'IT',monaco:'MC',barcelona:'ES',florencia:'IT',marsella:'FR'};
+
+// City data cache — populated by Claude API on demand
+var simCityCache = {
+  pisa: {
+    name:'Pisa', flag:'IT', after:'milan', ztl:false,
+    acts:['09:45 Llegada desde Milan (2h 45min de ruta)','09:45 Plaza dei Miracoli — Torre Inclinada, Catedral y Baptisterio (1h 30min)','11:15 Foto clasica "sosteniendo" la Torre Inclinada (15 min)','11:30 Salida hacia Roma'],
+    stay:'Sin alojamiento — parada de dia',
+    note:'Aparcar en Parking Pietrasantina (~5 euros). Todo a pie desde alli. Evitar restaurantes en la plaza, son caros.'
+  },
+  monaco: {
+    name:'Monaco', flag:'MC', after:'niza', ztl:false,
+    acts:['08:25 Llegada desde Niza (25 min de ruta)','08:25 Puerto de Hercules — yates y Formula 1 circuit (45 min)','09:10 Palacio del Principe — cambio de guardia a las 11:55h (1h)','10:10 Casino de Monte Carlo — exterior y jardines (30 min)','10:40 Jardin Exotique — vistas panoramicas (30 min)','11:10 Salida hacia Alicante'],
+    stay:'Sin alojamiento — parada de manana',
+    note:'Monaco es tiny — 2km2. Todo a pie. Aparcar en parking Fontvieille. El interior del casino abre a las 14h.'
+  },
+  barcelona: {
+    name:'Barcelona', flag:'ES', after:'alicante', ztl:false,
+    acts:['10:30 Llegada desde Alicante (3h 30min de ruta)','10:30 El Born — mercado y calles medievales (30 min)','11:00 Almuerzo en Barceloneta o el Born (1h 30min)','12:30 Paseo rapido por las Ramblas hasta el puerto (30 min)','13:00 Salida hacia Montpellier'],
+    stay:'Sin alojamiento — parada de almuerzo',
+    note:'No entrar al centro en coche. Aparcar en Parking Paral-lel o Ciutadella. El Born es el mejor barrio para una parada rapida.'
+  },
+  marsella: {
+    name:'Marsella', flag:'FR', after:'barcelona', ztl:false,
+    acts:['12:00 Llegada — Vieux-Port, el puerto viejo (45 min)','12:45 Notre-Dame de la Garde — vistas panoramicas (30 min)','13:15 Almuerzo: bouillabaisse en el puerto o mercado (1h 15min)','14:30 Salida hacia siguiente destino'],
+    stay:'Sin alojamiento — parada de medio dia',
+    note:'Marsella requiere un dia entero para disfrutarla bien. Como parada, centrarse en el Vieux-Port y Notre-Dame.'
+  },
+  florencia: {
+    name:'Florencia', flag:'IT', after:'pisa', ztl:true,
+    acts:['11:30 Llegada desde Pisa (1h de ruta)','11:30 Piazza del Duomo — Cattedrale y Campanile (1h)','12:30 Cruce del Ponte Vecchio y orillas del Arno (30 min)','13:00 Almuerzo bistecca fiorentina en trattoria local (1h)','14:00 Galeria Uffizi exterior o Piazzale Michelangelo (1h)','15:00 Salida hacia Roma'],
+    stay:'Sin alojamiento — parada de medio dia',
+    note:'ZTL activa en el centro. Aparcar en Parking Oltrarno o Parterre. La Galeria Uffizi requiere reserva para entrar.'
+  }
+};
 
 var simRoute = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
 var simAdded = [];
+var simPreviewing = null; // city being previewed
 var dragSrc = null;
+
+function simGetKm(a,b){
+  return SIM_KM[a+'|'+b]||SIM_KM[b+'|'+a]||400;
+}
 
 function simCalc(){
   var km=0,h=0;
@@ -1195,93 +1332,282 @@ function simCalc(){
   document.getElementById('sim-total-fuel').textContent='~'+fuel+' EUR';
 }
 
-var SIM_NAMES={alicante:'Alicante',montpellier:'Montpellier',paris:'Paris',colmar:'Colmar',
-  milan:'Milan',venecia:'Venecia',roma:'Roma',niza:'Niza',
-  pisa:'Pisa',monaco:'Monaco',barcelona:'Barcelona',florencia:'Florencia',marsella:'Marsella'};
-var SIM_FLAGS={alicante:'ES',montpellier:'FR',paris:'FR',colmar:'FR',milan:'IT',
-  venecia:'IT',roma:'IT',niza:'FR',pisa:'IT',monaco:'MC',barcelona:'ES',florencia:'IT',marsella:'FR'};
-
 function simRenderRoute(){
-  var names=SIM_NAMES;
-  var flags=SIM_FLAGS;
-  document.getElementById('sim-ruta').innerHTML=simRoute.map(function(c,i){
+  var el=document.getElementById('sim-ruta');
+  el.innerHTML='';
+  simRoute.forEach(function(c,i){
     var km=i<simRoute.length-1?simGetKm(c,simRoute[i+1]):0;
     var isAdded=simAdded.indexOf(c)!==-1;
-    return '<div class="sim-city" draggable="true" data-i="'+i+'" '+
-      'ondragstart="simDS(event,'+i+')" ondragover="simDO(event)" '+
-      'ondrop="simDP(event,'+i+')" ondragleave="simDL(event)">'+
-      '<span class="sim-handle">&#9776;</span>'+
-      '<span style="font-size:0.9rem;margin-right:2px">'+flags[c]+'</span>'+
-      '<span class="sim-name">'+names[c]+(isAdded?' <span style="font-size:0.58rem;background:#dbeafe;color:#2563eb;padding:0.1rem 0.3rem;border-radius:4px">+SIMULADA</span>':'')+'</span>'+
-      (km>0?'<div class="sim-meta"><div class="sim-km">'+km+'km</div>'+(km/80).toFixed(1)+'h</div>':'<div class="sim-meta" style="color:#10b981;font-weight:700">FIN</div>')+
-      (isAdded?'<button data-city="'+c+'" class="sim-rm-btn" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1rem;line-height:1;padding:0 2px">x</button>':'')+
-      '</div>';
-  }).join('');
+    var div=document.createElement('div');
+    div.className='sim-city';
+    div.draggable=true;
+    div.dataset.i=i;
+    div.innerHTML='<span class="sim-handle">&#9776;</span>'+
+      '<span style="font-size:0.85rem;margin-right:3px">'+(SIM_FLAGS[c]||'')+'</span>'+
+      '<span class="sim-name">'+(SIM_NAMES[c]||c)+
+        (isAdded?' <span style="font-size:0.58rem;background:#dbeafe;color:#2563eb;padding:0.1rem 0.3rem;border-radius:4px">+SIM</span>':'')+
+      '</span>'+
+      (km>0?'<div class="sim-meta"><div class="sim-km">'+km+'km</div>'+(km/80).toFixed(1)+'h</div>':
+            '<div class="sim-meta" style="color:#10b981;font-weight:700">FIN</div>');
+    if(isAdded){
+      var rmBtn=document.createElement('button');
+      rmBtn.style.cssText='background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1rem;padding:0 4px';
+      rmBtn.textContent='×';
+      (function(city){rmBtn.onclick=function(){simRemove(city);};})(c);
+      div.appendChild(rmBtn);
+    }
+    div.ondragstart=function(e){dragSrc=parseInt(e.currentTarget.dataset.i);};
+    div.ondragover=function(e){e.preventDefault();e.currentTarget.classList.add('dragover');};
+    div.ondragleave=function(e){e.currentTarget.classList.remove('dragover');};
+    div.ondrop=function(e){
+      e.preventDefault();e.currentTarget.classList.remove('dragover');
+      var target=parseInt(e.currentTarget.dataset.i);
+      if(dragSrc===null||dragSrc===target){dragSrc=null;return;}
+      var moved=simRoute.splice(dragSrc,1)[0];
+      simRoute.splice(target,0,moved);
+      dragSrc=null;
+      simRenderRoute();
+      simShowMsg('Ruta reordenada.');
+    };
+    el.appendChild(div);
+  });
   simCalc();
-  // Event delegation for remove buttons
-  document.getElementById('sim-ruta').onclick=function(e){
+  el.onclick=function(e){
     var btn=e.target.closest('.sim-rm-btn');
-    if(btn) simRemove(btn.getAttribute('data-city'));
+    if(btn) simRemove(btn.dataset.city);
   };
 }
+
 function simRenderCandidates(){
   var el=document.getElementById('sim-candidates');
   el.innerHTML='';
-  SIM_CANDIDATES.forEach(function(c){
-    var inRoute=simRoute.indexOf(c.id)!==-1;
+  // Show cached/predefined candidates that aren't in route yet
+  var toShow=Object.keys(simCityCache).filter(function(id){
+    return simRoute.indexOf(id)===-1;
+  });
+  if(!toShow.length){
+    el.innerHTML='<div style="font-size:0.78rem;color:#94a3b8;padding:0.5rem 0">Todas las ciudades candidatas estan en la ruta simulada.</div>';
+    return;
+  }
+  toShow.forEach(function(id){
+    var c=simCityCache[id];
     var div=document.createElement('div');
     div.className='sim-cand';
-    div.innerHTML='<span style="font-size:0.9rem">'+c.flag+'</span>'+
+    var prevKm=simGetKm(c.after||'milan',id)+simGetKm(id,simRoute[simRoute.indexOf(c.after||'milan')+1]||'roma');
+    var directKm=simGetKm(c.after||'milan',simRoute[simRoute.indexOf(c.after||'milan')+1]||'roma');
+    var extraKm=prevKm-directKm;
+    div.innerHTML='<span style="font-size:0.9rem">'+(SIM_FLAGS[id]||'')+'</span>'+
       '<div class="sim-cand-info">'+
-        '<div class="sim-cand-name">'+c.name+'</div>'+
-        '<div class="sim-cand-note">'+c.note+'</div>'+
-        '<div class="sim-cand-impact">'+c.impact+'</div>'+
+        '<div class="sim-cand-name">'+(SIM_NAMES[id]||c.name||id)+'</div>'+
+        '<div class="sim-cand-note">'+(c.acts[0]||'')+'</div>'+
+        '<div class="sim-cand-impact">+'+extraKm+'km vs ruta directa</div>'+
       '</div>';
     var btn=document.createElement('button');
-    btn.className='btn-sim-add'+(inRoute?' added':'');
-    btn.textContent=inRoute?'En ruta':'+ Probar';
-    (function(id){ btn.onclick=function(){ simAdd(id); }; })(c.id);
+    btn.className='btn-sim-add';
+    btn.textContent='+ Probar';
+    (function(cityId){btn.onclick=function(){simPreview(cityId);};})(id);
     div.appendChild(btn);
     el.appendChild(div);
   });
 }
 
-function simDS(e,i){dragSrc=i;}
-function simDO(e){e.preventDefault();e.currentTarget.classList.add('dragover');}
-function simDL(e){e.currentTarget.classList.remove('dragover');}
-function simDP(e,i){
-  e.preventDefault();e.currentTarget.classList.remove('dragover');
-  if(dragSrc===null||dragSrc===i){dragSrc=null;return;}
-  var el=simRoute.splice(dragSrc,1)[0];
-  simRoute.splice(i,0,el);
-  dragSrc=null;
-  simRenderRoute();
-  document.getElementById('sim-alert').textContent='Ruta reordenada. Km recalculados.';
-  document.getElementById('sim-alert').style.display='block';
-  setTimeout(function(){document.getElementById('sim-alert').style.display='none';},3000);
+function simPreview(cityId){
+  var c=simCityCache[cityId];
+  if(!c){ simShowMsg('Generando informacion...'); return; }
+
+  simPreviewing=cityId;
+
+  // Calculate where it inserts and impact
+  var afterCity=c.after||simRoute[simRoute.length-2];
+  var afterIdx=simRoute.indexOf(afterCity);
+  var nextCity=simRoute[afterIdx+1]||simRoute[afterIdx];
+  var kmBefore=simGetKm(afterCity,nextCity);
+  var kmNew=simGetKm(afterCity,cityId)+simGetKm(cityId,nextCity);
+  var extraKm=kmNew-kmBefore;
+  var hoursNew=(kmNew/80).toFixed(1);
+  var warning=parseFloat(hoursNew)>8?' ⚠️ Etapa larga':'';
+
+  // Impact text
+  document.getElementById('sim-preview-impact').innerHTML=
+    'Se inserta entre <strong>'+(SIM_NAMES[afterCity]||afterCity)+'</strong> y <strong>'+(SIM_NAMES[nextCity]||nextCity)+'</strong>. '+
+    'Ese tramo pasa de '+kmBefore+'km a '+kmNew+'km (+'+extraKm+'km). '+
+    'Conduccion del segmento: '+hoursNew+'h'+warning+'.';
+
+  // Build a fake TL day for preview
+  var previewDay={
+    date:'? jul',
+    city:(SIM_NAMES[afterCity]||afterCity)+' → '+(SIM_NAMES[cityId]||c.name||cityId)+' → '+(SIM_NAMES[nextCity]||nextCity),
+    drive:true, km:kmNew, h:hoursNew+'h',
+    ztl:c.ztl||false,
+    maps:'https://www.google.com/maps/dir/'+encodeURIComponent(SIM_NAMES[afterCity]||afterCity)+'/'+encodeURIComponent(SIM_NAMES[cityId]||cityId)+'/'+encodeURIComponent(SIM_NAMES[nextCity]||nextCity),
+    acts:c.acts||[],
+    stay:c.stay||'Por confirmar',
+    note:c.note||''
+  };
+
+  document.getElementById('sim-preview-tl').innerHTML='';
+  renderTL([previewDay],'sim-preview-tl');
+
+  document.getElementById('sim-preview').style.display='block';
+  document.getElementById('sim-preview').scrollIntoView({behavior:'smooth',block:'start'});
 }
+
+function simConfirm(){
+  if(!simPreviewing) return;
+  simAdd(simPreviewing);
+  simClosePreview();
+  simShowMsg((SIM_NAMES[simPreviewing]||simPreviewing)+' añadida a la simulacion. El itinerario oficial no cambia hasta que el grupo lo confirme.');
+  // Also add to official TL with confirmation prompt
+  var c=simCityCache[simPreviewing];
+  if(c && confirm('Añadir '+( SIM_NAMES[simPreviewing]||simPreviewing)+' al itinerario OFICIAL del grupo?')){
+    var afterIdx=simRoute.indexOf(c.after||'milan')-1; // -1 because simAdd already added it
+    var afterCity=c.after||simRoute[simRoute.length-2];
+    var tlAfterIdx=-1;
+    TL.forEach(function(d,i){ if(d.city.toLowerCase().indexOf(afterCity)!==-1) tlAfterIdx=i; });
+    var newDay={
+      date:'? jul',
+      city:(SIM_NAMES[afterCity]||afterCity)+' - '+(SIM_NAMES[simPreviewing]||simPreviewing),
+      drive:true, km:simGetKm(afterCity,simPreviewing), h:(simGetKm(afterCity,simPreviewing)/80).toFixed(1)+'h',
+      ztl:c.ztl||false, maps:'',
+      acts:c.acts||[],
+      stay:c.stay||'Por confirmar',
+      note:c.note||''
+    };
+    TL.splice(tlAfterIdx+1,0,newDay);
+    renderTL();
+    simShowMsg('Añadido al itinerario oficial. Ve a la pestaña Ruta para verlo.');
+  }
+  simPreviewing=null;
+}
+
+function simClosePreview(){
+  document.getElementById('sim-preview').style.display='none';
+  simPreviewing=null;
+}
+
 function simAdd(id){
   if(simRoute.indexOf(id)!==-1)return;
-  var cand=SIM_CANDIDATES.filter(function(c){return c.id===id;})[0];
-  var afterIdx=simRoute.indexOf(cand?cand.after:'');
+  var c=simCityCache[id];
+  var afterIdx=c?simRoute.indexOf(c.after):-1;
   simRoute.splice(afterIdx>=0?afterIdx+1:simRoute.length-1,0,id);
-  simAdded.push(id);
+  if(simAdded.indexOf(id)===-1) simAdded.push(id);
   simRenderRoute();simRenderCandidates();
-  document.getElementById('sim-alert').textContent=(SIM_NAMES[id]||id)+' anadida. Ruta oficial sin cambios.';
-  document.getElementById('sim-alert').style.display='block';
-  setTimeout(function(){document.getElementById('sim-alert').style.display='none';},3500);
 }
+
 function simRemove(id){
   simRoute=simRoute.filter(function(c){return c!==id;});
   simAdded=simAdded.filter(function(c){return c!==id;});
   simRenderRoute();simRenderCandidates();
+  if(simPreviewing===id) simClosePreview();
 }
+
 function simReset(){
   simRoute=['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
   simAdded=[];
+  simClosePreview();
   simRenderRoute();simRenderCandidates();
   document.getElementById('sim-alert').style.display='none';
 }
+
+function simShowMsg(msg){
+  var el=document.getElementById('sim-alert');
+  el.textContent=msg;
+  el.style.display='block';
+  setTimeout(function(){el.style.display='none';},4000);
+}
+
+// ===== GENERATE NEW CITY VIA CLAUDE API =====
+function simGenerateCity(){
+  var input=document.getElementById('sim-new-city');
+  var cityName=input.value.trim();
+  if(!cityName) return;
+
+  var btn=input.nextElementSibling;
+  btn.innerHTML='<span class="sim-spinner"></span>Generando...';
+  btn.disabled=true;
+  input.disabled=true;
+
+  var cityId=cityName.toLowerCase().replace(/[^a-z]/g,'');
+  
+  // Check if already in cache
+  if(simCityCache[cityId]){
+    input.value='';btn.innerHTML='✨ Generar';btn.disabled=false;input.disabled=false;
+    SIM_NAMES[cityId]=simCityCache[cityId].name||cityName;
+    SIM_FLAGS[cityId]=simCityCache[cityId].flag||'';
+    simRenderCandidates();
+    simPreview(cityId);
+    return;
+  }
+
+  // Determine neighboring cities in current route for context
+  var routeNames=simRoute.map(function(r){return SIM_NAMES[r]||r;}).join(' → ');
+
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      messages:[{role:'user',content:
+        'Eres un experto en viajes por Europa. Genera datos para insertar "'+cityName+'" en este itinerario de roadtrip: '+routeNames+'.\n\n'+
+        'Responde SOLO con JSON valido, sin texto adicional, sin markdown, sin backticks:\n'+
+        '{\n'+
+        '  "name": "nombre oficial de la ciudad",\n'+
+        '  "flag": "codigo pais 2 letras mayusculas (ES/FR/IT/DE/etc)",\n'+
+        '  "after": "id de la ciudad del itinerario DESPUES de la cual se insertaria (en minusculas sin tildes)",\n'+
+        '  "ztl": false,\n'+
+        '  "acts": [\n'+
+        '    "HH:MM Actividad — descripcion breve (tiempo estimado)",\n'+
+        '    "HH:MM Actividad — descripcion breve (tiempo estimado)",\n'+
+        '    "HH:MM Salida hacia siguiente destino"\n'+
+        '  ],\n'+
+        '  "stay": "descripcion del alojamiento o si es parada sin noche",\n'+
+        '  "note": "consejo practico mas importante para el grupo",\n'+
+        '  "km_from_prev": numero aproximado de km desde la ciudad anterior,\n'+
+        '  "km_to_next": numero aproximado de km hacia la siguiente ciudad\n'+
+        '}\n\n'+
+        'Las actividades deben tener horas reales empezando desde la llegada. El grupo son 7 personas en 2 coches. Viajan en julio.'
+      }]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var text=data.content&&data.content[0]&&data.content[0].text||'';
+    // Strip any markdown just in case
+    text=text.replace(/```json|```/g,'').trim();
+    var city=JSON.parse(text);
+    
+    // Store in cache
+    simCityCache[cityId]=city;
+    SIM_NAMES[cityId]=city.name||cityName;
+    SIM_FLAGS[cityId]=city.flag||'';
+    
+    // Store km distances
+    if(city.km_from_prev && city.after){
+      var prevCity=city.after;
+      SIM_KM[prevCity+'|'+cityId]=city.km_from_prev;
+      SIM_KM[cityId+'|'+prevCity]=city.km_from_prev;
+    }
+    if(city.km_to_next && city.after){
+      var nextCityId=simRoute[simRoute.indexOf(city.after)+1];
+      if(nextCityId){
+        SIM_KM[cityId+'|'+nextCityId]=city.km_to_next;
+        SIM_KM[nextCityId+'|'+cityId]=city.km_to_next;
+      }
+    }
+
+    input.value='';
+    btn.innerHTML='✨ Generar';btn.disabled=false;input.disabled=false;
+    simRenderCandidates();
+    simPreview(cityId);
+  })
+  .catch(function(err){
+    console.error('Error generating city:',err);
+    btn.innerHTML='✨ Generar';btn.disabled=false;input.disabled=false;
+    simShowMsg('Error al generar. Verifica tu conexion e intentalo de nuevo.');
+  });
+}
+
 var _origSV=showView;
 showView=function(name,idx){
   _origSV(name,idx);
