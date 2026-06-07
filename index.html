@@ -1799,14 +1799,15 @@ function simDeleteCandidate(cityId){
 }
 
 // ===== PREVIEW =====
-function simPreview(cityId){
+function simPreview(cityId, forceInsertAt){
   var c=simCityCache[cityId];
   if(!c){simShowMsg('Cargando...');return;}
   simPreviewing=cityId;
 
   var preferredAfter=c.after||'';
   var afterIdx=preferredAfter?simRoute.indexOf(preferredAfter):-1;
-  var insertAt=afterIdx>=0?afterIdx+1:simFindBestInsert(cityId);
+  var defaultInsert=afterIdx>=0?afterIdx+1:simFindBestInsert(cityId);
+  var insertAt=forceInsertAt!==undefined?forceInsertAt:defaultInsert;
   var afterCity=simRoute[insertAt-1]||simRoute[0];
   var nextCity=simRoute[insertAt]||simRoute[simRoute.length-1];
 
@@ -1926,6 +1927,47 @@ function simPreview(cityId){
     ? mergedActs.map(function(item){ return renderAct(item.act, item.isNew, item.isMod); }).join('')
     : (newCityActs||[]).map(function(a){ return renderAct(a, true, false); }).join('');
 
+  // Build insertion point selector options
+  var insertOptions = simRoute.map(function(fc, i){
+    if(i >= simRoute.length-1) return null;
+    var tc = simRoute[i+1];
+    var segKm = simGetKm(fc, cityId) + simGetKm(cityId, tc);
+    var directKm = simGetKm(fc, tc);
+    var extraKm = segKm - directKm;
+    var h = (simGetKm(fc,cityId)/80 + simGetKm(cityId,tc)/80).toFixed(1);
+    var isSelected = (i+1) === insertAt;
+    var isRecommended = (i+1) === defaultInsert;
+    return {
+      idx: i+1, from: fc, to: tc,
+      extraKm: extraKm, h: h,
+      label: (SIM_NAMES[fc]||fc) + ' → ' + (SIM_NAMES[tc]||tc),
+      isSelected: isSelected,
+      isRecommended: isRecommended
+    };
+  }).filter(Boolean);
+
+  var selectorHtml = '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem;margin-bottom:0.6rem">' +
+    '<div style="font-size:0.62rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.5rem">'+
+      '📍 ¿Dónde insertar '+( SIM_NAMES[cityId]||cityId)+'?'+
+    '</div>'+
+    insertOptions.map(function(opt){
+      var bg = opt.isSelected ? '#eff6ff' : 'white';
+      var border = opt.isSelected ? '1.5px solid #3b82f6' : '1px solid #e2e8f0';
+      var extraColor = opt.extraKm < 100 ? '#22c55e' : opt.extraKm < 300 ? '#f59e0b' : '#ef4444';
+      return '<div onclick="simPreview(''+cityId+'','+opt.idx+')" style="cursor:pointer;background:'+bg+';border:'+border+';border-radius:8px;padding:0.45rem 0.6rem;margin-bottom:0.3rem;display:flex;align-items:center;gap:8px;transition:all 0.15s">'+
+        '<div style="flex:1;font-size:0.76rem;font-weight:'+(opt.isSelected?'700':'400')+'">'+
+          opt.label+
+          (opt.isRecommended?' <span style="font-size:0.55rem;background:#dbeafe;color:#2563eb;padding:0.05rem 0.3rem;border-radius:3px;margin-left:4px">IA sugiere</span>':'')+
+        '</div>'+
+        '<div style="text-align:right;font-size:0.68rem">'+
+          '<span style="font-weight:700;color:'+extraColor+'">+'+opt.extraKm+'km</span>'+
+          '<span style="color:#94a3b8;margin-left:4px">'+opt.h+'h</span>'+
+        '</div>'+
+        (opt.isSelected?'<div style="width:8px;height:8px;border-radius:50%;background:#3b82f6;flex-shrink:0"></div>':'<div style="width:8px;height:8px;border-radius:50%;border:1.5px solid #e2e8f0;flex-shrink:0"></div>')+
+      '</div>';
+    }).join('')+
+  '</div>';
+
   // Impact summary card
   var extraDays = 0; // check if new city needs overnight
   var needsNight = c.stay && c.stay.toLowerCase().indexOf('noche')!==-1 && c.stay.toLowerCase().indexOf('sin')===-1;
@@ -1975,7 +2017,7 @@ function simPreview(cityId){
       '</div>'+
     '</div>';
 
-  var html=impactCard+verdictHtml+impactBar+
+  var html=selectorHtml+impactCard+verdictHtml+impactBar+
     '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:0.5rem">'+
       '<div style="padding:0.42rem 0.6rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.58rem;font-weight:700;color:#64748b;text-transform:uppercase">Con '+(SIM_NAMES[cityId]||cityId)+'</div>'+
       rows+'</div>'+
