@@ -1617,7 +1617,7 @@ function simDrawSVGMap(osmCities, gmUrl, totalKm){
     var labelX=x+r+5, anchor='start';
     if(x>W*0.70){labelX=x-r-5; anchor='end';}
     var name=SIM_NAMES[c]||c;
-    var shortName=name.length>9?name.substring(0,8)+'…':name;
+    var shortName=name.length>9?name.substring(0,8)+'...':name;
     return '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" fill="'+color+'" stroke="white" stroke-width="2" opacity="'+(isAdded?'0.75':'1')+'"/>'+
       '<text x="'+x.toFixed(1)+'" y="'+(y+1).toFixed(1)+'" font-size="7.5" fill="white" font-family="sans-serif" text-anchor="middle" dominant-baseline="middle" font-weight="800">D'+(i+1)+'</text>'+
       '<text x="'+labelX.toFixed(1)+'" y="'+(y-3).toFixed(1)+'" font-size="8" fill="'+color+'" font-family="sans-serif" text-anchor="'+anchor+'" font-weight="700">'+shortName+'</text>'+
