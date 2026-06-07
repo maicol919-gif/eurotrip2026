@@ -2035,7 +2035,10 @@ function simPreview(cityId, forceInsertAt){
   previewTl.appendChild(selectorDiv); // real DOM node with working onclick
   previewTl.insertAdjacentHTML('beforeend', html);
   document.getElementById('sim-preview').style.display='block';
-  document.getElementById('sim-preview').scrollIntoView({behavior:'smooth',block:'nearest'});
+  if(forceInsertAt===undefined){
+    document.getElementById('sim-preview').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  // else: user changed insertion point, keep scroll position
 
   // Update map to show the preview route (new city highlighted)
   simDrawPreviewMap(newRoute, cityId, afterCity, nextCity);
