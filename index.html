@@ -1954,7 +1954,7 @@ function simPreview(cityId, forceInsertAt){
       var bg = opt.isSelected ? '#eff6ff' : 'white';
       var border = opt.isSelected ? '1.5px solid #3b82f6' : '1px solid #e2e8f0';
       var extraColor = opt.extraKm < 100 ? '#22c55e' : opt.extraKm < 300 ? '#f59e0b' : '#ef4444';
-      return '<div onclick="simPreview(''+cityId+'','+opt.idx+')" style="cursor:pointer;background:'+bg+';border:'+border+';border-radius:8px;padding:0.45rem 0.6rem;margin-bottom:0.3rem;display:flex;align-items:center;gap:8px;transition:all 0.15s">'+
+      return '<div onclick="simPreview(\'' + cityId + '\',' + opt.idx + ')" style="cursor:pointer;background:' + bg + ';border:' + border + ';border-radius:8px;padding:0.45rem 0.6rem;margin-bottom:0.3rem;display:flex;align-items:center;gap:8px;transition:all 0.15s">'+
         '<div style="flex:1;font-size:0.76rem;font-weight:'+(opt.isSelected?'700':'400')+'">'+
           opt.label+
           (opt.isRecommended?' <span style="font-size:0.55rem;background:#dbeafe;color:#2563eb;padding:0.05rem 0.3rem;border-radius:3px;margin-left:4px">IA sugiere</span>':'')+
