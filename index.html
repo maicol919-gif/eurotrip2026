@@ -1295,13 +1295,13 @@ var simCityCache = {
     note:'No entrar al centro en coche. Aparcar en Parking Paral-lel o Ciutadella. El Born es el mejor barrio para una parada rapida.'
   },
   marsella: {
-    name:'Marsella', flag:'FR', after:'barcelona', ztl:false,
+    name:'Marsella', flag:'FR', after:'montpellier', ztl:false,
     acts:['12:00 Llegada — Vieux-Port, el puerto viejo (45 min)','12:45 Notre-Dame de la Garde — vistas panoramicas (30 min)','13:15 Almuerzo: bouillabaisse en el puerto o mercado (1h 15min)','14:30 Salida hacia siguiente destino'],
     stay:'Sin alojamiento — parada de medio dia',
     note:'Marsella requiere un dia entero para disfrutarla bien. Como parada, centrarse en el Vieux-Port y Notre-Dame.'
   },
   florencia: {
-    name:'Florencia', flag:'IT', after:'pisa', ztl:true,
+    name:'Florencia', flag:'IT', after:'milan', ztl:true,
     acts:['11:30 Llegada desde Pisa (1h de ruta)','11:30 Piazza del Duomo — Cattedrale y Campanile (1h)','12:30 Cruce del Ponte Vecchio y orillas del Arno (30 min)','13:00 Almuerzo bistecca fiorentina en trattoria local (1h)','14:00 Galeria Uffizi exterior o Piazzale Michelangelo (1h)','15:00 Salida hacia Roma'],
     stay:'Sin alojamiento — parada de medio dia',
     note:'ZTL activa en el centro. Aparcar en Parking Oltrarno o Parterre. La Galeria Uffizi requiere reserva para entrar.'
@@ -1414,10 +1414,13 @@ function simPreview(cityId){
 
   simPreviewing=cityId;
 
-  // Find where it inserts
-  var afterCity=c.after||simRoute[simRoute.length-2];
-  var afterIdx=simRoute.indexOf(afterCity);
-  var nextCity=simRoute[afterIdx+1]||simRoute[afterIdx];
+  // Find where it inserts — use best insert logic if after not in route
+  var preferredAfter=c.after||'';
+  var afterIdx=preferredAfter?simRoute.indexOf(preferredAfter):-1;
+  var insertAt=afterIdx>=0?afterIdx+1:simFindBestInsert(cityId);
+  // Recalculate afterCity/nextCity based on actual insert position
+  var afterCity=simRoute[insertAt-1]||simRoute[0];
+  var nextCity=simRoute[insertAt]||simRoute[simRoute.length-1];
 
   // Build comparison table: full itinerary before vs after
   // Current route segments
@@ -1428,7 +1431,6 @@ function simPreview(cityId){
 
   // New route with city inserted
   var newRoute=simRoute.slice();
-  var insertAt=afterIdx+1;
   newRoute.splice(insertAt,0,cityId);
   var newSegs=[];
   for(var j=0;j<newRoute.length-1;j++){
@@ -1542,11 +1544,33 @@ function simClosePreview(){
   simPreviewing=null;
 }
 
+function simFindBestInsert(id){
+  // Find the best position to insert a city by minimizing total km increase
+  var bestIdx=simRoute.length-1; // default: before last city
+  var bestExtra=999999;
+  for(var i=0;i<simRoute.length-1;i++){
+    var before=simRoute[i];
+    var after=simRoute[i+1];
+    var currentKm=simGetKm(before,after);
+    var newKm=simGetKm(before,id)+simGetKm(id,after);
+    var extra=newKm-currentKm;
+    if(extra<bestExtra){bestExtra=extra;bestIdx=i+1;}
+  }
+  return bestIdx;
+}
+
 function simAdd(id){
   if(simRoute.indexOf(id)!==-1)return;
   var c=simCityCache[id];
   var afterIdx=c?simRoute.indexOf(c.after):-1;
-  simRoute.splice(afterIdx>=0?afterIdx+1:simRoute.length-1,0,id);
+  var insertAt;
+  if(afterIdx>=0){
+    insertAt=afterIdx+1;
+  } else {
+    // afterCity not in route — find best position by minimum km increase
+    insertAt=simFindBestInsert(id);
+  }
+  simRoute.splice(insertAt,0,id);
   if(simAdded.indexOf(id)===-1) simAdded.push(id);
   simRenderRoute();simRenderCandidates();
 }
