@@ -1824,20 +1824,36 @@ function simPreview(cityId){
   var verdict=c.verdict||null;
   var pros=c.pros||[];
   var cons=c.cons||[];
+  // Time impact for affected day
+  var affectedDayTL = null;
+  TL.forEach(function(d){ 
+    if(d.city.toLowerCase().indexOf((SIM_NAMES[afterCity]||afterCity).toLowerCase().split(' ')[0])!==-1) 
+      affectedDayTL=d; 
+  });
+  var currentDayH = affectedDayTL ? parseFloat(affectedDayTL.h) : 0;
+  var newDayH = parseFloat(affectedH);
+  var dayDelta = (newDayH - currentDayH).toFixed(1);
+  var totalBefore = Math.round(kmBefore/80);
+  var totalAfter = Math.round(kmAfter/80);
+
   var verdictHtml='';
   if(verdict){
-    var vBg=verdict==='conviene'?'#f0fdf4':'verdict'==='no_conviene'?'#fef2f2':'#fefce8';
-    vBg=verdict==='conviene'?'#f0fdf4':verdict==='no_conviene'?'#fef2f2':'#fefce8';
+    var vBg=verdict==='conviene'?'#f0fdf4':verdict==='no_conviene'?'#fef2f2':'#fefce8';
     var vBorder=verdict==='conviene'?'#86efac':verdict==='no_conviene'?'#fca5a5':'#fde68a';
-    var vIcon=verdict==='conviene'?'✅ Conviene':verdict==='no_conviene'?'❌ No conviene':'⚠️ Depende';
-    verdictHtml='<div style="background:'+vBg+';border:1.5px solid '+vBorder+';border-radius:10px;padding:0.6rem;margin-bottom:0.5rem">'+
-      '<div style="font-weight:700;font-size:0.8rem;margin-bottom:0.3rem">'+vIcon+'</div>'+
-      (pros.length?'<div style="font-size:0.7rem;margin-bottom:0.2rem"><strong>✓</strong> '+pros.join(' · ')+'</div>':'')+
-      (cons.length?'<div style="font-size:0.7rem"><strong>✗</strong> '+cons.join(' · ')+'</div>':'')+
+    var vTitle=verdict==='conviene'?'✅ Conviene anyadirla':verdict==='no_conviene'?'🚨 No conviene':'⚠️ Depende del grupo';
+    var timeImpact='<div style="background:rgba(0,0,0,0.05);border-radius:6px;padding:0.4rem 0.5rem;margin:0.4rem 0;font-size:0.72rem">'+
+      '<span style="margin-right:12px">⏱️ Ese tramo: <strong>'+newDayH+'h'+(currentDayH>0?' (antes '+currentDayH+'h)':'')+
+        (parseFloat(dayDelta)>0?' <span style="color:#ef4444">+'+dayDelta+'h</span>':'')+'</strong></span>'+
+      '<span>🗓️ Total viaje: <strong>~'+totalBefore+'h → ~'+totalAfter+'h <span style="color:#f97316">+'+(totalAfter-totalBefore)+'h</span></strong></span>'+
+    '</div>';
+    verdictHtml='<div style="background:'+vBg+';border:1.5px solid '+vBorder+';border-radius:10px;padding:0.7rem;margin-bottom:0.6rem">'+
+      '<div style="font-weight:800;font-size:0.84rem;margin-bottom:0.35rem">'+vTitle+'</div>'+
+      timeImpact+
+      (pros.length?'<div style="font-size:0.72rem;margin-bottom:0.3rem">'+pros.map(function(p){return '<span style="margin-right:8px">✅ '+p+'</span>';}).join('')+'</div>':'')+
+      (cons.length?'<div style="font-size:0.72rem">'+cons.map(function(con){return '<span style="margin-right:8px">⚠️ '+con+'</span>';}).join('')+'</div>':'')+
       '</div>';
   }
-
-  // Mode of new segment
+    // Mode of new segment
   var segMode=c.modo||'coche';
   var modeIcon=simGetModeIcon(segMode);
   var affectedKm=simGetKm(afterCity,cityId)+simGetKm(cityId,nextCity);
@@ -1869,14 +1885,47 @@ function simPreview(cityId){
       '<div style="color:#94a3b8">'+segH+'h '+warn+'</div></div></div>';
   }
 
-  // Schedule
-  var schedHtml=(c.acts||[]).slice(0,5).map(function(a){
+  // Schedule: merge original day acts + new city acts, highlight new ones
+  var origActs = affectedDayTL ? (affectedDayTL.acts||[]) : [];
+  var newCityActs = c.acts||[];
+
+  // Build merged schedule: original acts up to departure + new city acts + remaining
+  function renderAct(a, isNew, isMod){
     var m=a.match(/^(\d{2}:\d{2})\s+(.*)/);
-    if(m) return '<div style="display:flex;gap:6px;padding:0.24rem 0;border-bottom:1px solid #f8fafc;font-size:0.7rem">'+
-      '<span style="font-family:monospace;color:#3b82f6;font-weight:700;flex-shrink:0;width:36px">'+m[1]+'</span>'+
-      '<span>'+m[2]+'</span></div>';
-    return '<div style="padding:0.24rem 0;font-size:0.7rem;border-bottom:1px solid #f8fafc">'+a+'</div>';
-  }).join('');
+    var bg=isNew?'background:#dcfce7;border-left:3px solid #16a34a;padding-left:6px;border-radius:0 4px 4px 0':
+            isMod?'background:#fef9c3;border-left:3px solid #ca8a04;padding-left:6px;border-radius:0 4px 4px 0':'';
+    var timeColor=isNew?'#16a34a':isMod?'#ca8a04':'#3b82f6';
+    var badge=isNew?'<span style="font-size:0.55rem;background:#16a34a;color:white;padding:0.05rem 0.3rem;border-radius:3px;margin-left:4px;vertical-align:middle">NUEVO</span>':'';
+    if(m){
+      return '<div style="display:flex;gap:6px;align-items:baseline;padding:0.26rem 0.3rem;border-bottom:1px solid #f1f5f9;font-size:0.7rem;'+bg+'">'+
+        '<span style="font-family:monospace;color:'+timeColor+';font-weight:700;flex-shrink:0;width:36px">'+m[1]+'</span>'+
+        '<span>'+m[2]+badge+'</span></div>';
+    }
+    return '<div style="padding:0.26rem 0.3rem;font-size:0.7rem;border-bottom:1px solid #f1f5f9;'+bg+'">'+a+badge+'</div>';
+  }
+
+  var mergedActs = [];
+  // Add original acts that happen before arrival at new city
+  var insertionAct = '--- Llegada a '+(SIM_NAMES[cityId]||cityId)+' ---';
+  var addedInsert = false;
+  origActs.forEach(function(a){
+    var m = a.match(/^(\d{2}:\d{2})/);
+    var hr = m ? parseInt(m[1]) : 99;
+    // Insert new city acts before the act that would happen after arrival
+    if(!addedInsert && hr >= 10 && origActs.indexOf(a) > 0){
+      addedInsert = true;
+      // Add new city acts
+      newCityActs.forEach(function(na){ mergedActs.push({act:na, isNew:true}); });
+    }
+    mergedActs.push({act:a, isNew:false, isMod: addedInsert && origActs.indexOf(a) > origActs.length/2});
+  });
+  if(!addedInsert){
+    newCityActs.forEach(function(na){ mergedActs.push({act:na, isNew:true}); });
+  }
+
+  var schedHtml = mergedActs.length > 0
+    ? mergedActs.map(function(item){ return renderAct(item.act, item.isNew, item.isMod); }).join('')
+    : (newCityActs||[]).map(function(a){ return renderAct(a, true, false); }).join('');
 
   // Impact summary card
   var extraDays = 0; // check if new city needs overnight
