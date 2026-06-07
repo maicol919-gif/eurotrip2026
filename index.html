@@ -509,11 +509,17 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
         <div class="ptitle" style="margin:0">Simulador</div>
         <div style="font-size:0.7rem;color:#94a3b8">Hola, <strong class="user-name-display" id="sim-username" style="color:#3b82f6">—</strong></div>
       </div>
-      <div style="display:flex;gap:6px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
         <button onclick="document.getElementById('sim-cond-modal').style.display='flex'" style="background:#f1f5f9;color:#0f172a;border:none;border-radius:8px;padding:0.4rem 0.7rem;font-family:inherit;font-weight:600;font-size:0.7rem;cursor:pointer">🚗 Conductores</button>
+        <button onclick="simSaveAsBase()" style="background:#10b981;color:white;border:none;border-radius:8px;padding:0.4rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">💾 Guardar base</button>
+        <button onclick="simDiscardAll()" id="sim-discard-btn" style="display:none;background:#ef4444;color:white;border:none;border-radius:8px;padding:0.4rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">↩ Descartar</button>
       </div>
     </div>
     <div class="sim-alert" id="sim-alert" style="display:none;margin-top:8px"></div>
+  <div id="sim-modified-bar" style="display:none;background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:0.4rem 0.75rem;margin-top:6px;font-size:0.72rem;color:#92400e;display:none;align-items:center;gap:8px">
+    <span>⚠️ Ruta simulada difiere del itinerario base</span>
+    <span style="margin-left:auto;font-size:0.65rem;color:#b45309">Guarda o descarta los cambios</span>
+  </div>
   </div>
 
   <!-- TWO COLUMN LAYOUT -->
@@ -2233,6 +2239,107 @@ function simRemove(id){
   simRenderRoute();simRenderCandidates();
   if(simPreviewing===id) simClosePreview();
 }
+// Track original base route for discard
+var SIM_BASE_ROUTE = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
+var SIM_BASE_TL = null; // will be set on first load
+var simIsModified = false;
+
+function simMarkModified(){
+  simIsModified = true;
+  var bar = document.getElementById('sim-modified-bar');
+  var discardBtn = document.getElementById('sim-discard-btn');
+  if(bar) bar.style.display = 'flex';
+  if(discardBtn) discardBtn.style.display = 'block';
+}
+
+function simSaveAsBase(){
+  simRequestAdmin(function(){
+    // Build new TL from simRoute
+    // For each segment in simRoute, find existing TL day or create minimal one
+    var newTL = [];
+    var DATES = ['14 jul','15 jul','16 jul','17 jul','18 jul','19 jul','20 jul','21 jul','22 jul','23 jul'];
+
+    simRoute.forEach(function(c, i){
+      if(i === simRoute.length - 1) return; // skip last (destination only)
+      var nextC = simRoute[i+1];
+      var fromName = SIM_NAMES[c]||c;
+      var toName = SIM_NAMES[nextC]||nextC;
+      var km = simGetKm(c, nextC);
+      var mode = simGetMode(c, nextC);
+      var h = (km / (SIM_SPEEDS[mode]||80)).toFixed(1);
+      var date = DATES[i] || ((14+i)+' jul');
+
+      // Try to find matching day in original TL
+      var existingDay = null;
+      TL.forEach(function(d){
+        var dLower = d.city.toLowerCase();
+        if(dLower.indexOf((fromName).toLowerCase().split(' ')[0]) !== -1 &&
+           dLower.indexOf((toName).toLowerCase().split(' ')[0]) !== -1){
+          existingDay = d;
+        }
+      });
+
+      if(existingDay){
+        // Use existing day with updated city string
+        var updated = JSON.parse(JSON.stringify(existingDay));
+        updated.date = date;
+        newTL.push(updated);
+      } else {
+        // Create new minimal day
+        newTL.push({
+          date: date,
+          city: fromName + ' - ' + toName,
+          drive: mode === 'coche',
+          km: km,
+          h: h + 'h',
+          ztl: false,
+          maps: 'https://www.google.com/maps/dir/' + encodeURIComponent(fromName) + '/' + encodeURIComponent(toName),
+          acts: [
+            '08:00 Salida desde ' + fromName,
+            '~' + Math.round(km/80) + 'h Llegada a ' + toName + ' — check-in'
+          ],
+          stay: 'Por confirmar en ' + toName,
+          note: 'Dia añadido desde el simulador. Actualizar detalles.'
+        });
+      }
+    });
+
+    // Update TL and base route
+    TL.length = 0;
+    newTL.forEach(function(d){ TL.push(d); });
+    SIM_BASE_ROUTE = simRoute.slice();
+    simIsModified = false;
+
+    // Persist
+    simSaveTL();
+
+    // Update UI
+    renderTL();
+    var bar = document.getElementById('sim-modified-bar');
+    var discardBtn = document.getElementById('sim-discard-btn');
+    if(bar) bar.style.display = 'none';
+    if(discardBtn) discardBtn.style.display = 'none';
+
+    simShowMsg('Itinerario base actualizado con ' + simRoute.length + ' ciudades. Ve a la pestana Ruta para verlo.');
+  });
+}
+
+function simDiscardAll(){
+  if(!confirm('Descartar todos los cambios del simulador y volver al itinerario base?')) return;
+  simRoute = SIM_BASE_ROUTE.slice();
+  simAdded = [];
+  simIsModified = false;
+  simClosePreview();
+  simRenderRoute();
+  simRenderCandidates();
+  simPopulateEndpoints();
+  var bar = document.getElementById('sim-modified-bar');
+  var discardBtn = document.getElementById('sim-discard-btn');
+  if(bar) bar.style.display = 'none';
+  if(discardBtn) discardBtn.style.display = 'none';
+  simShowMsg('Simulador restaurado al itinerario base.');
+}
+
 var SIM_ALL_CITIES = {
   alicante:'Alicante ES', madrid:'Madrid ES', barcelona:'Barcelona ES',
   valencia:'Valencia ES', bilbao:'Bilbao ES', sevilla:'Sevilla ES',
@@ -2277,6 +2384,7 @@ function simChangeEndpoint(type, newId){
     simRoute[simRoute.length-1]=newId;
     simShowMsg('Destino: '+(SIM_NAMES[newId]||newId)+' — solo en simulacion');
   }
+  simMarkModified();
   simRenderRoute();
   simPopulateEndpoints();
 }
