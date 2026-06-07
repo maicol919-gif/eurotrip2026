@@ -230,13 +230,12 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 /* Simulator two-column layout */
 @media (max-width: 640px) {
-  #sim-layout {
-    grid-template-columns: 1fr !important;
-    grid-template-rows: 240px 1fr;
-    height:auto !important;
-  }
+  #sim-layout { grid-template-columns: 1fr !important; grid-template-rows: 240px 1fr; height:auto !important; }
   #sim-layout > div:first-child { order:2; }
   #sim-layout > div:last-child { order:1; border-right:none !important; border-bottom:1px solid #e2e8f0; }
+  #ruta-sim-mode > div { grid-template-columns: 1fr !important; grid-template-rows: 220px 1fr; height:auto !important; }
+  #ruta-sim-mode > div > div:first-child { order:2; }
+  #ruta-sim-mode > div > div:last-child { order:1; border-right:none !important; border-bottom:1px solid #e2e8f0; height:220px; }
 }
 </style>
 </head>
@@ -347,12 +346,153 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 </div>
 
 <!-- TIMELINE -->
-<div id="view-timeline" class="view">
-  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
-  <div class="ptitle">Itinerario</div>
-  <div class="module-user">Hola, <strong class="user-name-display">—</strong></div>
-  <div class="psub">13 dias. Toca cada dia para ver el detalle y abrir la ruta en Google Maps.</div>
-  <div id="tl-container"></div>
+<div id="view-timeline" class="view" style="padding:0">
+
+  <!-- PIN modal (moved here, accessible from both modes) -->
+  <div id="sim-pin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+      <div style="font-size:1.5rem;margin-bottom:8px">🔐</div>
+      <div style="font-weight:800;font-size:1rem;margin-bottom:6px">Acceso Admin</div>
+      <div style="font-size:0.76rem;color:#64748b;margin-bottom:16px">Solo el admin puede guardar cambios en el itinerario</div>
+      <input id="sim-pin-input" type="password" placeholder="PIN" maxlength="6"
+        style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px;text-align:center;font-size:1.4rem;letter-spacing:0.4em;outline:none;margin-bottom:12px;font-family:monospace">
+      <div style="display:flex;gap:8px">
+        <button onclick="simCheckPIN()" style="flex:1;background:#0f172a;color:white;border:none;border-radius:8px;padding:10px;font-family:inherit;font-weight:700;cursor:pointer">Entrar</button>
+        <button onclick="document.getElementById('sim-pin-modal').style.display='none'" style="background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px;font-family:inherit;cursor:pointer;flex:1">Cancelar</button>
+      </div>
+      <div id="sim-pin-error" style="color:#ef4444;font-size:0.72rem;margin-top:8px;display:none">PIN incorrecto</div>
+    </div>
+  </div>
+
+  <!-- Conductores modal -->
+  <div id="sim-cond-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999;align-items:center;justify-content:center;padding:1rem">
+    <div style="background:white;border-radius:16px;padding:20px;width:100%;max-width:380px;max-height:80vh;overflow-y:auto">
+      <div style="font-weight:800;font-size:1rem;margin-bottom:4px">🚗 Conductores</div>
+      <div style="font-size:0.74rem;color:#64748b;margin-bottom:14px">Limite legal EU: 4.5h continuas, 9h/dia</div>
+      <div id="sim-cond-list"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <input id="sim-cond-new" placeholder="Nombre conductor" style="flex:1;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px 10px;font-family:inherit;font-size:0.82rem;outline:none">
+        <select id="sim-cond-coche" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:8px;font-family:inherit;font-size:0.78rem;outline:none">
+          <option value="1">Coche 1</option><option value="2">Coche 2</option>
+        </select>
+        <button onclick="simAddConductor()" style="background:#0f172a;color:white;border:none;border-radius:8px;padding:8px 12px;font-family:inherit;font-weight:700;cursor:pointer">+</button>
+      </div>
+      <button onclick="document.getElementById('sim-cond-modal').style.display='none'" style="width:100%;margin-top:12px;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px;font-family:inherit;cursor:pointer;font-weight:600">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- MODE TOGGLE HEADER -->
+  <div style="padding:0.75rem 1rem 0;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #f1f5f9;margin-bottom:0">
+    <div>
+      <div style="font-weight:800;font-size:1.05rem;letter-spacing:-0.02em" id="ruta-mode-title">Itinerario</div>
+      <div style="font-size:0.68rem;color:#94a3b8">Hola, <strong class="user-name-display" style="color:#3b82f6">—</strong></div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <!-- Mode toggle -->
+      <div style="background:#f1f5f9;border-radius:8px;padding:3px;display:flex;gap:2px">
+        <button id="btn-mode-ver" onclick="rutaSetMode('ver')"
+          style="background:#0f172a;color:white;border:none;border-radius:6px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">
+          Ver
+        </button>
+        <button id="btn-mode-sim" onclick="rutaSetMode('sim')"
+          style="background:transparent;color:#64748b;border:none;border-radius:6px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:600;font-size:0.7rem;cursor:pointer">
+          ✨ Simular
+        </button>
+      </div>
+      <!-- Admin actions (sim mode only) -->
+      <button id="ruta-save-btn" onclick="simSaveAsBase()" style="display:none;background:#10b981;color:white;border:none;border-radius:8px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">💾 Guardar</button>
+      <button id="ruta-discard-btn" onclick="simDiscardAll()" style="display:none;background:#ef4444;color:white;border:none;border-radius:8px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">↩</button>
+    </div>
+  </div>
+
+  <!-- Alert bar -->
+  <div class="sim-alert" id="sim-alert" style="display:none;margin:6px 1rem 0"></div>
+
+  <!-- ============ VER MODE ============ -->
+  <div id="ruta-ver-mode" style="padding:0.75rem 1rem">
+    <div class="psub" style="margin-bottom:0.75rem">Toca cada dia para ver el detalle. Solo el admin puede editar.</div>
+    <div id="tl-container"></div>
+  </div>
+
+  <!-- ============ SIM MODE ============ -->
+  <div id="ruta-sim-mode" style="display:none">
+
+    <!-- Two column layout -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;height:calc(100vh - 120px);min-height:480px">
+
+      <!-- LEFT: editor -->
+      <div style="overflow-y:auto;padding:0.75rem;border-right:1px solid #e2e8f0">
+
+        <!-- Live stats -->
+        <div style="background:#0f172a;border-radius:10px;padding:0.55rem;display:grid;grid-template-columns:repeat(4,1fr);gap:0.2rem;text-align:center;margin-bottom:0.6rem">
+          <div><div style="font-size:0.88rem;font-weight:800;color:white" id="sim-total-km">—</div><div style="font-size:0.5rem;color:#94a3b8;text-transform:uppercase">km</div></div>
+          <div><div style="font-size:0.88rem;font-weight:800;color:white" id="sim-total-h">—</div><div style="font-size:0.5rem;color:#94a3b8;text-transform:uppercase">horas</div></div>
+          <div><div style="font-size:0.88rem;font-weight:800;color:white" id="sim-total-fuel">—</div><div style="font-size:0.5rem;color:#94a3b8;text-transform:uppercase">gasolina</div></div>
+          <div><div style="font-size:0.88rem;font-weight:800" id="sim-max-day">—</div><div style="font-size:0.5rem;color:#94a3b8;text-transform:uppercase">max</div></div>
+        </div>
+
+        <div id="sim-warnings" style="margin-bottom:0.4rem"></div>
+
+        <!-- Origen / Destino -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.35rem;margin-bottom:0.5rem">
+          <div>
+            <div style="font-size:0.56rem;color:#94a3b8;text-transform:uppercase;margin-bottom:2px">🚩 Origen</div>
+            <select id="sim-origin-sel" onchange="simChangeEndpoint('origin',this.value)"
+              style="width:100%;border:1.5px solid #e2e8f0;border-radius:6px;padding:0.3rem 0.4rem;font-family:inherit;font-size:0.7rem;outline:none;background:white"></select>
+          </div>
+          <div>
+            <div style="font-size:0.56rem;color:#94a3b8;text-transform:uppercase;margin-bottom:2px">🏁 Destino</div>
+            <select id="sim-dest-sel" onchange="simChangeEndpoint('dest',this.value)"
+              style="width:100%;border:1.5px solid #e2e8f0;border-radius:6px;padding:0.3rem 0.4rem;font-family:inherit;font-size:0.7rem;outline:none;background:white"></select>
+          </div>
+        </div>
+
+        <!-- Route list -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem">
+          <div style="font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em">Ciudades — arrastra para reordenar</div>
+          <button onclick="simReset()" style="font-size:0.6rem;background:none;border:1px solid #e2e8f0;border-radius:5px;padding:0.2rem 0.5rem;cursor:pointer;color:#64748b">Restaurar</button>
+        </div>
+        <div id="sim-ruta" class="sim-ruta" style="margin-bottom:0.6rem"></div>
+
+        <!-- Add city -->
+        <div style="font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.35rem">Explorar nueva ciudad</div>
+        <div style="display:flex;gap:0.35rem;margin-bottom:0.6rem">
+          <input id="sim-new-city" class="fi" placeholder="Ej: Florencia, Zurich, Cinque Terre..." style="flex:1;font-size:0.76rem;padding:0.4rem 0.6rem">
+          <button onclick="simGenerateCity()" style="background:#0f172a;color:white;border:none;border-radius:7px;padding:0.4rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer;white-space:nowrap">✨ Analizar</button>
+        </div>
+
+        <!-- Candidates -->
+        <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:0.35rem">
+          <div style="font-size:0.6rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em">Guardadas por el grupo</div>
+          <span id="sim-cand-count" style="font-size:0.6rem;color:#94a3b8"></span>
+        </div>
+        <div id="sim-candidates"></div>
+
+        <!-- Conductores btn -->
+        <button onclick="document.getElementById('sim-cond-modal').style.display='flex'" style="margin-top:0.5rem;background:#f1f5f9;color:#64748b;border:none;border-radius:7px;padding:0.35rem 0.6rem;font-family:inherit;font-weight:600;font-size:0.68rem;cursor:pointer">🚗 Gestionar conductores</button>
+
+        <!-- Preview panel -->
+        <div id="sim-preview" style="display:none;margin-top:0.75rem">
+          <div id="sim-preview-tl"></div>
+          <div style="display:flex;gap:0.35rem;margin-top:0.5rem;flex-wrap:wrap">
+            <button onclick="simSaveCandidate()" style="flex:1;min-width:100px;background:#3b82f6;color:white;border:none;border-radius:7px;padding:0.5rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">📌 Guardar en grupo</button>
+            <button onclick="simConfirmOfficial()" style="flex:1;min-width:100px;background:#10b981;color:white;border:none;border-radius:7px;padding:0.5rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">✓ Al itinerario</button>
+            <button onclick="simClosePreview()" style="background:none;border:1.5px solid #e2e8f0;color:#64748b;border-radius:7px;padding:0.5rem 0.6rem;font-family:inherit;font-weight:600;font-size:0.7rem;cursor:pointer">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: live map -->
+      <div style="position:relative;background:#e8f4fb">
+        <div style="position:absolute;top:8px;left:8px;right:8px;z-index:5;background:white;border-radius:8px;padding:5px 10px;font-size:0.62rem;color:#64748b;box-shadow:0 2px 8px rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:space-between" id="sim-map-label">
+          <span>Ruta en tiempo real</span>
+          <a id="sim-maps-link" href="#" target="_blank" style="background:#0f172a;color:white;padding:3px 8px;border-radius:5px;text-decoration:none;font-weight:700;font-size:0.6rem">🗺 Maps</a>
+        </div>
+        <div id="sim-map-svg" style="width:100%;height:100%;padding-top:36px"></div>
+        <div id="sim-map-iframe" style="display:none"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- PRESUPUESTO -->
@@ -466,7 +606,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 </div>
 
 
-<div id="view-simulador" class="view" style="padding-bottom:0">
+<div id="view-simulador" class="view" style="display:none!important">
 
   <!-- PIN modal -->
   <div id="sim-pin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999;align-items:center;justify-content:center">
@@ -599,10 +739,10 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 <div class="bnav">
   <button class="bnb active" onclick="showView('dashboard',0)"><span class="bnb-i">🏠</span><span class="bnb-l">Inicio</span></button>
   <button class="bnb" onclick="showView('alojamientos',1)"><span class="bnb-i">🛏</span><span class="bnb-l">Alojam.</span></button>
-  <button class="bnb" onclick="showView('timeline',2)"><span class="bnb-i">📅</span><span class="bnb-l">Ruta</span></button>
+  <button class="bnb" onclick="showView('timeline',2)"><span class="bnb-i">🗺️</span><span class="bnb-l">Ruta</span></button>
   <button class="bnb" onclick="showView('gastos',4)"><span class="bnb-i">🧾</span><span class="bnb-l">Gastos</span></button>
   <button class="bnb" onclick="showView('notas',5)"><span class="bnb-i">📝</span><span class="bnb-l">Notas</span></button>
-  <button class="bnb" onclick="showView('simulador',8)"><span class="bnb-i">🧪</span><span class="bnb-l">Simular</span></button>
+
   <button class="bnb" onclick="showView('checklist',6)"><span class="bnb-i">✅</span><span class="bnb-l">Check</span></button>
   <button class="bnb" onclick="showView('emergencias',7)"><span class="bnb-i">🆘</span><span class="bnb-l">SOS</span></button>
 </div>
@@ -2246,9 +2386,9 @@ var simIsModified = false;
 
 function simMarkModified(){
   simIsModified = true;
-  var bar = document.getElementById('sim-modified-bar');
-  var discardBtn = document.getElementById('sim-discard-btn');
-  if(bar) bar.style.display = 'flex';
+  var saveBtn = document.getElementById('ruta-save-btn');
+  var discardBtn = document.getElementById('ruta-discard-btn');
+  if(saveBtn) saveBtn.style.display = 'block';
   if(discardBtn) discardBtn.style.display = 'block';
 }
 
@@ -2456,8 +2596,48 @@ function simGenerateCity(){
 var _origSV=showView;
 showView=function(name,idx){
   _origSV(name,idx);
-  if(name==='simulador'){simRenderRoute();simLoadCandidatas();simRenderConductores();simPopulateEndpoints();}
+  if(name==='timeline'){
+    renderTL();
+    // Init sim if not done
+    if(!simRouteInited){ simRouteInited=true; simRenderRoute();simLoadCandidatas();simRenderConductores();simPopulateEndpoints(); }
+  }
+  if(name==='simulador'){ showView('timeline',2); } // redirect
 };
+
+var simRouteInited = false;
+
+function rutaSetMode(mode){
+  var verMode = document.getElementById('ruta-ver-mode');
+  var simMode = document.getElementById('ruta-sim-mode');
+  var btnVer = document.getElementById('btn-mode-ver');
+  var btnSim = document.getElementById('btn-mode-sim');
+  var saveBtn = document.getElementById('ruta-save-btn');
+  var discardBtn = document.getElementById('ruta-discard-btn');
+  var title = document.getElementById('ruta-mode-title');
+
+  if(mode === 'ver'){
+    verMode.style.display = 'block';
+    simMode.style.display = 'none';
+    btnVer.style.background = '#0f172a'; btnVer.style.color = 'white';
+    btnSim.style.background = 'transparent'; btnSim.style.color = '#64748b';
+    if(saveBtn) saveBtn.style.display = 'none';
+    if(discardBtn) discardBtn.style.display = 'none';
+    if(title) title.textContent = 'Itinerario';
+  } else {
+    verMode.style.display = 'none';
+    simMode.style.display = 'block';
+    btnSim.style.background = '#0f172a'; btnSim.style.color = 'white';
+    btnVer.style.background = 'transparent'; btnVer.style.color = '#64748b';
+    if(title) title.textContent = 'Simulador';
+    simRenderRoute();
+    simLoadCandidatas();
+    simPopulateEndpoints();
+    if(simIsModified){
+      if(saveBtn) saveBtn.style.display = 'block';
+      if(discardBtn) discardBtn.style.display = 'block';
+    }
+  }
+}
 // Broadcast name on load
 (function(){
   var n=localStorage.getItem('et_nombre')||'';
