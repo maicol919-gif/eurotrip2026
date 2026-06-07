@@ -201,27 +201,22 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 }
 
 /* ===== SIMULADOR ===== */
-.sim-ruta {display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem}
-.sim-city {background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;display:flex;align-items:center;gap:0.7rem;cursor:grab}
-.sim-city:active{cursor:grabbing}
-.sim-city.dragging{opacity:0.4;border-style:dashed}
+.sim-ruta{display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem}
+.sim-city{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;display:flex;align-items:center;gap:0.7rem;cursor:grab;transition:all .15s}
 .sim-city.dragover{border-color:#3b82f6;background:#eff6ff}
-.sim-icon{font-size:1rem;width:24px;text-align:center;flex-shrink:0}
+.sim-handle{color:#cbd5e1;font-size:0.9rem;padding:0 0.2rem}
 .sim-name{font-weight:600;font-size:0.85rem;flex:1}
 .sim-meta{font-size:0.65rem;color:#94a3b8;text-align:right;line-height:1.4}
 .sim-km{font-weight:700;color:#0f172a;font-size:0.78rem}
-.sim-handle{color:#cbd5e1;font-size:0.9rem;cursor:grab;padding:0 0.2rem}
 .sim-summary{background:#0f172a;color:white;border-radius:12px;padding:1rem;display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1rem;text-align:center}
 .sim-sum-v{font-size:1.3rem;font-weight:800;letter-spacing:-0.02em}
 .sim-sum-l{font-size:0.6rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-top:0.1rem}
-.sim-candidates{display:flex;flex-direction:column;gap:0.4rem}
-.sim-cand{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;display:flex;align-items:center;gap:0.7rem}
+.sim-cand{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;display:flex;align-items:center;gap:0.7rem;margin-bottom:0.4rem}
 .sim-cand-info{flex:1}
 .sim-cand-name{font-weight:600;font-size:0.85rem}
 .sim-cand-note{font-size:0.68rem;color:#94a3b8;margin-top:0.1rem}
 .sim-cand-impact{font-size:0.7rem;color:#f59e0b;font-weight:600;margin-top:0.15rem}
-.btn-sim-add{background:#0f172a;color:white;border:none;border-radius:8px;padding:0.4rem 0.8rem;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s}
-.btn-sim-add:hover{background:#3b82f6}
+.btn-sim-add{background:#0f172a;color:white;border:none;border-radius:8px;padding:0.4rem 0.8rem;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
 .btn-sim-add.added{background:#10b981}
 .btn-sim-reset{background:none;border:1.5px solid #e2e8f0;color:#64748b;border-radius:8px;padding:0.38rem 0.8rem;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:inherit}
 .sim-alert{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.72rem;color:#92400e;margin-bottom:0.75rem;line-height:1.5}
@@ -447,27 +442,22 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 </div>
 
 
-<!-- SIMULADOR -->
 <div id="view-simulador" class="view">
-  <div class="ptitle">Simulador 🧪</div>
-  <div class="psub">Prueba ciudades nuevas en la ruta sin confirmar nada. Arrastra para reordenar.</div>
-
+  <div class="ptitle">Simulador de Ruta</div>
+  <div class="psub">Prueba ciudades nuevas sin confirmar nada. La ruta oficial no cambia.</div>
   <div class="sim-alert" id="sim-alert" style="display:none"></div>
-
   <div class="sim-summary">
-    <div><div class="sim-sum-v" id="sim-total-km">4.800</div><div class="sim-sum-l">km totales</div></div>
-    <div><div class="sim-sum-v" id="sim-total-h">~52h</div><div class="sim-sum-l">conducción</div></div>
-    <div><div class="sim-sum-v" id="sim-total-fuel">~350€</div><div class="sim-sum-l">gasolina est.</div></div>
+    <div><div class="sim-sum-v" id="sim-total-km">4.800</div><div class="sim-sum-l">km coche</div></div>
+    <div><div class="sim-sum-v" id="sim-total-h">~52h</div><div class="sim-sum-l">conduccion</div></div>
+    <div><div class="sim-sum-v" id="sim-total-fuel">~350 EUR</div><div class="sim-sum-l">gasolina est.</div></div>
   </div>
-
-  <div class="st">Ruta actual — arrastra para reordenar</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
+    <div class="st" style="margin:0;flex:1">Ruta — arrastra para reordenar</div>
+    <button class="btn-sim-reset" onclick="simReset()">Restaurar</button>
+  </div>
   <div id="sim-ruta" class="sim-ruta"></div>
-
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;margin-top:0.5rem">
-    <div class="st" style="margin:0;flex:1">Ciudades candidatas</div>
-    <button class="btn-sim-reset" onclick="simReset()">Restaurar ruta</button>
-  </div>
-  <div class="sim-candidates" id="sim-candidates"></div>
+  <div class="st" style="margin-top:0.75rem">Ciudades candidatas</div>
+  <div id="sim-candidates"></div>
 </div>
 
 </div><!-- end main -->
@@ -539,549 +529,6 @@ var LINKS = {
   milan:   {air:'', book:''},
   niza:    {air:'', book:''}
 };
-var PEOPLEml>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>EuroTrip 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bottom:64px}
-.header{background:#0f172a;padding:0.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:sticky;top:0;z-index:100}
-.hlogo{color:white;font-size:0.95rem;font-weight:700}
-.hbadge{font-size:0.65rem;font-weight:700;padding:0.25rem 0.7rem;border-radius:20px;background:rgba(255,255,255,0.1);color:#94a3b8;white-space:nowrap}
-.hcity{font-size:0.62rem;color:#64748b;cursor:pointer;transition:color .15s;white-space:nowrap;padding:0.15rem 0.1rem;-webkit-tap-highlight-color:transparent}
-.hcity:hover,.hcity:active{color:white;text-decoration:underline}
-.harr{font-size:0.55rem;color:#334155}
-.hbadge.live{background:rgba(16,185,129,0.2);color:#34d399}
-.bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.bnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.15rem;background:none;border:none;cursor:pointer;padding:0.5rem 0.1rem;font-family:inherit}
-.bnb-i{font-size:1.05rem}
-.bnb-l{font-size:0.55rem;font-weight:600;color:#94a3b8}
-.bnb.active .bnb-l{color:#3b82f6}
-.main{max-width:900px;margin:0 auto;padding:1.25rem}
-.view{display:none}.view.active{display:block}
-.ptitle{font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.2rem}
-.psub{font-size:0.78rem;color:#64748b;margin-bottom:1.25rem}
-
-/* CARDS */
-.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem}
-.dcard{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.85rem;cursor:pointer;transition:all .18s}
-.dcard:hover{border-color:#3b82f6;transform:translateY(-2px)}
-.di{font-size:1.1rem;margin-bottom:0.3rem}
-.dv{font-size:1.3rem;font-weight:800;letter-spacing:-0.02em}
-.dl{font-size:0.63rem;color:#64748b;margin-top:0.15rem}
-.dt{display:inline-block;margin-top:0.3rem;font-size:0.57rem;font-weight:600;padding:0.1rem 0.35rem;border-radius:4px}
-.tb{background:#eff6ff;color:#3b82f6}.tg{background:#ecfdf5;color:#059669}
-.ta{background:#fffbeb;color:#d97706}.tr{background:#fef2f2;color:#dc2626}
-
-/* ALERTS */
-.alerts{display:flex;flex-direction:column;gap:0.35rem;margin-top:1rem}
-.al{background:white;border-radius:9px;padding:0.68rem 0.9rem;border-left:3px solid}
-.al.r{border-color:#ef4444}.al.a{border-color:#f59e0b}.al.b{border-color:#3b82f6}.al.g{border-color:#10b981}
-.al-t{font-size:0.8rem;font-weight:600;margin-bottom:0.04rem}
-.al-d{font-size:0.7rem;color:#64748b}
-.al.r .al-t{color:#dc2626}.al.a .al-t{color:#d97706}.al.b .al-t{color:#2563eb}.al.g .al-t{color:#059669}
-
-/* STITLE */
-.st{font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem}
-.st::after{content:'';flex:1;height:1px;background:#e2e8f0}
-
-/* ALOJAMIENTOS */
-.city-block{background:white;border:1.5px solid #e2e8f0;border-radius:12px;margin-bottom:0.75rem;overflow:hidden}
-.city-h{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;border-bottom:1px solid #f1f5f9}
-.city-flag{font-size:1.3rem}
-.city-name{font-size:0.9rem;font-weight:700;flex:1}
-.city-meta{font-size:0.65rem;color:#94a3b8}
-.city-nights{background:#f1f5f9;border-radius:6px;padding:0.2rem 0.6rem;font-size:0.65rem;font-weight:600;color:#475569;white-space:nowrap}
-.city-body{padding:0.75rem 1rem;display:flex;flex-direction:column;gap:0.4rem}
-.lrow{display:flex;align-items:center;gap:0.65rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.55rem 0.8rem}
-.lp{display:flex;align-items:center;gap:0.35rem;font-size:0.68rem;font-weight:700;min-width:68px}
-.da{width:7px;height:7px;border-radius:50%;background:#ff5a5f}.la{color:#ef4444}
-.db{width:7px;height:7px;border-radius:50%;background:#003580}.lb{color:#003580}
-.ldesc{flex:1;font-size:0.7rem;color:#94a3b8;font-style:italic}
-.ldesc.ok{color:#059669;font-style:normal;font-weight:500}
-.btn-ver{color:white;font-family:inherit;font-size:0.67rem;font-weight:700;padding:0.35rem 0.7rem;border-radius:7px;text-decoration:none;white-space:nowrap;border:none;cursor:pointer}
-.ba{background:#ff5a5f}.bb{background:#003580}
-.vrow{display:flex;gap:0.35rem;margin-top:0.4rem}
-.vb{flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.2rem;cursor:pointer;font-size:0.67rem;font-weight:600;color:#64748b;font-family:inherit;transition:all .15s}
-.vb:hover{border-color:#94a3b8}
-.vy{border-color:#10b981!important;background:#ecfdf5!important;color:#059669!important}
-.vf{border-color:#f59e0b!important;background:#fffbeb!important;color:#d97706!important}
-.vn{border-color:#ef4444!important;background:#fef2f2!important;color:#dc2626!important}
-.rk-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;overflow:hidden;margin-top:1.25rem}
-.rk-h{padding:0.65rem 1rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.63rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em}
-.rk-row{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;border-bottom:1px solid #f1f5f9;font-size:0.78rem}
-.rk-row:last-child{border-bottom:none}
-.rk-pos{min-width:22px;font-size:0.9rem}
-.rk-name{flex:1;font-weight:600}
-.rk-pts{font-weight:700;color:#3b82f6}
-.rk-empty{padding:1rem;font-size:0.78rem;color:#94a3b8;text-align:center}
-
-/* TIMELINE */
-.tl-row{background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;cursor:pointer;margin-bottom:0.38rem;transition:border-color .15s}
-.tl-row:hover,.tl-row.open{border-color:#3b82f6}
-.tl-h{display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.9rem}
-.tl-date{font-size:0.65rem;font-weight:700;color:#3b82f6;min-width:40px}
-.tl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.ds{background:#3b82f6}.dd{background:#f59e0b}
-.tl-city{font-weight:600;font-size:0.82rem;flex:1}
-.tp{font-size:0.58rem;font-weight:600;padding:0.12rem 0.4rem;border-radius:5px}
-.tpd{background:#fffbeb;color:#d97706}.tps{background:#eff6ff;color:#3b82f6}.tpk{background:#ecfdf5;color:#059669}.tpz{background:#fef2f2;color:#dc2626}
-.tl-ch{color:#94a3b8;font-size:0.58rem;transition:transform .15s}
-.tl-row.open .tl-ch{transform:rotate(180deg)}
-.tl-body{display:none;border-top:1px solid #f1f5f9;padding:0.78rem 0.9rem;grid-template-columns:1fr 1fr;gap:0.85rem}
-.tl-row.open .tl-body{display:grid}
-.tsub{font-size:0.58rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.25rem}
-.tact{font-size:0.76rem;color:#475569;padding-left:0.72rem;position:relative;margin-bottom:0.2rem;line-height:1.35}
-.tact::before{content:'·';position:absolute;left:0;color:#3b82f6}
-.tnote{margin-top:0.45rem;background:#f8fafc;border-radius:7px;padding:0.4rem 0.65rem}
-.tnote-l{font-size:0.56rem;font-weight:700;color:#3b82f6;margin-bottom:0.06rem}
-.tnote-t{font-size:0.72rem;color:#64748b;line-height:1.45}
-.tztl{margin-top:0.4rem;background:#fef2f2;border-radius:7px;padding:0.4rem 0.65rem;border:1px solid #fecaca}
-.tztl-t{font-size:0.7rem;color:#dc2626;line-height:1.4}
-.tstay{background:#f8fafc;border-radius:7px;padding:0.4rem 0.65rem;font-size:0.76rem;color:#475569}
-.btn-maps{display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;margin-top:0.5rem}
-
-/* PRESUPUESTO */
-.pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem}
-.pp-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.85rem;text-align:center}
-.pp-card.hl{border-color:#3b82f6}
-.pp-n{font-size:0.65rem;color:#94a3b8;margin-bottom:0.2rem}
-.pp-v{font-size:1.6rem;font-weight:800;letter-spacing:-0.03em}
-.pp-card.hl .pp-v{color:#3b82f6}
-.pp-s{font-size:0.62rem;color:#94a3b8;margin-top:0.12rem}
-.bud-t{background:white;border:1.5px solid #e2e8f0;border-radius:11px;overflow:hidden;margin-bottom:1rem}
-.bud-th{display:grid;grid-template-columns:1fr auto auto;padding:0.5rem 0.88rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.59rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em}
-.bud-row{display:grid;grid-template-columns:1fr auto auto;padding:0.6rem 0.88rem;border-bottom:1px solid #f1f5f9;align-items:center}
-.bud-row:last-child{border-bottom:none}
-.bud-cat{display:flex;align-items:center;gap:0.38rem;font-size:0.78rem}
-.bud-bar{height:3px;background:#f1f5f9;border-radius:2px;margin-top:0.16rem;width:60px}
-.bud-fill{height:100%;border-radius:2px}
-.bud-amt{font-weight:700;font-size:0.78rem;padding-left:0.75rem}
-.bud-pct{font-size:0.59rem;color:#94a3b8;padding-left:0.35rem;min-width:24px;text-align:right}
-
-/* GASTOS */
-.gf{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.9rem;margin-bottom:1rem;display:flex;flex-direction:column;gap:0.5rem}
-.fl{display:block;font-size:0.59rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.22rem}
-.fi{width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.5rem 0.72rem;font-family:inherit;font-size:0.79rem;color:#0f172a;outline:none;transition:border-color .15s}
-.fi:focus{border-color:#3b82f6}
-.gf-row{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem}
-.btn-add{background:#0f172a;color:white;border:none;font-family:inherit;font-weight:700;font-size:0.75rem;padding:0.52rem 1rem;border-radius:8px;cursor:pointer;transition:background .15s;width:100%}
-.btn-add:hover{background:#3b82f6}
-.glist{display:flex;flex-direction:column;gap:0.35rem;margin-bottom:1rem}
-.gi{background:white;border:1.5px solid #e2e8f0;border-radius:9px;padding:0.6rem 0.88rem;display:flex;align-items:center;gap:0.7rem}
-.gi-desc{flex:1}
-.gi-name{font-size:0.79rem;font-weight:500}
-.gi-who{font-size:0.63rem;color:#94a3b8}
-.gi-amt{font-weight:700;font-size:0.85rem;color:#3b82f6;white-space:nowrap}
-.gi-del{background:none;border:none;color:#e2e8f0;cursor:pointer;font-size:0.85rem;transition:color .15s}
-.gi-del:hover{color:#ef4444}
-.bal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:0.5rem;margin-bottom:1rem}
-.bal-c{background:white;border:1.5px solid #e2e8f0;border-radius:9px;padding:0.72rem;text-align:center}
-.bal-n{font-weight:700;font-size:0.78rem;margin-bottom:0.15rem}
-.bal-a{font-size:1rem;font-weight:800;letter-spacing:-0.02em}
-.bal-pos{color:#059669}.bal-neg{color:#ef4444}
-.bal-l{font-size:0.58rem;color:#94a3b8;margin-top:0.08rem}
-.liq-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;overflow:hidden}
-.liq-h{padding:0.62rem 1rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.63rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em}
-.liq-row{display:flex;align-items:center;gap:0.6rem;padding:0.58rem 1rem;border-bottom:1px solid #f1f5f9;font-size:0.78rem}
-.liq-row:last-child{border-bottom:none}
-.liq-arr{color:#94a3b8}
-.liq-amt{font-weight:700;color:#3b82f6;margin-left:auto}
-.liq-empty{padding:1rem;font-size:0.78rem;color:#94a3b8;text-align:center}
-
-/* NOTAS */
-.ntabs{display:flex;gap:0.35rem;margin-bottom:0.88rem;flex-wrap:wrap}
-.ntab{background:white;border:1.5px solid #e2e8f0;color:#64748b;font-family:inherit;font-size:0.7rem;font-weight:600;padding:0.32rem 0.7rem;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap}
-.ntab.active{background:#0f172a;border-color:#0f172a;color:white}
-.ncard{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.95rem}
-.nsec{margin-bottom:0.88rem}
-.nsec:last-child{margin-bottom:0}
-.nsec-t{font-size:0.59rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.42rem}
-.nitem{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:0.42rem 0.7rem;font-size:0.77rem;margin-bottom:0.23rem;display:flex;align-items:flex-start;gap:0.36rem;line-height:1.4}
-.nd{color:#3b82f6;font-size:0.57rem;margin-top:0.19rem;flex-shrink:0}
-
-/* CHECKLIST */
-.cl-sec{margin-bottom:1.1rem}
-.cl-st{font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem}
-.cl-st::after{content:'';flex:1;height:1px;background:#e2e8f0}
-.cl-i{display:flex;align-items:center;gap:0.5rem;background:white;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.5rem 0.8rem;margin-bottom:0.27rem;cursor:pointer;transition:all .15s}
-.cl-i:hover{border-color:#3b82f6}
-.cl-i.done{opacity:0.42}
-.cl-box{width:15px;height:15px;border-radius:4px;border:2px solid #e2e8f0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:white;transition:all .15s}
-.cl-i.done .cl-box{background:#10b981;border-color:#10b981}
-.cl-txt{font-size:0.78rem;flex:1}
-.cl-i.done .cl-txt{text-decoration:line-through}
-.cl-own{font-size:0.58rem;font-weight:700;color:#7c3aed;background:#f5f3ff;padding:0.1rem 0.35rem;border-radius:5px;white-space:nowrap}
-
-/* EMERGENCIAS */
-.em-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:0.65rem}
-.em-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.88rem}
-.em-title{font-size:0.72rem;font-weight:700;margin-bottom:0.5rem}
-.em-item{display:flex;align-items:center;justify-content:space-between;padding:0.32rem 0;border-bottom:1px solid #f1f5f9;font-size:0.72rem}
-.em-item:last-child{border-bottom:none}
-.em-l{color:#64748b;font-size:0.7rem}
-.em-v{font-weight:700}
-.em-v a{color:#3b82f6;text-decoration:none}
-
-/* NOMBRE MODAL */
-.nmodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;padding:1rem}
-.nmodal.open{display:flex}
-.nmodal-box{background:white;border-radius:16px;padding:1.5rem;width:100%;max-width:320px}
-.nmodal-t{font-size:1rem;font-weight:700;margin-bottom:0.4rem}
-.nmodal-s{font-size:0.78rem;color:#64748b;margin-bottom:1rem}
-
-@media(max-width:600px){
-  .dgrid{grid-template-columns:repeat(2,1fr)}
-  .tl-row.open .tl-body{grid-template-columns:1fr}
-  .gf-row{grid-template-columns:1fr}
-  .main{padding:0.88rem}
-}
-
-/* ===== SIMULADOR ===== */
-.sim-ruta {display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem}
-.sim-city {background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;display:flex;align-items:center;gap:0.7rem;cursor:grab}
-.sim-city:active{cursor:grabbing}
-.sim-city.dragging{opacity:0.4;border-style:dashed}
-.sim-city.dragover{border-color:#3b82f6;background:#eff6ff}
-.sim-icon{font-size:1rem;width:24px;text-align:center;flex-shrink:0}
-.sim-name{font-weight:600;font-size:0.85rem;flex:1}
-.sim-meta{font-size:0.65rem;color:#94a3b8;text-align:right;line-height:1.4}
-.sim-km{font-weight:700;color:#0f172a;font-size:0.78rem}
-.sim-handle{color:#cbd5e1;font-size:0.9rem;cursor:grab;padding:0 0.2rem}
-.sim-summary{background:#0f172a;color:white;border-radius:12px;padding:1rem;display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1rem;text-align:center}
-.sim-sum-v{font-size:1.3rem;font-weight:800;letter-spacing:-0.02em}
-.sim-sum-l{font-size:0.6rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-top:0.1rem}
-.sim-candidates{display:flex;flex-direction:column;gap:0.4rem}
-.sim-cand{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;display:flex;align-items:center;gap:0.7rem}
-.sim-cand-info{flex:1}
-.sim-cand-name{font-weight:600;font-size:0.85rem}
-.sim-cand-note{font-size:0.68rem;color:#94a3b8;margin-top:0.1rem}
-.sim-cand-impact{font-size:0.7rem;color:#f59e0b;font-weight:600;margin-top:0.15rem}
-.btn-sim-add{background:#0f172a;color:white;border:none;border-radius:8px;padding:0.4rem 0.8rem;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s}
-.btn-sim-add:hover{background:#3b82f6}
-.btn-sim-add.added{background:#10b981}
-.btn-sim-reset{background:none;border:1.5px solid #e2e8f0;color:#64748b;border-radius:8px;padding:0.38rem 0.8rem;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:inherit}
-.sim-alert{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.72rem;color:#92400e;margin-bottom:0.75rem;line-height:1.5}
-</style>
-</head>
-<body>
-
-<div class="header">
-  <div style="display:flex;flex-direction:column;gap:0.18rem">
-    <div class="hlogo" onclick="showView('dashboard',0)" style="cursor:pointer">🌍 EuroTrip 2026</div>
-    <div id="header-route" style="display:flex;align-items:center;gap:0.28rem;flex-wrap:wrap"></div>
-  </div>
-  <div class="hbadge" id="badge">🌍 EuroTrip</div>
-</div>
-
-<div class="main">
-
-<!-- DASHBOARD -->
-<div id="view-dashboard" class="view active">
-  <div class="ptitle">Inicio 🌍</div>
-  <div class="psub">14 — 21 julio 2026 · 8 días · 7 noches · ~4.800 km</div>
-  <div class="dgrid">
-    <div class="dcard" onclick="showView('timeline',2)">
-      <div class="di">📅</div><div class="dv" id="days-left">—</div>
-      <div class="dl">Dias restantes</div><span class="dt tb">12 jul 2026</span>
-    </div>
-    <div class="dcard" onclick="showView('presupuesto',3)">
-      <div class="di">💶</div><div class="dv" id="dash-pp">690€</div>
-      <div class="dl">Por persona</div><span class="dt tg" id="dash-total-tag">Total 4.830€</span>
-    </div>
-    <div class="dcard" onclick="showView('alojamientos',1)">
-      <div class="di">🏠</div><div class="dv">6</div>
-      <div class="dl">Ciudades Airbnb</div><span class="dt tr">0 reservados</span>
-    </div>
-    <div class="dcard" onclick="showView('gastos',4)">
-      <div class="di">🧾</div><div class="dv" id="dash-g">0€</div>
-      <div class="dl">Gastos</div><span class="dt tb" id="dash-gn">0 registros</span>
-    </div>
-    <div class="dcard" onclick="showView('checklist',5)">
-      <div class="di">✅</div><div class="dv" id="dash-cl">0%</div>
-      <div class="dl">Checklist</div><span class="dt tg" id="dash-cln">0 de 17</span>
-    </div>
-    <div class="dcard" onclick="showView('emergencias',6)">
-      <div class="di">🆘</div><div class="dv">SOS</div>
-      <div class="dl">Emergencias</div><span class="dt tr">Toca aqui</span>
-    </div>
-  </div>
-  <!-- VIAJEROS + RUTA -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:1rem">
-    <!-- Viajeros -->
-    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem">
-      <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.65rem">Viajeros</div>
-      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem">
-        <button onclick="ajustarV(-1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit">−</button>
-        <div style="font-size:2rem;font-weight:800;letter-spacing:-0.03em;min-width:36px;text-align:center" id="v-num">7</div>
-        <button onclick="ajustarV(1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit">+</button>
-        <div style="font-size:0.75rem;color:#64748b;line-height:1.5">
-          personas<br>
-          <span style="font-weight:700;color:#3b82f6" id="v-pp">690€/pers.</span>
-        </div>
-      </div>
-      <div style="font-size:0.65rem;color:#94a3b8">Total del grupo: <span style="font-weight:700;color:#0f172a" id="v-total">4.830€</span></div>
-    </div>
-    <!-- Ruta -->
-    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem">
-      <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.65rem">Ruta del viaje</div>
-      <div id="ruta-chips" style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.55rem"></div>
-      <div style="display:flex;gap:0.4rem">
-        <select id="ruta-select" style="flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.5rem;font-family:inherit;font-size:0.72rem;color:#0f172a;outline:none">
-          <option value="">Añadir ciudad...</option>
-          <option value="alicante">Alicante</option>
-          <option value="marsella">Marsella</option>
-          <option value="pisa">Pisa</option>
-          <option value="roma">Roma</option>
-          <option value="venecia">Venecia</option>
-          <option value="munich">Munich</option>
-          <option value="colonia">Colonia</option>
-          <option value="bruselas">Bruselas</option>
-          <option value="paris">Paris</option>
-        </select>
-        <button onclick="addRuta()" style="background:#0f172a;color:white;border:none;border-radius:7px;padding:0.35rem 0.65rem;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:inherit">+</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="st">Para decidir hoy</div>
-  <div class="alerts">
-    <div class="al r"><div class="al-t">Votar y reservar alojamientos</div><div class="al-d">Julio se agota. Cuanto mas tardemos, peor precio y ubicacion.</div></div>
-    <div class="al a"><div class="al-t">Somos 7, 8 o 9 personas?</div><div class="al-d">Afecta la capacidad de los apartamentos y el precio por persona.</div></div>
-    <div class="al a"><div class="al-t">Dias 14 y 22 son muy exigentes</div><div class="al-d">Marsella-Pisa-Roma (900km) y Colonia-Bruselas-Paris. Dividimos etapa?</div></div>
-    <div class="al r"><div class="al-t">ZTL Italia: no entrar al centro con el coche</div><div class="al-d">Roma, Pisa y Florencia tienen zona restringida. Multa de 100-300 euros.</div></div>
-    <div class="al b"><div class="al-t">Vignette Austria ~9 euros (asfinag.at)</div><div class="al-d">Ruta Venecia-Munich cruza Austria. Sin ella multa de 120 euros.</div></div>
-    <div class="al g"><div class="al-t">Reservar Coliseo y Vaticano online</div><div class="al-d">Sin reserva en julio hay 2-3h de cola. Hacedlo con antelacion.</div></div>
-  </div>
-</div>
-
-<!-- ALOJAMIENTOS -->
-<div id="view-alojamientos" class="view">
-  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
-  <div class="ptitle">Alojamientos</div>
-  <div class="psub">Votad vuestras opciones favoritas. Los links abren directamente las listas de Airbnb.</div>
-  <div id="city-blocks"></div>
-  <div class="st" style="margin-top:1.25rem">Ranking de votos</div>
-  <div class="rk-card">
-    <div class="rk-h">Puntuacion en tiempo real</div>
-    <div id="rk-list"><div class="rk-empty">Sin votos todavia.</div></div>
-  </div>
-</div>
-
-<!-- TIMELINE -->
-<div id="view-timeline" class="view">
-  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
-  <div class="ptitle">Itinerario</div>
-  <div class="psub">13 dias. Toca cada dia para ver el detalle y abrir la ruta en Google Maps.</div>
-  <div id="tl-container"></div>
-</div>
-
-<!-- PRESUPUESTO -->
-<div id="view-presupuesto" class="view">
-  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
-  <div class="ptitle">Presupuesto</div>
-  <div class="psub">Estimacion realista para el viaje completo</div>
-  <div class="pp-grid">
-    <div class="pp-card"><div class="pp-n">9 personas</div><div class="pp-v">537€</div><div class="pp-s">por persona</div></div>
-    <div class="pp-card hl"><div class="pp-n">7 confirmados</div><div class="pp-v">690€</div><div class="pp-s">total 4.830€</div></div>
-    <div class="pp-card"><div class="pp-n">8 personas</div><div class="pp-v">604€</div><div class="pp-s">por persona</div></div>
-  </div>
-  <div class="bud-t">
-    <div class="bud-th"><span>Categoria</span><span>Total</span><span>%</span></div>
-    <div id="bud-rows"></div>
-  </div>
-</div>
-
-<!-- GASTOS -->
-<div id="view-gastos" class="view">
-  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
-  <div class="ptitle">Gastos compartidos</div>
-  <div class="psub">Quien pago que. Los balances se calculan solos.</div>
-  <div class="gf">
-    <div class="gf-row">
-      <div><label class="fl">Quien pago</label>
-        <select class="fi" id="g-payer">
-          <option value="">Seleccionar...</option>
-          <option>Carlos</option><option>Lucia</option><option>Marco</option>
-          <option>Sofia</option><option>Diego</option><option>Ana</option><option>Javi</option>
-        </select>
-      </div>
-      <div><label class="fl">Monto (euros)</label>
-        <input class="fi" type="number" id="g-amt" placeholder="0.00" min="0" step="0.01">
-      </div>
-    </div>
-    <div><label class="fl">Descripcion</label>
-      <input class="fi" type="text" id="g-desc" placeholder="ej: Gasolina Francia">
-    </div>
-    <button class="btn-add" onclick="addGasto()">+ Anadir gasto</button>
-  </div>
-  <div class="st">Movimientos</div>
-  <div id="glist" class="glist"></div>
-  <div class="st">Balances</div>
-  <div class="bal-grid" id="bal-grid"></div>
-  <div class="st" style="margin-top:0.75rem">Liquidacion optima</div>
-  <div class="liq-card">
-    <div class="liq-h">Minimas transferencias para saldar todo</div>
-    <div id="liq-list"><div class="liq-empty">Sin gastos todavia.</div></div>
-  </div>
-</div>
-
-<!-- NOTAS -->
-<div id="view-notas" class="view">
-  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
-  <div class="ptitle">Notas por ciudad</div>
-  <div class="psub">Restaurantes, lugares y consejos para cada parada.</div>
-  <div class="ntabs" id="ntabs"></div>
-  <div class="ncard" id="ncontent"></div>
-</div>
-
-<!-- CHECKLIST -->
-<div id="view-checklist" class="view">
-  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
-  <div class="ptitle">Checklist</div>
-  <div class="psub">Tareas antes y durante el viaje. Cada una tiene responsable.</div>
-  <div id="cl-cont"></div>
-</div>
-
-<!-- EMERGENCIAS -->
-<div id="view-emergencias" class="view">
-  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
-  <div class="ptitle">Emergencias y Documentos</div>
-  <div class="psub">Telefonos clave y alertas importantes para el viaje.</div>
-  <div class="em-grid">
-    <div class="em-card"><div class="em-title">🚨 Emergencias</div>
-      <div class="em-item"><span class="em-l">Toda Europa</span><span class="em-v"><a href="tel:112">112</a></span></div>
-      <div class="em-item"><span class="em-l">Policia Francia</span><span class="em-v"><a href="tel:17">17</a></span></div>
-      <div class="em-item"><span class="em-l">Policia Italia</span><span class="em-v"><a href="tel:113">113</a></span></div>
-      <div class="em-item"><span class="em-l">Policia Alemania</span><span class="em-v"><a href="tel:110">110</a></span></div>
-      <div class="em-item"><span class="em-l">Ambulancia Italia</span><span class="em-v"><a href="tel:118">118</a></span></div>
-    </div>
-    <div class="em-card"><div class="em-title">🏛️ Consulados Spain</div>
-      <div class="em-item"><span class="em-l">Paris</span><span class="em-v"><a href="tel:+33144433518">+33 1 44 43 35 18</a></span></div>
-      <div class="em-item"><span class="em-l">Roma</span><span class="em-v"><a href="tel:+390687114">+39 06 8711 4</a></span></div>
-      <div class="em-item"><span class="em-l">Berlin</span><span class="em-v"><a href="tel:+4930254007330">+49 30 254 007 33</a></span></div>
-      <div class="em-item"><span class="em-l">Bruselas</span><span class="em-v"><a href="tel:+3225903800">+32 2 590 38 00</a></span></div>
-    </div>
-    <div class="em-card"><div class="em-title">🚗 Alertas coche</div>
-      <div class="em-item"><span class="em-l">Vignette Austria</span><span class="em-v" style="color:#059669">~9 euros</span></div>
-      <div class="em-item"><span class="em-l">ZTL Roma</span><span class="em-v" style="color:#dc2626">100-300 euros</span></div>
-      <div class="em-item"><span class="em-l">ZTL Pisa</span><span class="em-v" style="color:#dc2626">Evitar centro</span></div>
-      <div class="em-item"><span class="em-l">Comprar vignette</span><span class="em-v"><a href="https://www.asfinag.at" target="_blank">asfinag.at</a></span></div>
-    </div>
-    <div class="em-card"><div class="em-title">📄 Links clave</div>
-      <div class="em-item"><span class="em-l">Coliseo entradas</span><span class="em-v"><a href="https://www.coopculture.it" target="_blank">coopculture.it</a></span></div>
-      <div class="em-item"><span class="em-l">Vaticano entradas</span><span class="em-v"><a href="https://www.museivaticani.va" target="_blank">museivaticani.va</a></span></div>
-      <div class="em-item"><span class="em-l">Louvre entradas</span><span class="em-v"><a href="https://www.ticketlouvre.fr" target="_blank">ticketlouvre.fr</a></span></div>
-      <div class="em-item"><span class="em-l">Vaporetto Venecia</span><span class="em-v"><a href="https://www.veneziaunica.it" target="_blank">veneziaunica.it</a></span></div>
-    </div>
-  </div>
-</div>
-
-<!-- CIUDAD -->
-<div id="view-ciudad" class="view">
-  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem">← Inicio</button>
-  <div id="ciudad-content"></div>
-</div>
-
-
-<!-- SIMULADOR -->
-<div id="view-simulador" class="view">
-  <div class="ptitle">Simulador 🧪</div>
-  <div class="psub">Prueba ciudades nuevas en la ruta sin confirmar nada. Arrastra para reordenar.</div>
-
-  <div class="sim-alert" id="sim-alert" style="display:none"></div>
-
-  <div class="sim-summary">
-    <div><div class="sim-sum-v" id="sim-total-km">4.800</div><div class="sim-sum-l">km totales</div></div>
-    <div><div class="sim-sum-v" id="sim-total-h">~52h</div><div class="sim-sum-l">conducción</div></div>
-    <div><div class="sim-sum-v" id="sim-total-fuel">~350€</div><div class="sim-sum-l">gasolina est.</div></div>
-  </div>
-
-  <div class="st">Ruta actual — arrastra para reordenar</div>
-  <div id="sim-ruta" class="sim-ruta"></div>
-
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;margin-top:0.5rem">
-    <div class="st" style="margin:0;flex:1">Ciudades candidatas</div>
-    <button class="btn-sim-reset" onclick="simReset()">Restaurar ruta</button>
-  </div>
-  <div class="sim-candidates" id="sim-candidates"></div>
-</div>
-
-</div><!-- end main -->
-
-<!-- BOTTOM NAV -->
-<div class="bnav">
-  <button class="bnb active" onclick="showView('dashboard',0)"><span class="bnb-i">🏠</span><span class="bnb-l">Inicio</span></button>
-  <button class="bnb" onclick="showView('alojamientos',1)"><span class="bnb-i">🛏</span><span class="bnb-l">Alojam.</span></button>
-  <button class="bnb" onclick="showView('timeline',2)"><span class="bnb-i">📅</span><span class="bnb-l">Ruta</span></button>
-  <button class="bnb" onclick="showView('gastos',4)"><span class="bnb-i">🧾</span><span class="bnb-l">Gastos</span></button>
-  <button class="bnb" onclick="showView('notas',5)"><span class="bnb-i">📝</span><span class="bnb-l">Notas</span></button>
-  <button class="bnb" onclick="showView('simulador',8)"><span class="bnb-i">🧪</span><span class="bnb-l">Simular</span></button>
-  <button class="bnb" onclick="showView('checklist',6)"><span class="bnb-i">✅</span><span class="bnb-l">Check</span></button>
-  <button class="bnb" onclick="showView('emergencias',7)"><span class="bnb-i">🆘</span><span class="bnb-l">SOS</span></button>
-</div>
-
-<!-- NOMBRE MODAL -->
-<div class="nmodal" id="nmodal">
-  <div class="nmodal-box">
-    <div class="nmodal-t">Bienvenido al EuroTrip 2026</div>
-    <div class="nmodal-s">Como te llamas? Asi identificamos tus votos y gastos.</div>
-    <input class="fi" id="ninput" type="text" placeholder="Tu nombre..." style="margin-bottom:0.75rem">
-    <button class="btn-add" onclick="guardarNombre()">Entrar</button>
-  </div>
-</div>
-
-<script>
-// openCity available globally from start
-function openCity(cityId) {
-  // Will be populated after full script loads
-  if(typeof _openCity === 'function') _openCity(cityId);
-  else setTimeout(function(){ if(typeof _openCity==='function') _openCity(cityId); }, 200);
-}
-
-// ===== CONFIG =====
-var SUPA = 'https://nhblyxltpdpyxmvjtrmt.supabase.co';
-var KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU';
-var NOMBRE = localStorage.getItem('et_nombre') || '';
-var SHEET  = 'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?output=csv');
-
-// ===== SUPABASE REST =====
-function supa(method, table, body, params) {
-  var url = SUPA + '/rest/v1/' + table + (params || '');
-  var headers = {
-    'apikey': KEY,
-    'Authorization': 'Bearer ' + KEY,
-    'Content-Type': 'application/json'
-  };
-  if(method === 'POST') headers['Prefer'] = 'return=minimal';
-  if(method === 'DELETE') headers['Prefer'] = 'return=minimal';
-  var opts = {method: method, headers: headers};
-  if (body) opts.body = JSON.stringify(body);
-  return fetch(url, opts).then(function(r) {
-    if(r.status === 204 || r.status === 200 && method === 'DELETE') return {};
-    return r.json().catch(function(){ return {}; });
-  });
-}
-
-// ===== DATA =====
-var votes  = {};
-var gastos = [];
-var clDone = {};
-var activeNota = 'Paris';
-
-var LINKS = {
-  marsella: {air:'https://www.airbnb.es/wishlists/invite/f7787fdf-c64d-409f-871b-d259b62ba37d?s=67&unique_share_id=dbb79b38-03c9-4832-b6ec-bf966d181bf8', book:''},
-  roma:     {air:'https://www.airbnb.es/wishlists/invite/68e72df8-718b-4bfc-bfa8-b46195ca67d9?s=67&unique_share_id=8bfb12b9-5b07-4818-b652-2268285130cd', book:''},
-  venecia:  {air:'https://www.airbnb.es/wishlists/invite/bcb6a644-cafa-4fb5-a4fe-98616153cfd5?s=67&unique_share_id=3195d603-7614-4f0d-8923-70e19816fafd', book:''},
-  munich:   {air:'https://www.airbnb.es/wishlists/invite/ff5569b9-a6c1-4936-a70f-d3eec36cd9f3?s=67&unique_share_id=6cd34cbb-c164-4d48-b651-5c0ff843acd3', book:''},
-  colonia:  {air:'https://www.airbnb.es/wishlists/invite/4627c88a-9a5f-4589-bb79-1be6c8627442?s=67&unique_share_id=ca2d806e-402b-4ad2-b8e4-53411d3be3c1', book:''},
-  paris:    {air:'https://www.airbnb.es/wishlists/invite/abb95041-b59b-4b22-ac85-65460cc5e80d?s=67&unique_share_id=5197016e-af28-45f7-a17c-83e2b5cc05ff', book:''}
-};
-
 var CITIES = [
   {id:'paris',   name:'París',   flag:'🇫🇷', nights:2, dates:'15-17 jul', zone:'Le Marais / Montmartre'},
   {id:'roma',    name:'Roma',    flag:'🇮🇹', nights:2, dates:'18-20 jul 🎂', zone:'Trastevere / Prati'},
@@ -1107,7 +554,7 @@ var NOTAS = {
   Paris: {
     rest: ['As du Falafel en Le Marais — el mejor y muy barato','Bouillon Chartier — cocina francesa clasica, precio justo','Baguette con jamon y queso en boulangerie: 5 euros'],
     lug:  ['Torre Eiffel al amanecer o de noche — sin colas','Louvre — reservar online, minimo 3 horas','Montmartre y Sacre-Coeur de manana temprano'],
-    cons: ['Navigo semana: 30 euros, cubre metro y RER completo','Le Marais es el barrio mas cool, abierto los domingos','Paris Plages en julio: playas artificiales en el Sena']
+    cons: ['Navigo semana: 30 euros, cubre metro y RER completo','Le Marais es el barrio mas cool, abierto domingos','Paris Plages en julio: playas en el Sena']
   },
   Colmar: {
     rest: ['Winstub Brenner — cocina alsaciana autentica','Marche couvert — productos locales','Baeckeoffe — el plato tipico de Alsacia'],
@@ -1122,12 +569,12 @@ var NOTAS = {
   Venecia: {
     rest: ['All Arco — cicchetti baratos y buenos','Osteria da Rioba — menu del dia razonable','Comprar en supermercado de Mestre: mitad de precio'],
     lug:  ['Plaza San Marcos — antes de las 8h','Puente de Rialto — al amanecer sin turistas','Isla de Burano — casas de colores'],
-    cons: ['Parada de 2-3h en tren — no hay alojamiento aqui','Vaporetto 1 viaje: 9 euros, recorre el Canal Grande','Madrugar es la clave: a las 7h es magica']
+    cons: ['Parada de 2-3h en tren — no hay alojamiento aqui','Vaporetto 1 viaje: 9 euros','A las 7h Venecia esta vacia y es magica']
   },
   Roma: {
     rest: ['Tonnarello en Trastevere — cacio e pepe legendaria','Suppli Roma — albondigas de arroz fritas','Mercato di Testaccio — comida local y barata'],
     lug:  ['Coliseo — reservar en coopculture.it sin falta','Vaticano y Capilla Sixtina — ir a las 8h en julio','Fontana di Trevi — gratis, mejor de noche'],
-    cons: ['ZTL: aparcar fuera del centro, todo a pie','Fuentes nasoni: agua potable gratis por la ciudad','Reservar Coliseo y Vaticano YA — julio se agota']
+    cons: ['ZTL: aparcar fuera del centro, todo a pie','Fuentes nasoni: agua potable gratis','Reservar Coliseo y Vaticano YA — julio se agota']
   },
   Niza: {
     rest: ['Cours Saleya — mercado y socca nicoise','Socca — crepe de garbanzos, especialidad local','Barrio Le Port para comer sin precios turisticos'],
@@ -1137,9 +584,9 @@ var NOTAS = {
 };
 
 var CL_DATA = [
-  {s:'🚨 Urgente — reservar ya', items:[
-    {t:'Billetes tren Milan→Venecia→Roma (trenitalia.com)', own:'Alguien'},
-    {t:'Billetes tren Roma→Milan de vuelta', own:'Alguien'},
+  {s:'Urgente — reservar ya', items:[
+    {t:'Billetes tren Milan a Venecia a Roma (trenitalia.com)', own:'Alguien'},
+    {t:'Billetes tren Roma a Milan de vuelta', own:'Alguien'},
     {t:'Entradas Coliseo — coopculture.it', own:'Marco'},
     {t:'Entradas Vaticano — museivaticani.va', own:'Marco'},
     {t:'Confirmar y reservar Airbnb Paris (2 noches)', own:'Todos'},
@@ -1171,38 +618,38 @@ var CL_DATA = [
 ];
 
 var TL = [
-  {date:'14 jul', city:'Alicante → Barcelona → Montpellier', drive:true, km:830, h:'9h 30min', ztl:false,
+  {date:'14 jul', city:'Alicante - Barcelona - Montpellier', drive:true, km:830, h:'9h 30min', ztl:false,
    maps:'https://www.google.com/maps/dir/Alicante,+Spain/Barcelona,+Spain/Montpellier,+France',
-   acts:['Salida temprana 7:00h — llenar tanques en Alicante','Parada almuerzo en Barcelona (~3h30 de ruta)','Tapas en el Born o Barceloneta, ~1.5h parada','Llegada Montpellier ~19:00h — primera noche en Francia'],
-   stay:'Hotel / Airbnb Montpellier (noche 1)', note:'Primera etapa larga. Turnos de conduccion desde Alicante. Llevar nevera con snacks y agua.'},
-  {date:'15 jul', city:'Montpellier → Clermont-Ferrand → París', drive:true, km:780, h:'8h 45min', ztl:false,
+   acts:['Salida temprana 7:00h, llenar tanques en Alicante','Parada almuerzo en Barcelona (3h30 de ruta)','Tapas en el Born o Barceloneta, 1.5h de parada','Llegada Montpellier 19:00h, primera noche en Francia'],
+   stay:'Hotel o Airbnb Montpellier (noche 1)', note:'Primera etapa larga. Turnos de conduccion desde Alicante. Llevar nevera con snacks.'},
+  {date:'15 jul', city:'Montpellier - Clermont-Ferrand - Paris', drive:true, km:780, h:'8h 45min', ztl:false,
    maps:'https://www.google.com/maps/dir/Montpellier,+France/Clermont-Ferrand,+France/Paris,+France',
-   acts:['Salida 8:00h desde Montpellier','Parada almuerzo Clermont-Ferrand (~4h de ruta)','Ciudad volcanica: Puy de Dome visible desde la ciudad','Llegada Paris ~19:00h — 2 noches en Paris'],
-   stay:'Airbnb París (noche 1 de 2)', note:'Clermont-Ferrand: perfecta parada a mitad de ruta. Puy de Dome es opcional si la energia lo permite (+30min desvio). Parking en Paris: usar P+R periferia o parking de la zona.'},
-  {date:'16 jul', city:'París — día libre \U0001f5fc', drive:false, km:0, h:'Dia libre', ztl:false,
-   maps:'https://www.google.com/maps/search/Paris+France+tourist+spots',
-   acts:['Torre Eiffel al amanecer o de noche (con luces)','Louvre — reservar en ticketlouvre.fr, llegar al abrir','Le Marais por la tarde — barrio mas cool de Paris','Montmartre y Sacre-Coeur al atardecer'],
-   stay:'Airbnb París (noche 2 de 2)', note:'El dia parisino que queria el grupo. Navigo semana: 30 euros por persona, cubre metro + RER completo. Baguette + jamon + queso al Sena: almuerzo por 5 euros.'},
-  {date:'17 jul', city:'París → Colmar → Milán', drive:true, km:890, h:'10h 00min', ztl:false,
+   acts:['Salida 8:00h desde Montpellier','Parada almuerzo Clermont-Ferrand (4h de ruta)','Ciudad volcanica bajo el Puy de Dome','Llegada Paris 19:00h, 2 noches en la ciudad'],
+   stay:'Airbnb Paris (noche 1 de 2)', note:'Clermont-Ferrand: perfecta parada a mitad. Puy de Dome opcional si hay energia (+30min desvio).'},
+  {date:'16 jul', city:'Paris - dia libre', drive:false, km:0, h:'', ztl:false,
+   maps:'https://www.google.com/maps/search/Paris+France',
+   acts:['Torre Eiffel al amanecer o de noche, sin colas','Louvre, reservar en ticketlouvre.fr','Le Marais por la tarde, el barrio mas cool','Montmartre y Sacre-Coeur al atardecer'],
+   stay:'Airbnb Paris (noche 2 de 2)', note:'El dia parisino que queria el grupo. Navigo semana: 30 euros por persona, cubre todo el metro.'},
+  {date:'17 jul', city:'Paris - Colmar - Milan', drive:true, km:890, h:'10h 00min', ztl:false,
    maps:'https://www.google.com/maps/dir/Paris,+France/Colmar,+France/Milan,+Italy',
-   acts:['Salida 7:30h — desayuno rapido frances','Parada Colmar, Alsacia (~4h desde Paris)','El pueblo mas bonito de Francia: 1.5h de paseo y fotos','Llegada Milan ~19:30h — coches quedan aqui 2 noches'],
-   stay:'Airbnb / Hotel Milán (noche 1)', note:'Colmar IMPRESCINDIBLE: casas medievales de colores junto al rio. Los 2 coches quedan en Milano Centrale. Parking Autosilos Sammartini (~25 euros/dia), 5min de la estacion.'},
-  {date:'18 jul', city:'Milán \U0001f684 Venecia \U0001f684 Roma', drive:false, km:650, h:'~5h en tren AV', ztl:true,
+   acts:['Salida 7:30h, desayuno rapido frances','Parada Colmar, Alsacia (4h desde Paris)','El pueblo mas bonito de Francia, 1.5h de paseo','Llegada Milan 19:30h, coches quedan aqui 2 noches'],
+   stay:'Airbnb o Hotel Milan (noche 1)', note:'Colmar imprescindible: casas medievales de colores junto al rio. Parking en Milán: Autosilos Sammartini cerca de Centrale.'},
+  {date:'18 jul', city:'Milan - Venecia - Roma (tren AV)', drive:false, km:650, h:'5h tren AV', ztl:true,
    maps:'https://www.trenitalia.com',
-   acts:['Tren AV Milano Centrale → Venezia Santa Lucia (~2h30)','Venecia: 2-3h — Rialto, San Marco, vaporetto una vuelta','Tren AV Venezia → Roma Termini (~3h30)','Llegada Roma ~18:00h — manana es el cumpleanos!'],
-   stay:'Airbnb Roma (noche 1 de 2)', note:'RESERVAR TRENES YA en trenitalia.com (~35-55 euros/persona). Los 2 coches quedan en parking Milan. ZTL activa en Roma: no conducir. Metro desde Termini cubre todo.'},
-  {date:'19 jul', city:'Roma \U0001f382 — Día del Cumpleaños', drive:false, km:0, h:'Dia libre', ztl:true,
+   acts:['Tren AV Milano Centrale a Venezia (2h30)','Venecia: 2-3h, Rialto, San Marco, vaporetto','Tren AV Venezia a Roma Termini (3h30)','Llegada Roma 18:00h, manana es el cumpleanos!'],
+   stay:'Airbnb Roma (noche 1 de 2)', note:'RESERVAR TRENES YA en trenitalia.com (35-55 euros/persona). Coches quedan en parking Milan. ZTL activa en Roma: no conducir.'},
+  {date:'19 jul', city:'Roma - Dia del Cumpleanos', drive:false, km:0, h:'', ztl:true,
    maps:'https://www.google.com/maps/search/Roma+centro+storico',
-   acts:['Coliseo y Foro Romano — llegar al abrir 9:00h (reservar ya)','Fontana di Trevi y Panteon (entrada ~5 euros, reservar)','Vaticano y Capilla Sixtina — madrugar, ir a las 8h','Cena especial de cumpleanos en Trastevere'],
-   stay:'Airbnb Roma (noche 2 de 2)', note:'El dia grande! Coliseo: coopculture.it. Vaticano: museivaticani.va. Ambos se agotan en julio sin reserva previa. ZTL: todo a pie o metro/taxi, nunca en coche al centro.'},
-  {date:'20 jul', city:'Roma \U0001f684 Milán → Niza', drive:true, km:640, h:'3h tren + 3h coche', ztl:false,
+   acts:['Coliseo y Foro Romano, llegar al abrir 9:00h','Fontana di Trevi y Panteon (5 euros, reservar)','Vaticano y Capilla Sixtina, ir a las 8h','Cena especial de cumpleanos en Trastevere'],
+   stay:'Airbnb Roma (noche 2 de 2)', note:'El dia grande! Coliseo: coopculture.it. Vaticano: museivaticani.va. Ambos se agotan en julio. ZTL: todo a pie o metro.'},
+  {date:'20 jul', city:'Roma - Milan (tren) - Niza (coche)', drive:true, km:640, h:'3h tren + 3h coche', ztl:false,
    maps:'https://www.google.com/maps/dir/Milan,+Italy/Nice,+France',
-   acts:['Tren AV Roma → Milan (~3h, salida ~9:00h)','Recuperar los 2 coches en parking de Milan','Parada breve para comer en zona Navigli','Llegada Niza ~18:00h — ultima noche internacional'],
-   stay:'Hotel / Airbnb Niza (noche 1)', note:'Reservar tren Roma→Milan YA en trenitalia.com. Milan a Niza: A7 + A10, ~3h por la Riviera italiana. Niza ultima noche: Promenade des Anglais y cena para celebrar.'},
-  {date:'21 jul', city:'Niza → Alicante \U0001f3c1', drive:true, km:640, h:'7h 30min', ztl:false,
+   acts:['Tren AV Roma a Milan (3h, salida 9:00h)','Recuperar los 2 coches en parking de Milan','Parada breve para comer en Navigli','Llegada Niza 18:00h, ultima noche internacional'],
+   stay:'Hotel o Airbnb Niza (noche 1)', note:'Reservar tren Roma-Milan YA en trenitalia.com. Milan a Niza: A7+A10, 3h por la Riviera italiana.'},
+  {date:'21 jul', city:'Niza - Alicante', drive:true, km:640, h:'7h 30min', ztl:false,
    maps:'https://www.google.com/maps/dir/Nice,+France/Alicante,+Spain',
-   acts:['Salida 8:00h — ultimo desayuno frances','Parada a mitad en Montpellier o Perpignan (~3.5h desde Niza)','Cruce de los Pirineos por La Junquera','Llegada Alicante ~17:00h — fin del EuroTrip 2026'],
-   stay:'Casa', note:'El dia mas corto del regreso. Llenar deposito en Francia antes de cruzar (algo mas barato que en Espana).'}
+   acts:['Salida 8:00h, ultimo desayuno frances','Parada a mitad en Montpellier o Perpignan','Cruce de los Pirineos por La Junquera','Llegada Alicante 17:00h - FIN DEL EUROTRIP 2026'],
+   stay:'Casa', note:'El dia mas corto del regreso. Llenar deposito en Francia antes de cruzar a Espana.'}
 ];
 
 // ===== VIAJEROS =====
@@ -1221,14 +668,14 @@ function ajustarV(d) {
 // ===== RUTA =====
 var miRuta = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
 var CITY_NAMES = {
-  alicante:'Alicante', montpellier:'Montpellier', paris:'París', colmar:'Colmar',
-  milan:'Milán', venecia:'Venecia', roma:'Roma', niza:'Niza',
-  pisa:'Pisa', monaco:'Mónaco', barcelona:'Barcelona'
+  alicante:'Alicante', montpellier:'Montpellier', paris:'Paris', colmar:'Colmar',
+  milan:'Milan', venecia:'Venecia', roma:'Roma', niza:'Niza',
+  pisa:'Pisa', monaco:'Monaco', barcelona:'Barcelona', florencia:'Florencia', marsella:'Marsella'
 };
 var CITY_FLAGS = {
-  alicante:'🇪🇸', montpellier:'🇫🇷', paris:'🇫🇷', colmar:'🇫🇷',
-  milan:'🇮🇹', venecia:'🇮🇹', roma:'🇮🇹', niza:'🇫🇷',
-  pisa:'🇮🇹', monaco:'🇲🇨', barcelona:'🇪🇸'
+  alicante:'ES', montpellier:'FR', paris:'FR', colmar:'FR',
+  milan:'IT', venecia:'IT', roma:'IT', niza:'FR',
+  pisa:'IT', monaco:'MC', barcelona:'ES', florencia:'IT', marsella:'FR'
 };
 function renderRuta() {
   var el = document.getElementById('ruta-chips');
@@ -1562,14 +1009,14 @@ var CITY_DAYS = {
 };
 
 var CITY_META = {
-  alicante:    {name:'Alicante',    flag:'🇪🇸', nights:0, dates:'14 jul salida', zone:'Origen del viaje'},
-  montpellier: {name:'Montpellier', flag:'🇫🇷', nights:1, dates:'14-15 jul', zone:'Centre historique'},
-  paris:       {name:'París',       flag:'🇫🇷', nights:2, dates:'15-17 jul', zone:'Le Marais / Montmartre'},
-  colmar:      {name:'Colmar',      flag:'🇫🇷', nights:0, dates:'17 jul parada', zone:'Petite Venise / Alsacia'},
-  milan:       {name:'Milán',       flag:'🇮🇹', nights:1, dates:'17-18 jul', zone:'Cerca de Centrale'},
-  venecia:     {name:'Venecia',     flag:'🇮🇹', nights:0, dates:'18 jul parada tren', zone:'Canal Grande / Rialto'},
-  roma:        {name:'Roma 🎂',     flag:'🇮🇹', nights:2, dates:'18-20 jul', zone:'Trastevere / Prati'},
-  niza:        {name:'Niza',        flag:'🇫🇷', nights:1, dates:'20-21 jul', zone:'Promenade des Anglais'}
+  alicante:    {name:'Alicante',    flag:'ES', nights:0, dates:'14 jul salida', zone:'Origen del viaje'},
+  montpellier: {name:'Montpellier', flag:'FR', nights:1, dates:'14-15 jul', zone:'Centre historique'},
+  paris:       {name:'Paris',       flag:'FR', nights:2, dates:'15-17 jul', zone:'Le Marais / Montmartre'},
+  colmar:      {name:'Colmar',      flag:'FR', nights:0, dates:'17 jul parada', zone:'Petite Venise / Alsacia'},
+  milan:       {name:'Milan',       flag:'IT', nights:1, dates:'17-18 jul', zone:'Cerca de Centrale'},
+  venecia:     {name:'Venecia',     flag:'IT', nights:0, dates:'18 jul parada tren', zone:'Canal Grande / Rialto'},
+  roma:        {name:'Roma',        flag:'IT', nights:2, dates:'18-20 jul', zone:'Trastevere / Prati'},
+  niza:        {name:'Niza',        flag:'FR', nights:1, dates:'20-21 jul', zone:'Promenade des Anglais'}
 };
 
 var NOTAS_MAP = {
@@ -1698,180 +1145,132 @@ document.addEventListener('keydown',function(e){
 
 
 // ===== SIMULADOR =====
-var SIM_DISTANCES = {
-  'alicante-barcelona': {km:520, h:5.0},
-  'barcelona-montpellier': {km:310, h:3.5},
-  'alicante-montpellier': {km:620, h:6.5},
-  'montpellier-clermont': {km:330, h:3.5},
-  'clermont-paris': {km:420, h:4.0},
-  'montpellier-paris': {km:750, h:8.0},
-  'paris-colmar': {km:490, h:4.5},
-  'paris-milan': {km:850, h:8.5},
-  'colmar-milan': {km:510, h:5.0},
-  'milan-venecia': {km:270, h:2.8},
-  'milan-roma': {km:580, h:5.5},
-  'venecia-roma': {km:530, h:5.3},
-  'roma-milan': {km:580, h:5.5},
-  'milan-niza': {km:320, h:3.2},
-  'niza-alicante': {km:650, h:6.5},
-  'paris-pisa': {km:1050, h:10.0},
-  'colmar-pisa': {km:680, h:6.5},
-  'milan-pisa': {km:270, h:2.7},
-  'pisa-roma': {km:340, h:3.5},
-  'venecia-pisa': {km:310, h:3.2},
-  'niza-monaco': {km:20, h:0.4},
-  'monaco-milan': {km:310, h:3.5},
-  'monaco-genova': {km:160, h:2.0},
-  'roma-niza': {km:790, h:8.0},
-  'pisa-venecia': {km:310, h:3.2},
-  'paris-barcelona': {km:1040, h:9.5}
+var SIM_KM = {
+  'alicante|montpellier':620,'montpellier|alicante':620,
+  'alicante|barcelona':310,'barcelona|alicante':310,
+  'barcelona|montpellier':310,'montpellier|barcelona':310,
+  'montpellier|paris':750,'paris|montpellier':750,
+  'montpellier|clermont':330,'clermont|montpellier':330,
+  'clermont|paris':420,'paris|clermont':420,
+  'paris|colmar':490,'colmar|paris':490,
+  'paris|milan':850,'milan|paris':850,
+  'colmar|milan':510,'milan|colmar':510,
+  'milan|venecia':270,'venecia|milan':270,
+  'milan|pisa':270,'pisa|milan':270,
+  'milan|roma':580,'roma|milan':580,
+  'venecia|roma':530,'roma|venecia':530,
+  'venecia|pisa':310,'pisa|venecia':310,
+  'pisa|roma':340,'roma|pisa':340,
+  'roma|niza':790,'niza|roma':790,
+  'milan|niza':320,'niza|milan':320,
+  'niza|monaco':20,'monaco|niza':20,
+  'monaco|milan':310,'milan|monaco':310,
+  'niza|alicante':650,'alicante|niza':650,
+  'marsella|milan':650,'milan|marsella':650,
+  'barcelona|paris':1040,'paris|barcelona':1040
 };
+function simGetKm(a,b){return SIM_KM[a+'|'+b]||SIM_KM[b+'|'+a]||400;}
 
 var SIM_CANDIDATES = [
-  {id:'pisa', name:'Pisa', flag:'🇮🇹', note:'Torre Inclinada — parada perfecta entre Milan y Roma', impact:'+270km, +2.7h vs ir directo', insertAfter:'milan'},
-  {id:'monaco', name:'Mónaco', flag:'🇲🇨', note:'El mini estado mas glamuroso — entre Niza y Milan', impact:'+20km desde Niza, casi gratis añadirlo', insertAfter:'niza'},
-  {id:'barcelona', name:'Barcelona', flag:'🇪🇸', note:'Parada de almuerzo obligatoria en el día 1', impact:'Ya incluida como parada — sin coste extra', insertAfter:'alicante'},
-  {id:'florencia', name:'Florencia', flag:'🇮🇹', note:'A 1h de Pisa y 3h de Roma por la A1', impact:'+100km si se añade con Pisa', insertAfter:'pisa'},
-  {id:'marsella', name:'Marsella', flag:'🇫🇷', note:'Puerto histórico — alternativa a Montpellier noche 1', impact:'+130km vs ir directo a Montpellier', insertAfter:'barcelona'}
+  {id:'pisa',      name:'Pisa',      flag:'IT', note:'Torre Inclinada — parada entre Milan y Roma o Venecia', impact:'+270km, +2.7h vs Milan directo a Roma', after:'milan'},
+  {id:'monaco',    name:'Monaco',    flag:'MC', note:'El mini estado mas glamuroso de Europa', impact:'+20km desde Niza, casi gratis anyadirlo', after:'niza'},
+  {id:'barcelona', name:'Barcelona', flag:'ES', note:'Parada almuerzo obligatoria en el dia 1', impact:'Ya incluida como parada — sin coste extra', after:'alicante'},
+  {id:'marsella',  name:'Marsella',  flag:'FR', note:'Puerto historico, alternativa a Montpellier', impact:'+130km vs ir directo a Montpellier', after:'barcelona'},
+  {id:'florencia', name:'Florencia', flag:'IT', note:'A 1h de Pisa y 3h de Roma por la A1', impact:'+100km si se anade con Pisa', after:'pisa'}
 ];
 
 var simRoute = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
 var simAdded = [];
 var dragSrc = null;
 
-function getDistance(a, b) {
-  var key1 = a + '-' + b;
-  var key2 = b + '-' + a;
-  return SIM_DISTANCES[key1] || SIM_DISTANCES[key2] || {km:400, h:4.0};
-}
-
-function simCalcTotals() {
-  var totalKm = 0, totalH = 0;
-  for (var i = 0; i < simRoute.length - 1; i++) {
-    var d = getDistance(simRoute[i], simRoute[i+1]);
-    totalKm += d.km;
-    totalH += d.h;
+function simCalc(){
+  var km=0,h=0;
+  for(var i=0;i<simRoute.length-1;i++){
+    var d=simGetKm(simRoute[i],simRoute[i+1]);
+    km+=d; h+=d/80;
   }
-  // Add train km (Milan-Venice-Rome area)
-  var trainKm = 650;
-  document.getElementById('sim-total-km').textContent = (totalKm + trainKm).toLocaleString();
-  document.getElementById('sim-total-h').textContent = '~' + Math.round(totalH) + 'h';
-  var fuel = Math.round((totalKm / 100) * 7.5 * 1.75 * 2); // 2 cars
-  document.getElementById('sim-total-fuel').textContent = '~' + fuel + '€';
-  return {km: totalKm, h: totalH};
+  document.getElementById('sim-total-km').textContent=km.toLocaleString();
+  document.getElementById('sim-total-h').textContent='~'+Math.round(h)+'h';
+  var fuel=Math.round((km/100)*7.5*1.75*2);
+  document.getElementById('sim-total-fuel').textContent='~'+fuel+' EUR';
 }
 
-function simRenderRoute() {
-  var el = document.getElementById('sim-ruta');
-  var cityEmoji = {alicante:'🏠', montpellier:'🇫🇷', paris:'🗼', colmar:'🏡',
-    milan:'🚇', venecia:'🚤', roma:'🏛️', niza:'🏖️',
-    pisa:'🗼', monaco:'🏎️', barcelona:'🇪🇸', florencia:'🎨', marsella:'⚓'};
-  var names = Object.assign({}, CITY_NAMES, {florencia:'Florencia', marsella:'Marsella'});
-  
-  el.innerHTML = simRoute.map(function(c, i) {
-    var nextD = i < simRoute.length - 1 ? getDistance(c, simRoute[i+1]) : null;
-    var isAdded = simAdded.indexOf(c) !== -1;
-    return '<div class="sim-city' + (isAdded ? ' sim-added' : '') + '" draggable="true" data-idx="' + i + '" ' +
-      'ondragstart="simDragStart(event,' + i + ')" ondragover="simDragOver(event)" ondrop="simDrop(event,' + i + ')" ondragleave="simDragLeave(event)">' +
-      '<span class="sim-handle">☰</span>' +
-      '<span class="sim-icon">' + (cityEmoji[c] || '📍') + '</span>' +
-      '<span class="sim-name">' + (names[c] || c) + (isAdded ? ' <span style="font-size:0.6rem;background:#dbeafe;color:#2563eb;padding:0.1rem 0.3rem;border-radius:4px;font-weight:700">+AÑADIDA</span>' : '') + '</span>' +
-      (nextD ? '<div class="sim-meta"><div class="sim-km">' + nextD.km + ' km</div>' + nextD.h.toFixed(1) + 'h</div>' : '<div class="sim-meta" style="color:#10b981;font-weight:600">FIN</div>') +
-      (isAdded ? '<button onclick="simRemoveCity('' + c + '')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:0.9rem;padding:0 0.2rem" title="Quitar">✕</button>' : '') +
+function simRenderRoute(){
+  var names={alicante:'Alicante',montpellier:'Montpellier',paris:'Paris',colmar:'Colmar',
+    milan:'Milan',venecia:'Venecia',roma:'Roma',niza:'Niza',
+    pisa:'Pisa',monaco:'Monaco',barcelona:'Barcelona',florencia:'Florencia',marsella:'Marsella'};
+  var flags={alicante:'ES',montpellier:'FR',paris:'FR',colmar:'FR',milan:'IT',
+    venecia:'IT',roma:'IT',niza:'FR',pisa:'IT',monaco:'MC',barcelona:'ES',florencia:'IT',marsella:'FR'};
+  document.getElementById('sim-ruta').innerHTML=simRoute.map(function(c,i){
+    var km=i<simRoute.length-1?simGetKm(c,simRoute[i+1]):0;
+    var isAdded=simAdded.indexOf(c)!==-1;
+    return '<div class="sim-city" draggable="true" data-i="'+i+'" '+
+      'ondragstart="simDS(event,'+i+')" ondragover="simDO(event)" '+
+      'ondrop="simDP(event,'+i+')" ondragleave="simDL(event)">'+
+      '<span class="sim-handle">&#9776;</span>'+
+      '<span style="font-size:0.9rem;margin-right:2px">'+flags[c]+'</span>'+
+      '<span class="sim-name">'+names[c]+(isAdded?' <span style="font-size:0.58rem;background:#dbeafe;color:#2563eb;padding:0.1rem 0.3rem;border-radius:4px">+SIMULADA</span>':'')+'</span>'+
+      (km>0?'<div class="sim-meta"><div class="sim-km">'+km+'km</div>'+(km/80).toFixed(1)+'h</div>':'<div class="sim-meta" style="color:#10b981;font-weight:700">FIN</div>')+
+      (isAdded?'<button onclick="simRemove(''+c+'')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:1rem;line-height:1;padding:0 2px">x</button>':'')+
       '</div>';
   }).join('');
-  simCalcTotals();
+  simCalc();
 }
-
-function simDragStart(e, idx) {
-  dragSrc = idx;
-  e.target.classList.add('dragging');
-}
-function simDragOver(e) {
-  e.preventDefault();
-  e.currentTarget.classList.add('dragover');
-}
-function simDragLeave(e) {
-  e.currentTarget.classList.remove('dragover');
-}
-function simDrop(e, targetIdx) {
-  e.preventDefault();
-  e.currentTarget.classList.remove('dragover');
-  if (dragSrc === null || dragSrc === targetIdx) { dragSrc=null; return; }
-  var moved = simRoute.splice(dragSrc, 1)[0];
-  simRoute.splice(targetIdx, 0, moved);
-  dragSrc = null;
-  document.querySelectorAll('.sim-city').forEach(function(el){el.classList.remove('dragging');});
-  simRenderRoute();
-  simShowAlert('Ruta reordenada. Km y horas recalculados.');
-}
-
-function simAddCity(candId) {
-  var cand = SIM_CANDIDATES.filter(function(c){return c.id===candId;})[0];
-  if (!cand) return;
-  if (simRoute.indexOf(candId) !== -1) return;
-  var insertIdx = simRoute.indexOf(cand.insertAfter);
-  if (insertIdx === -1) insertIdx = simRoute.length - 2;
-  simRoute.splice(insertIdx + 1, 0, candId);
-  simAdded.push(candId);
-  simRenderRoute();
-  simRenderCandidates();
-  simShowAlert('✅ ' + (CITY_NAMES[candId] || candId) + ' añadida a la simulación. La ruta oficial no cambia.');
-}
-
-function simRemoveCity(cityId) {
-  simRoute = simRoute.filter(function(c){return c !== cityId;});
-  simAdded = simAdded.filter(function(c){return c !== cityId;});
-  simRenderRoute();
-  simRenderCandidates();
-  simHideAlert();
-}
-
-function simReset() {
-  simRoute = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
-  simAdded = [];
-  simRenderRoute();
-  simRenderCandidates();
-  simHideAlert();
-}
-
-function simRenderCandidates() {
-  var el = document.getElementById('sim-candidates');
-  el.innerHTML = SIM_CANDIDATES.map(function(c) {
-    var inRoute = simRoute.indexOf(c.id) !== -1;
-    return '<div class="sim-cand">' +
-      '<span style="font-size:1.1rem">' + c.flag + '</span>' +
-      '<div class="sim-cand-info">' +
-        '<div class="sim-cand-name">' + c.name + '</div>' +
-        '<div class="sim-cand-note">' + c.note + '</div>' +
-        '<div class="sim-cand-impact">📍 ' + c.impact + '</div>' +
-      '</div>' +
-      '<button class="btn-sim-add' + (inRoute ? ' added' : '') + '" onclick="simAddCity('' + c.id + '')">' +
-        (inRoute ? '✓ En ruta' : '+ Probar') +
-      '</button>' +
-      '</div>';
+function simRenderCandidates(){
+  document.getElementById('sim-candidates').innerHTML=SIM_CANDIDATES.map(function(c){
+    var inRoute=simRoute.indexOf(c.id)!==-1;
+    return '<div class="sim-cand">'+
+      '<span style="font-size:0.9rem">'+c.flag+'</span>'+
+      '<div class="sim-cand-info">'+
+        '<div class="sim-cand-name">'+c.name+'</div>'+
+        '<div class="sim-cand-note">'+c.note+'</div>'+
+        '<div class="sim-cand-impact">'+c.impact+'</div>'+
+      '</div>'+
+      '<button class="btn-sim-add'+(inRoute?' added':'')+'" onclick="simAdd(''+c.id+'')">'+
+        (inRoute?'En ruta':'+ Probar')+
+      '</button></div>';
   }).join('');
 }
-
-function simShowAlert(msg) {
-  var el = document.getElementById('sim-alert');
-  el.textContent = msg;
-  el.style.display = 'block';
-  setTimeout(function(){ el.style.display='none'; }, 4000);
+function simDS(e,i){dragSrc=i;}
+function simDO(e){e.preventDefault();e.currentTarget.classList.add('dragover');}
+function simDL(e){e.currentTarget.classList.remove('dragover');}
+function simDP(e,i){
+  e.preventDefault();e.currentTarget.classList.remove('dragover');
+  if(dragSrc===null||dragSrc===i){dragSrc=null;return;}
+  var el=simRoute.splice(dragSrc,1)[0];
+  simRoute.splice(i,0,el);
+  dragSrc=null;
+  simRenderRoute();
+  document.getElementById('sim-alert').textContent='Ruta reordenada. Km recalculados.';
+  document.getElementById('sim-alert').style.display='block';
+  setTimeout(function(){document.getElementById('sim-alert').style.display='none';},3000);
 }
-
-function simHideAlert() {
-  document.getElementById('sim-alert').style.display = 'none';
+function simAdd(id){
+  if(simRoute.indexOf(id)!==-1)return;
+  var cand=SIM_CANDIDATES.filter(function(c){return c.id===id;})[0];
+  var afterIdx=simRoute.indexOf(cand?cand.after:'');
+  simRoute.splice(afterIdx>=0?afterIdx+1:simRoute.length-1,0,id);
+  simAdded.push(id);
+  simRenderRoute();simRenderCandidates();
+  document.getElementById('sim-alert').textContent=names[id]||id+' anadida a la simulacion. Ruta oficial sin cambios.';
+  document.getElementById('sim-alert').style.display='block';
+  setTimeout(function(){document.getElementById('sim-alert').style.display='none';},3500);
 }
-
-// Init simulator when view is shown
-var _origShowView = showView;
-showView = function(name, idx) {
-  _origShowView(name, idx);
-  if (name === 'simulador') {
-    simRenderRoute();
-    simRenderCandidates();
-  }
+function simRemove(id){
+  simRoute=simRoute.filter(function(c){return c!==id;});
+  simAdded=simAdded.filter(function(c){return c!==id;});
+  simRenderRoute();simRenderCandidates();
+}
+function simReset(){
+  simRoute=['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
+  simAdded=[];
+  simRenderRoute();simRenderCandidates();
+  document.getElementById('sim-alert').style.display='none';
+}
+var _origSV=showView;
+showView=function(name,idx){
+  _origSV(name,idx);
+  if(name==='simulador'){simRenderRoute();simRenderCandidates();}
 };
 
 </script>
