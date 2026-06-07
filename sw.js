@@ -1,4 +1,4 @@
-var CACHE = 'eurotrip2026-v5';
+var CACHE = 'eurotrip2026-v6';
 var ASSETS = ['/eurotrip2026/','/eurotrip2026/index.html'];
 self.addEventListener('install',function(e){e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(ASSETS);}).then(function(){return self.skipWaiting();}));});
 self.addEventListener('activate',function(e){e.waitUntil(caches.keys().then(function(keys){return Promise.all(keys.filter(function(k){return k!==CACHE;}).map(function(k){return caches.delete(k);}));}).then(function(){return self.clients.claim();}));});
