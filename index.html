@@ -1741,9 +1741,9 @@ function simRenderCandidates(){
         '<div style="font-size:0.64rem;color:#94a3b8">por '+row.propuesta_por+'</div>'+
       '</div>';
     var prevBtn=document.createElement('button');
-    prevBtn.className='btn-sim-add'+(inRoute?' added':'');
+    prevBtn.className='btn-sim-add';
     prevBtn.style.cssText='font-size:0.68rem;padding:0.3rem 0.6rem;white-space:nowrap';
-    prevBtn.textContent=inRoute?'En ruta':'Ver';
+    prevBtn.textContent='Ver impacto';
     (function(id){prevBtn.onclick=function(){simPreview(id);};})(cityId);
     div.appendChild(prevBtn);
     if(simIsAdmin){
@@ -1882,10 +1882,10 @@ function simPreview(cityId){
   var extraDays = 0; // check if new city needs overnight
   var needsNight = c.stay && c.stay.toLowerCase().indexOf('noche')!==-1 && c.stay.toLowerCase().indexOf('sin')===-1;
   if(needsNight) extraDays=1;
-  var baseFuel = Math.round((totalKmBefore/100)*7.5*1.75*2);
+  var baseFuel = Math.round((kmBefore/100)*7.5*1.75*2);
   var newFuel  = Math.round((kmAfter/100)*7.5*1.75*2);
   var fuelExtra = newFuel - baseFuel;
-  var baseH = (totalKmBefore/80).toFixed(0);
+  var baseH = (kmBefore/80).toFixed(0);
   var newH  = (kmAfter/80).toFixed(0);
 
   // Determine date of insertion (D insertAt + base date)
@@ -1922,7 +1922,7 @@ function simPreview(cityId){
           '<span>'+baseH+'h → '+newH+'h <strong style="color:#fb923c">+'+extraH+'h</strong></span>'+
         '</div>'+
         '<div style="background:rgba(255,255,255,0.1);border-radius:3px;height:5px;overflow:hidden">'+
-          '<div style="height:100%;border-radius:3px;background:linear-gradient(90deg,#3b82f6,#fb923c);width:'+Math.min(100,Math.round((kmAfter/totalKmBefore)*100))+'%"></div>'+
+          '<div style="height:100%;border-radius:3px;background:linear-gradient(90deg,#3b82f6,#fb923c);width:'+Math.min(100,Math.round((kmAfter/(kmBefore||1))*100))+'%"></div>'+
         '</div>'+
       '</div>'+
     '</div>';
@@ -2026,10 +2026,9 @@ function simConfirmOfficial(){
     var preferredAfter=c?c.after:'';
     var afterIdx=preferredAfter?simRoute.indexOf(preferredAfter):-1;
     var insertAt=afterIdx>=0?afterIdx+1:simFindBestInsert(cityId);
-    if(simRoute.indexOf(cityId)===-1){
-      simRoute.splice(insertAt,0,cityId);
-      if(simAdded.indexOf(cityId)===-1) simAdded.push(cityId);
-    }
+    // Admin can add a city even if already in route (for return trips e.g. Milan->Venice->Milan)
+    simRoute.splice(insertAt,0,cityId);
+    if(simAdded.indexOf(cityId)===-1) simAdded.push(cityId);
     var afterCity=simRoute[Math.max(0,insertAt-1)];
     var nextCity=simRoute[Math.min(simRoute.length-1,insertAt+1)];
     var tlIdx=-1;
