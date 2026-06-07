@@ -538,6 +538,18 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
         <div style="font-size:0.65rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em">Ruta — arrastra</div>
         <button class="btn-sim-reset" onclick="simReset()" style="font-size:0.65rem;padding:0.25rem 0.6rem">Restaurar</button>
       </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;margin-bottom:0.5rem">
+        <div>
+          <div style="font-size:0.58rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Origen</div>
+          <select id="sim-origin-sel" onchange="simChangeEndpoint('origin',this.value)"
+            style="width:100%;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.5rem;font-family:inherit;font-size:0.72rem;color:#0f172a;outline:none;background:white"></select>
+        </div>
+        <div>
+          <div style="font-size:0.58rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px">Destino final</div>
+          <select id="sim-dest-sel" onchange="simChangeEndpoint('dest',this.value)"
+            style="width:100%;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.5rem;font-family:inherit;font-size:0.72rem;color:#0f172a;outline:none;background:white"></select>
+        </div>
+      </div>
       <div id="sim-ruta" class="sim-ruta" style="margin-bottom:0.75rem"></div>
 
       <!-- Generate -->
@@ -2221,9 +2233,58 @@ function simRemove(id){
   simRenderRoute();simRenderCandidates();
   if(simPreviewing===id) simClosePreview();
 }
+var SIM_ALL_CITIES = {
+  alicante:'Alicante ES', madrid:'Madrid ES', barcelona:'Barcelona ES',
+  valencia:'Valencia ES', bilbao:'Bilbao ES', sevilla:'Sevilla ES',
+  montpellier:'Montpellier FR', paris:'Paris FR', lyon:'Lyon FR',
+  marsella:'Marsella FR', niza:'Niza FR', colmar:'Colmar FR', burdeos:'Burdeos FR',
+  milan:'Milan IT', roma:'Roma IT', venecia:'Venecia IT', florencia:'Florencia IT',
+  pisa:'Pisa IT', napoles:'Napoles IT', bologna:'Bolonia IT', genova:'Genova IT',
+  monaco:'Monaco MC',
+  amsterdam:'Amsterdam NL', bruselas:'Bruselas BE',
+  berlin:'Berlin DE', munich:'Munich DE', frankfurt:'Frankfurt DE', colonia:'Colonia DE',
+  zurich:'Zurich CH', ginebra:'Ginebra CH',
+  lisboa:'Lisboa PT', oporto:'Oporto PT',
+  viena:'Viena AT', praga:'Praga CZ', budapest:'Budapest HU'
+};
+
+function simPopulateEndpoints(){
+  var originSel = document.getElementById('sim-origin-sel');
+  var destSel = document.getElementById('sim-dest-sel');
+  if(!originSel || !destSel) return;
+  var allCities = Object.assign({}, SIM_ALL_CITIES);
+  Object.keys(SIM_NAMES).forEach(function(k){ if(!allCities[k]) allCities[k]=SIM_NAMES[k]; });
+  var sorted = Object.keys(allCities).sort(function(a,b){ return allCities[a].localeCompare(allCities[b]); });
+  var opts = sorted.map(function(id){ return '<option value="'+id+'">'+allCities[id]+'</option>'; }).join('');
+  originSel.innerHTML = opts;
+  destSel.innerHTML = opts;
+  originSel.value = simRoute[0];
+  destSel.value = simRoute[simRoute.length-1];
+}
+
+function simChangeEndpoint(type, newId){
+  if(!newId) return;
+  var allCities = Object.assign({}, SIM_ALL_CITIES, SIM_NAMES);
+  if(!SIM_NAMES[newId]) SIM_NAMES[newId] = allCities[newId] || newId;
+  if(!SIM_FLAGS[newId]) SIM_FLAGS[newId] = newId.length===2 ? newId.toUpperCase() : '';
+  if(!SIM_COORDS[newId]) SIM_COORDS[newId] = (SIM_NAMES[newId]||newId)+',Europe';
+  if(type==='origin'){
+    if(simRoute[0]===newId) return;
+    simRoute[0]=newId;
+    simShowMsg('Origen: '+(SIM_NAMES[newId]||newId)+' — solo en simulacion');
+  } else {
+    if(simRoute[simRoute.length-1]===newId) return;
+    simRoute[simRoute.length-1]=newId;
+    simShowMsg('Destino: '+(SIM_NAMES[newId]||newId)+' — solo en simulacion');
+  }
+  simRenderRoute();
+  simPopulateEndpoints();
+}
+
 function simReset(){
   simRoute=['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
   simAdded=[];simClosePreview();simRenderRoute();simRenderCandidates();
+  simPopulateEndpoints();
   document.getElementById('sim-alert').style.display='none';
 }
 function simShowMsg(msg){
@@ -2287,7 +2348,7 @@ function simGenerateCity(){
 var _origSV=showView;
 showView=function(name,idx){
   _origSV(name,idx);
-  if(name==='simulador'){simRenderRoute();simLoadCandidatas();simRenderConductores();}
+  if(name==='simulador'){simRenderRoute();simLoadCandidatas();simRenderConductores();simPopulateEndpoints();}
 };
 // Broadcast name on load
 (function(){
