@@ -1411,6 +1411,7 @@ var simCityCache = {};
 var simRoute = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
 var simAdded = [];
 var simPreviewing = null;
+var simPreviewInsertAt = null; // tracks user-selected insert position
 var simCandidatas = [];
 var dragSrc = null;
 
@@ -2123,9 +2124,8 @@ function simConfirmOfficial(){
     if(!simPreviewing) return;
     var c=simCityCache[simPreviewing];
     var cityId=simPreviewing;
-    var preferredAfter=c?c.after:'';
-    var afterIdx=preferredAfter?simRoute.indexOf(preferredAfter):-1;
-    var insertAt=afterIdx>=0?afterIdx+1:simFindBestInsert(cityId);
+    // Use the insertAt the user selected in the preview selector
+    var insertAt=simPreviewInsertAt!==null?simPreviewInsertAt:simFindBestInsert(cityId);
     // Admin can add a city even if already in route (for return trips e.g. Milan->Venice->Milan)
     simRoute.splice(insertAt,0,cityId);
     if(simAdded.indexOf(cityId)===-1) simAdded.push(cityId);
@@ -2138,18 +2138,80 @@ function simConfirmOfficial(){
       h:((simGetKm(afterCity,cityId)+simGetKm(cityId,nextCity))/80).toFixed(1)+'h',
       ztl:c?c.ztl||false:false,maps:'',acts:c?c.acts||[]:[],
       stay:c?c.stay||'Por confirmar':'Por confirmar',note:c?c.note||'':'Desde simulador'};
-    if(tlIdx>=0) TL.splice(tlIdx+1,0,newDay);
+    if(tlIdx>=0) TL.splice(tlIdx+1,0,newDay); else TL.push(newDay);
     supa('PATCH','candidatas?city_id=eq.'+cityId,{en_oficial:true}).catch(function(){});
+    // Persist TL changes to Supabase
+    simSaveTL();
     renderTL();simRenderRoute();simClosePreview();
-    simShowMsg('✓ '+(SIM_NAMES[cityId]||cityId)+' añadida al itinerario.');
+    simShowMsg('✓ '+(SIM_NAMES[cityId]||cityId)+' añadida al itinerario oficial.');
   });
 }
 
 function simClosePreview(){
   document.getElementById('sim-preview').style.display='none';
   simPreviewing=null;
+  simPreviewInsertAt=null;
   // Restore map to current route
   simUpdateMap();
+}
+
+// Persist TL to Supabase as JSON
+function simSaveTL(){
+  // Save added days (non-original) to Supabase
+  // Use a simple approach: save the count and extra days
+  var extraDays = TL.filter(function(d){ return d.date === '? jul'; });
+  try {
+    localStorage.setItem('et26_tl_extra', JSON.stringify(extraDays));
+  } catch(e) {}
+  // Also try Supabase
+  supa('GET', 'alojamientos_estado?ciudad=eq.tl_changes').then(function(rows){
+    var payload = { ciudad: 'tl_changes', estado: 'custom', notas: JSON.stringify(extraDays) };
+    if(rows && rows.length > 0){
+      supa('PATCH', 'alojamientos_estado?ciudad=eq.tl_changes', payload).catch(function(){});
+    } else {
+      supa('POST', 'alojamientos_estado', payload).catch(function(){});
+    }
+  }).catch(function(){});
+}
+
+function simLoadTL(){
+  // Load persisted extra days from Supabase
+  supa('GET', 'alojamientos_estado?ciudad=eq.tl_changes').then(function(rows){
+    if(rows && rows.length > 0 && rows[0].notas){
+      try {
+        var extraDays = JSON.parse(rows[0].notas);
+        if(extraDays && extraDays.length > 0){
+          extraDays.forEach(function(day){
+            // Find insert position based on city references in day.city
+            var parts = day.city.split(' → ');
+            var afterName = parts[0] || '';
+            var insertIdx = TL.length - 1;
+            TL.forEach(function(d, i){
+              if(d.city.indexOf(afterName) !== -1) insertIdx = i + 1;
+            });
+            // Check not already added
+            var exists = TL.some(function(d){ return d.city === day.city; });
+            if(!exists) TL.splice(insertIdx, 0, day);
+          });
+          renderTL();
+          simShowMsg && simShowMsg('Itinerario restaurado con ' + extraDays.length + ' dia(s) añadido(s).');
+        }
+      } catch(e) { console.error('Error loading TL:', e); }
+    }
+  }).catch(function(){
+    // Fallback to localStorage
+    try {
+      var saved = localStorage.getItem('et26_tl_extra');
+      if(saved) {
+        var extraDays = JSON.parse(saved);
+        extraDays.forEach(function(day){
+          var exists = TL.some(function(d){ return d.city === day.city; });
+          if(!exists) TL.push(day);
+        });
+        if(extraDays.length > 0) renderTL();
+      }
+    } catch(e) {}
+  });
 }
 function simRemove(id){
   simRoute=simRoute.filter(function(c){return c!==id;});
