@@ -1825,11 +1825,10 @@ function simPreview(cityId){
   var pros=c.pros||[];
   var cons=c.cons||[];
   // Time impact for affected day
-  var affectedDayTL = null;
-  TL.forEach(function(d){ 
-    if(d.city.toLowerCase().indexOf((SIM_NAMES[afterCity]||afterCity).toLowerCase().split(' ')[0])!==-1) 
-      affectedDayTL=d; 
-  });
+  // Find affected TL day by position (insertAt-1 = the day that gets split)
+  // insertAt is the position in simRoute, which maps to TL index
+  var affectedTLIdx = Math.max(0, insertAt - 1);
+  var affectedDayTL = TL[affectedTLIdx] || null;
   var currentDayH = affectedDayTL ? parseFloat(affectedDayTL.h) : 0;
   var newDayH = parseFloat(affectedH);
   var dayDelta = (newDayH - currentDayH).toFixed(1);
