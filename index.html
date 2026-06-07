@@ -3,1264 +3,1877 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>EuroTrip 2026 — 7 Amigos</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-
+<title>EuroTrip 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0a0e1a;
-  --surface: #111827;
-  --card: #1a2235;
-  --border: rgba(255,255,255,0.08);
-  --accent: #e8b86d;
-  --accent2: #6d9ee8;
-  --accent3: #e86d8a;
-  --text: #f0ede8;
-  --muted: #8a94a6;
-  --green: #4ade80;
-  --red: #f87171;
-  --grad: linear-gradient(135deg, #1a2235 0%, #0f1729 100%);
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bottom:64px}
+.header{background:#0f172a;padding:0.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:sticky;top:0;z-index:100}
+.hlogo{color:white;font-size:0.95rem;font-weight:700}
+.hbadge{font-size:0.65rem;font-weight:700;padding:0.25rem 0.7rem;border-radius:20px;background:rgba(255,255,255,0.1);color:#94a3b8;white-space:nowrap}
+.hcity{font-size:0.62rem;color:#64748b;cursor:pointer;transition:color .15s;white-space:nowrap;padding:0.15rem 0.1rem;-webkit-tap-highlight-color:transparent}
+.hcity:hover,.hcity:active{color:white;text-decoration:underline}
+.harr{font-size:0.55rem;color:#334155}
+.hbadge.live{background:rgba(16,185,129,0.2);color:#34d399}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.bnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.15rem;background:none;border:none;cursor:pointer;padding:0.5rem 0.1rem;font-family:inherit}
+.bnb-i{font-size:1.05rem}
+.bnb-l{font-size:0.55rem;font-weight:600;color:#94a3b8}
+.bnb.active .bnb-l{color:#3b82f6}
+.main{max-width:900px;margin:0 auto;padding:1.25rem}
+.view{display:none}.view.active{display:block}
+.ptitle{font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.2rem}
+.psub{font-size:0.78rem;color:#64748b;margin-bottom:1.25rem}
+
+/* CARDS */
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem}
+.dcard{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.85rem;cursor:pointer;transition:all .18s}
+.dcard:hover{border-color:#3b82f6;transform:translateY(-2px)}
+.di{font-size:1.1rem;margin-bottom:0.3rem}
+.dv{font-size:1.3rem;font-weight:800;letter-spacing:-0.02em}
+.dl{font-size:0.63rem;color:#64748b;margin-top:0.15rem}
+.dt{display:inline-block;margin-top:0.3rem;font-size:0.57rem;font-weight:600;padding:0.1rem 0.35rem;border-radius:4px}
+.tb{background:#eff6ff;color:#3b82f6}.tg{background:#ecfdf5;color:#059669}
+.ta{background:#fffbeb;color:#d97706}.tr{background:#fef2f2;color:#dc2626}
+
+/* ALERTS */
+.alerts{display:flex;flex-direction:column;gap:0.35rem;margin-top:1rem}
+.al{background:white;border-radius:9px;padding:0.68rem 0.9rem;border-left:3px solid}
+.al.r{border-color:#ef4444}.al.a{border-color:#f59e0b}.al.b{border-color:#3b82f6}.al.g{border-color:#10b981}
+.al-t{font-size:0.8rem;font-weight:600;margin-bottom:0.04rem}
+.al-d{font-size:0.7rem;color:#64748b}
+.al.r .al-t{color:#dc2626}.al.a .al-t{color:#d97706}.al.b .al-t{color:#2563eb}.al.g .al-t{color:#059669}
+
+/* STITLE */
+.st{font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem}
+.st::after{content:'';flex:1;height:1px;background:#e2e8f0}
+
+/* ALOJAMIENTOS */
+.city-block{background:white;border:1.5px solid #e2e8f0;border-radius:12px;margin-bottom:0.75rem;overflow:hidden}
+.city-h{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;border-bottom:1px solid #f1f5f9}
+.city-flag{font-size:1.3rem}
+.city-name{font-size:0.9rem;font-weight:700;flex:1}
+.city-meta{font-size:0.65rem;color:#94a3b8}
+.city-nights{background:#f1f5f9;border-radius:6px;padding:0.2rem 0.6rem;font-size:0.65rem;font-weight:600;color:#475569;white-space:nowrap}
+.city-body{padding:0.75rem 1rem;display:flex;flex-direction:column;gap:0.4rem}
+.lrow{display:flex;align-items:center;gap:0.65rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.55rem 0.8rem}
+.lp{display:flex;align-items:center;gap:0.35rem;font-size:0.68rem;font-weight:700;min-width:68px}
+.da{width:7px;height:7px;border-radius:50%;background:#ff5a5f}.la{color:#ef4444}
+.db{width:7px;height:7px;border-radius:50%;background:#003580}.lb{color:#003580}
+.ldesc{flex:1;font-size:0.7rem;color:#94a3b8;font-style:italic}
+.ldesc.ok{color:#059669;font-style:normal;font-weight:500}
+.btn-ver{color:white;font-family:inherit;font-size:0.67rem;font-weight:700;padding:0.35rem 0.7rem;border-radius:7px;text-decoration:none;white-space:nowrap;border:none;cursor:pointer}
+.ba{background:#ff5a5f}.bb{background:#003580}
+.vrow{display:flex;gap:0.35rem;margin-top:0.4rem}
+.vb{flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.2rem;cursor:pointer;font-size:0.67rem;font-weight:600;color:#64748b;font-family:inherit;transition:all .15s}
+.vb:hover{border-color:#94a3b8}
+.vy{border-color:#10b981!important;background:#ecfdf5!important;color:#059669!important}
+.vf{border-color:#f59e0b!important;background:#fffbeb!important;color:#d97706!important}
+.vn{border-color:#ef4444!important;background:#fef2f2!important;color:#dc2626!important}
+.rk-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;overflow:hidden;margin-top:1.25rem}
+.rk-h{padding:0.65rem 1rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.63rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em}
+.rk-row{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;border-bottom:1px solid #f1f5f9;font-size:0.78rem}
+.rk-row:last-child{border-bottom:none}
+.rk-pos{min-width:22px;font-size:0.9rem}
+.rk-name{flex:1;font-weight:600}
+.rk-pts{font-weight:700;color:#3b82f6}
+.rk-empty{padding:1rem;font-size:0.78rem;color:#94a3b8;text-align:center}
+
+/* TIMELINE */
+.tl-row{background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;cursor:pointer;margin-bottom:0.38rem;transition:border-color .15s}
+.tl-row:hover,.tl-row.open{border-color:#3b82f6}
+.tl-h{display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.9rem}
+.tl-date{font-size:0.65rem;font-weight:700;color:#3b82f6;min-width:40px}
+.tl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.ds{background:#3b82f6}.dd{background:#f59e0b}
+.tl-city{font-weight:600;font-size:0.82rem;flex:1}
+.tp{font-size:0.58rem;font-weight:600;padding:0.12rem 0.4rem;border-radius:5px}
+.tpd{background:#fffbeb;color:#d97706}.tps{background:#eff6ff;color:#3b82f6}.tpk{background:#ecfdf5;color:#059669}.tpz{background:#fef2f2;color:#dc2626}
+.tl-ch{color:#94a3b8;font-size:0.58rem;transition:transform .15s}
+.tl-row.open .tl-ch{transform:rotate(180deg)}
+.tl-body{display:none;border-top:1px solid #f1f5f9;padding:0.78rem 0.9rem;grid-template-columns:1fr 1fr;gap:0.85rem}
+.tl-row.open .tl-body{display:grid}
+.tsub{font-size:0.58rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.25rem}
+.tact{font-size:0.76rem;color:#475569;padding-left:0.72rem;position:relative;margin-bottom:0.2rem;line-height:1.35}
+.tact::before{content:'·';position:absolute;left:0;color:#3b82f6}
+.tnote{margin-top:0.45rem;background:#f8fafc;border-radius:7px;padding:0.4rem 0.65rem}
+.tnote-l{font-size:0.56rem;font-weight:700;color:#3b82f6;margin-bottom:0.06rem}
+.tnote-t{font-size:0.72rem;color:#64748b;line-height:1.45}
+.tztl{margin-top:0.4rem;background:#fef2f2;border-radius:7px;padding:0.4rem 0.65rem;border:1px solid #fecaca}
+.tztl-t{font-size:0.7rem;color:#dc2626;line-height:1.4}
+.tstay{background:#f8fafc;border-radius:7px;padding:0.4rem 0.65rem;font-size:0.76rem;color:#475569}
+.btn-maps{display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;margin-top:0.5rem}
+
+/* PRESUPUESTO */
+.pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem}
+.pp-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.85rem;text-align:center}
+.pp-card.hl{border-color:#3b82f6}
+.pp-n{font-size:0.65rem;color:#94a3b8;margin-bottom:0.2rem}
+.pp-v{font-size:1.6rem;font-weight:800;letter-spacing:-0.03em}
+.pp-card.hl .pp-v{color:#3b82f6}
+.pp-s{font-size:0.62rem;color:#94a3b8;margin-top:0.12rem}
+.bud-t{background:white;border:1.5px solid #e2e8f0;border-radius:11px;overflow:hidden;margin-bottom:1rem}
+.bud-th{display:grid;grid-template-columns:1fr auto auto;padding:0.5rem 0.88rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.59rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em}
+.bud-row{display:grid;grid-template-columns:1fr auto auto;padding:0.6rem 0.88rem;border-bottom:1px solid #f1f5f9;align-items:center}
+.bud-row:last-child{border-bottom:none}
+.bud-cat{display:flex;align-items:center;gap:0.38rem;font-size:0.78rem}
+.bud-bar{height:3px;background:#f1f5f9;border-radius:2px;margin-top:0.16rem;width:60px}
+.bud-fill{height:100%;border-radius:2px}
+.bud-amt{font-weight:700;font-size:0.78rem;padding-left:0.75rem}
+.bud-pct{font-size:0.59rem;color:#94a3b8;padding-left:0.35rem;min-width:24px;text-align:right}
+
+/* GASTOS */
+.gf{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.9rem;margin-bottom:1rem;display:flex;flex-direction:column;gap:0.5rem}
+.fl{display:block;font-size:0.59rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.22rem}
+.fi{width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.5rem 0.72rem;font-family:inherit;font-size:0.79rem;color:#0f172a;outline:none;transition:border-color .15s}
+.fi:focus{border-color:#3b82f6}
+.gf-row{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem}
+.btn-add{background:#0f172a;color:white;border:none;font-family:inherit;font-weight:700;font-size:0.75rem;padding:0.52rem 1rem;border-radius:8px;cursor:pointer;transition:background .15s;width:100%}
+.btn-add:hover{background:#3b82f6}
+.glist{display:flex;flex-direction:column;gap:0.35rem;margin-bottom:1rem}
+.gi{background:white;border:1.5px solid #e2e8f0;border-radius:9px;padding:0.6rem 0.88rem;display:flex;align-items:center;gap:0.7rem}
+.gi-desc{flex:1}
+.gi-name{font-size:0.79rem;font-weight:500}
+.gi-who{font-size:0.63rem;color:#94a3b8}
+.gi-amt{font-weight:700;font-size:0.85rem;color:#3b82f6;white-space:nowrap}
+.gi-del{background:none;border:none;color:#e2e8f0;cursor:pointer;font-size:0.85rem;transition:color .15s}
+.gi-del:hover{color:#ef4444}
+.bal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:0.5rem;margin-bottom:1rem}
+.bal-c{background:white;border:1.5px solid #e2e8f0;border-radius:9px;padding:0.72rem;text-align:center}
+.bal-n{font-weight:700;font-size:0.78rem;margin-bottom:0.15rem}
+.bal-a{font-size:1rem;font-weight:800;letter-spacing:-0.02em}
+.bal-pos{color:#059669}.bal-neg{color:#ef4444}
+.bal-l{font-size:0.58rem;color:#94a3b8;margin-top:0.08rem}
+.liq-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;overflow:hidden}
+.liq-h{padding:0.62rem 1rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.63rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em}
+.liq-row{display:flex;align-items:center;gap:0.6rem;padding:0.58rem 1rem;border-bottom:1px solid #f1f5f9;font-size:0.78rem}
+.liq-row:last-child{border-bottom:none}
+.liq-arr{color:#94a3b8}
+.liq-amt{font-weight:700;color:#3b82f6;margin-left:auto}
+.liq-empty{padding:1rem;font-size:0.78rem;color:#94a3b8;text-align:center}
+
+/* NOTAS */
+.ntabs{display:flex;gap:0.35rem;margin-bottom:0.88rem;flex-wrap:wrap}
+.ntab{background:white;border:1.5px solid #e2e8f0;color:#64748b;font-family:inherit;font-size:0.7rem;font-weight:600;padding:0.32rem 0.7rem;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ntab.active{background:#0f172a;border-color:#0f172a;color:white}
+.ncard{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.95rem}
+.nsec{margin-bottom:0.88rem}
+.nsec:last-child{margin-bottom:0}
+.nsec-t{font-size:0.59rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.42rem}
+.nitem{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:0.42rem 0.7rem;font-size:0.77rem;margin-bottom:0.23rem;display:flex;align-items:flex-start;gap:0.36rem;line-height:1.4}
+.nd{color:#3b82f6;font-size:0.57rem;margin-top:0.19rem;flex-shrink:0}
+
+/* CHECKLIST */
+.cl-sec{margin-bottom:1.1rem}
+.cl-st{font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem}
+.cl-st::after{content:'';flex:1;height:1px;background:#e2e8f0}
+.cl-i{display:flex;align-items:center;gap:0.5rem;background:white;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.5rem 0.8rem;margin-bottom:0.27rem;cursor:pointer;transition:all .15s}
+.cl-i:hover{border-color:#3b82f6}
+.cl-i.done{opacity:0.42}
+.cl-box{width:15px;height:15px;border-radius:4px;border:2px solid #e2e8f0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:white;transition:all .15s}
+.cl-i.done .cl-box{background:#10b981;border-color:#10b981}
+.cl-txt{font-size:0.78rem;flex:1}
+.cl-i.done .cl-txt{text-decoration:line-through}
+.cl-own{font-size:0.58rem;font-weight:700;color:#7c3aed;background:#f5f3ff;padding:0.1rem 0.35rem;border-radius:5px;white-space:nowrap}
+
+/* EMERGENCIAS */
+.em-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:0.65rem}
+.em-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.88rem}
+.em-title{font-size:0.72rem;font-weight:700;margin-bottom:0.5rem}
+.em-item{display:flex;align-items:center;justify-content:space-between;padding:0.32rem 0;border-bottom:1px solid #f1f5f9;font-size:0.72rem}
+.em-item:last-child{border-bottom:none}
+.em-l{color:#64748b;font-size:0.7rem}
+.em-v{font-weight:700}
+.em-v a{color:#3b82f6;text-decoration:none}
+
+/* NOMBRE MODAL */
+.nmodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;padding:1rem}
+.nmodal.open{display:flex}
+.nmodal-box{background:white;border-radius:16px;padding:1.5rem;width:100%;max-width:320px}
+.nmodal-t{font-size:1rem;font-weight:700;margin-bottom:0.4rem}
+.nmodal-s{font-size:0.78rem;color:#64748b;margin-bottom:1rem}
+
+@media(max-width:600px){
+  .dgrid{grid-template-columns:repeat(2,1fr)}
+  .tl-row.open .tl-body{grid-template-columns:1fr}
+  .gf-row{grid-template-columns:1fr}
+  .main{padding:0.88rem}
 }
 
-* { margin:0; padding:0; box-sizing:border-box; }
-
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* ---- STARS BG ---- */
-.stars {
-  position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  background:
-    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 50% 70%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,0.2) 0%, transparent 100%),
-    radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.25) 0%, transparent 100%),
-    radial-gradient(1px 1px at 35% 15%, rgba(255,255,255,0.2) 0%, transparent 100%),
-    radial-gradient(1px 1px at 70% 85%, rgba(255,255,255,0.2) 0%, transparent 100%),
-    radial-gradient(1px 1px at 60% 40%, rgba(255,255,255,0.15) 0%, transparent 100%),
-    radial-gradient(1px 1px at 25% 55%, rgba(255,255,255,0.15) 0%, transparent 100%);
-}
-
-/* ---- NAV ---- */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(10,14,26,0.85);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 0 24px; height: 60px;
-}
-
-.nav-brand {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.2rem; color: var(--accent);
-  letter-spacing: 0.02em;
-}
-.nav-brand span { color: var(--muted); font-size: 0.75rem; font-family: 'DM Sans', sans-serif; display: block; }
-
-.nav-tabs {
-  display: flex; gap: 4px;
-  background: rgba(255,255,255,0.04);
-  border-radius: 10px; padding: 4px;
-}
-.nav-tab {
-  padding: 6px 14px; border-radius: 7px; border: none;
-  background: transparent; color: var(--muted);
-  font-family: 'DM Sans', sans-serif; font-size: 0.8rem;
-  cursor: pointer; transition: all 0.2s; white-space: nowrap;
-}
-.nav-tab.active { background: var(--accent); color: #0a0e1a; font-weight: 600; }
-.nav-tab:hover:not(.active) { color: var(--text); background: rgba(255,255,255,0.06); }
-
-/* ---- PAGES ---- */
-.page { display: none; padding-top: 70px; min-height: 100vh; position: relative; z-index: 1; }
-.page.active { display: block; }
-
-.container { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
-
-/* ---- HERO ---- */
-.hero {
-  text-align: center; padding: 60px 24px 40px;
-  position: relative;
-}
-.hero::before {
-  content: '';
-  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-  width: 600px; height: 300px;
-  background: radial-gradient(ellipse at center, rgba(232,184,109,0.12) 0%, transparent 70%);
-  pointer-events: none;
-}
-
-.hero-eyebrow {
-  font-family: 'DM Mono', monospace; font-size: 0.7rem;
-  color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase;
-  margin-bottom: 16px;
-}
-.hero-title {
-  font-family: 'Playfair Display', serif;
-  font-size: clamp(2.5rem, 8vw, 5rem);
-  line-height: 1.05; color: var(--text);
-  margin-bottom: 8px;
-}
-.hero-title em { color: var(--accent); font-style: italic; }
-.hero-sub {
-  color: var(--muted); font-size: 1rem; margin-bottom: 40px;
-}
-
-.countdown-row {
-  display: flex; justify-content: center; gap: 32px; margin-bottom: 40px;
-  flex-wrap: wrap;
-}
-.countdown-item { text-align: center; }
-.countdown-num {
-  font-family: 'Playfair Display', serif; font-size: 2.8rem;
-  color: var(--accent); line-height: 1; font-weight: 700;
-}
-.countdown-label {
-  font-size: 0.65rem; color: var(--muted); text-transform: uppercase;
-  letter-spacing: 0.12em; margin-top: 4px;
-}
-
-/* ---- STATS GRID ---- */
-.stats-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 12px; margin-bottom: 32px;
-}
-.stat-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 16px;
-  transition: transform 0.2s, border-color 0.2s;
-}
-.stat-card:hover { transform: translateY(-2px); border-color: var(--accent); }
-.stat-icon { font-size: 1.4rem; margin-bottom: 8px; }
-.stat-val { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--text); }
-.stat-lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
-
-/* ---- ALERTS ---- */
-.alerts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-.alert {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 10px; padding: 14px 16px;
-  display: flex; gap: 12px; align-items: flex-start;
-  border-left: 3px solid var(--accent);
-}
-.alert.danger { border-left-color: var(--red); }
-.alert.info { border-left-color: var(--accent2); }
-.alert-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
-.alert-title { font-weight: 600; font-size: 0.88rem; margin-bottom: 2px; }
-.alert-body { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
-
-/* ---- SECTION HEADER ---- */
-.section-header {
-  display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px;
-}
-.section-title {
-  font-family: 'Playfair Display', serif; font-size: 1.6rem;
-}
-.section-line {
-  flex: 1; height: 1px; background: var(--border);
-}
-
-/* ---- ITINERARY ---- */
-.days-list { display: flex; flex-direction: column; gap: 0; }
-
-.day-card {
-  display: grid; grid-template-columns: 80px 1fr;
-  gap: 0; position: relative;
-}
-
-.day-card:not(:last-child) .day-line { display: block; }
-
-.day-left {
-  display: flex; flex-direction: column; align-items: center;
-  padding-top: 8px;
-}
-.day-dot {
-  width: 14px; height: 14px; border-radius: 50%;
-  background: var(--surface); border: 2px solid var(--accent);
-  flex-shrink: 0; z-index: 1; position: relative;
-}
-.day-dot.birthday { background: var(--accent3); border-color: var(--accent3); box-shadow: 0 0 12px var(--accent3); }
-.day-dot.paris { background: var(--accent2); border-color: var(--accent2); box-shadow: 0 0 12px var(--accent2); }
-.day-line { flex: 1; width: 2px; background: var(--border); margin: 4px 0; }
-
-.day-date {
-  font-family: 'DM Mono', monospace; font-size: 0.65rem;
-  color: var(--muted); text-align: center; margin-top: 6px;
-  line-height: 1.3;
-}
-
-.day-content {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 16px; margin: 0 0 12px 16px;
-  cursor: pointer; transition: all 0.2s;
-}
-.day-content:hover { border-color: rgba(232,184,109,0.3); transform: translateX(2px); }
-.day-content.expanded { border-color: rgba(232,184,109,0.4); }
-
-.day-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.day-num {
-  font-family: 'DM Mono', monospace; font-size: 0.65rem;
-  color: var(--accent); background: rgba(232,184,109,0.1);
-  padding: 2px 8px; border-radius: 4px; text-transform: uppercase;
-}
-.day-title { font-weight: 600; font-size: 0.95rem; flex: 1; }
-.day-badge {
-  font-size: 0.68rem; padding: 2px 8px; border-radius: 4px;
-  background: rgba(232,184,109,0.12); color: var(--accent);
-}
-.day-badge.birthday-badge { background: rgba(232,109,138,0.12); color: var(--accent3); }
-.day-badge.paris-badge { background: rgba(109,158,232,0.12); color: var(--accent2); }
-
-.day-meta {
-  display: flex; gap: 16px; margin-top: 10px; flex-wrap: wrap;
-}
-.day-meta-item {
-  display: flex; align-items: center; gap: 5px;
-  font-size: 0.75rem; color: var(--muted);
-}
-.day-meta-item span { color: var(--text); font-weight: 500; }
-
-.day-details {
-  display: none; margin-top: 14px; padding-top: 14px;
-  border-top: 1px solid var(--border);
-}
-.day-details.open { display: block; }
-
-.stops-list { display: flex; flex-direction: column; gap: 10px; }
-.stop {
-  display: flex; gap: 10px; align-items: flex-start;
-}
-.stop-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--accent); flex-shrink: 0; margin-top: 5px;
-}
-.stop-dot.rest { background: var(--green); }
-.stop-dot.train { background: var(--accent2); }
-.stop-info { flex: 1; }
-.stop-name { font-weight: 500; font-size: 0.88rem; }
-.stop-note { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
-
-.maps-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  margin-top: 14px; padding: 8px 14px;
-  background: rgba(232,184,109,0.1); border: 1px solid rgba(232,184,109,0.25);
-  border-radius: 8px; color: var(--accent);
-  font-size: 0.78rem; font-weight: 500; text-decoration: none;
-  transition: all 0.2s;
-}
-.maps-btn:hover { background: rgba(232,184,109,0.18); }
-
-/* ---- BUDGET ---- */
-.budget-hero {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 16px; padding: 28px; margin-bottom: 20px;
-  text-align: center;
-}
-.budget-main { font-family: 'Playfair Display', serif; font-size: 3rem; color: var(--accent); }
-.budget-sub { color: var(--muted); font-size: 0.85rem; margin-top: 4px; }
-
-.budget-toggle {
-  display: flex; gap: 8px; justify-content: center; margin-top: 16px;
-}
-.toggle-btn {
-  padding: 8px 20px; border-radius: 8px; border: 1px solid var(--border);
-  background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif;
-  font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
-}
-.toggle-btn.active { background: var(--accent); color: #0a0e1a; border-color: var(--accent); font-weight: 600; }
-
-.budget-cats { display: flex; flex-direction: column; gap: 10px; }
-.budget-cat {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 10px; padding: 14px 16px;
-  display: flex; align-items: center; gap: 14px;
-}
-.budget-cat-icon { font-size: 1.3rem; width: 32px; text-align: center; }
-.budget-cat-info { flex: 1; }
-.budget-cat-name { font-weight: 500; font-size: 0.9rem; }
-.budget-cat-note { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
-.budget-cat-bar { margin-top: 6px; background: rgba(255,255,255,0.06); border-radius: 4px; height: 4px; overflow: hidden; }
-.budget-cat-fill { height: 100%; border-radius: 4px; background: var(--accent); transition: width 0.6s ease; }
-.budget-cat-amount { font-family: 'DM Mono', monospace; font-size: 0.88rem; color: var(--accent); white-space: nowrap; }
-
-/* ---- ALOJAMIENTOS ---- */
-.stays-grid { display: grid; gap: 14px; }
-.stay-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 14px; padding: 18px; display: flex;
-  justify-content: space-between; align-items: center;
-  gap: 16px; flex-wrap: wrap;
-}
-.stay-city { font-family: 'Playfair Display', serif; font-size: 1.2rem; }
-.stay-dates { font-size: 0.75rem; color: var(--muted); margin-top: 3px; }
-.stay-nights {
-  font-size: 0.72rem; color: var(--accent);
-  background: rgba(232,184,109,0.1); padding: 2px 8px; border-radius: 4px;
-  margin-top: 6px; display: inline-block;
-}
-.airbnb-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 10px 16px; border-radius: 10px;
-  background: rgba(255,88,88,0.1); border: 1px solid rgba(255,88,88,0.25);
-  color: #ff7a7a; text-decoration: none; font-size: 0.8rem;
-  font-weight: 500; transition: all 0.2s; white-space: nowrap;
-}
-.airbnb-btn:hover { background: rgba(255,88,88,0.18); }
-
-/* ---- GASTOS ---- */
-.expense-form {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 14px; padding: 20px; margin-bottom: 20px;
-}
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-.form-input, .form-select {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 10px 12px; color: var(--text);
-  font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
-  transition: border-color 0.2s; outline: none;
-}
-.form-input:focus, .form-select:focus { border-color: var(--accent); }
-.form-select option { background: var(--surface); }
-.btn-primary {
-  width: 100%; padding: 11px; border-radius: 8px;
-  background: var(--accent); color: #0a0e1a;
-  border: none; font-family: 'DM Sans', sans-serif;
-  font-weight: 600; font-size: 0.88rem; cursor: pointer;
-  transition: opacity 0.2s;
-}
-.btn-primary:hover { opacity: 0.88; }
-
-.expenses-list { display: flex; flex-direction: column; gap: 8px; }
-.expense-item {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 10px; padding: 14px 16px;
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px;
-}
-.expense-who { font-size: 0.72rem; color: var(--muted); }
-.expense-desc { font-weight: 500; font-size: 0.9rem; margin-top: 1px; }
-.expense-city { font-size: 0.7rem; color: var(--accent); margin-top: 2px; }
-.expense-amt { font-family: 'DM Mono', monospace; font-size: 1rem; color: var(--accent); }
-.expense-per { font-size: 0.7rem; color: var(--muted); text-align: right; margin-top: 2px; }
-
-.balances-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 14px; padding: 20px; margin-top: 20px;
-}
-.balance-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 0; border-bottom: 1px solid var(--border);
-}
-.balance-row:last-child { border-bottom: none; }
-.balance-name { font-weight: 500; font-size: 0.9rem; }
-.balance-total { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--muted); }
-.balance-net { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 600; }
-.balance-net.pos { color: var(--green); }
-.balance-net.neg { color: var(--red); }
-
-/* ---- CHECKLIST ---- */
-.checklist-section { margin-bottom: 20px; }
-.checklist-section-title {
-  font-size: 0.72rem; color: var(--muted); text-transform: uppercase;
-  letter-spacing: 0.12em; margin-bottom: 10px;
-  display: flex; align-items: center; gap: 8px;
-}
-.checklist-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-.check-item {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 10px; padding: 12px 16px; margin-bottom: 8px;
-  display: flex; align-items: center; gap: 12px; cursor: pointer;
-  transition: all 0.2s;
-}
-.check-item:hover { border-color: rgba(232,184,109,0.3); }
-.check-item.done { opacity: 0.55; }
-.check-box {
-  width: 18px; height: 18px; border-radius: 4px;
-  border: 2px solid var(--border); flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; font-size: 0.7rem;
-}
-.check-item.done .check-box { background: var(--green); border-color: var(--green); }
-.check-text { font-size: 0.88rem; flex: 1; }
-.check-item.done .check-text { text-decoration: line-through; color: var(--muted); }
-.check-who { font-size: 0.68rem; color: var(--muted); }
-.check-tag {
-  font-size: 0.65rem; padding: 2px 7px; border-radius: 4px;
-  background: rgba(232,184,109,0.1); color: var(--accent);
-}
-
-/* ---- SOS ---- */
-.sos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-.sos-card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: 12px; padding: 16px;
-}
-.sos-card-title {
-  font-size: 0.68rem; color: var(--muted); text-transform: uppercase;
-  letter-spacing: 0.1em; margin-bottom: 10px;
-}
-.sos-number {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 7px 0; border-bottom: 1px solid var(--border);
-}
-.sos-number:last-child { border-bottom: none; }
-.sos-num-label { font-size: 0.8rem; }
-.sos-num-val { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: var(--accent2); }
-.sos-num-val a { color: inherit; text-decoration: none; }
-.sos-num-val a:hover { text-decoration: underline; }
-
-.sos-alert {
-  background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2);
-  border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
-}
-.sos-alert-title { font-size: 0.82rem; font-weight: 600; color: var(--red); margin-bottom: 4px; }
-.sos-alert-body { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
-
-/* ---- PROGRESS BAR ---- */
-.progress-bar {
-  background: rgba(255,255,255,0.06); border-radius: 4px; height: 4px;
-  overflow: hidden; margin-top: 4px;
-}
-.progress-fill { height: 100%; border-radius: 4px; background: var(--green); transition: width 0.5s ease; }
-
-/* ---- MOBILE NAV ---- */
-.mobile-nav {
-  display: none;
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(10,14,26,0.95); backdrop-filter: blur(12px);
-  border-top: 1px solid var(--border);
-  padding: 8px 0 max(8px, env(safe-area-inset-bottom));
-}
-.mobile-nav-inner { display: flex; justify-content: space-around; }
-.mobile-tab {
-  display: flex; flex-direction: column; align-items: center;
-  gap: 3px; padding: 6px 12px; border: none; background: transparent;
-  color: var(--muted); cursor: pointer; transition: color 0.2s;
-  font-family: 'DM Sans', sans-serif;
-}
-.mobile-tab.active { color: var(--accent); }
-.mobile-tab-icon { font-size: 1.2rem; }
-.mobile-tab-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; }
-
-@media (max-width: 640px) {
-  .mobile-nav { display: block; }
-  .nav-tabs { display: none; }
-  nav { padding: 0 16px; }
-  .hero { padding: 40px 16px 24px; }
-  .countdown-row { gap: 20px; }
-  .form-row { grid-template-columns: 1fr; }
-  .sos-grid { grid-template-columns: 1fr; }
-  .page { padding-bottom: 80px; }
-  .stay-card { flex-direction: column; align-items: flex-start; }
-}
-
-/* ---- ANIMATIONS ---- */
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.page.active .container { animation: fadeSlideIn 0.35s ease both; }
-
-.day-content { animation: fadeSlideIn 0.3s ease both; }
+/* ===== SIMULADOR ===== */
+.sim-ruta {display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem}
+.sim-city {background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;display:flex;align-items:center;gap:0.7rem;cursor:grab}
+.sim-city:active{cursor:grabbing}
+.sim-city.dragging{opacity:0.4;border-style:dashed}
+.sim-city.dragover{border-color:#3b82f6;background:#eff6ff}
+.sim-icon{font-size:1rem;width:24px;text-align:center;flex-shrink:0}
+.sim-name{font-weight:600;font-size:0.85rem;flex:1}
+.sim-meta{font-size:0.65rem;color:#94a3b8;text-align:right;line-height:1.4}
+.sim-km{font-weight:700;color:#0f172a;font-size:0.78rem}
+.sim-handle{color:#cbd5e1;font-size:0.9rem;cursor:grab;padding:0 0.2rem}
+.sim-summary{background:#0f172a;color:white;border-radius:12px;padding:1rem;display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1rem;text-align:center}
+.sim-sum-v{font-size:1.3rem;font-weight:800;letter-spacing:-0.02em}
+.sim-sum-l{font-size:0.6rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-top:0.1rem}
+.sim-candidates{display:flex;flex-direction:column;gap:0.4rem}
+.sim-cand{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;display:flex;align-items:center;gap:0.7rem}
+.sim-cand-info{flex:1}
+.sim-cand-name{font-weight:600;font-size:0.85rem}
+.sim-cand-note{font-size:0.68rem;color:#94a3b8;margin-top:0.1rem}
+.sim-cand-impact{font-size:0.7rem;color:#f59e0b;font-weight:600;margin-top:0.15rem}
+.btn-sim-add{background:#0f172a;color:white;border:none;border-radius:8px;padding:0.4rem 0.8rem;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s}
+.btn-sim-add:hover{background:#3b82f6}
+.btn-sim-add.added{background:#10b981}
+.btn-sim-reset{background:none;border:1.5px solid #e2e8f0;color:#64748b;border-radius:8px;padding:0.38rem 0.8rem;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:inherit}
+.sim-alert{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.72rem;color:#92400e;margin-bottom:0.75rem;line-height:1.5}
 </style>
 </head>
 <body>
 
-<div class="stars"></div>
-
-<!-- DESKTOP NAV -->
-<nav>
-  <div>
-    <div class="nav-brand">EuroTrip 2026 <span>14 — 21 Julio · 7 Amigos</span></div>
+<div class="header">
+  <div style="display:flex;flex-direction:column;gap:0.18rem">
+    <div class="hlogo" onclick="showView('dashboard',0)" style="cursor:pointer">🌍 EuroTrip 2026</div>
+    <div id="header-route" style="display:flex;align-items:center;gap:0.28rem;flex-wrap:wrap"></div>
   </div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="showPage('inicio')">🌍 Inicio</button>
-    <button class="nav-tab" onclick="showPage('ruta')">📅 Ruta</button>
-    <button class="nav-tab" onclick="showPage('presupuesto')">💶 Presupuesto</button>
-    <button class="nav-tab" onclick="showPage('alojamientos')">🏠 Alojamientos</button>
-    <button class="nav-tab" onclick="showPage('gastos')">🧾 Gastos</button>
-    <button class="nav-tab" onclick="showPage('checklist')">✅ Checklist</button>
-    <button class="nav-tab" onclick="showPage('sos')">🆘 SOS</button>
-  </div>
-</nav>
+  <div class="hbadge" id="badge">🌍 EuroTrip</div>
+</div>
 
-<!-- MOBILE NAV -->
-<div class="mobile-nav">
-  <div class="mobile-nav-inner">
-    <button class="mobile-tab active" onclick="showPage('inicio')"><span class="mobile-tab-icon">🌍</span><span class="mobile-tab-label">Inicio</span></button>
-    <button class="mobile-tab" onclick="showPage('ruta')"><span class="mobile-tab-icon">📅</span><span class="mobile-tab-label">Ruta</span></button>
-    <button class="mobile-tab" onclick="showPage('presupuesto')"><span class="mobile-tab-icon">💶</span><span class="mobile-tab-label">Presupuesto</span></button>
-    <button class="mobile-tab" onclick="showPage('alojamientos')"><span class="mobile-tab-icon">🏠</span><span class="mobile-tab-label">Alojam.</span></button>
-    <button class="mobile-tab" onclick="showPage('gastos')"><span class="mobile-tab-icon">🧾</span><span class="mobile-tab-label">Gastos</span></button>
-    <button class="mobile-tab" onclick="showPage('checklist')"><span class="mobile-tab-icon">✅</span><span class="mobile-tab-label">Check</span></button>
-    <button class="mobile-tab" onclick="showPage('sos')"><span class="mobile-tab-icon">🆘</span><span class="mobile-tab-label">SOS</span></button>
+<div class="main">
+
+<!-- DASHBOARD -->
+<div id="view-dashboard" class="view active">
+  <div class="ptitle">Inicio 🌍</div>
+  <div class="psub">14 — 21 julio 2026 · 8 días · 7 noches · ~4.800 km</div>
+  <div class="dgrid">
+    <div class="dcard" onclick="showView('timeline',2)">
+      <div class="di">📅</div><div class="dv" id="days-left">—</div>
+      <div class="dl">Dias restantes</div><span class="dt tb">12 jul 2026</span>
+    </div>
+    <div class="dcard" onclick="showView('presupuesto',3)">
+      <div class="di">💶</div><div class="dv" id="dash-pp">690€</div>
+      <div class="dl">Por persona</div><span class="dt tg" id="dash-total-tag">Total 4.830€</span>
+    </div>
+    <div class="dcard" onclick="showView('alojamientos',1)">
+      <div class="di">🏠</div><div class="dv">6</div>
+      <div class="dl">Ciudades Airbnb</div><span class="dt tr">0 reservados</span>
+    </div>
+    <div class="dcard" onclick="showView('gastos',4)">
+      <div class="di">🧾</div><div class="dv" id="dash-g">0€</div>
+      <div class="dl">Gastos</div><span class="dt tb" id="dash-gn">0 registros</span>
+    </div>
+    <div class="dcard" onclick="showView('checklist',5)">
+      <div class="di">✅</div><div class="dv" id="dash-cl">0%</div>
+      <div class="dl">Checklist</div><span class="dt tg" id="dash-cln">0 de 17</span>
+    </div>
+    <div class="dcard" onclick="showView('emergencias',6)">
+      <div class="di">🆘</div><div class="dv">SOS</div>
+      <div class="dl">Emergencias</div><span class="dt tr">Toca aqui</span>
+    </div>
+  </div>
+  <!-- VIAJEROS + RUTA -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:1rem">
+    <!-- Viajeros -->
+    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem">
+      <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.65rem">Viajeros</div>
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem">
+        <button onclick="ajustarV(-1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit">−</button>
+        <div style="font-size:2rem;font-weight:800;letter-spacing:-0.03em;min-width:36px;text-align:center" id="v-num">7</div>
+        <button onclick="ajustarV(1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit">+</button>
+        <div style="font-size:0.75rem;color:#64748b;line-height:1.5">
+          personas<br>
+          <span style="font-weight:700;color:#3b82f6" id="v-pp">690€/pers.</span>
+        </div>
+      </div>
+      <div style="font-size:0.65rem;color:#94a3b8">Total del grupo: <span style="font-weight:700;color:#0f172a" id="v-total">4.830€</span></div>
+    </div>
+    <!-- Ruta -->
+    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem">
+      <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.65rem">Ruta del viaje</div>
+      <div id="ruta-chips" style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.55rem"></div>
+      <div style="display:flex;gap:0.4rem">
+        <select id="ruta-select" style="flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.5rem;font-family:inherit;font-size:0.72rem;color:#0f172a;outline:none">
+          <option value="">Añadir ciudad...</option>
+          <option value="alicante">Alicante</option>
+          <option value="marsella">Marsella</option>
+          <option value="pisa">Pisa</option>
+          <option value="roma">Roma</option>
+          <option value="venecia">Venecia</option>
+          <option value="munich">Munich</option>
+          <option value="colonia">Colonia</option>
+          <option value="bruselas">Bruselas</option>
+          <option value="paris">Paris</option>
+        </select>
+        <button onclick="addRuta()" style="background:#0f172a;color:white;border:none;border-radius:7px;padding:0.35rem 0.65rem;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:inherit">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="st">Para decidir hoy</div>
+  <div class="alerts">
+    <div class="al r"><div class="al-t">Votar y reservar alojamientos</div><div class="al-d">Julio se agota. Cuanto mas tardemos, peor precio y ubicacion.</div></div>
+    <div class="al a"><div class="al-t">Somos 7, 8 o 9 personas?</div><div class="al-d">Afecta la capacidad de los apartamentos y el precio por persona.</div></div>
+    <div class="al a"><div class="al-t">Dias 14 y 22 son muy exigentes</div><div class="al-d">Marsella-Pisa-Roma (900km) y Colonia-Bruselas-Paris. Dividimos etapa?</div></div>
+    <div class="al r"><div class="al-t">ZTL Italia: no entrar al centro con el coche</div><div class="al-d">Roma, Pisa y Florencia tienen zona restringida. Multa de 100-300 euros.</div></div>
+    <div class="al b"><div class="al-t">Vignette Austria ~9 euros (asfinag.at)</div><div class="al-d">Ruta Venecia-Munich cruza Austria. Sin ella multa de 120 euros.</div></div>
+    <div class="al g"><div class="al-t">Reservar Coliseo y Vaticano online</div><div class="al-d">Sin reserva en julio hay 2-3h de cola. Hacedlo con antelacion.</div></div>
   </div>
 </div>
 
-<!-- ==================== INICIO ==================== -->
-<div id="page-inicio" class="page active">
-  <div class="hero">
-    <div class="hero-eyebrow">🇪🇸 Alicante → París → Roma → 🇪🇸 Alicante</div>
-    <h1 class="hero-title">Euro<em>Trip</em><br>2026</h1>
-    <p class="hero-sub">7 amigos · 8 días · ~5.800 km · 1 cumpleaños en Roma</p>
-    <div class="countdown-row">
-      <div class="countdown-item">
-        <div class="countdown-num" id="cnt-days">—</div>
-        <div class="countdown-label">Días</div>
-      </div>
-      <div class="countdown-item">
-        <div class="countdown-num" id="cnt-hours">—</div>
-        <div class="countdown-label">Horas</div>
-      </div>
-      <div class="countdown-item">
-        <div class="countdown-num" id="cnt-min">—</div>
-        <div class="countdown-label">Minutos</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="container">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon">🗓️</div>
-        <div class="stat-val">8</div>
-        <div class="stat-lbl">Días de viaje</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🏙️</div>
-        <div class="stat-val">8</div>
-        <div class="stat-lbl">Ciudades</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🚗</div>
-        <div class="stat-val">~4.800</div>
-        <div class="stat-lbl">km en coche</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🚄</div>
-        <div class="stat-val">~650</div>
-        <div class="stat-lbl">km en tren</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">💶</div>
-        <div class="stat-val">~700€</div>
-        <div class="stat-lbl">Por persona</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">🎂</div>
-        <div class="stat-val">19 Jul</div>
-        <div class="stat-lbl">Cumple en Roma</div>
-      </div>
-    </div>
-
-    <div class="section-header">
-      <div class="section-title">⚠️ Avisos importantes</div>
-      <div class="section-line"></div>
-    </div>
-
-    <div class="alerts">
-      <div class="alert danger">
-        <div class="alert-icon">🚗</div>
-        <div>
-          <div class="alert-title">ZTL Italia — No entrar al centro con coche</div>
-          <div class="alert-body">Roma y Milán tienen zonas de tráfico restringido (ZTL). Multas de 100–300€. Aparcar fuera y usar metro/taxi.</div>
-        </div>
-      </div>
-      <div class="alert danger">
-        <div class="alert-icon">🎟️</div>
-        <div>
-          <div class="alert-title">Reservar Coliseo y Vaticano YA</div>
-          <div class="alert-body">En julio sin reserva hay 2–3h de cola. Booking online imprescindible: coopculture.it y museivaticani.va</div>
-        </div>
-      </div>
-      <div class="alert">
-        <div class="alert-icon">🛣️</div>
-        <div>
-          <div class="alert-title">Vignette Austria ~9€ por coche</div>
-          <div class="alert-body">Si la ruta cruza Austria (Milán–Venecia). Comprarla antes: asfinag.at. Sin ella multa de 120€.</div>
-        </div>
-      </div>
-      <div class="alert info">
-        <div class="alert-icon">🚄</div>
-        <div>
-          <div class="alert-title">Tren Milán→Venecia→Roma (Día 5)</div>
-          <div class="alert-body">Trenitalia alta velocidad. Reservar con antelación. Llevan los coches aparcados en Milán y el grupo va en tren.</div>
-        </div>
-      </div>
-      <div class="alert info">
-        <div class="alert-icon">⛽</div>
-        <div>
-          <div class="alert-title">Gasolina por tramos</div>
-          <div class="alert-body">Prever ~€1.80/L en Francia. Llenar antes de entrar a Italia (más caro). Total estimado: ~€350 entre los 2 coches.</div>
-        </div>
-      </div>
-    </div>
+<!-- ALOJAMIENTOS -->
+<div id="view-alojamientos" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Alojamientos</div>
+  <div class="psub">Votad vuestras opciones favoritas. Los links abren directamente las listas de Airbnb.</div>
+  <div id="city-blocks"></div>
+  <div class="st" style="margin-top:1.25rem">Ranking de votos</div>
+  <div class="rk-card">
+    <div class="rk-h">Puntuacion en tiempo real</div>
+    <div id="rk-list"><div class="rk-empty">Sin votos todavia.</div></div>
   </div>
 </div>
 
-<!-- ==================== RUTA ==================== -->
-<div id="page-ruta" class="page">
-  <div class="container">
-    <div class="section-header" style="margin-top:8px">
-      <div class="section-title">La Ruta</div>
-      <div class="section-line"></div>
-    </div>
-    <p style="color:var(--muted);font-size:0.83rem;margin-bottom:24px">14 — 21 Julio 2026 · Toca cada día para ver el detalle</p>
+<!-- TIMELINE -->
+<div id="view-timeline" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Itinerario</div>
+  <div class="psub">13 dias. Toca cada dia para ver el detalle y abrir la ruta en Google Maps.</div>
+  <div id="tl-container"></div>
+</div>
 
-    <div class="days-list" id="days-list">
-      <!-- Populated by JS -->
-    </div>
+<!-- PRESUPUESTO -->
+<div id="view-presupuesto" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Presupuesto</div>
+  <div class="psub">Estimacion realista para el viaje completo</div>
+  <div class="pp-grid">
+    <div class="pp-card"><div class="pp-n">9 personas</div><div class="pp-v">537€</div><div class="pp-s">por persona</div></div>
+    <div class="pp-card hl"><div class="pp-n">7 confirmados</div><div class="pp-v">690€</div><div class="pp-s">total 4.830€</div></div>
+    <div class="pp-card"><div class="pp-n">8 personas</div><div class="pp-v">604€</div><div class="pp-s">por persona</div></div>
+  </div>
+  <div class="bud-t">
+    <div class="bud-th"><span>Categoria</span><span>Total</span><span>%</span></div>
+    <div id="bud-rows"></div>
   </div>
 </div>
 
-<!-- ==================== PRESUPUESTO ==================== -->
-<div id="page-presupuesto" class="page">
-  <div class="container">
-    <div class="section-header" style="margin-top:8px">
-      <div class="section-title">Presupuesto</div>
-      <div class="section-line"></div>
-    </div>
-
-    <div class="budget-hero">
-      <div class="budget-sub" style="margin-bottom:4px">Estimación total por persona</div>
-      <div class="budget-main" id="budget-per-person">700€</div>
-      <div class="budget-sub" id="budget-total">Total grupo: 4.900€</div>
-      <div class="budget-toggle" style="margin-top:16px">
-        <button class="toggle-btn active" onclick="setPeople(7,this)">7 personas</button>
-        <button class="toggle-btn" onclick="setPeople(8,this)">8 personas</button>
-        <button class="toggle-btn" onclick="setPeople(9,this)">9 personas</button>
+<!-- GASTOS -->
+<div id="view-gastos" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Gastos compartidos</div>
+  <div class="psub">Quien pago que. Los balances se calculan solos.</div>
+  <div class="gf">
+    <div class="gf-row">
+      <div><label class="fl">Quien pago</label>
+        <select class="fi" id="g-payer">
+          <option value="">Seleccionar...</option>
+          <option>Carlos</option><option>Lucia</option><option>Marco</option>
+          <option>Sofia</option><option>Diego</option><option>Ana</option><option>Javi</option>
+        </select>
+      </div>
+      <div><label class="fl">Monto (euros)</label>
+        <input class="fi" type="number" id="g-amt" placeholder="0.00" min="0" step="0.01">
       </div>
     </div>
-
-    <div class="section-header">
-      <div class="section-title" style="font-size:1.1rem">Desglose por categoría</div>
-      <div class="section-line"></div>
+    <div><label class="fl">Descripcion</label>
+      <input class="fi" type="text" id="g-desc" placeholder="ej: Gasolina Francia">
     </div>
-
-    <div class="budget-cats" id="budget-cats">
-      <!-- Populated by JS -->
-    </div>
-
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-top:16px">
-      <div style="font-size:0.8rem;color:var(--muted);line-height:1.7">
-        <strong style="color:var(--text)">📌 Notas del presupuesto</strong><br>
-        • Gasolina estimada: €1.80/L media · 7.5L/100km · 2 coches<br>
-        • Alojamientos: estimación Airbnb 7 personas (3 noches Roma, 1 Milán, 1 París)<br>
-        • Peajes: A7 España ~€30, Autopistas Francia ~€60, Italia ~€40<br>
-        • Tren Milán→Roma (AV): ~€35–55 por persona (reservar ya)<br>
-        • Entradas: Coliseo €16, Vaticano €17, Louvre €22<br>
-        • Comidas: ~€25/día · Se ahorra cocinando en Airbnb
-      </div>
-    </div>
+    <button class="btn-add" onclick="addGasto()">+ Anadir gasto</button>
+  </div>
+  <div class="st">Movimientos</div>
+  <div id="glist" class="glist"></div>
+  <div class="st">Balances</div>
+  <div class="bal-grid" id="bal-grid"></div>
+  <div class="st" style="margin-top:0.75rem">Liquidacion optima</div>
+  <div class="liq-card">
+    <div class="liq-h">Minimas transferencias para saldar todo</div>
+    <div id="liq-list"><div class="liq-empty">Sin gastos todavia.</div></div>
   </div>
 </div>
 
-<!-- ==================== ALOJAMIENTOS ==================== -->
-<div id="page-alojamientos" class="page">
-  <div class="container">
-    <div class="section-header" style="margin-top:8px">
-      <div class="section-title">Alojamientos</div>
-      <div class="section-line"></div>
-    </div>
-    <p style="color:var(--muted);font-size:0.83rem;margin-bottom:24px">Links directos a las listas de Airbnb compartidas. Votar y reservar cuanto antes — julio se agota.</p>
-
-    <div class="stays-grid" id="stays-grid">
-      <!-- Populated by JS -->
-    </div>
-  </div>
+<!-- NOTAS -->
+<div id="view-notas" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Notas por ciudad</div>
+  <div class="psub">Restaurantes, lugares y consejos para cada parada.</div>
+  <div class="ntabs" id="ntabs"></div>
+  <div class="ncard" id="ncontent"></div>
 </div>
 
-<!-- ==================== GASTOS ==================== -->
-<div id="page-gastos" class="page">
-  <div class="container">
-    <div class="section-header" style="margin-top:8px">
-      <div class="section-title">Gastos compartidos</div>
-      <div class="section-line"></div>
-    </div>
+<!-- CHECKLIST -->
+<div id="view-checklist" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Checklist</div>
+  <div class="psub">Tareas antes y durante el viaje. Cada una tiene responsable.</div>
+  <div id="cl-cont"></div>
+</div>
 
-    <div class="expense-form">
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">¿Quién pagó?</label>
-          <select class="form-select" id="exp-who">
-            <option value="">Seleccionar...</option>
-            <option>Carlos</option><option>Lucía</option><option>Marco</option>
-            <option>Sofía</option><option>Diego</option><option>Ana</option><option>Javi</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Monto (€)</label>
-          <input type="number" class="form-input" id="exp-amount" placeholder="0.00" min="0" step="0.01">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Descripción</label>
-          <input type="text" class="form-input" id="exp-desc" placeholder="Gasolina, cena, entrada...">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Ciudad</label>
-          <select class="form-select" id="exp-city">
-            <option value="Viaje completo">Viaje completo</option>
-            <option>Alicante</option><option>Barcelona</option><option>Montpellier</option>
-            <option>Clermont-Ferrand</option><option>París</option><option>Colmar</option>
-            <option>Milán</option><option>Venecia</option><option>Roma</option>
-            <option>Niza</option>
-          </select>
-        </div>
-      </div>
-      <button class="btn-primary" onclick="addExpense()">+ Añadir gasto</button>
+<!-- EMERGENCIAS -->
+<div id="view-emergencias" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Emergencias y Documentos</div>
+  <div class="psub">Telefonos clave y alertas importantes para el viaje.</div>
+  <div class="em-grid">
+    <div class="em-card"><div class="em-title">🚨 Emergencias</div>
+      <div class="em-item"><span class="em-l">Toda Europa</span><span class="em-v"><a href="tel:112">112</a></span></div>
+      <div class="em-item"><span class="em-l">Policia Francia</span><span class="em-v"><a href="tel:17">17</a></span></div>
+      <div class="em-item"><span class="em-l">Policia Italia</span><span class="em-v"><a href="tel:113">113</a></span></div>
+      <div class="em-item"><span class="em-l">Policia Alemania</span><span class="em-v"><a href="tel:110">110</a></span></div>
+      <div class="em-item"><span class="em-l">Ambulancia Italia</span><span class="em-v"><a href="tel:118">118</a></span></div>
     </div>
-
-    <div id="expenses-summary" style="display:none">
-      <div class="balances-card" id="balances-card">
-        <div style="font-size:0.82rem;font-weight:600;margin-bottom:14px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Balances actuales</div>
-        <div id="balances-list"></div>
-      </div>
+    <div class="em-card"><div class="em-title">🏛️ Consulados Spain</div>
+      <div class="em-item"><span class="em-l">Paris</span><span class="em-v"><a href="tel:+33144433518">+33 1 44 43 35 18</a></span></div>
+      <div class="em-item"><span class="em-l">Roma</span><span class="em-v"><a href="tel:+390687114">+39 06 8711 4</a></span></div>
+      <div class="em-item"><span class="em-l">Berlin</span><span class="em-v"><a href="tel:+4930254007330">+49 30 254 007 33</a></span></div>
+      <div class="em-item"><span class="em-l">Bruselas</span><span class="em-v"><a href="tel:+3225903800">+32 2 590 38 00</a></span></div>
     </div>
-
-    <div class="section-header" style="margin-top:20px">
-      <div class="section-title" style="font-size:1.1rem">Registro</div>
-      <div class="section-line"></div>
+    <div class="em-card"><div class="em-title">🚗 Alertas coche</div>
+      <div class="em-item"><span class="em-l">Vignette Austria</span><span class="em-v" style="color:#059669">~9 euros</span></div>
+      <div class="em-item"><span class="em-l">ZTL Roma</span><span class="em-v" style="color:#dc2626">100-300 euros</span></div>
+      <div class="em-item"><span class="em-l">ZTL Pisa</span><span class="em-v" style="color:#dc2626">Evitar centro</span></div>
+      <div class="em-item"><span class="em-l">Comprar vignette</span><span class="em-v"><a href="https://www.asfinag.at" target="_blank">asfinag.at</a></span></div>
     </div>
-    <div class="expenses-list" id="expenses-list">
-      <div style="text-align:center;color:var(--muted);font-size:0.85rem;padding:30px">Sin gastos todavía. ¡Añade el primero!</div>
+    <div class="em-card"><div class="em-title">📄 Links clave</div>
+      <div class="em-item"><span class="em-l">Coliseo entradas</span><span class="em-v"><a href="https://www.coopculture.it" target="_blank">coopculture.it</a></span></div>
+      <div class="em-item"><span class="em-l">Vaticano entradas</span><span class="em-v"><a href="https://www.museivaticani.va" target="_blank">museivaticani.va</a></span></div>
+      <div class="em-item"><span class="em-l">Louvre entradas</span><span class="em-v"><a href="https://www.ticketlouvre.fr" target="_blank">ticketlouvre.fr</a></span></div>
+      <div class="em-item"><span class="em-l">Vaporetto Venecia</span><span class="em-v"><a href="https://www.veneziaunica.it" target="_blank">veneziaunica.it</a></span></div>
     </div>
   </div>
 </div>
 
-<!-- ==================== CHECKLIST ==================== -->
-<div id="page-checklist" class="page">
-  <div class="container">
-    <div class="section-header" style="margin-top:8px">
-      <div class="section-title">Checklist</div>
-      <div class="section-line"></div>
-    </div>
-    <div id="checklist-progress" style="margin-bottom:20px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-        <span style="font-size:0.8rem;color:var(--muted)">Progreso general</span>
-        <span style="font-size:0.8rem;color:var(--accent)" id="check-pct">0%</span>
-      </div>
-      <div class="progress-bar"><div class="progress-fill" id="check-bar" style="width:0%"></div></div>
-    </div>
-    <div id="checklist-container"></div>
-  </div>
+<!-- CIUDAD -->
+<div id="view-ciudad" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem">← Inicio</button>
+  <div id="ciudad-content"></div>
 </div>
 
-<!-- ==================== SOS ==================== -->
-<div id="page-sos" class="page">
-  <div class="container">
-    <div class="section-header" style="margin-top:8px">
-      <div class="section-title">🆘 Emergencias</div>
-      <div class="section-line"></div>
-    </div>
 
-    <div class="sos-grid">
-      <div class="sos-card">
-        <div class="sos-card-title">🚨 Emergencias generales</div>
-        <div class="sos-number"><span class="sos-num-label">Toda Europa</span><span class="sos-num-val"><a href="tel:112">112</a></span></div>
-        <div class="sos-number"><span class="sos-num-label">Policía Francia</span><span class="sos-num-val"><a href="tel:17">17</a></span></div>
-        <div class="sos-number"><span class="sos-num-label">Policía Italia</span><span class="sos-num-val"><a href="tel:113">113</a></span></div>
-        <div class="sos-number"><span class="sos-num-label">Ambulancia Italia</span><span class="sos-num-val"><a href="tel:118">118</a></span></div>
-      </div>
-      <div class="sos-card">
-        <div class="sos-card-title">🏛️ Consulados España</div>
-        <div class="sos-number"><span class="sos-num-label">París</span><span class="sos-num-val"><a href="tel:+33144433518">+33 1 44 43 35 18</a></span></div>
-        <div class="sos-number"><span class="sos-num-label">Roma</span><span class="sos-num-val"><a href="tel:+390687114">+39 06 8711 4</a></span></div>
-        <div class="sos-number"><span class="sos-num-label">Berlín</span><span class="sos-num-val"><a href="tel:+4930254007330">+49 30 254 007 33</a></span></div>
-        <div class="sos-number"><span class="sos-num-label">Bruselas</span><span class="sos-num-val"><a href="tel:+3225903800">+32 2 590 38 00</a></span></div>
-      </div>
-    </div>
+<!-- SIMULADOR -->
+<div id="view-simulador" class="view">
+  <div class="ptitle">Simulador 🧪</div>
+  <div class="psub">Prueba ciudades nuevas en la ruta sin confirmar nada. Arrastra para reordenar.</div>
 
-    <div style="margin-top:16px">
-      <div class="sos-alert">
-        <div class="sos-alert-title">🚗 ZTL — Zonas de Tráfico Limitado Italia</div>
-        <div class="sos-alert-body">Roma y Milán tienen ZTL activas. Aparcar en parkings externos (P+R) y entrar en transporte público. Multas de 100–300€ si el coche entra al centro.</div>
-      </div>
-      <div class="sos-alert">
-        <div class="sos-alert-title">🛣️ Vignette Austria</div>
-        <div class="sos-alert-body">Si la ruta pasa por Austria: vignette obligatoria ~9€ por coche. Comprar online en asfinag.at antes de cruzar. Multa de 120€ si no la llevas.</div>
-      </div>
-    </div>
+  <div class="sim-alert" id="sim-alert" style="display:none"></div>
 
-    <div class="sos-card" style="margin-top:16px">
-      <div class="sos-card-title">📄 Links imprescindibles</div>
-      <div class="sos-number"><span class="sos-num-label">Coliseo entradas</span><span class="sos-num-val"><a href="https://www.coopculture.it" target="_blank">coopculture.it</a></span></div>
-      <div class="sos-number"><span class="sos-num-label">Vaticano entradas</span><span class="sos-num-val"><a href="https://www.museivaticani.va" target="_blank">museivaticani.va</a></span></div>
-      <div class="sos-number"><span class="sos-num-label">Louvre entradas</span><span class="sos-num-val"><a href="https://www.ticketlouvre.fr" target="_blank">ticketlouvre.fr</a></span></div>
-      <div class="sos-number"><span class="sos-num-label">Trenitalia (trenes)</span><span class="sos-num-val"><a href="https://www.trenitalia.com" target="_blank">trenitalia.com</a></span></div>
-      <div class="sos-number"><span class="sos-num-label">Vignette Austria</span><span class="sos-num-val"><a href="https://www.asfinag.at" target="_blank">asfinag.at</a></span></div>
-    </div>
+  <div class="sim-summary">
+    <div><div class="sim-sum-v" id="sim-total-km">4.800</div><div class="sim-sum-l">km totales</div></div>
+    <div><div class="sim-sum-v" id="sim-total-h">~52h</div><div class="sim-sum-l">conducción</div></div>
+    <div><div class="sim-sum-v" id="sim-total-fuel">~350€</div><div class="sim-sum-l">gasolina est.</div></div>
+  </div>
+
+  <div class="st">Ruta actual — arrastra para reordenar</div>
+  <div id="sim-ruta" class="sim-ruta"></div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;margin-top:0.5rem">
+    <div class="st" style="margin:0;flex:1">Ciudades candidatas</div>
+    <button class="btn-sim-reset" onclick="simReset()">Restaurar ruta</button>
+  </div>
+  <div class="sim-candidates" id="sim-candidates"></div>
+</div>
+
+</div><!-- end main -->
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="bnb active" onclick="showView('dashboard',0)"><span class="bnb-i">🏠</span><span class="bnb-l">Inicio</span></button>
+  <button class="bnb" onclick="showView('alojamientos',1)"><span class="bnb-i">🛏</span><span class="bnb-l">Alojam.</span></button>
+  <button class="bnb" onclick="showView('timeline',2)"><span class="bnb-i">📅</span><span class="bnb-l">Ruta</span></button>
+  <button class="bnb" onclick="showView('gastos',4)"><span class="bnb-i">🧾</span><span class="bnb-l">Gastos</span></button>
+  <button class="bnb" onclick="showView('notas',5)"><span class="bnb-i">📝</span><span class="bnb-l">Notas</span></button>
+  <button class="bnb" onclick="showView('simulador',8)"><span class="bnb-i">🧪</span><span class="bnb-l">Simular</span></button>
+  <button class="bnb" onclick="showView('checklist',6)"><span class="bnb-i">✅</span><span class="bnb-l">Check</span></button>
+  <button class="bnb" onclick="showView('emergencias',7)"><span class="bnb-i">🆘</span><span class="bnb-l">SOS</span></button>
+</div>
+
+<!-- NOMBRE MODAL -->
+<div class="nmodal" id="nmodal">
+  <div class="nmodal-box">
+    <div class="nmodal-t">Bienvenido al EuroTrip 2026</div>
+    <div class="nmodal-s">Como te llamas? Asi identificamos tus votos y gastos.</div>
+    <input class="fi" id="ninput" type="text" placeholder="Tu nombre..." style="margin-bottom:0.75rem">
+    <button class="btn-add" onclick="guardarNombre()">Entrar</button>
   </div>
 </div>
 
 <script>
-// ==================== DATA ====================
-const PEOPLE = 7;
-let currentPeople = 7;
+// openCity available globally from start
+function openCity(cityId) {
+  // Will be populated after full script loads
+  if(typeof _openCity === 'function') _openCity(cityId);
+  else setTimeout(function(){ if(typeof _openCity==='function') _openCity(cityId); }, 200);
+}
 
-const ITINERARY = [
-  {
-    day: 1, date: '14 Jul', label: 'Día 1',
-    title: 'Alicante → Barcelona → Montpellier',
-    type: 'drive', driving: '9h 30min', km: 830,
-    stops: [
-      { name: 'Alicante', note: 'Salida temprano (7:00h). Llenar tanques.', type: 'start' },
-      { name: 'Barcelona', note: '🍽️ Parada almuerzo (~3h30 desde Alicante). Tapas en el Born o Barceloneta. ~1.5h parada.', type: 'rest' },
-      { name: 'Montpellier', note: '🛏️ Llegada ~19:00h. Primera noche en Francia. Centre historique muy bonito.', type: 'end' },
-    ],
-    maps: 'https://maps.app.goo.gl/xY5Ksd7qJhAQnR5M6',
-    badge: null, badgeClass: null,
-  },
-  {
-    day: 2, date: '15 Jul', label: 'Día 2',
-    title: 'Montpellier → Clermont-Ferrand → París',
-    type: 'drive', driving: '8h 45min', km: 780,
-    stops: [
-      { name: 'Montpellier', note: 'Salida 8:00h', type: 'start' },
-      { name: 'Clermont-Ferrand', note: '🍽️ Parada almuerzo a mitad de ruta. Ciudad bajo el volcán Puy de Dôme — si hay tiempo, subir (15 min extra). ~1.5h parada.', type: 'rest' },
-      { name: 'París', note: '🛏️ Llegada ~19:00h. 2 noches en París. Airbnb central recomendado en Le Marais o Montmartre.', type: 'end' },
-    ],
-    maps: 'https://maps.app.goo.gl/zyaR1HqWBtT7JN3B6',
-    badge: null, badgeClass: null,
-  },
-  {
-    day: 3, date: '16 Jul', label: 'Día 3',
-    title: 'Día libre en París 🗼',
-    type: 'free', driving: '—', km: 0,
-    stops: [
-      { name: 'Torre Eiffel', note: 'Reservar entradas con antelación en toureiffel.paris. Subir a medianoche para ver las luces.', type: 'start' },
-      { name: 'Louvre', note: '🎨 Reservar online (ticketlouvre.fr). Llegad al abrir para evitar colas.', type: 'rest' },
-      { name: 'Montmartre & Sacré-Cœur', note: '🎭 Barrio bohemio, vistas de París. Cenar en Montmartre.', type: 'rest' },
-    ],
-    maps: 'https://maps.app.goo.gl/mG47c3F1Xw7LfJxN8',
-    badge: '¡El amigo quería París!', badgeClass: 'paris-badge',
-  },
-  {
-    day: 4, date: '17 Jul', label: 'Día 4',
-    title: 'París → Colmar → Milán',
-    type: 'drive', driving: '10h 00min', km: 890,
-    stops: [
-      { name: 'París', note: 'Salida 7:30h. Desayuno rápido.', type: 'start' },
-      { name: 'Colmar (Alsacia)', note: '🏡 Parada a mitad de ruta. El pueblo más bonito de Francia. Casas medievales de colores a orillas del río. 1.5h parada — vale mucho la pena.', type: 'rest' },
-      { name: 'Milán', note: '🛏️ Llegada ~19:30h. 1 noche en Milán. Coches quedan aparcados aquí hasta el regreso.', type: 'end' },
-    ],
-    maps: 'https://maps.app.goo.gl/8Np3KfTqHr9CZaLU9',
-    badge: null, badgeClass: null,
-  },
-  {
-    day: 5, date: '18 Jul', label: 'Día 5',
-    title: 'Milán 🚄 Venecia 🚄 Roma',
-    type: 'train', driving: '~5h tren', km: 650,
-    stops: [
-      { name: 'Milán (Centrale)', note: '🚄 Tren alta velocidad Trenitalia. Coches aparcados en parking del hotel. Reservar billetes YA en trenitalia.com (~€35–55 pp).', type: 'train' },
-      { name: 'Venecia', note: '🎭 Parada 2–3h. El tren pasa por Venezia Santa Lucia. Paseo por Rialto y San Marco. Vaporetto 1 viaje (~€9). Sin coche — perfecto.', type: 'rest' },
-      { name: 'Roma (Termini)', note: '🛏️ Llegada ~18:00h. 2 noches en Roma. ¡Mañana es el gran día del cumpleaños!', type: 'end' },
-    ],
-    maps: 'https://www.trenitalia.com',
-    badge: '🚄 Todo en tren', badgeClass: null,
-  },
-  {
-    day: 6, date: '19 Jul', label: 'Día 6',
-    title: '🎂 Roma — Día del Cumpleaños',
-    type: 'free', driving: '—', km: 0,
-    stops: [
-      { name: 'Coliseo & Foro Romano', note: '🏛️ Reservar con antelación (coopculture.it). Llegar al abrir (9:00h) para evitar el calor de mediodía.', type: 'start' },
-      { name: 'Fontana di Trevi & Panteón', note: '⛲ La Fontana di Trevi es gratuita. El Panteón requiere entrada (~€5). Centro histórico a pie.', type: 'rest' },
-      { name: 'Vaticano & Capilla Sixtina', note: '✝️ Reservar online (museivaticani.va). ¡Imprescindible! Tarde en el Vaticano + cena de cumpleaños especial.', type: 'rest' },
-    ],
-    maps: 'https://maps.app.goo.gl/hGnKpYgMXR3JHT4V7',
-    badge: '🎂 Cumpleaños en Roma', badgeClass: 'birthday-badge',
-  },
-  {
-    day: 7, date: '20 Jul', label: 'Día 7',
-    title: 'Roma 🚄 Milán → Niza',
-    type: 'mixed', driving: '3h coche + 3h tren', km: 650,
-    stops: [
-      { name: 'Roma (Termini)', note: '🚄 Tren Roma→Milán ~3h. Salida 9:00h approx.', type: 'train' },
-      { name: 'Milán', note: '🚗 Recuperar los 2 coches del parking. Breve parada para comer y recargar.', type: 'rest' },
-      { name: 'Niza', note: '🛏️ ~3h desde Milán por autovía. Última noche internacional. Paseo por la Promenade des Anglais.', type: 'end' },
-    ],
-    maps: 'https://maps.app.goo.gl/4TpA3cQhHjYpGXsY8',
-    badge: null, badgeClass: null,
-  },
-  {
-    day: 8, date: '21 Jul', label: 'Día 8',
-    title: 'Niza → Alicante 🏁',
-    type: 'drive', driving: '7h 30min', km: 640,
-    stops: [
-      { name: 'Niza', note: 'Salida 8:00h. Último desayuno francés.', type: 'start' },
-      { name: 'Montpellier o Perpignan', note: '🍽️ Parada a mitad de ruta para comer. ~3.5h desde Niza.', type: 'rest' },
-      { name: 'Alicante 🏁', note: '🎉 ¡Casa! Llegada ~17:00h. Fin del EuroTrip 2026.', type: 'end' },
-    ],
-    maps: 'https://maps.app.goo.gl/jKkR3BpNzYTQW5t86',
-    badge: null, badgeClass: null,
-  },
-];
+// ===== CONFIG =====
+var SUPA = 'https://nhblyxltpdpyxmvjtrmt.supabase.co';
+var KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU';
+var NOMBRE = localStorage.getItem('et_nombre') || '';
+var SHEET  = 'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?output=csv');
 
-const BUDGET_CATS = [
-  { icon: '⛽', name: 'Gasolina', note: '2 coches × ~2400km coche total / 7.5L/100km', total: 650, pct: 19 },
-  { icon: '🏠', name: 'Alojamientos', note: '~7 noches Airbnb (Roma 2n, Milán 1n, París 2n, Montpellier 1n, Niza 1n)', total: 1400, pct: 41 },
-  { icon: '🚄', name: 'Trenes', note: 'Milán→Venecia→Roma + Roma→Milán (Alta velocidad)', total: 420, pct: 12 },
-  { icon: '🛣️', name: 'Peajes', note: 'A7 España, autopistas Francia e Italia', total: 280, pct: 8 },
-  { icon: '🎟️', name: 'Entradas', note: 'Coliseo, Vaticano, Louvre, Torre Eiffel, Venecia vaporetto', total: 350, pct: 10 },
-  { icon: '🍽️', name: 'Comidas extra', note: 'Paradas en ruta, cena cumpleaños Roma', total: 350, pct: 10 },
-];
-
-const STAYS = [
-  { city: 'Montpellier', dates: '14 → 15 Jul', nights: '1 noche', note: 'Sólo para dormir — salida temprana el 15', airbnb: null },
-  { city: 'París', dates: '15 → 17 Jul', nights: '2 noches', note: 'Le Marais o Montmartre recomendado', airbnb: 'https://www.airbnb.es/wishlists/invite/abb95041-b59b-4b22-ac85-65460cc5e80d' },
-  { city: 'Milán', dates: '17 → 18 Jul', nights: '1 noche', note: 'Cerca de Milano Centrale (dejáis los coches aquí)', airbnb: null },
-  { city: 'Roma', dates: '18 → 20 Jul', nights: '2 noches 🎂', note: 'Centro histórico o Trastevere — ¡la noche del cumple!', airbnb: 'https://www.airbnb.es/wishlists/invite/68e72df8-718b-4bfc-bfa8-b46195ca67d9' },
-  { city: 'Niza', dates: '20 → 21 Jul', nights: '1 noche', note: 'Cerca de la Promenade des Anglais', airbnb: null },
-];
-
-const CHECKLIST_DATA = [
-  {
-    section: '📋 Antes del viaje (urgente)',
-    items: [
-      { text: 'Reservar billetes de tren Milán→Venecia→Roma', who: 'Todos', tag: '🚄 Tren', done: false },
-      { text: 'Reservar tren Roma→Milán (vuelta)', who: 'Todos', tag: '🚄 Tren', done: false },
-      { text: 'Comprar entradas Coliseo online', who: 'Alguien', tag: '🏛️ Roma', done: false },
-      { text: 'Comprar entradas Vaticano online', who: 'Alguien', tag: '🏛️ Roma', done: false },
-      { text: 'Reservar Torre Eiffel (si suben)', who: 'Alguien', tag: '🗼 París', done: false },
-      { text: 'Reservar Louvre online', who: 'Alguien', tag: '🗼 París', done: false },
-      { text: 'Confirmar Airbnb París (2 noches)', who: 'Todos votan', tag: '🏠 Alojam.', done: false },
-      { text: 'Confirmar Airbnb Roma (2 noches)', who: 'Todos votan', tag: '🏠 Alojam.', done: false },
-      { text: 'Comprar Vignette Austria (si aplica)', who: 'Conductores', tag: '🛣️ Ruta', done: false },
-    ]
-  },
-  {
-    section: '🎒 Preparar maletas',
-    items: [
-      { text: 'Tarjeta sanitaria europea (EHIC) — todos', who: 'Individual', tag: '🏥 Salud', done: false },
-      { text: 'DNI/Pasaporte vigente', who: 'Individual', tag: '📄 Docs', done: false },
-      { text: 'Adaptador de enchufes (FR/IT usan Schuko)', who: 'Compartido', tag: '🔌 Equipo', done: false },
-      { text: 'Botiquín básico', who: 'Grupo', tag: '🏥 Salud', done: false },
-      { text: 'Power bank para el coche', who: 'Conductores', tag: '🔌 Equipo', done: false },
-    ]
-  },
-  {
-    section: '🚗 Coches y conductores',
-    items: [
-      { text: 'Seguro de viaje europeo (ambos coches)', who: 'Conductores', tag: '🚗 Coches', done: false },
-      { text: 'Carta verde del seguro impresa', who: 'Conductores', tag: '🚗 Coches', done: false },
-      { text: 'Chaleco reflectante + triángulo (obligatorio FR/IT)', who: 'Conductores', tag: '🚗 Coches', done: false },
-      { text: 'Definir turnos de conducción por etapa', who: 'Grupo', tag: '🚗 Coches', done: false },
-      { text: 'Parking Milán reservado (2 coches, 2 noches)', who: 'Alguien', tag: '🚗 Coches', done: false },
-    ]
-  },
-];
-
-// ==================== STATE ====================
-let expenses = JSON.parse(localStorage.getItem('et26_expenses') || '[]');
-let checkStates = JSON.parse(localStorage.getItem('et26_checks') || '{}');
-
-// ==================== NAV ====================
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.mobile-tab').forEach(t => t.classList.remove('active'));
-
-  document.getElementById('page-' + id).classList.add('active');
-
-  document.querySelectorAll('.nav-tab').forEach(t => {
-    if (t.getAttribute('onclick').includes("'" + id + "'")) t.classList.add('active');
-  });
-  document.querySelectorAll('.mobile-tab').forEach(t => {
-    if (t.getAttribute('onclick').includes("'" + id + "'")) t.classList.add('active');
+// ===== SUPABASE REST =====
+function supa(method, table, body, params) {
+  var url = SUPA + '/rest/v1/' + table + (params || '');
+  var headers = {
+    'apikey': KEY,
+    'Authorization': 'Bearer ' + KEY,
+    'Content-Type': 'application/json'
+  };
+  if(method === 'POST') headers['Prefer'] = 'return=minimal';
+  if(method === 'DELETE') headers['Prefer'] = 'return=minimal';
+  var opts = {method: method, headers: headers};
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(url, opts).then(function(r) {
+    if(r.status === 204 || r.status === 200 && method === 'DELETE') return {};
+    return r.json().catch(function(){ return {}; });
   });
 }
 
-// ==================== COUNTDOWN ====================
-function updateCountdown() {
-  const target = new Date('2026-07-14T07:00:00');
-  const now = new Date();
-  const diff = target - now;
-  if (diff <= 0) {
-    document.getElementById('cnt-days').textContent = '¡Ya!';
-    document.getElementById('cnt-hours').textContent = '🎉';
-    document.getElementById('cnt-min').textContent = '🚗';
-    return;
-  }
-  const days = Math.floor(diff / 86400000);
-  const hours = Math.floor((diff % 86400000) / 3600000);
-  const mins = Math.floor((diff % 3600000) / 60000);
-  document.getElementById('cnt-days').textContent = days;
-  document.getElementById('cnt-hours').textContent = hours;
-  document.getElementById('cnt-min').textContent = mins;
+// ===== DATA =====
+var votes  = {};
+var gastos = [];
+var clDone = {};
+var activeNota = 'Paris';
+
+var LINKS = {
+  paris:   {air:'https://www.airbnb.es/wishlists/invite/abb95041-b59b-4b22-ac85-65460cc5e80d', book:''},
+  roma:    {air:'https://www.airbnb.es/wishlists/invite/68e72df8-718b-4bfc-bfa8-b46195ca67d9', book:''},
+  venecia: {air:'https://www.airbnb.es/wishlists/invite/bcb6a644-cafa-4fb5-a4fe-98616153cfd5', book:''},
+  milan:   {air:'', book:''},
+  niza:    {air:'', book:''}
+};
+var PEOPLEml>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>EuroTrip 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bottom:64px}
+.header{background:#0f172a;padding:0.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:sticky;top:0;z-index:100}
+.hlogo{color:white;font-size:0.95rem;font-weight:700}
+.hbadge{font-size:0.65rem;font-weight:700;padding:0.25rem 0.7rem;border-radius:20px;background:rgba(255,255,255,0.1);color:#94a3b8;white-space:nowrap}
+.hcity{font-size:0.62rem;color:#64748b;cursor:pointer;transition:color .15s;white-space:nowrap;padding:0.15rem 0.1rem;-webkit-tap-highlight-color:transparent}
+.hcity:hover,.hcity:active{color:white;text-decoration:underline}
+.harr{font-size:0.55rem;color:#334155}
+.hbadge.live{background:rgba(16,185,129,0.2);color:#34d399}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.bnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.15rem;background:none;border:none;cursor:pointer;padding:0.5rem 0.1rem;font-family:inherit}
+.bnb-i{font-size:1.05rem}
+.bnb-l{font-size:0.55rem;font-weight:600;color:#94a3b8}
+.bnb.active .bnb-l{color:#3b82f6}
+.main{max-width:900px;margin:0 auto;padding:1.25rem}
+.view{display:none}.view.active{display:block}
+.ptitle{font-size:1.15rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.2rem}
+.psub{font-size:0.78rem;color:#64748b;margin-bottom:1.25rem}
+
+/* CARDS */
+.dgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem}
+.dcard{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.85rem;cursor:pointer;transition:all .18s}
+.dcard:hover{border-color:#3b82f6;transform:translateY(-2px)}
+.di{font-size:1.1rem;margin-bottom:0.3rem}
+.dv{font-size:1.3rem;font-weight:800;letter-spacing:-0.02em}
+.dl{font-size:0.63rem;color:#64748b;margin-top:0.15rem}
+.dt{display:inline-block;margin-top:0.3rem;font-size:0.57rem;font-weight:600;padding:0.1rem 0.35rem;border-radius:4px}
+.tb{background:#eff6ff;color:#3b82f6}.tg{background:#ecfdf5;color:#059669}
+.ta{background:#fffbeb;color:#d97706}.tr{background:#fef2f2;color:#dc2626}
+
+/* ALERTS */
+.alerts{display:flex;flex-direction:column;gap:0.35rem;margin-top:1rem}
+.al{background:white;border-radius:9px;padding:0.68rem 0.9rem;border-left:3px solid}
+.al.r{border-color:#ef4444}.al.a{border-color:#f59e0b}.al.b{border-color:#3b82f6}.al.g{border-color:#10b981}
+.al-t{font-size:0.8rem;font-weight:600;margin-bottom:0.04rem}
+.al-d{font-size:0.7rem;color:#64748b}
+.al.r .al-t{color:#dc2626}.al.a .al-t{color:#d97706}.al.b .al-t{color:#2563eb}.al.g .al-t{color:#059669}
+
+/* STITLE */
+.st{font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;margin-bottom:0.6rem;display:flex;align-items:center;gap:0.5rem}
+.st::after{content:'';flex:1;height:1px;background:#e2e8f0}
+
+/* ALOJAMIENTOS */
+.city-block{background:white;border:1.5px solid #e2e8f0;border-radius:12px;margin-bottom:0.75rem;overflow:hidden}
+.city-h{display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1rem;border-bottom:1px solid #f1f5f9}
+.city-flag{font-size:1.3rem}
+.city-name{font-size:0.9rem;font-weight:700;flex:1}
+.city-meta{font-size:0.65rem;color:#94a3b8}
+.city-nights{background:#f1f5f9;border-radius:6px;padding:0.2rem 0.6rem;font-size:0.65rem;font-weight:600;color:#475569;white-space:nowrap}
+.city-body{padding:0.75rem 1rem;display:flex;flex-direction:column;gap:0.4rem}
+.lrow{display:flex;align-items:center;gap:0.65rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.55rem 0.8rem}
+.lp{display:flex;align-items:center;gap:0.35rem;font-size:0.68rem;font-weight:700;min-width:68px}
+.da{width:7px;height:7px;border-radius:50%;background:#ff5a5f}.la{color:#ef4444}
+.db{width:7px;height:7px;border-radius:50%;background:#003580}.lb{color:#003580}
+.ldesc{flex:1;font-size:0.7rem;color:#94a3b8;font-style:italic}
+.ldesc.ok{color:#059669;font-style:normal;font-weight:500}
+.btn-ver{color:white;font-family:inherit;font-size:0.67rem;font-weight:700;padding:0.35rem 0.7rem;border-radius:7px;text-decoration:none;white-space:nowrap;border:none;cursor:pointer}
+.ba{background:#ff5a5f}.bb{background:#003580}
+.vrow{display:flex;gap:0.35rem;margin-top:0.4rem}
+.vb{flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.2rem;cursor:pointer;font-size:0.67rem;font-weight:600;color:#64748b;font-family:inherit;transition:all .15s}
+.vb:hover{border-color:#94a3b8}
+.vy{border-color:#10b981!important;background:#ecfdf5!important;color:#059669!important}
+.vf{border-color:#f59e0b!important;background:#fffbeb!important;color:#d97706!important}
+.vn{border-color:#ef4444!important;background:#fef2f2!important;color:#dc2626!important}
+.rk-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;overflow:hidden;margin-top:1.25rem}
+.rk-h{padding:0.65rem 1rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.63rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em}
+.rk-row{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;border-bottom:1px solid #f1f5f9;font-size:0.78rem}
+.rk-row:last-child{border-bottom:none}
+.rk-pos{min-width:22px;font-size:0.9rem}
+.rk-name{flex:1;font-weight:600}
+.rk-pts{font-weight:700;color:#3b82f6}
+.rk-empty{padding:1rem;font-size:0.78rem;color:#94a3b8;text-align:center}
+
+/* TIMELINE */
+.tl-row{background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;cursor:pointer;margin-bottom:0.38rem;transition:border-color .15s}
+.tl-row:hover,.tl-row.open{border-color:#3b82f6}
+.tl-h{display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.9rem}
+.tl-date{font-size:0.65rem;font-weight:700;color:#3b82f6;min-width:40px}
+.tl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.ds{background:#3b82f6}.dd{background:#f59e0b}
+.tl-city{font-weight:600;font-size:0.82rem;flex:1}
+.tp{font-size:0.58rem;font-weight:600;padding:0.12rem 0.4rem;border-radius:5px}
+.tpd{background:#fffbeb;color:#d97706}.tps{background:#eff6ff;color:#3b82f6}.tpk{background:#ecfdf5;color:#059669}.tpz{background:#fef2f2;color:#dc2626}
+.tl-ch{color:#94a3b8;font-size:0.58rem;transition:transform .15s}
+.tl-row.open .tl-ch{transform:rotate(180deg)}
+.tl-body{display:none;border-top:1px solid #f1f5f9;padding:0.78rem 0.9rem;grid-template-columns:1fr 1fr;gap:0.85rem}
+.tl-row.open .tl-body{display:grid}
+.tsub{font-size:0.58rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.25rem}
+.tact{font-size:0.76rem;color:#475569;padding-left:0.72rem;position:relative;margin-bottom:0.2rem;line-height:1.35}
+.tact::before{content:'·';position:absolute;left:0;color:#3b82f6}
+.tnote{margin-top:0.45rem;background:#f8fafc;border-radius:7px;padding:0.4rem 0.65rem}
+.tnote-l{font-size:0.56rem;font-weight:700;color:#3b82f6;margin-bottom:0.06rem}
+.tnote-t{font-size:0.72rem;color:#64748b;line-height:1.45}
+.tztl{margin-top:0.4rem;background:#fef2f2;border-radius:7px;padding:0.4rem 0.65rem;border:1px solid #fecaca}
+.tztl-t{font-size:0.7rem;color:#dc2626;line-height:1.4}
+.tstay{background:#f8fafc;border-radius:7px;padding:0.4rem 0.65rem;font-size:0.76rem;color:#475569}
+.btn-maps{display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;margin-top:0.5rem}
+
+/* PRESUPUESTO */
+.pp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1rem}
+.pp-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.85rem;text-align:center}
+.pp-card.hl{border-color:#3b82f6}
+.pp-n{font-size:0.65rem;color:#94a3b8;margin-bottom:0.2rem}
+.pp-v{font-size:1.6rem;font-weight:800;letter-spacing:-0.03em}
+.pp-card.hl .pp-v{color:#3b82f6}
+.pp-s{font-size:0.62rem;color:#94a3b8;margin-top:0.12rem}
+.bud-t{background:white;border:1.5px solid #e2e8f0;border-radius:11px;overflow:hidden;margin-bottom:1rem}
+.bud-th{display:grid;grid-template-columns:1fr auto auto;padding:0.5rem 0.88rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.59rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em}
+.bud-row{display:grid;grid-template-columns:1fr auto auto;padding:0.6rem 0.88rem;border-bottom:1px solid #f1f5f9;align-items:center}
+.bud-row:last-child{border-bottom:none}
+.bud-cat{display:flex;align-items:center;gap:0.38rem;font-size:0.78rem}
+.bud-bar{height:3px;background:#f1f5f9;border-radius:2px;margin-top:0.16rem;width:60px}
+.bud-fill{height:100%;border-radius:2px}
+.bud-amt{font-weight:700;font-size:0.78rem;padding-left:0.75rem}
+.bud-pct{font-size:0.59rem;color:#94a3b8;padding-left:0.35rem;min-width:24px;text-align:right}
+
+/* GASTOS */
+.gf{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.9rem;margin-bottom:1rem;display:flex;flex-direction:column;gap:0.5rem}
+.fl{display:block;font-size:0.59rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.22rem}
+.fi{width:100%;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.5rem 0.72rem;font-family:inherit;font-size:0.79rem;color:#0f172a;outline:none;transition:border-color .15s}
+.fi:focus{border-color:#3b82f6}
+.gf-row{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem}
+.btn-add{background:#0f172a;color:white;border:none;font-family:inherit;font-weight:700;font-size:0.75rem;padding:0.52rem 1rem;border-radius:8px;cursor:pointer;transition:background .15s;width:100%}
+.btn-add:hover{background:#3b82f6}
+.glist{display:flex;flex-direction:column;gap:0.35rem;margin-bottom:1rem}
+.gi{background:white;border:1.5px solid #e2e8f0;border-radius:9px;padding:0.6rem 0.88rem;display:flex;align-items:center;gap:0.7rem}
+.gi-desc{flex:1}
+.gi-name{font-size:0.79rem;font-weight:500}
+.gi-who{font-size:0.63rem;color:#94a3b8}
+.gi-amt{font-weight:700;font-size:0.85rem;color:#3b82f6;white-space:nowrap}
+.gi-del{background:none;border:none;color:#e2e8f0;cursor:pointer;font-size:0.85rem;transition:color .15s}
+.gi-del:hover{color:#ef4444}
+.bal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:0.5rem;margin-bottom:1rem}
+.bal-c{background:white;border:1.5px solid #e2e8f0;border-radius:9px;padding:0.72rem;text-align:center}
+.bal-n{font-weight:700;font-size:0.78rem;margin-bottom:0.15rem}
+.bal-a{font-size:1rem;font-weight:800;letter-spacing:-0.02em}
+.bal-pos{color:#059669}.bal-neg{color:#ef4444}
+.bal-l{font-size:0.58rem;color:#94a3b8;margin-top:0.08rem}
+.liq-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;overflow:hidden}
+.liq-h{padding:0.62rem 1rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.63rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.07em}
+.liq-row{display:flex;align-items:center;gap:0.6rem;padding:0.58rem 1rem;border-bottom:1px solid #f1f5f9;font-size:0.78rem}
+.liq-row:last-child{border-bottom:none}
+.liq-arr{color:#94a3b8}
+.liq-amt{font-weight:700;color:#3b82f6;margin-left:auto}
+.liq-empty{padding:1rem;font-size:0.78rem;color:#94a3b8;text-align:center}
+
+/* NOTAS */
+.ntabs{display:flex;gap:0.35rem;margin-bottom:0.88rem;flex-wrap:wrap}
+.ntab{background:white;border:1.5px solid #e2e8f0;color:#64748b;font-family:inherit;font-size:0.7rem;font-weight:600;padding:0.32rem 0.7rem;border-radius:8px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ntab.active{background:#0f172a;border-color:#0f172a;color:white}
+.ncard{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.95rem}
+.nsec{margin-bottom:0.88rem}
+.nsec:last-child{margin-bottom:0}
+.nsec-t{font-size:0.59rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.42rem}
+.nitem{background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:0.42rem 0.7rem;font-size:0.77rem;margin-bottom:0.23rem;display:flex;align-items:flex-start;gap:0.36rem;line-height:1.4}
+.nd{color:#3b82f6;font-size:0.57rem;margin-top:0.19rem;flex-shrink:0}
+
+/* CHECKLIST */
+.cl-sec{margin-bottom:1.1rem}
+.cl-st{font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;display:flex;align-items:center;gap:0.5rem}
+.cl-st::after{content:'';flex:1;height:1px;background:#e2e8f0}
+.cl-i{display:flex;align-items:center;gap:0.5rem;background:white;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.5rem 0.8rem;margin-bottom:0.27rem;cursor:pointer;transition:all .15s}
+.cl-i:hover{border-color:#3b82f6}
+.cl-i.done{opacity:0.42}
+.cl-box{width:15px;height:15px;border-radius:4px;border:2px solid #e2e8f0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:0.55rem;color:white;transition:all .15s}
+.cl-i.done .cl-box{background:#10b981;border-color:#10b981}
+.cl-txt{font-size:0.78rem;flex:1}
+.cl-i.done .cl-txt{text-decoration:line-through}
+.cl-own{font-size:0.58rem;font-weight:700;color:#7c3aed;background:#f5f3ff;padding:0.1rem 0.35rem;border-radius:5px;white-space:nowrap}
+
+/* EMERGENCIAS */
+.em-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:0.65rem}
+.em-card{background:white;border:1.5px solid #e2e8f0;border-radius:11px;padding:0.88rem}
+.em-title{font-size:0.72rem;font-weight:700;margin-bottom:0.5rem}
+.em-item{display:flex;align-items:center;justify-content:space-between;padding:0.32rem 0;border-bottom:1px solid #f1f5f9;font-size:0.72rem}
+.em-item:last-child{border-bottom:none}
+.em-l{color:#64748b;font-size:0.7rem}
+.em-v{font-weight:700}
+.em-v a{color:#3b82f6;text-decoration:none}
+
+/* NOMBRE MODAL */
+.nmodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;padding:1rem}
+.nmodal.open{display:flex}
+.nmodal-box{background:white;border-radius:16px;padding:1.5rem;width:100%;max-width:320px}
+.nmodal-t{font-size:1rem;font-weight:700;margin-bottom:0.4rem}
+.nmodal-s{font-size:0.78rem;color:#64748b;margin-bottom:1rem}
+
+@media(max-width:600px){
+  .dgrid{grid-template-columns:repeat(2,1fr)}
+  .tl-row.open .tl-body{grid-template-columns:1fr}
+  .gf-row{grid-template-columns:1fr}
+  .main{padding:0.88rem}
 }
-updateCountdown();
-setInterval(updateCountdown, 30000);
 
-// ==================== ITINERARY ====================
-function buildItinerary() {
-  const container = document.getElementById('days-list');
-  container.innerHTML = '';
-  ITINERARY.forEach((day, i) => {
-    const isLast = i === ITINERARY.length - 1;
-    const isBirthday = day.day === 6;
-    const isParis = day.day === 3;
+/* ===== SIMULADOR ===== */
+.sim-ruta {display:flex;flex-direction:column;gap:0.4rem;margin-bottom:1rem}
+.sim-city {background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;display:flex;align-items:center;gap:0.7rem;cursor:grab}
+.sim-city:active{cursor:grabbing}
+.sim-city.dragging{opacity:0.4;border-style:dashed}
+.sim-city.dragover{border-color:#3b82f6;background:#eff6ff}
+.sim-icon{font-size:1rem;width:24px;text-align:center;flex-shrink:0}
+.sim-name{font-weight:600;font-size:0.85rem;flex:1}
+.sim-meta{font-size:0.65rem;color:#94a3b8;text-align:right;line-height:1.4}
+.sim-km{font-weight:700;color:#0f172a;font-size:0.78rem}
+.sim-handle{color:#cbd5e1;font-size:0.9rem;cursor:grab;padding:0 0.2rem}
+.sim-summary{background:#0f172a;color:white;border-radius:12px;padding:1rem;display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1rem;text-align:center}
+.sim-sum-v{font-size:1.3rem;font-weight:800;letter-spacing:-0.02em}
+.sim-sum-l{font-size:0.6rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-top:0.1rem}
+.sim-candidates{display:flex;flex-direction:column;gap:0.4rem}
+.sim-cand{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.9rem;display:flex;align-items:center;gap:0.7rem}
+.sim-cand-info{flex:1}
+.sim-cand-name{font-weight:600;font-size:0.85rem}
+.sim-cand-note{font-size:0.68rem;color:#94a3b8;margin-top:0.1rem}
+.sim-cand-impact{font-size:0.7rem;color:#f59e0b;font-weight:600;margin-top:0.15rem}
+.btn-sim-add{background:#0f172a;color:white;border:none;border-radius:8px;padding:0.4rem 0.8rem;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s}
+.btn-sim-add:hover{background:#3b82f6}
+.btn-sim-add.added{background:#10b981}
+.btn-sim-reset{background:none;border:1.5px solid #e2e8f0;color:#64748b;border-radius:8px;padding:0.38rem 0.8rem;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:inherit}
+.sim-alert{background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:0.6rem 0.8rem;font-size:0.72rem;color:#92400e;margin-bottom:0.75rem;line-height:1.5}
+</style>
+</head>
+<body>
 
-    const dotClass = isBirthday ? 'birthday' : isParis ? 'paris' : '';
+<div class="header">
+  <div style="display:flex;flex-direction:column;gap:0.18rem">
+    <div class="hlogo" onclick="showView('dashboard',0)" style="cursor:pointer">🌍 EuroTrip 2026</div>
+    <div id="header-route" style="display:flex;align-items:center;gap:0.28rem;flex-wrap:wrap"></div>
+  </div>
+  <div class="hbadge" id="badge">🌍 EuroTrip</div>
+</div>
 
-    const badgeHtml = day.badge
-      ? `<span class="day-badge ${day.badgeClass || ''}">${day.badge}</span>`
-      : '';
+<div class="main">
 
-    const typeIcon = day.type === 'train' ? '🚄' : day.type === 'free' ? '🏙️' : day.type === 'mixed' ? '🚄🚗' : '🚗';
-
-    const card = document.createElement('div');
-    card.className = 'day-card';
-    card.innerHTML = `
-      <div class="day-left">
-        <div class="day-dot ${dotClass}"></div>
-        ${!isLast ? '<div class="day-line"></div>' : ''}
-        <div class="day-date">${day.date}</div>
+<!-- DASHBOARD -->
+<div id="view-dashboard" class="view active">
+  <div class="ptitle">Inicio 🌍</div>
+  <div class="psub">14 — 21 julio 2026 · 8 días · 7 noches · ~4.800 km</div>
+  <div class="dgrid">
+    <div class="dcard" onclick="showView('timeline',2)">
+      <div class="di">📅</div><div class="dv" id="days-left">—</div>
+      <div class="dl">Dias restantes</div><span class="dt tb">12 jul 2026</span>
+    </div>
+    <div class="dcard" onclick="showView('presupuesto',3)">
+      <div class="di">💶</div><div class="dv" id="dash-pp">690€</div>
+      <div class="dl">Por persona</div><span class="dt tg" id="dash-total-tag">Total 4.830€</span>
+    </div>
+    <div class="dcard" onclick="showView('alojamientos',1)">
+      <div class="di">🏠</div><div class="dv">6</div>
+      <div class="dl">Ciudades Airbnb</div><span class="dt tr">0 reservados</span>
+    </div>
+    <div class="dcard" onclick="showView('gastos',4)">
+      <div class="di">🧾</div><div class="dv" id="dash-g">0€</div>
+      <div class="dl">Gastos</div><span class="dt tb" id="dash-gn">0 registros</span>
+    </div>
+    <div class="dcard" onclick="showView('checklist',5)">
+      <div class="di">✅</div><div class="dv" id="dash-cl">0%</div>
+      <div class="dl">Checklist</div><span class="dt tg" id="dash-cln">0 de 17</span>
+    </div>
+    <div class="dcard" onclick="showView('emergencias',6)">
+      <div class="di">🆘</div><div class="dv">SOS</div>
+      <div class="dl">Emergencias</div><span class="dt tr">Toca aqui</span>
+    </div>
+  </div>
+  <!-- VIAJEROS + RUTA -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:1rem">
+    <!-- Viajeros -->
+    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem">
+      <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.65rem">Viajeros</div>
+      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem">
+        <button onclick="ajustarV(-1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit">−</button>
+        <div style="font-size:2rem;font-weight:800;letter-spacing:-0.03em;min-width:36px;text-align:center" id="v-num">7</div>
+        <button onclick="ajustarV(1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit">+</button>
+        <div style="font-size:0.75rem;color:#64748b;line-height:1.5">
+          personas<br>
+          <span style="font-weight:700;color:#3b82f6" id="v-pp">690€/pers.</span>
+        </div>
       </div>
-      <div class="day-content" onclick="toggleDay(this)">
-        <div class="day-header">
-          <span class="day-num">${day.label}</span>
-          <span class="day-title">${day.title}</span>
-          ${badgeHtml}
-        </div>
-        <div class="day-meta">
-          <div class="day-meta-item">${typeIcon} <span>${day.driving}</span></div>
-          ${day.km > 0 ? `<div class="day-meta-item">📍 <span>${day.km} km</span></div>` : ''}
-        </div>
-        <div class="day-details">
-          <div class="stops-list">
-            ${day.stops.map(s => `
-              <div class="stop">
-                <div class="stop-dot ${s.type === 'rest' ? 'rest' : s.type === 'train' ? 'train' : ''}"></div>
-                <div class="stop-info">
-                  <div class="stop-name">${s.name}</div>
-                  <div class="stop-note">${s.note}</div>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-          <a class="maps-btn" href="${day.maps}" target="_blank">
-            🗺️ Abrir ruta en Maps
-          </a>
-        </div>
-      </div>
-    `;
-    container.appendChild(card);
-  });
-}
-
-function toggleDay(el) {
-  const details = el.querySelector('.day-details');
-  details.classList.toggle('open');
-  el.classList.toggle('expanded');
-}
-
-buildItinerary();
-
-// ==================== BUDGET ====================
-function setPeople(n, btn) {
-  currentPeople = n;
-  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  updateBudget();
-}
-
-function updateBudget() {
-  const total = BUDGET_CATS.reduce((s, c) => s + c.total, 0);
-  const perPerson = Math.round(total / currentPeople);
-  document.getElementById('budget-per-person').textContent = perPerson + '€';
-  document.getElementById('budget-total').textContent = 'Total grupo: ' + (perPerson * currentPeople) + '€';
-  buildBudgetCats(total);
-}
-
-function buildBudgetCats(total) {
-  const container = document.getElementById('budget-cats');
-  container.innerHTML = '';
-  BUDGET_CATS.forEach(cat => {
-    const perP = Math.round(cat.total / currentPeople);
-    container.innerHTML += `
-      <div class="budget-cat">
-        <div class="budget-cat-icon">${cat.icon}</div>
-        <div class="budget-cat-info">
-          <div class="budget-cat-name">${cat.name}</div>
-          <div class="budget-cat-note">${cat.note}</div>
-          <div class="budget-cat-bar"><div class="budget-cat-fill" style="width:${cat.pct}%"></div></div>
-        </div>
-        <div>
-          <div class="budget-cat-amount">${cat.total}€</div>
-          <div style="font-size:0.7rem;color:var(--muted);text-align:right;margin-top:2px">${perP}€/pers</div>
-        </div>
-      </div>
-    `;
-  });
-}
-
-updateBudget();
-
-// ==================== STAYS ====================
-function buildStays() {
-  const grid = document.getElementById('stays-grid');
-  grid.innerHTML = '';
-  STAYS.forEach(stay => {
-    grid.innerHTML += `
-      <div class="stay-card">
-        <div>
-          <div class="stay-city">${stay.city}</div>
-          <div class="stay-dates">${stay.dates}</div>
-          <div class="stay-nights">${stay.nights}</div>
-          <div style="font-size:0.75rem;color:var(--muted);margin-top:6px">${stay.note}</div>
-        </div>
-        ${stay.airbnb
-          ? `<a class="airbnb-btn" href="${stay.airbnb}" target="_blank">🏠 Ver Airbnb</a>`
-          : `<span style="font-size:0.75rem;color:var(--muted);padding:10px 0">Sin lista aún</span>`
-        }
-      </div>
-    `;
-  });
-}
-
-buildStays();
-
-// ==================== EXPENSES ====================
-function addExpense() {
-  const who = document.getElementById('exp-who').value;
-  const amount = parseFloat(document.getElementById('exp-amount').value);
-  const desc = document.getElementById('exp-desc').value.trim();
-  const city = document.getElementById('exp-city').value;
-
-  if (!who || !amount || !desc) {
-    alert('Rellena quién pagó, el monto y la descripción.');
-    return;
-  }
-
-  expenses.push({ who, amount, desc, city, id: Date.now() });
-  localStorage.setItem('et26_expenses', JSON.stringify(expenses));
-
-  document.getElementById('exp-who').value = '';
-  document.getElementById('exp-amount').value = '';
-  document.getElementById('exp-desc').value = '';
-
-  renderExpenses();
-}
-
-function renderExpenses() {
-  const list = document.getElementById('expenses-list');
-
-  if (expenses.length === 0) {
-    list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:0.85rem;padding:30px">Sin gastos todavía. ¡Añade el primero!</div>';
-    document.getElementById('expenses-summary').style.display = 'none';
-    return;
-  }
-
-  document.getElementById('expenses-summary').style.display = 'block';
-  list.innerHTML = expenses.map(e => `
-    <div class="expense-item">
-      <div>
-        <div class="expense-who">${e.who} pagó</div>
-        <div class="expense-desc">${e.desc}</div>
-        <div class="expense-city">${e.city}</div>
-      </div>
-      <div style="text-align:right">
-        <div class="expense-amt">${e.amount.toFixed(2)}€</div>
-        <div class="expense-per">${(e.amount / 7).toFixed(2)}€/pers</div>
-        <button onclick="deleteExpense(${e.id})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.7rem;margin-top:4px">✕ Borrar</button>
+      <div style="font-size:0.65rem;color:#94a3b8">Total del grupo: <span style="font-weight:700;color:#0f172a" id="v-total">4.830€</span></div>
+    </div>
+    <!-- Ruta -->
+    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem">
+      <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.65rem">Ruta del viaje</div>
+      <div id="ruta-chips" style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.55rem"></div>
+      <div style="display:flex;gap:0.4rem">
+        <select id="ruta-select" style="flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.5rem;font-family:inherit;font-size:0.72rem;color:#0f172a;outline:none">
+          <option value="">Añadir ciudad...</option>
+          <option value="alicante">Alicante</option>
+          <option value="marsella">Marsella</option>
+          <option value="pisa">Pisa</option>
+          <option value="roma">Roma</option>
+          <option value="venecia">Venecia</option>
+          <option value="munich">Munich</option>
+          <option value="colonia">Colonia</option>
+          <option value="bruselas">Bruselas</option>
+          <option value="paris">Paris</option>
+        </select>
+        <button onclick="addRuta()" style="background:#0f172a;color:white;border:none;border-radius:7px;padding:0.35rem 0.65rem;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:inherit">+</button>
       </div>
     </div>
-  `).join('');
+  </div>
 
-  // Balances
-  const paid = {};
-  const MEMBERS = ['Carlos','Lucía','Marco','Sofía','Diego','Ana','Javi'];
-  MEMBERS.forEach(m => paid[m] = 0);
-  let total = 0;
-  expenses.forEach(e => {
-    paid[e.who] = (paid[e.who] || 0) + e.amount;
-    total += e.amount;
-  });
-  const share = total / 7;
+  <div class="st">Para decidir hoy</div>
+  <div class="alerts">
+    <div class="al r"><div class="al-t">Votar y reservar alojamientos</div><div class="al-d">Julio se agota. Cuanto mas tardemos, peor precio y ubicacion.</div></div>
+    <div class="al a"><div class="al-t">Somos 7, 8 o 9 personas?</div><div class="al-d">Afecta la capacidad de los apartamentos y el precio por persona.</div></div>
+    <div class="al a"><div class="al-t">Dias 14 y 22 son muy exigentes</div><div class="al-d">Marsella-Pisa-Roma (900km) y Colonia-Bruselas-Paris. Dividimos etapa?</div></div>
+    <div class="al r"><div class="al-t">ZTL Italia: no entrar al centro con el coche</div><div class="al-d">Roma, Pisa y Florencia tienen zona restringida. Multa de 100-300 euros.</div></div>
+    <div class="al b"><div class="al-t">Vignette Austria ~9 euros (asfinag.at)</div><div class="al-d">Ruta Venecia-Munich cruza Austria. Sin ella multa de 120 euros.</div></div>
+    <div class="al g"><div class="al-t">Reservar Coliseo y Vaticano online</div><div class="al-d">Sin reserva en julio hay 2-3h de cola. Hacedlo con antelacion.</div></div>
+  </div>
+</div>
 
-  const balances = document.getElementById('balances-list');
-  balances.innerHTML = MEMBERS.filter(m => paid[m] > 0 || total > 0).map(m => {
-    const net = (paid[m] || 0) - share;
-    return `
-      <div class="balance-row">
-        <div>
-          <div class="balance-name">${m}</div>
-          <div class="balance-total">Pagó: ${(paid[m]||0).toFixed(2)}€ · Debe: ${share.toFixed(2)}€</div>
-        </div>
-        <div class="balance-net ${net >= 0 ? 'pos' : 'neg'}">${net >= 0 ? '+' : ''}${net.toFixed(2)}€</div>
+<!-- ALOJAMIENTOS -->
+<div id="view-alojamientos" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Alojamientos</div>
+  <div class="psub">Votad vuestras opciones favoritas. Los links abren directamente las listas de Airbnb.</div>
+  <div id="city-blocks"></div>
+  <div class="st" style="margin-top:1.25rem">Ranking de votos</div>
+  <div class="rk-card">
+    <div class="rk-h">Puntuacion en tiempo real</div>
+    <div id="rk-list"><div class="rk-empty">Sin votos todavia.</div></div>
+  </div>
+</div>
+
+<!-- TIMELINE -->
+<div id="view-timeline" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Itinerario</div>
+  <div class="psub">13 dias. Toca cada dia para ver el detalle y abrir la ruta en Google Maps.</div>
+  <div id="tl-container"></div>
+</div>
+
+<!-- PRESUPUESTO -->
+<div id="view-presupuesto" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Presupuesto</div>
+  <div class="psub">Estimacion realista para el viaje completo</div>
+  <div class="pp-grid">
+    <div class="pp-card"><div class="pp-n">9 personas</div><div class="pp-v">537€</div><div class="pp-s">por persona</div></div>
+    <div class="pp-card hl"><div class="pp-n">7 confirmados</div><div class="pp-v">690€</div><div class="pp-s">total 4.830€</div></div>
+    <div class="pp-card"><div class="pp-n">8 personas</div><div class="pp-v">604€</div><div class="pp-s">por persona</div></div>
+  </div>
+  <div class="bud-t">
+    <div class="bud-th"><span>Categoria</span><span>Total</span><span>%</span></div>
+    <div id="bud-rows"></div>
+  </div>
+</div>
+
+<!-- GASTOS -->
+<div id="view-gastos" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Gastos compartidos</div>
+  <div class="psub">Quien pago que. Los balances se calculan solos.</div>
+  <div class="gf">
+    <div class="gf-row">
+      <div><label class="fl">Quien pago</label>
+        <select class="fi" id="g-payer">
+          <option value="">Seleccionar...</option>
+          <option>Carlos</option><option>Lucia</option><option>Marco</option>
+          <option>Sofia</option><option>Diego</option><option>Ana</option><option>Javi</option>
+        </select>
       </div>
-    `;
+      <div><label class="fl">Monto (euros)</label>
+        <input class="fi" type="number" id="g-amt" placeholder="0.00" min="0" step="0.01">
+      </div>
+    </div>
+    <div><label class="fl">Descripcion</label>
+      <input class="fi" type="text" id="g-desc" placeholder="ej: Gasolina Francia">
+    </div>
+    <button class="btn-add" onclick="addGasto()">+ Anadir gasto</button>
+  </div>
+  <div class="st">Movimientos</div>
+  <div id="glist" class="glist"></div>
+  <div class="st">Balances</div>
+  <div class="bal-grid" id="bal-grid"></div>
+  <div class="st" style="margin-top:0.75rem">Liquidacion optima</div>
+  <div class="liq-card">
+    <div class="liq-h">Minimas transferencias para saldar todo</div>
+    <div id="liq-list"><div class="liq-empty">Sin gastos todavia.</div></div>
+  </div>
+</div>
+
+<!-- NOTAS -->
+<div id="view-notas" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Notas por ciudad</div>
+  <div class="psub">Restaurantes, lugares y consejos para cada parada.</div>
+  <div class="ntabs" id="ntabs"></div>
+  <div class="ncard" id="ncontent"></div>
+</div>
+
+<!-- CHECKLIST -->
+<div id="view-checklist" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Checklist</div>
+  <div class="psub">Tareas antes y durante el viaje. Cada una tiene responsable.</div>
+  <div id="cl-cont"></div>
+</div>
+
+<!-- EMERGENCIAS -->
+<div id="view-emergencias" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
+  <div class="ptitle">Emergencias y Documentos</div>
+  <div class="psub">Telefonos clave y alertas importantes para el viaje.</div>
+  <div class="em-grid">
+    <div class="em-card"><div class="em-title">🚨 Emergencias</div>
+      <div class="em-item"><span class="em-l">Toda Europa</span><span class="em-v"><a href="tel:112">112</a></span></div>
+      <div class="em-item"><span class="em-l">Policia Francia</span><span class="em-v"><a href="tel:17">17</a></span></div>
+      <div class="em-item"><span class="em-l">Policia Italia</span><span class="em-v"><a href="tel:113">113</a></span></div>
+      <div class="em-item"><span class="em-l">Policia Alemania</span><span class="em-v"><a href="tel:110">110</a></span></div>
+      <div class="em-item"><span class="em-l">Ambulancia Italia</span><span class="em-v"><a href="tel:118">118</a></span></div>
+    </div>
+    <div class="em-card"><div class="em-title">🏛️ Consulados Spain</div>
+      <div class="em-item"><span class="em-l">Paris</span><span class="em-v"><a href="tel:+33144433518">+33 1 44 43 35 18</a></span></div>
+      <div class="em-item"><span class="em-l">Roma</span><span class="em-v"><a href="tel:+390687114">+39 06 8711 4</a></span></div>
+      <div class="em-item"><span class="em-l">Berlin</span><span class="em-v"><a href="tel:+4930254007330">+49 30 254 007 33</a></span></div>
+      <div class="em-item"><span class="em-l">Bruselas</span><span class="em-v"><a href="tel:+3225903800">+32 2 590 38 00</a></span></div>
+    </div>
+    <div class="em-card"><div class="em-title">🚗 Alertas coche</div>
+      <div class="em-item"><span class="em-l">Vignette Austria</span><span class="em-v" style="color:#059669">~9 euros</span></div>
+      <div class="em-item"><span class="em-l">ZTL Roma</span><span class="em-v" style="color:#dc2626">100-300 euros</span></div>
+      <div class="em-item"><span class="em-l">ZTL Pisa</span><span class="em-v" style="color:#dc2626">Evitar centro</span></div>
+      <div class="em-item"><span class="em-l">Comprar vignette</span><span class="em-v"><a href="https://www.asfinag.at" target="_blank">asfinag.at</a></span></div>
+    </div>
+    <div class="em-card"><div class="em-title">📄 Links clave</div>
+      <div class="em-item"><span class="em-l">Coliseo entradas</span><span class="em-v"><a href="https://www.coopculture.it" target="_blank">coopculture.it</a></span></div>
+      <div class="em-item"><span class="em-l">Vaticano entradas</span><span class="em-v"><a href="https://www.museivaticani.va" target="_blank">museivaticani.va</a></span></div>
+      <div class="em-item"><span class="em-l">Louvre entradas</span><span class="em-v"><a href="https://www.ticketlouvre.fr" target="_blank">ticketlouvre.fr</a></span></div>
+      <div class="em-item"><span class="em-l">Vaporetto Venecia</span><span class="em-v"><a href="https://www.veneziaunica.it" target="_blank">veneziaunica.it</a></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- CIUDAD -->
+<div id="view-ciudad" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem">← Inicio</button>
+  <div id="ciudad-content"></div>
+</div>
+
+
+<!-- SIMULADOR -->
+<div id="view-simulador" class="view">
+  <div class="ptitle">Simulador 🧪</div>
+  <div class="psub">Prueba ciudades nuevas en la ruta sin confirmar nada. Arrastra para reordenar.</div>
+
+  <div class="sim-alert" id="sim-alert" style="display:none"></div>
+
+  <div class="sim-summary">
+    <div><div class="sim-sum-v" id="sim-total-km">4.800</div><div class="sim-sum-l">km totales</div></div>
+    <div><div class="sim-sum-v" id="sim-total-h">~52h</div><div class="sim-sum-l">conducción</div></div>
+    <div><div class="sim-sum-v" id="sim-total-fuel">~350€</div><div class="sim-sum-l">gasolina est.</div></div>
+  </div>
+
+  <div class="st">Ruta actual — arrastra para reordenar</div>
+  <div id="sim-ruta" class="sim-ruta"></div>
+
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;margin-top:0.5rem">
+    <div class="st" style="margin:0;flex:1">Ciudades candidatas</div>
+    <button class="btn-sim-reset" onclick="simReset()">Restaurar ruta</button>
+  </div>
+  <div class="sim-candidates" id="sim-candidates"></div>
+</div>
+
+</div><!-- end main -->
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="bnb active" onclick="showView('dashboard',0)"><span class="bnb-i">🏠</span><span class="bnb-l">Inicio</span></button>
+  <button class="bnb" onclick="showView('alojamientos',1)"><span class="bnb-i">🛏</span><span class="bnb-l">Alojam.</span></button>
+  <button class="bnb" onclick="showView('timeline',2)"><span class="bnb-i">📅</span><span class="bnb-l">Ruta</span></button>
+  <button class="bnb" onclick="showView('gastos',4)"><span class="bnb-i">🧾</span><span class="bnb-l">Gastos</span></button>
+  <button class="bnb" onclick="showView('notas',5)"><span class="bnb-i">📝</span><span class="bnb-l">Notas</span></button>
+  <button class="bnb" onclick="showView('simulador',8)"><span class="bnb-i">🧪</span><span class="bnb-l">Simular</span></button>
+  <button class="bnb" onclick="showView('checklist',6)"><span class="bnb-i">✅</span><span class="bnb-l">Check</span></button>
+  <button class="bnb" onclick="showView('emergencias',7)"><span class="bnb-i">🆘</span><span class="bnb-l">SOS</span></button>
+</div>
+
+<!-- NOMBRE MODAL -->
+<div class="nmodal" id="nmodal">
+  <div class="nmodal-box">
+    <div class="nmodal-t">Bienvenido al EuroTrip 2026</div>
+    <div class="nmodal-s">Como te llamas? Asi identificamos tus votos y gastos.</div>
+    <input class="fi" id="ninput" type="text" placeholder="Tu nombre..." style="margin-bottom:0.75rem">
+    <button class="btn-add" onclick="guardarNombre()">Entrar</button>
+  </div>
+</div>
+
+<script>
+// openCity available globally from start
+function openCity(cityId) {
+  // Will be populated after full script loads
+  if(typeof _openCity === 'function') _openCity(cityId);
+  else setTimeout(function(){ if(typeof _openCity==='function') _openCity(cityId); }, 200);
+}
+
+// ===== CONFIG =====
+var SUPA = 'https://nhblyxltpdpyxmvjtrmt.supabase.co';
+var KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU';
+var NOMBRE = localStorage.getItem('et_nombre') || '';
+var SHEET  = 'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.com/spreadsheets/d/e/2PACX-1vQoLyB10eO0zVA9C9qU9A1z24a05wnA9bC-UrxU_Hd3w7wFIbHFA4o9_yZCTnKl5n36GptfnLPXMlRd/pub?output=csv');
+
+// ===== SUPABASE REST =====
+function supa(method, table, body, params) {
+  var url = SUPA + '/rest/v1/' + table + (params || '');
+  var headers = {
+    'apikey': KEY,
+    'Authorization': 'Bearer ' + KEY,
+    'Content-Type': 'application/json'
+  };
+  if(method === 'POST') headers['Prefer'] = 'return=minimal';
+  if(method === 'DELETE') headers['Prefer'] = 'return=minimal';
+  var opts = {method: method, headers: headers};
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(url, opts).then(function(r) {
+    if(r.status === 204 || r.status === 200 && method === 'DELETE') return {};
+    return r.json().catch(function(){ return {}; });
+  });
+}
+
+// ===== DATA =====
+var votes  = {};
+var gastos = [];
+var clDone = {};
+var activeNota = 'Paris';
+
+var LINKS = {
+  marsella: {air:'https://www.airbnb.es/wishlists/invite/f7787fdf-c64d-409f-871b-d259b62ba37d?s=67&unique_share_id=dbb79b38-03c9-4832-b6ec-bf966d181bf8', book:''},
+  roma:     {air:'https://www.airbnb.es/wishlists/invite/68e72df8-718b-4bfc-bfa8-b46195ca67d9?s=67&unique_share_id=8bfb12b9-5b07-4818-b652-2268285130cd', book:''},
+  venecia:  {air:'https://www.airbnb.es/wishlists/invite/bcb6a644-cafa-4fb5-a4fe-98616153cfd5?s=67&unique_share_id=3195d603-7614-4f0d-8923-70e19816fafd', book:''},
+  munich:   {air:'https://www.airbnb.es/wishlists/invite/ff5569b9-a6c1-4936-a70f-d3eec36cd9f3?s=67&unique_share_id=6cd34cbb-c164-4d48-b651-5c0ff843acd3', book:''},
+  colonia:  {air:'https://www.airbnb.es/wishlists/invite/4627c88a-9a5f-4589-bb79-1be6c8627442?s=67&unique_share_id=ca2d806e-402b-4ad2-b8e4-53411d3be3c1', book:''},
+  paris:    {air:'https://www.airbnb.es/wishlists/invite/abb95041-b59b-4b22-ac85-65460cc5e80d?s=67&unique_share_id=5197016e-af28-45f7-a17c-83e2b5cc05ff', book:''}
+};
+
+var CITIES = [
+  {id:'paris',   name:'París',   flag:'🇫🇷', nights:2, dates:'15-17 jul', zone:'Le Marais / Montmartre'},
+  {id:'roma',    name:'Roma',    flag:'🇮🇹', nights:2, dates:'18-20 jul 🎂', zone:'Trastevere / Prati'},
+  {id:'venecia', name:'Venecia', flag:'🇮🇹', nights:0, dates:'18 jul parada', zone:'Canal Grande / Rialto'},
+  {id:'milan',   name:'Milán',   flag:'🇮🇹', nights:1, dates:'17-18 jul', zone:'Cerca de Centrale'},
+  {id:'niza',    name:'Niza',    flag:'🇫🇷', nights:1, dates:'20-21 jul', zone:'Promenade des Anglais'}
+];
+
+var PEOPLE = ['Carlos','Lucia','Marco','Sofia','Diego','Ana','Javi'];
+
+var BUDGET = [
+  {cat:'Alojamiento', amount:1680, color:'#3b82f6'},
+  {cat:'Combustible', amount:630,  color:'#f59e0b'},
+  {cat:'Peajes',      amount:280,  color:'#fb923c'},
+  {cat:'Trenes AV',   amount:420,  color:'#8b5cf6'},
+  {cat:'Comida',      amount:490,  color:'#10b981'},
+  {cat:'Actividades', amount:350,  color:'#f472b6'},
+  {cat:'Parking',     amount:130,  color:'#38bdf8'},
+  {cat:'Emergencias', amount:200,  color:'#94a3b8'}
+];
+
+var NOTAS = {
+  Paris: {
+    rest: ['As du Falafel en Le Marais — el mejor y muy barato','Bouillon Chartier — cocina francesa clasica, precio justo','Baguette con jamon y queso en boulangerie: 5 euros'],
+    lug:  ['Torre Eiffel al amanecer o de noche — sin colas','Louvre — reservar online, minimo 3 horas','Montmartre y Sacre-Coeur de manana temprano'],
+    cons: ['Navigo semana: 30 euros, cubre metro y RER completo','Le Marais es el barrio mas cool, abierto los domingos','Paris Plages en julio: playas artificiales en el Sena']
+  },
+  Colmar: {
+    rest: ['Winstub Brenner — cocina alsaciana autentica','Marche couvert — productos locales','Baeckeoffe — el plato tipico de Alsacia'],
+    lug:  ['Barrio La Petite Venise — el mas fotografiado','Maison Pfister — edificio renacentista siglo XVI','Rue des Marchands — calle medieval mas bonita'],
+    cons: ['Solo 1.5h de parada — todo a pie, muy compacto','Aparcar en P+R periferia, centro peatonal','La luz de tarde es perfecta para fotografiar']
+  },
+  Milan: {
+    rest: ['Luini — panzerotti fritos, el snack milanes clasico','Mercato del Duomo — comida rapida y local','Navigli — zona de aperitivos al canal'],
+    lug:  ['Duomo di Milano — subir a la terraza (reservar)','Galleria Vittorio Emanuele II — la mas lujosa de Italia','Barrio Navigli — canales, ideal para cenar'],
+    cons: ['ZTL activa: aparcar fuera, usar metro','Coches quedan aqui mientras el grupo va en tren','Day pass metro: 7 euros, cubre toda la ciudad']
+  },
+  Venecia: {
+    rest: ['All Arco — cicchetti baratos y buenos','Osteria da Rioba — menu del dia razonable','Comprar en supermercado de Mestre: mitad de precio'],
+    lug:  ['Plaza San Marcos — antes de las 8h','Puente de Rialto — al amanecer sin turistas','Isla de Burano — casas de colores'],
+    cons: ['Parada de 2-3h en tren — no hay alojamiento aqui','Vaporetto 1 viaje: 9 euros, recorre el Canal Grande','Madrugar es la clave: a las 7h es magica']
+  },
+  Roma: {
+    rest: ['Tonnarello en Trastevere — cacio e pepe legendaria','Suppli Roma — albondigas de arroz fritas','Mercato di Testaccio — comida local y barata'],
+    lug:  ['Coliseo — reservar en coopculture.it sin falta','Vaticano y Capilla Sixtina — ir a las 8h en julio','Fontana di Trevi — gratis, mejor de noche'],
+    cons: ['ZTL: aparcar fuera del centro, todo a pie','Fuentes nasoni: agua potable gratis por la ciudad','Reservar Coliseo y Vaticano YA — julio se agota']
+  },
+  Niza: {
+    rest: ['Cours Saleya — mercado y socca nicoise','Socca — crepe de garbanzos, especialidad local','Barrio Le Port para comer sin precios turisticos'],
+    lug:  ['Promenade des Anglais — paseo al atardecer','Casco antiguo Vieille Ville — calles de colores','Colina del Castillo — vistas panoramicas'],
+    cons: ['A 30 min de Monaco en coche o tren','Playa de guijarros — llevar chanclas','Ultima noche: celebrar el final del viaje']
+  }
+};
+
+var CL_DATA = [
+  {s:'🚨 Urgente — reservar ya', items:[
+    {t:'Billetes tren Milan→Venecia→Roma (trenitalia.com)', own:'Alguien'},
+    {t:'Billetes tren Roma→Milan de vuelta', own:'Alguien'},
+    {t:'Entradas Coliseo — coopculture.it', own:'Marco'},
+    {t:'Entradas Vaticano — museivaticani.va', own:'Marco'},
+    {t:'Confirmar y reservar Airbnb Paris (2 noches)', own:'Todos'},
+    {t:'Confirmar y reservar Airbnb Roma (2 noches)', own:'Todos'},
+    {t:'Parking Milan para 2 coches', own:'Carlos'}
+  ]},
+  {s:'Antes del viaje', items:[
+    {t:'Confirmar numero final de viajeros', own:'Todos'},
+    {t:'Contratar seguro de viaje europeo', own:'Carlos'},
+    {t:'Revisar vigencia de DNI y pasaportes', own:'Todos'},
+    {t:'Descargar Google Maps offline de cada ciudad', own:'Todos'},
+    {t:'Crear fondo comun en Revolut o Bizum', own:'Lucia'},
+    {t:'Revisar seguro del coche para Europa', own:'Conductores'},
+    {t:'Chaleco y triangulo en ambos coches', own:'Conductores'},
+    {t:'Definir turnos de conduccion por etapa', own:'Grupo'}
+  ]},
+  {s:'Durante el viaje', items:[
+    {t:'Check-in en cada alojamiento al llegar', own:'Todos'},
+    {t:'Registrar gastos compartidos cada dia', own:'Sofia'},
+    {t:'Llenar deposito antes de entrar en Italia', own:'Conductor'},
+    {t:'Foto grupal en cada ciudad', own:'Diego'},
+    {t:'No entrar con coche al centro de Roma o Milan (ZTL)', own:'Conductor'}
+  ]},
+  {s:'De vuelta', items:[
+    {t:'Check-out de todos los alojamientos', own:'Todos'},
+    {t:'Balance final de gastos del grupo', own:'Sofia'},
+    {t:'Recuperar coches del parking de Milan', own:'Conductores'}
+  ]}
+];
+
+var TL = [
+  {date:'14 jul', city:'Alicante → Barcelona → Montpellier', drive:true, km:830, h:'9h 30min', ztl:false,
+   maps:'https://www.google.com/maps/dir/Alicante,+Spain/Barcelona,+Spain/Montpellier,+France',
+   acts:['Salida temprana 7:00h — llenar tanques en Alicante','Parada almuerzo en Barcelona (~3h30 de ruta)','Tapas en el Born o Barceloneta, ~1.5h parada','Llegada Montpellier ~19:00h — primera noche en Francia'],
+   stay:'Hotel / Airbnb Montpellier (noche 1)', note:'Primera etapa larga. Turnos de conduccion desde Alicante. Llevar nevera con snacks y agua.'},
+  {date:'15 jul', city:'Montpellier → Clermont-Ferrand → París', drive:true, km:780, h:'8h 45min', ztl:false,
+   maps:'https://www.google.com/maps/dir/Montpellier,+France/Clermont-Ferrand,+France/Paris,+France',
+   acts:['Salida 8:00h desde Montpellier','Parada almuerzo Clermont-Ferrand (~4h de ruta)','Ciudad volcanica: Puy de Dome visible desde la ciudad','Llegada Paris ~19:00h — 2 noches en Paris'],
+   stay:'Airbnb París (noche 1 de 2)', note:'Clermont-Ferrand: perfecta parada a mitad de ruta. Puy de Dome es opcional si la energia lo permite (+30min desvio). Parking en Paris: usar P+R periferia o parking de la zona.'},
+  {date:'16 jul', city:'París — día libre \U0001f5fc', drive:false, km:0, h:'Dia libre', ztl:false,
+   maps:'https://www.google.com/maps/search/Paris+France+tourist+spots',
+   acts:['Torre Eiffel al amanecer o de noche (con luces)','Louvre — reservar en ticketlouvre.fr, llegar al abrir','Le Marais por la tarde — barrio mas cool de Paris','Montmartre y Sacre-Coeur al atardecer'],
+   stay:'Airbnb París (noche 2 de 2)', note:'El dia parisino que queria el grupo. Navigo semana: 30 euros por persona, cubre metro + RER completo. Baguette + jamon + queso al Sena: almuerzo por 5 euros.'},
+  {date:'17 jul', city:'París → Colmar → Milán', drive:true, km:890, h:'10h 00min', ztl:false,
+   maps:'https://www.google.com/maps/dir/Paris,+France/Colmar,+France/Milan,+Italy',
+   acts:['Salida 7:30h — desayuno rapido frances','Parada Colmar, Alsacia (~4h desde Paris)','El pueblo mas bonito de Francia: 1.5h de paseo y fotos','Llegada Milan ~19:30h — coches quedan aqui 2 noches'],
+   stay:'Airbnb / Hotel Milán (noche 1)', note:'Colmar IMPRESCINDIBLE: casas medievales de colores junto al rio. Los 2 coches quedan en Milano Centrale. Parking Autosilos Sammartini (~25 euros/dia), 5min de la estacion.'},
+  {date:'18 jul', city:'Milán \U0001f684 Venecia \U0001f684 Roma', drive:false, km:650, h:'~5h en tren AV', ztl:true,
+   maps:'https://www.trenitalia.com',
+   acts:['Tren AV Milano Centrale → Venezia Santa Lucia (~2h30)','Venecia: 2-3h — Rialto, San Marco, vaporetto una vuelta','Tren AV Venezia → Roma Termini (~3h30)','Llegada Roma ~18:00h — manana es el cumpleanos!'],
+   stay:'Airbnb Roma (noche 1 de 2)', note:'RESERVAR TRENES YA en trenitalia.com (~35-55 euros/persona). Los 2 coches quedan en parking Milan. ZTL activa en Roma: no conducir. Metro desde Termini cubre todo.'},
+  {date:'19 jul', city:'Roma \U0001f382 — Día del Cumpleaños', drive:false, km:0, h:'Dia libre', ztl:true,
+   maps:'https://www.google.com/maps/search/Roma+centro+storico',
+   acts:['Coliseo y Foro Romano — llegar al abrir 9:00h (reservar ya)','Fontana di Trevi y Panteon (entrada ~5 euros, reservar)','Vaticano y Capilla Sixtina — madrugar, ir a las 8h','Cena especial de cumpleanos en Trastevere'],
+   stay:'Airbnb Roma (noche 2 de 2)', note:'El dia grande! Coliseo: coopculture.it. Vaticano: museivaticani.va. Ambos se agotan en julio sin reserva previa. ZTL: todo a pie o metro/taxi, nunca en coche al centro.'},
+  {date:'20 jul', city:'Roma \U0001f684 Milán → Niza', drive:true, km:640, h:'3h tren + 3h coche', ztl:false,
+   maps:'https://www.google.com/maps/dir/Milan,+Italy/Nice,+France',
+   acts:['Tren AV Roma → Milan (~3h, salida ~9:00h)','Recuperar los 2 coches en parking de Milan','Parada breve para comer en zona Navigli','Llegada Niza ~18:00h — ultima noche internacional'],
+   stay:'Hotel / Airbnb Niza (noche 1)', note:'Reservar tren Roma→Milan YA en trenitalia.com. Milan a Niza: A7 + A10, ~3h por la Riviera italiana. Niza ultima noche: Promenade des Anglais y cena para celebrar.'},
+  {date:'21 jul', city:'Niza → Alicante \U0001f3c1', drive:true, km:640, h:'7h 30min', ztl:false,
+   maps:'https://www.google.com/maps/dir/Nice,+France/Alicante,+Spain',
+   acts:['Salida 8:00h — ultimo desayuno frances','Parada a mitad en Montpellier o Perpignan (~3.5h desde Niza)','Cruce de los Pirineos por La Junquera','Llegada Alicante ~17:00h — fin del EuroTrip 2026'],
+   stay:'Casa', note:'El dia mas corto del regreso. Llenar deposito en Francia antes de cruzar (algo mas barato que en Espana).'}
+];
+
+// ===== VIAJEROS =====
+var nViajeros = 7;
+var BUDGET_TOTAL = 4900;
+function ajustarV(d) {
+  nViajeros = Math.max(1, nViajeros + d);
+  var pp = Math.round(BUDGET_TOTAL / nViajeros);
+  document.getElementById('v-num').textContent = nViajeros;
+  document.getElementById('v-pp').textContent = pp + '€/pers.';
+  document.getElementById('v-total').textContent = BUDGET_TOTAL + '€';
+  var dp = document.getElementById('dash-pp'); if(dp) dp.textContent = pp + '€';
+  var dt = document.getElementById('dash-total-tag'); if(dt) dt.textContent = 'Total ' + BUDGET_TOTAL + '€';
+}
+
+// ===== RUTA =====
+var miRuta = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
+var CITY_NAMES = {
+  alicante:'Alicante', montpellier:'Montpellier', paris:'París', colmar:'Colmar',
+  milan:'Milán', venecia:'Venecia', roma:'Roma', niza:'Niza',
+  pisa:'Pisa', monaco:'Mónaco', barcelona:'Barcelona'
+};
+var CITY_FLAGS = {
+  alicante:'🇪🇸', montpellier:'🇫🇷', paris:'🇫🇷', colmar:'🇫🇷',
+  milan:'🇮🇹', venecia:'🇮🇹', roma:'🇮🇹', niza:'🇫🇷',
+  pisa:'🇮🇹', monaco:'🇲🇨', barcelona:'🇪🇸'
+};
+function renderRuta() {
+  var el = document.getElementById('ruta-chips');
+  if(!el) return;
+  if(!miRuta.length) { el.innerHTML='<span style="font-size:0.72rem;color:#94a3b8">Sin ciudades</span>'; return; }
+  el.innerHTML = miRuta.map(function(c, i) {
+    return (i>0?'<span style="font-size:0.6rem;color:#94a3b8;align-self:center">→</span>':'') +
+      '<span style="display:inline-flex;align-items:center;gap:0.25rem;background:#f1f5f9;border-radius:6px;padding:0.2rem 0.45rem;font-size:0.68rem;font-weight:600;cursor:pointer" onclick="openCity(\'' + c + '\')">' +
+      CITY_FLAGS[c]+' '+CITY_NAMES[c]+
+      '<span onclick="event.stopPropagation();removeRuta('+i+')" style="color:#94a3b8;margin-left:0.15rem;font-size:0.7rem;line-height:1">×</span></span>';
+  }).join('');
+  // Also update header route
+  updateHeaderRoute();
+}
+function addRuta() {
+  var sel = document.getElementById('ruta-select');
+  var val = sel.value;
+  if(!val || miRuta.indexOf(val) !== -1) return;
+  miRuta.push(val);
+  sel.value = '';
+  renderRuta();
+}
+function removeRuta(idx) {
+  miRuta.splice(idx, 1);
+  renderRuta();
+}
+function updateHeaderRoute() {
+  var el = document.getElementById('header-route');
+  if(!el) return;
+  el.innerHTML = miRuta.map(function(c, i) {
+    return (i>0?'<span class="harr">→</span>':'')+
+      '<span class="hcity" onclick="openCity(\'' + c + '\')">' + CITY_NAMES[c] + '</span>';
   }).join('');
 }
 
-function deleteExpense(id) {
-  expenses = expenses.filter(e => e.id !== id);
-  localStorage.setItem('et26_expenses', JSON.stringify(expenses));
-  renderExpenses();
+// ===== NAV =====
+var VIEWS = ['dashboard','alojamientos','timeline','presupuesto','gastos','notas','checklist','emergencias'];
+function showView(name, idx) {
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.querySelectorAll('.bnb').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('view-'+name).classList.add('active');
+  var btns = document.querySelectorAll('.bnb');
+  if(btns[idx]) btns[idx].classList.add('active');
 }
 
-renderExpenses();
+// ===== COUNTDOWN =====
+function updateCountdown() {
+  var diff = Math.ceil((new Date(2026,6,14,0,0,0) - new Date()) / 86400000);
+  var el = document.getElementById('days-left');
+  if(el) el.textContent = diff > 0 ? diff : 'Ya!';
+}
 
-// ==================== CHECKLIST ====================
-function buildChecklist() {
-  const container = document.getElementById('checklist-container');
-  container.innerHTML = '';
+// ===== NOMBRE =====
+function guardarNombre() {
+  var v = document.getElementById('ninput').value.trim();
+  if(!v) return;
+  NOMBRE = v;
+  localStorage.setItem('et_nombre', v);
+  document.getElementById('nmodal').classList.remove('open');
+}
 
-  let total = 0, done = 0;
+// ===== SUPABASE LOAD =====
+function loadData() {
+  // Votos
+  supa('GET','votos','','?select=*').then(function(data) {
+    if(!Array.isArray(data)) return;
+    votes = {};
+    data.forEach(function(v){ votes[v.ciudad+'_'+v.tipo] = v.usuario; });
+    renderCities();
+    setBadge(true);
+  }).catch(function(){ setBadge(false); });
 
-  CHECKLIST_DATA.forEach((section, si) => {
-    const sectionEl = document.createElement('div');
-    sectionEl.className = 'checklist-section';
-    sectionEl.innerHTML = `<div class="checklist-section-title">${section.section}</div>`;
-
-    section.items.forEach((item, ii) => {
-      total++;
-      const key = `${si}-${ii}`;
-      const isDone = checkStates[key] || false;
-      if (isDone) done++;
-
-      const itemEl = document.createElement('div');
-      itemEl.className = 'check-item' + (isDone ? ' done' : '');
-      itemEl.innerHTML = `
-        <div class="check-box">${isDone ? '✓' : ''}</div>
-        <div class="check-text">${item.text}</div>
-        <div>
-          <div class="check-tag">${item.tag}</div>
-          <div class="check-who" style="margin-top:4px">${item.who}</div>
-        </div>
-      `;
-      itemEl.onclick = () => toggleCheck(key, itemEl, si, ii);
-      sectionEl.appendChild(itemEl);
+  // Gastos
+  supa('GET','gastos','','?select=*&order=created_at').then(function(data) {
+    if(!Array.isArray(data)) return;
+    gastos = data.map(function(g){
+      return {id:g.id, payer:g.payer, desc:g.descripcion, amt:parseFloat(g.monto)};
     });
-
-    container.appendChild(sectionEl);
+    renderGastos();
   });
 
-  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-  document.getElementById('check-pct').textContent = pct + '%';
-  document.getElementById('check-bar').style.width = pct + '%';
+  // Checklist
+  supa('GET','checklist','','?select=*').then(function(data) {
+    if(!Array.isArray(data)) return;
+    data.forEach(function(c){ if(c.done) clDone[c.id]=true; });
+    renderCL();
+  });
 }
 
-function toggleCheck(key, el, si, ii) {
-  checkStates[key] = !checkStates[key];
-  localStorage.setItem('et26_checks', JSON.stringify(checkStates));
-  buildChecklist();
+function setBadge(ok) {
+  var b = document.getElementById('badge');
+  if(!b) return;
+  if(ok){ b.textContent='⚡ Sync'; b.className='hbadge live'; }
+  // Don't show error - just stay neutral if no connection
 }
 
-buildChecklist();
+// ===== ALOJAMIENTOS =====
+function renderCities() {
+  var html = '';
+  CITIES.forEach(function(c) {
+    var air = LINKS[c.id] ? LINKS[c.id].air : '';
+    var book = LINKS[c.id] ? LINKS[c.id].book : '';
+    var vy = votes[c.id+'_y'] ? 'vy' : '';
+    var vf = votes[c.id+'_f'] ? 'vf' : '';
+    var vn = votes[c.id+'_n'] ? 'vn' : '';
+    html += '<div class="city-block">';
+    html += '<div class="city-h"><div class="city-flag">'+c.flag+'</div>';
+    html += '<div style="flex:1"><div class="city-name">'+c.name+'</div>';
+    html += '<div class="city-meta">'+c.dates+' · '+c.zone+'</div></div>';
+    html += '<div class="city-nights">'+c.nights+(c.nights>1?' noches':' noche')+'</div></div>';
+    html += '<div class="city-body">';
+    html += '<div class="lrow"><div class="lp"><div class="da"></div><span class="la">Airbnb</span></div>';
+    if(air){ html += '<div class="ldesc ok">Inicia sesion en Airbnb para ver</div><a href="'+air+'" target="_blank" class="btn-ver ba">Ver</a>'; }
+    else   { html += '<div class="ldesc">Proximamente</div>'; }
+    html += '</div>';
+    html += '<div class="lrow"><div class="lp"><div class="db"></div><span class="lb">Booking</span></div>';
+    if(book){ html += '<div class="ldesc ok">Inicia sesion en Booking para ver</div><a href="'+book+'" target="_blank" class="btn-ver bb">Ver</a>'; }
+    else    { html += '<div class="ldesc">Proximamente</div>'; }
+    html += '</div>';
+    html += '<div class="vrow">';
+    html += '<button class="vb '+vy+'" onclick="vote(\''+c.id+'\',\'y\')">👍 Me apunto</button>';
+    html += '<button class="vb '+vf+'" onclick="vote(\''+c.id+'\',\'f\')">⭐ Favorita</button>';
+    html += '<button class="vb '+vn+'" onclick="vote(\''+c.id+'\',\'n\')">👎 No</button>';
+    html += '</div></div></div>';
+  });
+  document.getElementById('city-blocks').innerHTML = html;
+  renderRanking();
+}
+
+function vote(id, tipo) {
+  if(!NOMBRE) return;
+  // Delete existing vote for this user+city, then insert new one
+  supa('DELETE','votos','','?ciudad=eq.'+id+'&usuario=eq.'+encodeURIComponent(NOMBRE))
+    .then(function(){
+      return supa('POST','votos',{ciudad:id, tipo:tipo, usuario:NOMBRE},'');
+    })
+    .then(function(){ loadData(); })
+    .catch(function(){ loadData(); });
+}
+
+function renderRanking() {
+  var sc = CITIES.map(function(c){
+    return {name:c.name, flag:c.flag,
+      score:(votes[c.id+'_y']?2:0)+(votes[c.id+'_f']?3:0)+(votes[c.id+'_n']?-1:0)};
+  }).filter(function(x){return x.score!==0;});
+  sc.sort(function(a,b){return b.score-a.score;});
+  if(!sc.length){ document.getElementById('rk-list').innerHTML='<div class="rk-empty">Sin votos todavia.</div>'; return; }
+  var m=['🥇','🥈','🥉'];
+  document.getElementById('rk-list').innerHTML = sc.slice(0,6).map(function(x,i){
+    return '<div class="rk-row"><span class="rk-pos">'+(m[i]||'·')+'</span><span class="rk-name">'+x.flag+' '+x.name+'</span><span class="rk-pts">'+x.score+' pts</span></div>';
+  }).join('');
+}
+
+// ===== TIMELINE =====
+function renderTL() {
+  document.getElementById('tl-container').innerHTML = TL.map(function(d,i){
+    var tags = '';
+    if(d.drive) tags += '<span class="tp tpd">🚗 '+d.h+'</span> ';
+    tags += d.km>0 ? '<span class="tp tpk">'+d.km+'km</span>' : '<span class="tp tps">Dia libre</span>';
+    if(d.ztl) tags += ' <span class="tp tpz">⚠️ ZTL</span>';
+    if(d.maps) tags += ' <a href="'+d.maps+'" target="_blank" class="tp" style="background:#dbeafe;color:#2563eb;text-decoration:none;padding:0.12rem 0.4rem;border-radius:5px;font-size:0.58rem;font-weight:600">🗺 Maps</a>';
+    var acts = d.acts.map(function(a){return '<div class="tact">'+a+'</div>';}).join('');
+    var tray = d.km>0 ? '<div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-top:0.3rem"><span class="tp tpd">🚗 '+d.h+'</span><span class="tp tpk">'+d.km+' km</span></div>' : '';
+    var ztl = d.ztl ? '<div class="tztl"><div class="tztl-t">⚠️ ZTL Italia: no entrar al centro con el coche. Multa 100-300 euros. Aparcar en la periferia.</div></div>' : '';
+    var mapsBtn = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;margin-top:0.5rem">🗺 Abrir en Google Maps</a>' : '';
+    return '<div class="tl-row" id="tl'+i+'" onclick="toggleTL('+i+')">' +
+      '<div class="tl-h"><div class="tl-date">'+d.date+'</div>' +
+      '<div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>' +
+      '<div class="tl-city">'+d.city+'</div>' +
+      '<div style="display:flex;gap:0.28rem;align-items:center;flex-wrap:wrap">'+tags+'</div>' +
+      '<span class="tl-ch">▾</span></div>' +
+      '<div class="tl-body">' +
+        '<div><div class="tsub">Actividades</div>'+acts+ztl+
+        '<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div>'+mapsBtn+'</div>' +
+        '<div><div class="tsub">Alojamiento</div><div class="tstay">'+d.stay+'</div>'+tray+'</div>' +
+      '</div></div>';
+  }).join('');
+}
+function toggleTL(i){ document.getElementById('tl'+i).classList.toggle('open'); }
+
+// ===== PRESUPUESTO =====
+function renderBudget() {
+  var total = BUDGET.reduce(function(s,b){return s+b.amount;},0);
+  document.getElementById('bud-rows').innerHTML = BUDGET.map(function(b){
+    var pct = Math.round(b.amount/total*100);
+    return '<div class="bud-row"><div class="bud-cat"><span>'+b.cat+'</span>' +
+      '<div class="bud-bar"><div class="bud-fill" style="width:'+pct+'%;background:'+b.color+'"></div></div></div>' +
+      '<div class="bud-amt">'+b.amount+'€</div><div class="bud-pct">'+pct+'%</div></div>';
+  }).join('');
+}
+
+// ===== GASTOS =====
+function addGasto() {
+  var payer = document.getElementById('g-payer').value;
+  var desc  = document.getElementById('g-desc').value.trim();
+  var amt   = parseFloat(document.getElementById('g-amt').value);
+  if(!payer||!desc||!amt||amt<=0) return;
+  supa('POST','gastos',{payer:payer, descripcion:desc, monto:amt},'').then(function(){
+    document.getElementById('g-desc').value='';
+    document.getElementById('g-amt').value='';
+    loadData();
+  });
+}
+function deleteGasto(id) {
+  supa('DELETE','gastos','','?id=eq.'+id).then(loadData);
+}
+function renderGastos() {
+  var html = gastos.length ? gastos.map(function(g){
+    return '<div class="gi"><div class="gi-desc"><div class="gi-name">'+g.desc+'</div>' +
+      '<div class="gi-who">Pago: '+g.payer+'</div></div>' +
+      '<div class="gi-amt">'+g.amt.toFixed(2)+'€</div>' +
+      '<button class="gi-del" onclick="deleteGasto(\''+g.id+'\')">×</button></div>';
+  }).join('') : '<div style="font-size:0.78rem;color:#94a3b8">Sin gastos todavia.</div>';
+  document.getElementById('glist').innerHTML = html;
+
+  var total = gastos.reduce(function(s,g){return s+g.amt;},0);
+  var share = total/PEOPLE.length;
+  var paid  = {};
+  PEOPLE.forEach(function(p){paid[p]=0;});
+  gastos.forEach(function(g){if(paid[g.payer]!==undefined) paid[g.payer]+=g.amt;});
+
+  document.getElementById('bal-grid').innerHTML = PEOPLE.map(function(p){
+    var bal = (paid[p]||0)-share;
+    return '<div class="bal-c"><div class="bal-n">'+p+'</div>' +
+      '<div class="bal-a '+(bal>=0?'bal-pos':'bal-neg')+'">'+(bal>=0?'+':'')+bal.toFixed(0)+'€</div>' +
+      '<div class="bal-l">'+(bal>=0?'Le deben':'Debe')+'</div></div>';
+  }).join('');
+
+  // Liquidacion optima
+  var deb=[],cre=[];
+  PEOPLE.forEach(function(p){
+    var b=(paid[p]||0)-share;
+    if(b<-0.01) deb.push({name:p,amt:-b});
+    else if(b>0.01) cre.push({name:p,amt:b});
+  });
+  deb.sort(function(a,b){return b.amt-a.amt;});
+  cre.sort(function(a,b){return b.amt-a.amt;});
+  var transfers=[];
+  var di=0,ci=0;
+  while(di<deb.length&&ci<cre.length){
+    var amt=Math.min(deb[di].amt,cre[ci].amt);
+    if(amt>0.01) transfers.push({from:deb[di].name,to:cre[ci].name,amt:amt});
+    deb[di].amt-=amt; cre[ci].amt-=amt;
+    if(deb[di].amt<0.01) di++;
+    if(cre[ci].amt<0.01) ci++;
+  }
+  document.getElementById('liq-list').innerHTML = transfers.length ?
+    transfers.map(function(t){
+      return '<div class="liq-row"><strong>'+t.from+'</strong><span class="liq-arr">→</span>' +
+        '<strong>'+t.to+'</strong><span class="liq-amt">'+t.amt.toFixed(2)+'€</span></div>';
+    }).join('') : '<div class="liq-empty">'+(total<0.01?'Sin gastos todavia.':'Todo en orden.')+'</div>';
+
+  var dge=document.getElementById('dash-g');
+  var dgn=document.getElementById('dash-gn');
+  if(dge) dge.textContent=total.toFixed(0)+'€';
+  if(dgn) dgn.textContent=gastos.length+' registro'+(gastos.length!==1?'s':'');
+}
+
+// ===== NOTAS =====
+function renderNotas() {
+  var cities = Object.keys(NOTAS);
+  document.getElementById('ntabs').innerHTML = cities.map(function(c){
+    return '<button class="ntab'+(activeNota===c?' active':'')+'" onclick="setNota(\''+c+'\')">'+c+'</button>';
+  }).join('');
+  var n = NOTAS[activeNota];
+  var secs = [{t:'Restaurantes',k:'rest'},{t:'Lugares imprescindibles',k:'lug'},{t:'Consejos',k:'cons'}];
+  document.getElementById('ncontent').innerHTML = secs.map(function(s){
+    return '<div class="nsec"><div class="nsec-t">'+s.t+'</div>'+
+      n[s.k].map(function(i){return '<div class="nitem"><span class="nd">●</span>'+i+'</div>';}).join('')+
+      '</div>';
+  }).join('');
+}
+function setNota(c){ activeNota=c; renderNotas(); }
+
+// ===== CHECKLIST =====
+function renderCL() {
+  var total=0, done=0;
+  document.getElementById('cl-cont').innerHTML = CL_DATA.map(function(sec,si){
+    var d=sec.items.filter(function(_,ii){return clDone[si+'_'+ii];}).length;
+    total+=sec.items.length; done+=d;
+    return '<div class="cl-sec"><div class="cl-st">'+sec.s+
+      ' <span style="margin-left:auto;font-size:0.6rem;background:#f1f5f9;padding:0.1rem 0.35rem;border-radius:4px;color:#64748b">'+d+'/'+sec.items.length+'</span></div>'+
+      sec.items.map(function(item,ii){
+        var dk=clDone[si+'_'+ii];
+        return '<div class="cl-i'+(dk?' done':'')+'" onclick="toggleCL('+si+','+ii+')">' +
+          '<div class="cl-box">'+(dk?'✓':'')+'</div>' +
+          '<span class="cl-txt">'+item.t+'</span>' +
+          '<span class="cl-own">'+item.own+'</span></div>';
+      }).join('')+'</div>';
+  }).join('');
+  var pct=total?Math.round(done/total*100):0;
+  var e1=document.getElementById('dash-cl'); if(e1) e1.textContent=pct+'%';
+  var e2=document.getElementById('dash-cln'); if(e2) e2.textContent=done+' de '+total;
+}
+function toggleCL(si,ii){
+  var k=si+'_'+ii;
+  var newDone=!clDone[k];
+  supa('DELETE','checklist','','?id=eq.'+k)
+    .then(function(){ return supa('POST','checklist',{id:k,done:newDone},''); })
+    .then(function(){
+    clDone[k]=newDone; renderCL();
+  });
+}
+
+// ===== GOOGLE SHEETS =====
+function loadSheet() {
+  fetch(SHEET).then(function(r){return r.text();}).then(function(txt){
+    if(!txt||txt.indexOf('ciudad')===-1) return;
+    var lines=txt.trim().split('\n');
+    var cur={city:'',air:'',book:''};
+    for(var i=1;i<lines.length;i++){
+      var cols=lines[i].split(',');
+      var city=cols[0]?cols[0].trim().toLowerCase():'';
+      if(city&&LINKS[city]!==undefined){
+        if(cur.city&&cur.city!==city) LINKS[cur.city]={air:cur.air.replace(/"/g,''),book:cur.book.replace(/"/g,'')};
+        cur={city:city,air:cols[1]?cols[1].trim():'',book:cols[2]?cols[2].trim():''};
+      } else if(cur.city){
+        if(cols[1]) cur.air+=cols[1].trim();
+        if(cols[2]) cur.book+=cols[2].trim();
+      }
+    }
+    if(cur.city&&LINKS[cur.city]!==undefined) LINKS[cur.city]={air:cur.air.replace(/"/g,''),book:cur.book.replace(/"/g,'')};
+    renderCities();
+  }).catch(function(){});
+}
+
+// ===== CIUDAD DETAIL =====
+var CITY_DAYS = {
+  alicante:[1], montpellier:[1,2], paris:[2,3], colmar:[4],
+  milan:[4,5], venecia:[5], roma:[5,6,7], niza:[7,8]
+};
+
+var CITY_META = {
+  alicante:    {name:'Alicante',    flag:'🇪🇸', nights:0, dates:'14 jul salida', zone:'Origen del viaje'},
+  montpellier: {name:'Montpellier', flag:'🇫🇷', nights:1, dates:'14-15 jul', zone:'Centre historique'},
+  paris:       {name:'París',       flag:'🇫🇷', nights:2, dates:'15-17 jul', zone:'Le Marais / Montmartre'},
+  colmar:      {name:'Colmar',      flag:'🇫🇷', nights:0, dates:'17 jul parada', zone:'Petite Venise / Alsacia'},
+  milan:       {name:'Milán',       flag:'🇮🇹', nights:1, dates:'17-18 jul', zone:'Cerca de Centrale'},
+  venecia:     {name:'Venecia',     flag:'🇮🇹', nights:0, dates:'18 jul parada tren', zone:'Canal Grande / Rialto'},
+  roma:        {name:'Roma 🎂',     flag:'🇮🇹', nights:2, dates:'18-20 jul', zone:'Trastevere / Prati'},
+  niza:        {name:'Niza',        flag:'🇫🇷', nights:1, dates:'20-21 jul', zone:'Promenade des Anglais'}
+};
+
+var NOTAS_MAP = {
+  alicante:null, montpellier:null, paris:'Paris',
+  colmar:'Colmar', milan:'Milan', venecia:'Venecia',
+  roma:'Roma', niza:'Niza'
+};
+
+var _openCity = function(cityId) {
+  var m = CITY_META[cityId];
+  if(!m) return;
+  var FLAGS = {FR:'🇫🇷',IT:'🇮🇹',DE:'🇩🇪',BE:'🇧🇪',ES:'🇪🇸'};
+  m = JSON.parse(JSON.stringify(m)); // clone
+  m.flagEmoji = FLAGS[m.flag] || m.flag;
+  // Build city detail view
+  var html = '';
+  var ns = m.nights > 0 ? m.nights+' noche'+(m.nights>1?'s':'') : 'Parada de transito';
+
+  // Header info
+  html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.85rem">';
+  html += '<div style="font-size:2rem">'+m.flagEmoji+'</div>';
+  html += '<div><div style="font-size:1.1rem;font-weight:800;letter-spacing:-0.02em">'+m.name+'</div>';
+  html += '<div style="font-size:0.72rem;color:#64748b;margin-top:0.1rem">'+m.dates+' &nbsp;·&nbsp; '+ns+' &nbsp;·&nbsp; '+m.zone+'</div></div></div>';
+
+  // Alojamiento
+  if(LINKS[cityId]){
+    var air = LINKS[cityId].air;
+    var book = LINKS[cityId].book;
+    html += '<div class="st">Alojamiento</div>';
+    html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:1rem">';
+    html += '<div class="city-body">';
+    html += '<div class="lrow"><div class="lp"><div class="da"></div><span class="la">Airbnb</span></div>';
+    html += air ? '<div class="ldesc ok">Inicia sesion para ver opciones</div><a href="'+air+'" target="_blank" class="btn-ver ba">Ver</a>' : '<div class="ldesc">Proximamente</div>';
+    html += '</div>';
+    html += '<div class="lrow"><div class="lp"><div class="db"></div><span class="lb">Booking</span></div>';
+    html += book ? '<div class="ldesc ok">Inicia sesion para ver opciones</div><a href="'+book+'" target="_blank" class="btn-ver bb">Ver</a>' : '<div class="ldesc">Proximamente</div>';
+    html += '</div></div></div>';
+    // Votes
+    var vy = votes[cityId+'_y']?'vy':'';
+    var vf = votes[cityId+'_f']?'vf':'';
+    var vn = votes[cityId+'_n']?'vn':'';
+    html += '<div class="vrow" style="margin-bottom:1rem">';
+    html += '<button class="vb '+vy+'" onclick="vote(\''+cityId+'\',\'y\')">👍 Me apunto</button>';
+    html += '<button class="vb '+vf+'" onclick="vote(\''+cityId+'\',\'f\')">⭐ Favorita</button>';
+    html += '<button class="vb '+vn+'" onclick="vote(\''+cityId+'\',\'n\')">👎 No</button>';
+    html += '</div>';
+  }
+
+  // Itinerario dias
+  var days = CITY_DAYS[cityId] || [];
+  if(days.length) {
+    html += '<div class="st">Dias en '+m.name+'</div>';
+    days.forEach(function(di){
+      var d = TL[di];
+      if(!d) return;
+      var acts = d.acts.map(function(a){return '<div class="tact">'+a+'</div>';}).join('');
+      var ztl = d.ztl ? '<div class="tztl"><div class="tztl-t">⚠️ ZTL: no entrar al centro con el coche. Multa 100-300 euros.</div></div>' : '';
+      var mBtn = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;text-decoration:none;margin-top:0.5rem">🗺 Google Maps</a>' : '';
+      html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:0.5rem">';
+      html += '<div style="display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.9rem;border-bottom:1px solid #f1f5f9">';
+      html += '<div style="font-size:0.65rem;font-weight:700;color:#3b82f6;min-width:40px">'+d.date+'</div>';
+      html += '<div style="font-size:0.82rem;font-weight:600;flex:1">'+d.city+'</div>';
+      if(d.drive) html += '<span class="tp tpd">🚗 '+d.h+'</span>';
+      html += '</div>';
+      html += '<div style="padding:0.78rem 0.9rem;display:grid;grid-template-columns:1fr 1fr;gap:0.85rem">';
+      html += '<div><div class="tsub">Actividades</div>'+acts+ztl+mBtn+'</div>';
+      html += '<div><div class="tsub">Alojamiento</div><div class="tstay">'+d.stay+'</div>';
+      if(d.km>0) html += '<div style="display:flex;gap:0.3rem;flex-wrap:wrap;margin-top:0.3rem"><span class="tp tpd">🚗 '+d.h+'</span><span class="tp tpk">'+d.km+' km</span></div>';
+      html += '</div></div><div style="padding:0 0.9rem 0.78rem"><div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div></div>';
+      html += '</div>';
+    });
+  }
+
+  // Notas
+  var nk = NOTAS_MAP[cityId];
+  if(nk && NOTAS[nk]){
+    var n = NOTAS[nk];
+    html += '<div class="st" style="margin-top:0.5rem">Notas y consejos</div>';
+    html += '<div class="ncard">';
+    [{t:'Restaurantes',k:'rest'},{t:'Lugares',k:'lug'},{t:'Consejos',k:'cons'}].forEach(function(s){
+      html += '<div class="nsec"><div class="nsec-t">'+s.t+'</div>';
+      n[s.k].forEach(function(i){html += '<div class="nitem"><span class="nd">●</span>'+i+'</div>';});
+      html += '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Show ciudad view
+  document.getElementById('ciudad-content').innerHTML = html;
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.querySelectorAll('.bnb').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('view-ciudad').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// ===== INIT =====
+updateCountdown();
+setInterval(updateCountdown, 60000);
+renderCities();
+renderTL();
+renderBudget();
+renderGastos();
+renderNotas();
+renderCL();
+
+renderRuta();
+
+// Load sheet links immediately (Google Sheets for Airbnb links)
+loadSheet();
+
+// Try Supabase in background — don't block UI
+setTimeout(function() {
+  loadData();
+  setInterval(loadData, 15000);
+}, 500);
+
+// Show nombre modal if needed
+if(!NOMBRE){
+  document.getElementById('nmodal').classList.add('open');
+  setTimeout(function(){ var i=document.getElementById('ninput'); if(i) i.focus(); },100);
+}
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&document.getElementById('nmodal').classList.contains('open')) guardarNombre();
+});
+
+
+// ===== SIMULADOR =====
+var SIM_DISTANCES = {
+  'alicante-barcelona': {km:520, h:5.0},
+  'barcelona-montpellier': {km:310, h:3.5},
+  'alicante-montpellier': {km:620, h:6.5},
+  'montpellier-clermont': {km:330, h:3.5},
+  'clermont-paris': {km:420, h:4.0},
+  'montpellier-paris': {km:750, h:8.0},
+  'paris-colmar': {km:490, h:4.5},
+  'paris-milan': {km:850, h:8.5},
+  'colmar-milan': {km:510, h:5.0},
+  'milan-venecia': {km:270, h:2.8},
+  'milan-roma': {km:580, h:5.5},
+  'venecia-roma': {km:530, h:5.3},
+  'roma-milan': {km:580, h:5.5},
+  'milan-niza': {km:320, h:3.2},
+  'niza-alicante': {km:650, h:6.5},
+  'paris-pisa': {km:1050, h:10.0},
+  'colmar-pisa': {km:680, h:6.5},
+  'milan-pisa': {km:270, h:2.7},
+  'pisa-roma': {km:340, h:3.5},
+  'venecia-pisa': {km:310, h:3.2},
+  'niza-monaco': {km:20, h:0.4},
+  'monaco-milan': {km:310, h:3.5},
+  'monaco-genova': {km:160, h:2.0},
+  'roma-niza': {km:790, h:8.0},
+  'pisa-venecia': {km:310, h:3.2},
+  'paris-barcelona': {km:1040, h:9.5}
+};
+
+var SIM_CANDIDATES = [
+  {id:'pisa', name:'Pisa', flag:'🇮🇹', note:'Torre Inclinada — parada perfecta entre Milan y Roma', impact:'+270km, +2.7h vs ir directo', insertAfter:'milan'},
+  {id:'monaco', name:'Mónaco', flag:'🇲🇨', note:'El mini estado mas glamuroso — entre Niza y Milan', impact:'+20km desde Niza, casi gratis añadirlo', insertAfter:'niza'},
+  {id:'barcelona', name:'Barcelona', flag:'🇪🇸', note:'Parada de almuerzo obligatoria en el día 1', impact:'Ya incluida como parada — sin coste extra', insertAfter:'alicante'},
+  {id:'florencia', name:'Florencia', flag:'🇮🇹', note:'A 1h de Pisa y 3h de Roma por la A1', impact:'+100km si se añade con Pisa', insertAfter:'pisa'},
+  {id:'marsella', name:'Marsella', flag:'🇫🇷', note:'Puerto histórico — alternativa a Montpellier noche 1', impact:'+130km vs ir directo a Montpellier', insertAfter:'barcelona'}
+];
+
+var simRoute = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
+var simAdded = [];
+var dragSrc = null;
+
+function getDistance(a, b) {
+  var key1 = a + '-' + b;
+  var key2 = b + '-' + a;
+  return SIM_DISTANCES[key1] || SIM_DISTANCES[key2] || {km:400, h:4.0};
+}
+
+function simCalcTotals() {
+  var totalKm = 0, totalH = 0;
+  for (var i = 0; i < simRoute.length - 1; i++) {
+    var d = getDistance(simRoute[i], simRoute[i+1]);
+    totalKm += d.km;
+    totalH += d.h;
+  }
+  // Add train km (Milan-Venice-Rome area)
+  var trainKm = 650;
+  document.getElementById('sim-total-km').textContent = (totalKm + trainKm).toLocaleString();
+  document.getElementById('sim-total-h').textContent = '~' + Math.round(totalH) + 'h';
+  var fuel = Math.round((totalKm / 100) * 7.5 * 1.75 * 2); // 2 cars
+  document.getElementById('sim-total-fuel').textContent = '~' + fuel + '€';
+  return {km: totalKm, h: totalH};
+}
+
+function simRenderRoute() {
+  var el = document.getElementById('sim-ruta');
+  var cityEmoji = {alicante:'🏠', montpellier:'🇫🇷', paris:'🗼', colmar:'🏡',
+    milan:'🚇', venecia:'🚤', roma:'🏛️', niza:'🏖️',
+    pisa:'🗼', monaco:'🏎️', barcelona:'🇪🇸', florencia:'🎨', marsella:'⚓'};
+  var names = Object.assign({}, CITY_NAMES, {florencia:'Florencia', marsella:'Marsella'});
+  
+  el.innerHTML = simRoute.map(function(c, i) {
+    var nextD = i < simRoute.length - 1 ? getDistance(c, simRoute[i+1]) : null;
+    var isAdded = simAdded.indexOf(c) !== -1;
+    return '<div class="sim-city' + (isAdded ? ' sim-added' : '') + '" draggable="true" data-idx="' + i + '" ' +
+      'ondragstart="simDragStart(event,' + i + ')" ondragover="simDragOver(event)" ondrop="simDrop(event,' + i + ')" ondragleave="simDragLeave(event)">' +
+      '<span class="sim-handle">☰</span>' +
+      '<span class="sim-icon">' + (cityEmoji[c] || '📍') + '</span>' +
+      '<span class="sim-name">' + (names[c] || c) + (isAdded ? ' <span style="font-size:0.6rem;background:#dbeafe;color:#2563eb;padding:0.1rem 0.3rem;border-radius:4px;font-weight:700">+AÑADIDA</span>' : '') + '</span>' +
+      (nextD ? '<div class="sim-meta"><div class="sim-km">' + nextD.km + ' km</div>' + nextD.h.toFixed(1) + 'h</div>' : '<div class="sim-meta" style="color:#10b981;font-weight:600">FIN</div>') +
+      (isAdded ? '<button onclick="simRemoveCity('' + c + '')" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:0.9rem;padding:0 0.2rem" title="Quitar">✕</button>' : '') +
+      '</div>';
+  }).join('');
+  simCalcTotals();
+}
+
+function simDragStart(e, idx) {
+  dragSrc = idx;
+  e.target.classList.add('dragging');
+}
+function simDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.classList.add('dragover');
+}
+function simDragLeave(e) {
+  e.currentTarget.classList.remove('dragover');
+}
+function simDrop(e, targetIdx) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  if (dragSrc === null || dragSrc === targetIdx) { dragSrc=null; return; }
+  var moved = simRoute.splice(dragSrc, 1)[0];
+  simRoute.splice(targetIdx, 0, moved);
+  dragSrc = null;
+  document.querySelectorAll('.sim-city').forEach(function(el){el.classList.remove('dragging');});
+  simRenderRoute();
+  simShowAlert('Ruta reordenada. Km y horas recalculados.');
+}
+
+function simAddCity(candId) {
+  var cand = SIM_CANDIDATES.filter(function(c){return c.id===candId;})[0];
+  if (!cand) return;
+  if (simRoute.indexOf(candId) !== -1) return;
+  var insertIdx = simRoute.indexOf(cand.insertAfter);
+  if (insertIdx === -1) insertIdx = simRoute.length - 2;
+  simRoute.splice(insertIdx + 1, 0, candId);
+  simAdded.push(candId);
+  simRenderRoute();
+  simRenderCandidates();
+  simShowAlert('✅ ' + (CITY_NAMES[candId] || candId) + ' añadida a la simulación. La ruta oficial no cambia.');
+}
+
+function simRemoveCity(cityId) {
+  simRoute = simRoute.filter(function(c){return c !== cityId;});
+  simAdded = simAdded.filter(function(c){return c !== cityId;});
+  simRenderRoute();
+  simRenderCandidates();
+  simHideAlert();
+}
+
+function simReset() {
+  simRoute = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
+  simAdded = [];
+  simRenderRoute();
+  simRenderCandidates();
+  simHideAlert();
+}
+
+function simRenderCandidates() {
+  var el = document.getElementById('sim-candidates');
+  el.innerHTML = SIM_CANDIDATES.map(function(c) {
+    var inRoute = simRoute.indexOf(c.id) !== -1;
+    return '<div class="sim-cand">' +
+      '<span style="font-size:1.1rem">' + c.flag + '</span>' +
+      '<div class="sim-cand-info">' +
+        '<div class="sim-cand-name">' + c.name + '</div>' +
+        '<div class="sim-cand-note">' + c.note + '</div>' +
+        '<div class="sim-cand-impact">📍 ' + c.impact + '</div>' +
+      '</div>' +
+      '<button class="btn-sim-add' + (inRoute ? ' added' : '') + '" onclick="simAddCity('' + c.id + '')">' +
+        (inRoute ? '✓ En ruta' : '+ Probar') +
+      '</button>' +
+      '</div>';
+  }).join('');
+}
+
+function simShowAlert(msg) {
+  var el = document.getElementById('sim-alert');
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(function(){ el.style.display='none'; }, 4000);
+}
+
+function simHideAlert() {
+  document.getElementById('sim-alert').style.display = 'none';
+}
+
+// Init simulator when view is shown
+var _origShowView = showView;
+showView = function(name, idx) {
+  _origShowView(name, idx);
+  if (name === 'simulador') {
+    simRenderRoute();
+    simRenderCandidates();
+  }
+};
+
 </script>
 </body>
 </html>
