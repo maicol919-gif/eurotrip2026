@@ -1027,8 +1027,9 @@ function renderTL(tlData, containerId) {
     var ztl = d.ztl ? '<div class="tztl"><div class="tztl-t">⚠️ ZTL Italia: no entrar al centro con el coche. Multa 100-300 euros. Aparcar en la periferia.</div></div>' : '';
     var mapsBtn = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;margin-top:0.5rem">🗺 Abrir en Google Maps</a>' : '';
     var prefix = containerId ? 'sim-tl-' : 'tl';
-    var delBtn = (!containerId && simIsAdmin) ?
-      '<button onclick="event.stopPropagation();tlDeleteDay('+i+')" style="background:none;border:1px solid #fecaca;color:#ef4444;border-radius:6px;padding:0.15rem 0.45rem;font-size:0.62rem;cursor:pointer;font-family:inherit;margin-left:4px;flex-shrink:0" title="Eliminar este dia">✕</button>' : '';
+    // Delete button always visible in TL (not in preview containers), PIN requested on click
+    var delBtn = !containerId ?
+      '<button onclick="event.stopPropagation();tlDeleteDay('+i+')" style="background:none;border:1px solid #fecaca;color:#ef4444;border-radius:6px;padding:0.15rem 0.45rem;font-size:0.62rem;cursor:pointer;font-family:inherit;margin-left:4px;flex-shrink:0;opacity:0.6" title="Eliminar (requiere PIN admin)">✕</button>' : '';
     return '<div class="tl-row" id="'+prefix+i+'" onclick="toggleTL(this)">'+
       '<div class="tl-h"><div class="tl-date">'+d.date+'</div>'+
       '<div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>'+
@@ -1045,13 +1046,14 @@ function renderTL(tlData, containerId) {
 function toggleTL(el){ el.classList.toggle('open'); }
 
 function tlDeleteDay(idx){
-  if(!simIsAdmin){ return; }
-  var day = TL[idx];
-  if(!day) return;
-  if(!confirm('Eliminar "'+day.city+'" del itinerario oficial?')) return;
-  TL.splice(idx, 1);
-  renderTL();
-  simShowMsg && simShowMsg('Dia eliminado del itinerario.');
+  simRequestAdmin(function(){
+    var day = TL[idx];
+    if(!day) return;
+    if(!confirm('Eliminar "'+day.city+'" del itinerario oficial?')) return;
+    TL.splice(idx, 1);
+    renderTL();
+    simShowMsg('Dia eliminado del itinerario.');
+  });
 }
 
 // ===== PRESUPUESTO =====
@@ -1651,6 +1653,8 @@ function simDrawSVGMap(osmCities, gmUrl, totalKm){
 // ===== RENDER ROUTE =====
 function simRenderRoute(){
   var LEGAL_CONTINUOUS=4.5, LEGAL_DAILY=9;
+  // Map route position to TL date
+  var TL_DATES=['14 jul','15 jul','16 jul','17 jul','18 jul','19 jul','20 jul','21 jul'];
   var el=document.getElementById('sim-ruta');
   el.innerHTML='';
   simRoute.forEach(function(c,i){
@@ -1659,19 +1663,25 @@ function simRenderRoute(){
     var h=km>0?simGetHours(c,simRoute[i+1]):0;
     var isAdded=simAdded.indexOf(c)!==-1;
     var isOver=h>4.5&&mode==='coche';
+    var dayDate=TL_DATES[i]||'';
     var div=document.createElement('div');
     div.className='sim-city';div.draggable=true;div.dataset.i=i;
     div.style.cssText='padding:0.5rem 0.7rem;';
     var overDaily = h > LEGAL_DAILY && mode==='coche';
     var overContinuous = h > LEGAL_CONTINUOUS && mode==='coche';
-    div.innerHTML='<span class="sim-handle" style="color:#cbd5e1;margin-right:4px">&#9776;</span>'+
-      '<span style="font-size:0.8rem;margin-right:3px">'+(SIM_FLAGS[c]||'')+'</span>'+
+    div.innerHTML=
+      '<div style="display:flex;flex-direction:column;align-items:center;margin-right:6px;flex-shrink:0">'+
+        '<span style="font-size:0.55rem;font-weight:800;color:#0f172a;font-family:monospace;line-height:1">D'+(i+1)+'</span>'+
+        (dayDate?'<span style="font-size:0.48rem;color:#94a3b8;line-height:1;margin-top:1px">'+dayDate+'</span>':'')+
+      '</div>'+
+      '<span class="sim-handle" style="color:#cbd5e1;margin-right:4px;font-size:0.75rem">&#9776;</span>'+
+      '<span style="font-size:0.78rem;margin-right:3px">'+(SIM_FLAGS[c]||'')+'</span>'+
       '<div style="flex:1;min-width:0">'+
         '<span class="sim-name" style="font-size:0.82rem">'+(SIM_NAMES[c]||c)+
-          (isAdded?' <span style="font-size:0.55rem;background:#dbeafe;color:#2563eb;padding:0.1rem 0.3rem;border-radius:3px">SIM</span>':'')+
+          (isAdded?' <span style="font-size:0.52rem;background:#dbeafe;color:#2563eb;padding:0.1rem 0.28rem;border-radius:3px">SIM</span>':'')+
         '</span>'+
-        (overContinuous&&!overDaily?'<div style="font-size:0.58rem;color:#f59e0b;margin-top:1px">⚠️ '+h.toFixed(1)+'h — planificar parada</div>':'')+
-        (overDaily?'<div style="font-size:0.58rem;color:#ef4444;margin-top:1px">🔴 '+h.toFixed(1)+'h — etapa muy larga</div>':'')+
+        (overContinuous&&!overDaily?'<div style="font-size:0.56rem;color:#f59e0b;margin-top:1px">⚠️ '+h.toFixed(1)+'h — planificar parada</div>':'')+
+        (overDaily?'<div style="font-size:0.56rem;color:#ef4444;margin-top:1px">🔴 '+h.toFixed(1)+'h — etapa muy larga</div>':'')+
       '</div>'+
       (km>0?'<div style="text-align:right;flex-shrink:0">'+
         '<div style="font-size:0.68rem;font-weight:700;color:'+(overDaily?'#ef4444':'#0f172a')+'">'+
@@ -1863,7 +1873,56 @@ function simPreview(cityId){
     return '<div style="padding:0.24rem 0;font-size:0.7rem;border-bottom:1px solid #f8fafc">'+a+'</div>';
   }).join('');
 
-  var html=verdictHtml+impactBar+
+  // Impact summary card
+  var extraDays = 0; // check if new city needs overnight
+  var needsNight = c.stay && c.stay.toLowerCase().indexOf('noche')!==-1 && c.stay.toLowerCase().indexOf('sin')===-1;
+  if(needsNight) extraDays=1;
+  var baseFuel = Math.round((totalKmBefore/100)*7.5*1.75*2);
+  var newFuel  = Math.round((kmAfter/100)*7.5*1.75*2);
+  var fuelExtra = newFuel - baseFuel;
+  var baseH = (totalKmBefore/80).toFixed(0);
+  var newH  = (kmAfter/80).toFixed(0);
+
+  // Determine date of insertion (D insertAt + base date)
+  var BASE_DATES=['14 jul','15 jul','16 jul','17 jul','18 jul','19 jul','20 jul','21 jul'];
+  var insertDate = BASE_DATES[insertAt-1]||'? jul';
+
+  var impactCard =
+    '<div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border-radius:12px;padding:0.75rem;margin-bottom:0.6rem;color:white">'+
+      '<div style="font-size:0.6rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem">'+
+        '📍 Se inserta en D'+insertAt+' · '+insertDate+' · entre '+(SIM_NAMES[afterCity]||afterCity)+' y '+(SIM_NAMES[nextCity]||nextCity)+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:repeat('+(extraDays>0?4:3)+',1fr);gap:0.4rem;text-align:center">'+
+        '<div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:0.45rem 0.2rem">'+
+          '<div style="font-size:1.1rem;font-weight:900;color:#fb923c">+'+extraKm+'km</div>'+
+          '<div style="font-size:0.52rem;color:#94a3b8;text-transform:uppercase;margin-top:2px">km extra</div>'+
+        '</div>'+
+        '<div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:0.45rem 0.2rem">'+
+          '<div style="font-size:1.1rem;font-weight:900;color:'+(parseFloat(affectedH)>9?'#ef4444':'#4ade80')+'">'+affectedH+'h</div>'+
+          '<div style="font-size:0.52rem;color:#94a3b8;text-transform:uppercase;margin-top:2px">ese tramo</div>'+
+        '</div>'+
+        '<div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:0.45rem 0.2rem">'+
+          '<div style="font-size:1.1rem;font-weight:900;color:#a78bfa">+'+fuelExtra+'€</div>'+
+          '<div style="font-size:0.52rem;color:#94a3b8;text-transform:uppercase;margin-top:2px">gasolina</div>'+
+        '</div>'+
+        (extraDays>0?'<div style="background:rgba(239,68,68,0.2);border-radius:8px;padding:0.45rem 0.2rem;border:1px solid rgba(239,68,68,0.4)">'+
+          '<div style="font-size:1.1rem;font-weight:900;color:#ef4444">+1</div>'+
+          '<div style="font-size:0.52rem;color:#fca5a5;text-transform:uppercase;margin-top:2px">noche</div>'+
+        '</div>':'')+
+      '</div>'+
+      // Time comparison bar
+      '<div style="margin-top:0.5rem;background:rgba(255,255,255,0.06);border-radius:6px;padding:0.4rem 0.5rem">'+
+        '<div style="display:flex;justify-content:space-between;font-size:0.58rem;color:#94a3b8;margin-bottom:4px">'+
+          '<span>Conduccion total</span>'+
+          '<span>'+baseH+'h → '+newH+'h <strong style="color:#fb923c">+'+extraH+'h</strong></span>'+
+        '</div>'+
+        '<div style="background:rgba(255,255,255,0.1);border-radius:3px;height:5px;overflow:hidden">'+
+          '<div style="height:100%;border-radius:3px;background:linear-gradient(90deg,#3b82f6,#fb923c);width:'+Math.min(100,Math.round((kmAfter/totalKmBefore)*100))+'%"></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+
+  var html=impactCard+verdictHtml+impactBar+
     '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:0.5rem">'+
       '<div style="padding:0.42rem 0.6rem;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:0.58rem;font-weight:700;color:#64748b;text-transform:uppercase">Con '+(SIM_NAMES[cityId]||cityId)+'</div>'+
       rows+'</div>'+
