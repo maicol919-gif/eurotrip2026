@@ -1051,6 +1051,7 @@ function tlDeleteDay(idx){
     if(!day) return;
     if(!confirm('Eliminar "'+day.city+'" del itinerario oficial?')) return;
     TL.splice(idx, 1);
+    simSaveTL();
     renderTL();
     simShowMsg('Dia eliminado del itinerario.');
   });
@@ -1809,6 +1810,7 @@ function simPreview(cityId, forceInsertAt){
   var afterIdx=preferredAfter?simRoute.indexOf(preferredAfter):-1;
   var defaultInsert=afterIdx>=0?afterIdx+1:simFindBestInsert(cityId);
   var insertAt=forceInsertAt!==undefined?forceInsertAt:defaultInsert;
+  simPreviewInsertAt=insertAt; // track for simConfirmOfficial
   var afterCity=simRoute[insertAt-1]||simRoute[0];
   var nextCity=simRoute[insertAt]||simRoute[simRoute.length-1];
 
