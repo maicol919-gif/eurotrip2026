@@ -1500,24 +1500,20 @@ function simCalc(){
     if(mode==='coche'&&h>maxSegH){maxSegH=h;maxSegName=(SIM_NAMES[a]||a)+' → '+(SIM_NAMES[b]||b);}
   }
 
-  // Check continuous driving (car segments only, pauses reset counter)
-  var continuousH=0;
+  // Check each segment individually against daily limit
+  // Only warn if a SINGLE segment exceeds 9h (one continuous drive)
+  // Conductores warning only when actually defined
   segments.forEach(function(seg){
-    if(seg.mode==='coche'){
-      continuousH+=seg.h;
-      if(continuousH>LEGAL_CONTINUOUS){
-        warnings.push({type:'continuous',msg:'⚠️ '+seg.from.toUpperCase()+'→'+seg.to.toUpperCase()+': '+continuousH.toFixed(1)+'h continuas sin parada (limite: '+LEGAL_CONTINUOUS+'h)'});
-      }
-    } else {
-      continuousH=0; // transport change = break
+    if(seg.mode==='coche' && seg.h>LEGAL_DAILY){
+      warnings.push({type:'day',city:seg.to,
+        msg:seg.h.toFixed(1)+'h'});
     }
   });
 
-  // Conductor warnings
+  // Conductor warnings only when conductores are defined
   if(simConductores.length>0){
     var coches={1:[],2:[]};
     simConductores.forEach(function(c){coches[c.coche].push(c);});
-    // Check if any coche has 0 conductores
     [1,2].forEach(function(cocheNum){
       if(coches[cocheNum].length===0){
         warnings.push({type:'cond',msg:'🚗 Coche '+cocheNum+' sin conductor asignado'});
@@ -1536,9 +1532,11 @@ function simCalc(){
   maxEl.textContent=maxSegH.toFixed(1)+'h';
   maxEl.style.color=maxSegH>9?'#ef4444':maxSegH>7?'#f59e0b':'#4ade80';
 
+  // Only show conductor warnings in top bar (not driving hour warnings - those are on city rows)
   var wEl=document.getElementById('sim-warnings');
-  if(warnings.length){
-    wEl.innerHTML=warnings.map(function(w){
+  var condWarnings=warnings.filter(function(w){return w.type==='cond';});
+  if(condWarnings.length){
+    wEl.innerHTML=condWarnings.map(function(w){
       return '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:0.38rem 0.65rem;font-size:0.7rem;color:#dc2626;margin-bottom:3px">'+w.msg+'</div>';
     }).join('');
   } else {wEl.innerHTML='';}
@@ -1547,34 +1545,100 @@ function simCalc(){
   simUpdateMap();
 }
 
-// ===== GOOGLE MAPS =====
+// ===== MAP: Google Maps link (no embed API needed) =====
 function simUpdateMap(){
-  var route=simRoute.slice();
-  var waypoints=route.map(function(c){
-    return SIM_COORDS[c]||((SIM_NAMES[c]||c)+',Europe');
-  });
-  if(waypoints.length<2){return;}
-  var origin=encodeURIComponent(waypoints[0]);
-  var destination=encodeURIComponent(waypoints[waypoints.length-1]);
-  var mids=waypoints.slice(1,-1).map(function(w){return encodeURIComponent(w);}).join('|');
-  var url='https://www.google.com/maps/embed/v1/directions?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY'+
-    '&origin='+origin+
-    '&destination='+destination+
-    (mids?'&waypoints='+mids:'')+
-    '&mode=driving&language=es';
-
-  // Count km for label
   var totalKm=0;
   for(var i=0;i<simRoute.length-1;i++) totalKm+=simGetKm(simRoute[i],simRoute[i+1]);
+
   var label=document.getElementById('sim-map-label');
   if(label) label.textContent=simRoute.length+' ciudades · '+totalKm.toLocaleString()+' km';
 
-  var iframe=document.getElementById('sim-map-iframe');
-  if(iframe) iframe.src=url;
+  // Build Google Maps directions URL (opens in new tab - no API key needed)
+  var coords=simRoute.map(function(c){return SIM_COORDS[c]||(SIM_NAMES[c]||c)+',Europe';});
+  var gmUrl='https://www.google.com/maps/dir/'+coords.map(function(c){return encodeURIComponent(c);}).join('/');
+
+  // Use OpenStreetMap embed (free, no key)
+  // Build bbox from known city coords for a good view
+  var osmCities={
+    alicante:[-0.48,38.35],montpellier:[3.88,43.61],paris:[2.35,48.85],
+    colmar:[7.36,48.08],milan:[9.19,45.46],venecia:[12.33,45.44],
+    roma:[12.50,41.90],niza:[7.27,43.71],pisa:[10.40,43.72],
+    monaco:[7.42,43.74],barcelona:[2.15,41.39],florencia:[11.25,43.77],
+    marsella:[5.37,43.30],madrid:[-3.70,40.42]
+  };
+
+  // Draw SVG map
+  simDrawSVGMap(osmCities, gmUrl, totalKm);
+}
+
+function simDrawSVGMap(osmCities, gmUrl, totalKm){
+  var mapEl=document.getElementById('sim-map-iframe');
+  if(!mapEl) return;
+
+  // Get bounds
+  var lons=simRoute.map(function(c){return osmCities[c]?osmCities[c][0]:5;});
+  var lats=simRoute.map(function(c){return osmCities[c]?osmCities[c][1]:44;});
+  var minLon=Math.min.apply(null,lons)-3, maxLon=Math.max.apply(null,lons)+3;
+  var minLat=Math.min.apply(null,lats)-2, maxLat=Math.max.apply(null,lats)+2;
+
+  var W=400, H=340;
+  function toX(lon){return ((lon-minLon)/(maxLon-minLon))*W;}
+  function toY(lat){return H-((lat-minLat)/(maxLat-minLat))*H;}
+
+  // Build path
+  var pathD=simRoute.map(function(c,i){
+    var pos=osmCities[c]||[5,44];
+    var x=toX(pos[0]),y=toY(pos[1]);
+    return (i===0?'M':'L')+x.toFixed(1)+','+y.toFixed(1);
+  }).join(' ');
+
+  // Build city dots and labels
+  var dots=simRoute.map(function(c,i){
+    var pos=osmCities[c]||[5,44];
+    var x=toX(pos[0]),y=toY(pos[1]);
+    var isFirst=i===0,isLast=i===simRoute.length-1;
+    var isAdded=simAdded.indexOf(c)!==-1;
+    var color=isFirst||isLast?'#0f172a':isAdded?'#3b82f6':'#e85d04';
+    var r=isFirst||isLast?6:isAdded?5:4;
+    var labelX=x+8,anchor='start';
+    if(x>W*0.75){labelX=x-8;anchor='end';}
+    return '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" fill="'+color+'" stroke="white" stroke-width="1.5"/>'+
+      '<text x="'+labelX.toFixed(1)+'" y="'+(y+4).toFixed(1)+'" font-size="9" fill="#0f172a" font-family="sans-serif" text-anchor="'+anchor+'" font-weight="'+(isFirst||isLast?'700':'400')+'">'+
+      (SIM_FLAGS[c]?SIM_FLAGS[c]+' ':'')+(SIM_NAMES[c]||c)+'</text>';
+  }).join('');
+
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;height:100%;background:#f0f4f8">'+
+    // Background subtle grid
+    '<rect width="'+W+'" height="'+H+'" fill="#e8f0f7"/>'+
+    // Route shadow
+    '<path d="'+pathD+'" fill="none" stroke="#0f172a" stroke-width="4" stroke-opacity="0.15" stroke-linejoin="round" stroke-linecap="round"/>'+
+    // Route line animated
+    '<path d="'+pathD+'" fill="none" stroke="#e85d04" stroke-width="2.5" stroke-dasharray="6 3" stroke-linejoin="round" stroke-linecap="round">'+
+      '<animate attributeName="stroke-dashoffset" values="18;0" dur="1.5s" repeatCount="indefinite"/>'+
+    '</path>'+
+    // City dots and labels
+    dots+
+    // Total km label
+    '<rect x="4" y="'+(H-22)+'" width="120" height="18" rx="4" fill="#0f172a" fill-opacity="0.75"/>'+
+    '<text x="10" y="'+(H-9)+'" font-size="9" fill="white" font-family="sans-serif">'+totalKm.toLocaleString()+' km · '+simRoute.length+' ciudades</text>'+
+    '</svg>';
+
+  // Replace iframe with SVG div + Maps link
+  var container=mapEl.parentElement;
+  if(container){
+    container.innerHTML=
+      '<div style="position:absolute;top:8px;left:8px;right:8px;z-index:5;background:white;border-radius:8px;padding:5px 10px;font-size:0.64rem;color:#64748b;box-shadow:0 2px 8px rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:space-between" id="sim-map-label">'+
+        '<span>'+simRoute.length+' ciudades · '+totalKm.toLocaleString()+' km</span>'+
+        '<a href="'+gmUrl+'" target="_blank" style="background:#0f172a;color:white;padding:3px 8px;border-radius:5px;text-decoration:none;font-weight:700;font-size:0.62rem">🗺 Google Maps</a>'+
+      '</div>'+
+      '<div id="sim-map-svg" style="width:100%;height:100%;padding-top:36px">'+svg+'</div>'+
+      '<div id="sim-map-iframe" style="display:none"></div>';
+  }
 }
 
 // ===== RENDER ROUTE =====
 function simRenderRoute(){
+  var LEGAL_CONTINUOUS=4.5, LEGAL_DAILY=9;
   var el=document.getElementById('sim-ruta');
   el.innerHTML='';
   simRoute.forEach(function(c,i){
@@ -1586,15 +1650,21 @@ function simRenderRoute(){
     var div=document.createElement('div');
     div.className='sim-city';div.draggable=true;div.dataset.i=i;
     div.style.cssText='padding:0.5rem 0.7rem;';
+    var overDaily = h > LEGAL_DAILY && mode==='coche';
+    var overContinuous = h > LEGAL_CONTINUOUS && mode==='coche';
     div.innerHTML='<span class="sim-handle" style="color:#cbd5e1;margin-right:4px">&#9776;</span>'+
       '<span style="font-size:0.8rem;margin-right:3px">'+(SIM_FLAGS[c]||'')+'</span>'+
-      '<span class="sim-name" style="font-size:0.82rem">'+(SIM_NAMES[c]||c)+
-        (isAdded?' <span style="font-size:0.55rem;background:#dbeafe;color:#2563eb;padding:0.1rem 0.3rem;border-radius:3px">SIM</span>':'')+
-      '</span>'+
+      '<div style="flex:1;min-width:0">'+
+        '<span class="sim-name" style="font-size:0.82rem">'+(SIM_NAMES[c]||c)+
+          (isAdded?' <span style="font-size:0.55rem;background:#dbeafe;color:#2563eb;padding:0.1rem 0.3rem;border-radius:3px">SIM</span>':'')+
+        '</span>'+
+        (overContinuous&&!overDaily?'<div style="font-size:0.58rem;color:#f59e0b;margin-top:1px">⚠️ '+h.toFixed(1)+'h — planificar parada</div>':'')+
+        (overDaily?'<div style="font-size:0.58rem;color:#ef4444;margin-top:1px">🔴 '+h.toFixed(1)+'h — etapa muy larga</div>':'')+
+      '</div>'+
       (km>0?'<div style="text-align:right;flex-shrink:0">'+
-        '<div style="font-size:0.68rem;font-weight:700;color:'+(isOver?'#ef4444':'#0f172a')+'">'+
+        '<div style="font-size:0.68rem;font-weight:700;color:'+(overDaily?'#ef4444':'#0f172a')+'">'+
           simGetModeIcon(mode)+' '+km+'km</div>'+
-        '<div style="font-size:0.6rem;color:'+(isOver?'#ef4444':'#94a3b8')+'">'+h.toFixed(1)+'h'+(isOver?' ⚠️':'')+'</div>'+
+        '<div style="font-size:0.6rem;color:'+(overDaily?'#ef4444':'#94a3b8')+'">'+h.toFixed(1)+'h</div>'+
       '</div>':
       '<div style="font-size:0.65rem;color:#10b981;font-weight:700;margin-left:auto">FIN</div>');
     if(isAdded){
