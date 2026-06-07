@@ -1027,11 +1027,13 @@ function renderTL(tlData, containerId) {
     var ztl = d.ztl ? '<div class="tztl"><div class="tztl-t">⚠️ ZTL Italia: no entrar al centro con el coche. Multa 100-300 euros. Aparcar en la periferia.</div></div>' : '';
     var mapsBtn = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;margin-top:0.5rem">🗺 Abrir en Google Maps</a>' : '';
     var prefix = containerId ? 'sim-tl-' : 'tl';
+    var delBtn = (!containerId && simIsAdmin) ?
+      '<button onclick="event.stopPropagation();tlDeleteDay('+i+')" style="background:none;border:1px solid #fecaca;color:#ef4444;border-radius:6px;padding:0.15rem 0.45rem;font-size:0.62rem;cursor:pointer;font-family:inherit;margin-left:4px;flex-shrink:0" title="Eliminar este dia">✕</button>' : '';
     return '<div class="tl-row" id="'+prefix+i+'" onclick="toggleTL(this)">'+
       '<div class="tl-h"><div class="tl-date">'+d.date+'</div>'+
       '<div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>'+
-      '<div class="tl-city">'+d.city+'</div>'+
-      '<div style="display:flex;gap:0.28rem;align-items:center;flex-wrap:wrap">'+tags+'</div>'+
+      '<div class="tl-city" style="flex:1">'+d.city+'</div>'+
+      '<div style="display:flex;gap:0.28rem;align-items:center;flex-wrap:wrap">'+tags+delBtn+'</div>'+
       '<span class="tl-ch">▾</span></div>'+
       '<div class="tl-body">'+
         '<div><div class="tsub">Horario del dia</div>'+acts+ztl+
@@ -1041,6 +1043,16 @@ function renderTL(tlData, containerId) {
   }).join('');
 }
 function toggleTL(el){ el.classList.toggle('open'); }
+
+function tlDeleteDay(idx){
+  if(!simIsAdmin){ return; }
+  var day = TL[idx];
+  if(!day) return;
+  if(!confirm('Eliminar "'+day.city+'" del itinerario oficial?')) return;
+  TL.splice(idx, 1);
+  renderTL();
+  simShowMsg && simShowMsg('Dia eliminado del itinerario.');
+}
 
 // ===== PRESUPUESTO =====
 function renderBudget() {
@@ -1863,6 +1875,83 @@ function simPreview(cityId){
   document.getElementById('sim-preview-tl').innerHTML=html;
   document.getElementById('sim-preview').style.display='block';
   document.getElementById('sim-preview').scrollIntoView({behavior:'smooth',block:'nearest'});
+
+  // Update map to show the preview route (new city highlighted)
+  simDrawPreviewMap(newRoute, cityId, afterCity, nextCity);
+}
+
+function simDrawPreviewMap(previewRoute, newCityId, afterCity, nextCity){
+  var osmCities={
+    alicante:[-0.48,38.35],montpellier:[3.88,43.61],paris:[2.35,48.85],
+    colmar:[7.36,48.08],milan:[9.19,45.46],venecia:[12.33,45.44],
+    roma:[12.50,41.90],niza:[7.27,43.71],pisa:[10.40,43.72],
+    monaco:[7.42,43.74],barcelona:[2.15,41.39],florencia:[11.25,43.77],
+    marsella:[5.37,43.30],madrid:[-3.70,40.42],zurich:[8.55,47.37],
+    lyon:[4.83,45.75],bruselas:[4.35,50.85],amsterdam:[4.90,52.37]
+  };
+
+  var totalKm=0;
+  for(var i=0;i<previewRoute.length-1;i++) totalKm+=simGetKm(previewRoute[i],previewRoute[i+1]);
+  var gmUrl='https://www.google.com/maps/dir/'+previewRoute.map(function(c){
+    return encodeURIComponent(osmCities[c]?c+',Europe':(SIM_NAMES[c]||c)+',Europe');
+  }).join('/');
+
+  var lons=previewRoute.map(function(c){return osmCities[c]?osmCities[c][0]:5;});
+  var lats=previewRoute.map(function(c){return osmCities[c]?osmCities[c][1]:44;});
+  var minLon=Math.min.apply(null,lons)-3, maxLon=Math.max.apply(null,lons)+3;
+  var minLat=Math.min.apply(null,lats)-2, maxLat=Math.max.apply(null,lats)+2;
+  var W=400, H=340;
+  function toX(lon){return ((lon-minLon)/(maxLon-minLon))*W;}
+  function toY(lat){return H-((lat-minLat)/(maxLat-minLat))*H;}
+
+  // Draw existing route in grey
+  var existingPath=simRoute.map(function(c,i){
+    var pos=osmCities[c]||[5,44];
+    return (i===0?'M':'L')+toX(pos[0]).toFixed(1)+','+toY(pos[1]).toFixed(1);
+  }).join(' ');
+
+  // Draw new route in orange
+  var newPath=previewRoute.map(function(c,i){
+    var pos=osmCities[c]||[5,44];
+    return (i===0?'M':'L')+toX(pos[0]).toFixed(1)+','+toY(pos[1]).toFixed(1);
+  }).join(' ');
+
+  var dots=previewRoute.map(function(c,i){
+    var pos=osmCities[c]||[5,44];
+    var x=toX(pos[0]),y=toY(pos[1]);
+    var isNew=c===newCityId;
+    var isFirst=i===0,isLast=i===previewRoute.length-1;
+    var color=isNew?'#10b981':isFirst||isLast?'#0f172a':'#e85d04';
+    var r=isNew?7:isFirst||isLast?6:4;
+    var labelX=x+9,anchor='start';
+    if(x>W*0.72){labelX=x-9;anchor='end';}
+    var label=(SIM_FLAGS[c]?SIM_FLAGS[c]+' ':'')+(SIM_NAMES[c]||c);
+    var weight=isNew||isFirst||isLast?'700':'400';
+    return (isNew?'<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="12" fill="#10b981" fill-opacity="0.15"/>':'')+
+      '<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" fill="'+color+'" stroke="white" stroke-width="'+(isNew?'2':'1.5')+'"/>'+
+      (isNew?'<text x="'+labelX.toFixed(1)+'" y="'+(y-10).toFixed(1)+'" font-size="9" fill="#10b981" font-family="sans-serif" font-weight="700" text-anchor="'+anchor+'">+NUEVA</text>':'')+
+      '<text x="'+labelX.toFixed(1)+'" y="'+(y+4).toFixed(1)+'" font-size="9" fill="'+(isNew?'#10b981':'#0f172a')+'" font-family="sans-serif" text-anchor="'+anchor+'" font-weight="'+weight+'">'+label+'</text>';
+  }).join('');
+
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;height:100%;background:#e8f0f7">'+
+    // Old route grey
+    '<path d="'+existingPath+'" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3" stroke-opacity="0.5"/>'+
+    // New route orange animated
+    '<path d="'+newPath+'" fill="none" stroke="#e85d04" stroke-width="2.5" stroke-dasharray="6 3" stroke-linejoin="round" stroke-linecap="round">'+
+      '<animate attributeName="stroke-dashoffset" values="18;0" dur="1.2s" repeatCount="indefinite"/>'+
+    '</path>'+
+    dots+
+    '<rect x="4" y="'+(H-22)+'" width="140" height="18" rx="4" fill="#0f172a" fill-opacity="0.75"/>'+
+    '<text x="10" y="'+(H-9)+'" font-size="9" fill="white" font-family="sans-serif">+NEW: '+totalKm.toLocaleString()+' km total</text>'+
+    '</svg>';
+
+  var container=document.getElementById('sim-map-svg');
+  if(container) container.innerHTML=svg;
+  var label=document.getElementById('sim-map-label');
+  if(label){
+    var span=label.querySelector('span');
+    if(span) span.textContent=previewRoute.length+' ciudades · '+totalKm.toLocaleString()+' km (preview)';
+  }
 }
 
 function simConfirmOfficial(){
@@ -1893,7 +1982,12 @@ function simConfirmOfficial(){
   });
 }
 
-function simClosePreview(){document.getElementById('sim-preview').style.display='none';simPreviewing=null;}
+function simClosePreview(){
+  document.getElementById('sim-preview').style.display='none';
+  simPreviewing=null;
+  // Restore map to current route
+  simUpdateMap();
+}
 function simRemove(id){
   simRoute=simRoute.filter(function(c){return c!==id;});
   simAdded=simAdded.filter(function(c){return c!==id;});
