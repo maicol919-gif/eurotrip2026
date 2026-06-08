@@ -275,6 +275,25 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .nav-picker-sub{font-size:0.65rem;color:#94a3b8;margin-top:0.1rem}
 .nav-picker-cancel{width:100%;padding:0.7rem;border:none;background:#f8fafc;border-radius:10px;font-family:inherit;font-size:0.8rem;color:#64748b;cursor:pointer;margin-top:0.3rem;font-weight:600}
 
+
+/* ===== ACTIVIDADES ENRIQUECIDAS ===== */
+.eact-simple{display:flex;align-items:flex-start;gap:0.4rem;padding:0.3rem 0;border-bottom:1px solid #f8fafc;font-size:0.74rem}
+.eact-simple:last-child{border-bottom:none}
+.eact-time{font-size:0.62rem;font-weight:700;color:#94a3b8;min-width:38px;flex-shrink:0;margin-top:0.1rem}
+.eact-text{flex:1;color:#475569;line-height:1.35}
+.eact-rich{border:1.5px solid #e2e8f0;border-radius:9px;margin-bottom:0.35rem;overflow:hidden;transition:border-color .15s}
+.eact-rich.open{border-color:#93c5fd}
+.eact-header{display:flex;align-items:center;gap:0.4rem;padding:0.45rem 0.6rem;cursor:pointer;transition:background .15s;background:white}
+.eact-rich.open .eact-header{background:#eff6ff}
+.eact-header:hover{background:#f8fafc}
+.eact-dur{font-size:0.58rem;font-weight:700;color:#94a3b8;white-space:nowrap;flex-shrink:0;background:#f1f5f9;padding:0.1rem 0.35rem;border-radius:4px}
+.eact-chevron{font-size:0.9rem;color:#cbd5e1;transition:transform .15s;flex-shrink:0;margin-left:0.2rem}
+.eact-rich.open .eact-chevron{transform:rotate(90deg);color:#3b82f6}
+.eact-body{display:none;padding:0.55rem 0.6rem;background:#f8fafc;border-top:1px solid #e2e8f0}
+.eact-rich.open .eact-body{display:block}
+.eact-tip{font-size:0.72rem;color:#475569;line-height:1.5;padding:0.35rem 0.5rem;background:white;border-radius:7px;border:1px solid #e2e8f0}
+.eact-alerta{font-size:0.7rem;color:#dc2626;line-height:1.4;padding:0.35rem 0.5rem;background:#fef2f2;border-radius:7px;border:1px solid #fecaca;margin-bottom:0.35rem}
+
 @media(max-width:600px){
   .dgrid{grid-template-columns:repeat(2,1fr)}
   .tl-row.open .tl-body{grid-template-columns:1fr}
@@ -1772,7 +1791,7 @@ var _openCity = function(cityId) {
     days.forEach(function(di){
       var d = TL[di];
       if(!d) return;
-      var acts = d.acts.map(function(a){return '<div class="tact">'+a+'</div>';}).join('');
+      var acts = d.acts.map(function(a){return renderEnrichedAct(a);}).join('');
       var ztl = d.ztl ? '<div class="tztl"><div class="tztl-t">⚠️ ZTL: no entrar al centro con el coche. Multa 100-300 euros.</div></div>' : '';
       var mBtn = d.maps ? '<button onclick="navPickerOpen(\'' + d.maps.replace(/\'/g,\'%27\') + '\')" style="display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:0.5rem">🗺️ Ver ruta</button>' : '';
       html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:0.5rem">';
@@ -2581,6 +2600,99 @@ function navPickerOpen(mapsUrl) {
 
 function navPickerClose() {
   document.getElementById('nav-picker-modal').classList.remove('open');
+}
+
+
+// ===== BASE DE DATOS DE ACTIVIDADES ENRIQUECIDAS =====
+// Cada actividad tiene: match (palabra clave), icon, tiempo, tip, foto-emoji
+var ACTIVITY_DB = {
+  // ROMA
+  'Vaticano': {icon:'⛪', tiempo:'3-4h', tip:'Llegar antes de las 8:00 para evitar colas de más de 2h. Entrada a la Capilla Sixtina incluida. Código de vestimenta: hombros y rodillas cubiertos.', alerta:'Sin reserva online puedes esperar 2-3h en cola. Reserva en museivaticani.va mínimo 1 semana antes.'},
+  'Capilla Sixtina': {icon:'🎨', tiempo:'1h', tip:'Está dentro de los Museos Vaticanos. Prohibido hablar en voz alta y hacer fotos. La bóveda pintada por Miguel Ángel es el techo, no una pared — inclina la cabeza hacia atrás.', alerta:null},
+  'Fontana di Trevi': {icon:'⛲', tiempo:'30-45min', tip:'Ir antes de las 8:00 o después de las 22:00. De día está masificada. La tradición: lanzar una moneda de espaldas con la mano derecha para volver a Roma. Cuidado con carteristas.', alerta:'De 9:00 a 21:00 hay barrera y aforo limitado (máx 400 personas). Pueden cobrar entrada de 2€.'},
+  'Coliseo': {icon:'🏛️', tiempo:'2-3h', tip:'Reserva online obligatoria en verano (coopculture.it). El ticket incluye el Foro Romano y el Palatino. Llevar agua — no hay sombra. Mejor luz para fotos: tarde (17-19h).', alerta:'Sin reserva online, las colas superan las 3h en julio. No lo dejes para el día.'},
+  'Foro Romano': {icon:'🏺', tiempo:'1-2h', tip:'Incluido con el ticket del Coliseo. Caminar entre ruinas de más de 2.000 años. Hay poca sombra — usar protector solar. La mejor vista panorámica: desde el Monte Palatino.', alerta:null},
+  'Trastevere': {icon:'🍷', tiempo:'2-3h', tip:'Barrio más auténtico de Roma. Perfecto para cenar (mejor después de las 20:00 cuando los locales van). Platos típicos: cacio e pepe, carbonara, supplì. Evita restaurantes con foto en el menú.', alerta:null},
+  'Castel Sant'Angelo': {icon:'🏰', tiempo:'1.5-2h', tip:'Antigua fortaleza papal con vistas panorámicas de Roma desde la terraza. Mucho menos concurrido que el Coliseo. Entrada: ~15€. Ir por la tarde para la mejor luz.', alerta:null},
+  // PARIS
+  'Torre Eiffel': {icon:'🗼', tiempo:'2-3h', tip:'Al amanecer (5:30-7:00 en julio) no hay nadie y la luz es espectacular. Para subir: reservar online en toureiffel.paris. La vista desde el Trocadéro es la foto clásica (gratis).', alerta:'En julio las colas para subir sin reserva son de 2-3h. Reservar con semanas de antelación.'},
+  'Louvre': {icon:'🖼️', tiempo:'3-4h', tip:'El museo más visitado del mundo — imposible verlo todo. Estrategia: decidir 3-4 obras clave (Mona Lisa, Venus de Milo, Victoria de Samotracia) y ir a ellas directamente. Reserva online obligatoria.', alerta:'La Mona Lisa está en la sala 711, primer piso. Siempre rodeada de gente — llegar a primera hora.'},
+  'Montmartre': {icon:'⛪', tiempo:'2-3h', tip:'Subir a pie por las escaleras o en funicular (vale 1 viaje de metro). La Basílica del Sacré-Cœur es gratis. El barrio de artistas tiene la mejor atmósfera de París. Ir temprano o al atardecer.', alerta:'La Place du Tertre (de pintores) es muy turística y cara. Los retratos cuestan 30-50€.'},
+  'Champs-Élysées': {icon:'🛍️', tiempo:'1-2h', tip:'El Arco de Triunfo vale la pena subir (entrada ~13€) para ver la perspectiva de las 12 avenidas. Los Campos en sí son turísticos — para compras ir a Le Marais o Saint-Germain.', alerta:null},
+  'Le Marais': {icon:'🥐', tiempo:'2-3h', tip:'Barrio judío y LGTB+ de París. Las mejores tiendas vintage, galerías de arte y el mejor falafel de la ciudad (L'As du Fallafel en Rue des Rosiers). Museos gratuitos los primeros domingos.', alerta:null},
+  'Musée d'Orsay': {icon:'🎨', tiempo:'2-3h', tip:'Impresionismo francés — Monet, Renoir, Van Gogh, Degas. Menos masificado que el Louvre. El edificio es una antigua estación de tren. Vistas del Sena desde el reloj del último piso.', alerta:null},
+  // VENECIA
+  'Canal Grande': {icon:'🚤', tiempo:'1-2h', tip:'El vaporetto (barco bus) línea 1 recorre todo el Canal Grande por 9.50€ — es la mejor "excursión" de Venecia. Sentarse en la proa para las mejores vistas.', alerta:'Las góndolas cuestan 80-100€ por 30 min. Negociar precio antes de subir.'},
+  'Rialto': {icon:'🌉', tiempo:'45min', tip:'El puente más antiguo de Venecia (1591). Mejor foto: desde abajo, desde un vaporetto o desde el puente de madera a 100m. El mercado de Rialto funciona por la mañana (8-13h).', alerta:null},
+  'Plaza San Marcos': {icon:'🕊️', tiempo:'1-2h', tip:'La basílica de San Marcos es gratis pero hay que reservar para el acceso con mochilas. Los cafés de la plaza cobran suplemento por la música en vivo (5-10€). Para café barato: ir a los bares del interior.', alerta:'En verano puede haber acqua alta (inundación). No es peligrosa pero moja los pies.'},
+  // MILAN
+  'Duomo Milano': {icon:'⛪', tiempo:'2h', tip:'La catedral de Milán es gratuita por dentro. Para subir a las terrazas (vistas espectaculares): 14€ escaleras, 19€ ascensor. Reservar online. Ver el atardecer desde arriba es muy especial.', alerta:'Alrededor del Duomo hay muchos estafadores con palomas. No coger nada que te ofrezcan en la calle.'},
+  'Galleria Vittorio Emanuele': {icon:'🏛️', tiempo:'30min', tip:'Galería comercial de lujo de 1877 — Prada, Louis Vuitton. Entrar solo para ver la arquitectura (gratis). El suelo de mosaico del centro tiene un toro: girar sobre el talón trae suerte.', alerta:null},
+  'Navigli': {icon:'🍺', tiempo:'2-3h (noche)', tip:'Los canales de Milán. El mejor barrio para cenar y tomar algo por la noche. El aperitivo milanés (18-21h) incluye bebida + buffet de comida por ~10-12€.', alerta:null},
+  // NIZA / COSTA AZUL
+  'Promenade des Anglais': {icon:'🌊', tiempo:'1-2h', tip:'El paseo marítimo más famoso de la Costa Azul. 7 km de largo. Las playas son de guijarros (no arena) — llevar chanclas. La parte este (playa de los Ponchettes) tiene menos turistas.', alerta:null},
+  'Vieux-Nice': {icon:'🍦', tiempo:'2h', tip:'Casco antiguo de colores. Probar la socca (tortita de garbanzo típica) en el mercado del Cours Saleya. Las calles estrechas y coloridas son perfectas para fotos al mediodía.', alerta:null},
+  'Villefranche-sur-Mer': {icon:'🏖️', tiempo:'3-4h', tip:'A 10 min en tren de Niza. Playa de arena turquesa mucho menos concurrida que Niza. Pueblo medieval con callejuelas. Ideal para el último baño del viaje.', alerta:null},
+  // COLMAR
+  'Petite Venise': {icon:'🌸', tiempo:'1.5h', tip:'El barrio más fotogénico de Colmar — casas de colores reflejadas en el canal. Mejor foto: desde el puente de Rue de la Poissonnerie. Ir temprano (antes de las 9:00) para fotos sin turistas.', alerta:null},
+  'Maison Pfister': {icon:'🏡', tiempo:'15min', tip:'La casa más fotografiada de Colmar (1537). Está en el centro histórico. La planta baja tiene una tienda de vinos alsacianos — perfecta para comprar un recuerdo.', alerta:null},
+  // CONDUCCIÓN / CARRETERA
+  'Salida': {icon:'🚗', tiempo:null, tip:'Llenar el depósito antes de salir a la autopista — siempre más barato en ciudad que en área de servicio. Verificar presión de ruedas y aceite.', alerta:null},
+  'Autopista': {icon:'🛣️', tiempo:null, tip:'En Francia e Italia las autopistas son de peaje. Llevar tarjeta de crédito. Los peajes por cobrar aceptan efectivo y tarjeta. En Italia busca el carril "Telepass/Viacard" si hay cola.', alerta:null},
+  'Parada': {icon:'⛽', tiempo:'20-30min', tip:'Parada recomendada cada 2 horas de conducción. Aprovechar para repostar, ir al baño y rotar el conductor si es posible. Los conductores necesitan descanso — no forzar si hay cansancio.', alerta:null},
+  'La Junquera': {icon:'🛂', tiempo:'15-30min', tip:'Paso fronterizo España-Francia. La autopista AP-7 tiene peaje justo al entrar en Francia. Alternativa gratuita: salir en La Jonquera y tomar la N-II. Llenar depósito antes si estáis bajos.', alerta:'En verano puede haber control policial. Llevar DNI/Pasaporte a mano.'}
+};
+
+// Enriquecer una actividad con su detalle si existe en la DB
+function enrichActivity(actText) {
+  var matched = null;
+  var matchKey = null;
+  Object.keys(ACTIVITY_DB).forEach(function(key) {
+    if(!matched && actText.indexOf(key) !== -1) {
+      matched = ACTIVITY_DB[key];
+      matchKey = key;
+    }
+  });
+  if(!matched) return null;
+  return matched;
+}
+
+// Renderizar actividad enriquecida
+function renderEnrichedAct(actText) {
+  var detail = enrichActivity(actText);
+  var timeMatch = actText.match(/^(\d{1,2}:\d{2})\s*/);
+  var time = timeMatch ? timeMatch[1] : null;
+  var text = time ? actText.replace(timeMatch[0], '') : actText;
+  // Limpiar guiones iniciales
+  text = text.replace(/^—\s*/, '').trim();
+
+  if(!detail) {
+    // Sin detalle — render simple
+    return '<div class="eact-simple">' +
+      (time ? '<span class="eact-time">'+time+'</span>' : '') +
+      '<span class="eact-text">'+text+'</span>' +
+    '</div>';
+  }
+
+  // Con detalle — render expandible
+  var id = 'eact_' + Math.random().toString(36).substr(2,6);
+  return '<div class="eact-rich" id="'+id+'">' +
+    '<div class="eact-header" onclick="toggleEact(''+id+'')">' +
+      (time ? '<span class="eact-time">'+time+'</span>' : '<span class="eact-time">'+detail.icon+'</span>') +
+      '<span class="eact-text">'+text+'</span>' +
+      (detail.tiempo ? '<span class="eact-dur">⏱ '+detail.tiempo+'</span>' : '') +
+      '<span class="eact-chevron">›</span>' +
+    '</div>' +
+    '<div class="eact-body">' +
+      (detail.alerta ? '<div class="eact-alerta">⚠️ '+detail.alerta+'</div>' : '') +
+      '<div class="eact-tip">💡 '+detail.tip+'</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function toggleEact(id) {
+  var el = document.getElementById(id);
+  if(el) el.classList.toggle('open');
 }
 
 // ===== INIT =====
