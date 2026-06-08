@@ -3105,50 +3105,131 @@ function simConfirmOfficial(){
 
 function simSaveAsBase(){
   simRequestAdmin(function(){
-    var DATES=TL_DATES;
-    var newTL=[];
-    simRoute.forEach(function(c,i){
-      if(i===simRoute.length-1) return;
-      var nextC=simRoute[i+1];
-      var km=simGetKm(c,nextC);
-      var mode=simGetMode(c,nextC);
-      var h=(km/(SIM_SPEEDS[mode]||80)).toFixed(1);
-      var existing=null;
-      TL.forEach(function(d){
-        var dl=d.city.toLowerCase();
-        if(dl.indexOf((SIM_NAMES[c]||c).toLowerCase().split(' ')[0])!==-1) existing=d;
+    var DATES = TL_DATES;
+    var MAX_DAY_H = 10; // horas máximas de conducción por jornada
+    var newTL = [];
+
+    // PASO 1: agrupar ciudades de simRoute en JORNADAS
+    // Una jornada = varios segmentos consecutivos que juntos no superan MAX_DAY_H
+    var jornadas = []; // [{cities:['alicante','barcelona','montpellier'], totalKm, totalH, mode}]
+    var currentJornada = { cities: [simRoute[0]], totalKm: 0, totalH: 0 };
+
+    for(var i = 0; i < simRoute.length - 1; i++) {
+      var from = simRoute[i];
+      var to   = simRoute[i+1];
+      var km   = simGetKm(from, to);
+      var mode = simGetMode(from, to);
+      var h    = km / (SIM_SPEEDS[mode] || 80);
+
+      // Si añadir este segmento supera el máximo diario → nueva jornada
+      if(currentJornada.totalH + h > MAX_DAY_H && currentJornada.cities.length > 1) {
+        jornadas.push(currentJornada);
+        currentJornada = { cities: [from], totalKm: 0, totalH: 0 };
+      }
+
+      currentJornada.cities.push(to);
+      currentJornada.totalKm += km;
+      currentJornada.totalH  += h;
+    }
+    jornadas.push(currentJornada);
+
+    // PASO 2: convertir cada jornada en una entrada del TL
+    jornadas.forEach(function(j, ji) {
+      var dateStr = DATES[ji] || ('? jul');
+      var cities  = j.cities;
+      var origin  = cities[0];
+      var dest    = cities[cities.length - 1];
+      var stops   = cities.slice(1, -1); // paradas intermedias
+      var mode    = simGetMode(origin, dest);
+      var modeLabel = {coche:'coche',tren:'tren',tren_av:'tren AV',avion:'avion',ferry:'ferry'}[mode]||mode;
+      var isDrive = (mode === 'coche' || mode === 'ferry');
+      var totalH  = j.totalH.toFixed(1);
+      var totalKm = Math.round(j.totalKm);
+
+      // Nombre de la ciudad: "Origen - Parada1 - Destino"
+      var cityLabel = cities.map(function(c){ return SIM_NAMES[c] || c; }).join(' - ');
+      if(mode !== 'coche') cityLabel += ' (' + modeLabel + ')';
+
+      // Google Maps con waypoints
+      var mapsUrl = '';
+      if(isDrive) {
+        var encoded = cities.map(function(c){ return encodeURIComponent(SIM_NAMES[c]||c); });
+        mapsUrl = 'https://www.google.com/maps/dir/' + encoded.join('/');
+      }
+
+      // Actividades del día con paradas
+      var acts = ['08:00 Salida desde ' + (SIM_NAMES[origin]||origin)];
+      var hoursAccum = 8;
+      cities.slice(1).forEach(function(c, ci) {
+        var prevC = cities[ci];
+        var segKm = simGetKm(prevC, c);
+        var segH  = segKm / (SIM_SPEEDS[mode]||80);
+        hoursAccum += segH;
+        var hh = Math.floor(hoursAccum);
+        var mm = Math.round((hoursAccum - hh) * 60);
+        var timeStr = (hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
+        var isStop = ci < cities.length - 2; // intermedia
+        if(isStop) {
+          acts.push(timeStr + ' Parada en ' + (SIM_NAMES[c]||c) + ' (~' + Math.round(segH*60) + ' min)');
+        } else {
+          acts.push(timeStr + ' Llegada a ' + (SIM_NAMES[c]||c));
+        }
       });
-      var modeLabel={coche:'coche',tren:'tren',tren_av:'tren AV',avion:'avion',ferry:'ferry'}[mode]||mode;
-      var hReal=(km/(SIM_SPEEDS[mode]||80)).toFixed(1);
-      var segCost=simSegmentCost(c,nextC)*7;
-      if(existing){
-        var upd=JSON.parse(JSON.stringify(existing));
-        upd.date=DATES[i]||'';
-        upd.drive=(mode==='coche'||mode==='ferry');
-        upd.h=hReal+'h'+(mode!=='coche'?' '+modeLabel:'');
-        upd.modo=mode;
+
+      // Buscar si existe una entrada en el TL original para reutilizar datos
+      var existing = null;
+      TL.forEach(function(d){
+        var dl = d.city.toLowerCase();
+        var originName = (SIM_NAMES[origin]||origin).toLowerCase().split(' ')[0];
+        if(dl.indexOf(originName) !== -1) existing = d;
+      });
+
+      var segCost = 0;
+      for(var si=0; si<cities.length-1; si++) segCost += simSegmentCost(cities[si], cities[si+1]) * 7;
+
+      if(existing && cities.length === 2) {
+        // Ruta directa sin paradas — preservar datos existentes
+        var upd = JSON.parse(JSON.stringify(existing));
+        upd.date  = dateStr;
+        upd.drive = isDrive;
+        upd.h     = totalH + 'h';
+        upd.km    = totalKm;
+        upd.modo  = mode;
+        upd.city  = cityLabel;
+        upd.maps  = mapsUrl || upd.maps;
         newTL.push(upd);
       } else {
-        newTL.push({date:DATES[i]||'',city:(SIM_NAMES[c]||c)+' - '+(SIM_NAMES[nextC]||nextC)+
-          (mode!=='coche'?' ('+modeLabel+')':''),
-          drive:(mode==='coche'),km:km,h:hReal+'h',modo:mode,ztl:false,
-          maps:mode==='coche'?'https://www.google.com/maps/dir/'+encodeURIComponent(SIM_NAMES[c]||c)+'/'+encodeURIComponent(SIM_NAMES[nextC]||nextC):'',
-          acts:['08:00 Salida desde '+(SIM_NAMES[c]||c),'Llegada a '+(SIM_NAMES[nextC]||nextC)+' (~'+hReal+'h)'],
-          stay:'Por confirmar en '+(SIM_NAMES[nextC]||nextC),
-          note:'Modo: '+modeLabel+'. Coste estimado grupo: ~'+segCost+'€. Actualizar detalles.'});
+        newTL.push({
+          date:  dateStr,
+          city:  cityLabel,
+          drive: isDrive,
+          km:    totalKm,
+          h:     totalH + 'h',
+          modo:  mode,
+          ztl:   false,
+          maps:  mapsUrl,
+          acts:  acts,
+          stay:  'Por confirmar en ' + (SIM_NAMES[dest]||dest),
+          note:  stops.length
+            ? 'Paradas: ' + stops.map(function(s){return SIM_NAMES[s]||s;}).join(', ') + '. Coste estimado grupo: ~' + Math.round(segCost) + '€.'
+            : 'Coste estimado grupo: ~' + Math.round(segCost) + '€. Actualizar detalles.'
+        });
       }
     });
-    TL.length=0; newTL.forEach(function(d){TL.push(d);});
-    SIM_BASE_ROUTE=simRoute.slice();
-    simIsModified=false;
+
+    TL.length = 0;
+    newTL.forEach(function(d){ TL.push(d); });
+    SIM_BASE_ROUTE = simRoute.slice();
+    simIsModified = false;
     simSaveTL();
     renderTL();
-    renderAgenda(); updateHeaderRoute(); // Actualizar tabs de países cuando cambia el itinerario
-    var s=document.getElementById('ruta-save-btn');
-    var d=document.getElementById('ruta-discard-btn');
+    renderAgenda();
+    updateHeaderRoute();
+    var s = document.getElementById('ruta-save-btn');
+    var d = document.getElementById('ruta-discard-btn');
     if(s) s.style.display='none';
     if(d) d.style.display='none';
-    simShowMsg('Itinerario base guardado con '+simRoute.length+' ciudades.');
+    simShowMsg('Itinerario guardado: ' + jornadas.length + ' jornadas, ' + simRoute.length + ' ciudades.');
   });
 }
 
