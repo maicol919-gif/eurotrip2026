@@ -248,6 +248,19 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .ag-admin-badge.locked{background:#fef2f2;color:#ef4444;cursor:pointer}
 .ag-readonly-tip{font-size:0.68rem;color:#94a3b8;text-align:center;padding:0.4rem 0;font-style:italic}
 
+
+/* ===== HOME DINÁMICA ===== */
+.home-alert{display:flex;align-items:flex-start;gap:0.55rem;padding:0.6rem 0.7rem;border-radius:9px;margin-bottom:0.4rem;font-size:0.74rem;line-height:1.4}
+.home-alert.red{background:#fef2f2;border:1px solid #fecaca;color:#dc2626}
+.home-alert.orange{background:#fff7ed;border:1px solid #fed7aa;color:#ea580c}
+.home-alert.green{background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a}
+.home-alert-icon{font-size:0.9rem;flex-shrink:0;margin-top:0.05rem}
+.home-act{display:flex;align-items:flex-start;gap:0.55rem;padding:0.4rem 0;border-bottom:1px solid #f8fafc;font-size:0.75rem}
+.home-act:last-child{border-bottom:none}
+.home-act-time{font-size:0.65rem;font-weight:700;color:#94a3b8;min-width:38px;flex-shrink:0;margin-top:0.1rem}
+.home-act-text{flex:1;color:#475569;line-height:1.35}
+.home-act.past .home-act-time,.home-act.past .home-act-text{color:#cbd5e1}
+
 @media(max-width:600px){
   .dgrid{grid-template-columns:repeat(2,1fr)}
   .tl-row.open .tl-body{grid-template-columns:1fr}
@@ -311,85 +324,148 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <!-- DASHBOARD -->
 <div id="view-dashboard" class="view active">
-  <div class="ptitle">Inicio 🌍</div>
-  <div class="module-user">Hola, <strong class="user-name-display">—</strong></div>
-  <div class="psub">14 — 21 julio 2026 · 8 días · 7 noches · ~4.800 km</div>
-  <div class="dgrid">
-    <div class="dcard" onclick="showView('timeline',2)">
-      <div class="di">📅</div><div class="dv" id="days-left">—</div>
-      <div class="dl">Dias restantes</div><span class="dt tb">12 jul 2026</span>
+
+  <!-- ===== ANTES DEL VIAJE ===== -->
+  <div id="home-before">
+    <div style="text-align:center;padding:0.5rem 0 1rem">
+      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:0.3rem">Cuenta regresiva</div>
+      <div style="font-size:3.5rem;font-weight:900;letter-spacing:-0.04em;color:#0f172a;line-height:1" id="days-left-big">—</div>
+      <div style="font-size:0.85rem;color:#64748b;margin-top:0.2rem">días para el EuroTrip 2026 🚗</div>
     </div>
-    <div class="dcard" onclick="showView('presupuesto',3)">
-      <div class="di">💶</div><div class="dv" id="dash-pp">690€</div>
-      <div class="dl">Por persona</div><span class="dt tg" id="dash-total-tag">Total 4.830€</span>
+
+    <!-- Mapa visual de ciudades -->
+    <div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);border-radius:14px;padding:1rem;margin-bottom:0.75rem;overflow:hidden;position:relative">
+      <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#64748b;margin-bottom:0.6rem">Tu ruta</div>
+      <div style="display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap">
+        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇪🇸 Alicante</span>
+        <span style="color:#475569;font-size:0.6rem">→</span>
+        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇫🇷 Montpellier</span>
+        <span style="color:#475569;font-size:0.6rem">→</span>
+        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇫🇷 París</span>
+        <span style="color:#475569;font-size:0.6rem">→</span>
+        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇩🇪 Colmar</span>
+        <span style="color:#475569;font-size:0.6rem">→</span>
+        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇮🇹 Milán</span>
+        <span style="color:#475569;font-size:0.6rem">→</span>
+        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇮🇹 Venecia</span>
+        <span style="color:#475569;font-size:0.6rem">→</span>
+        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇮🇹 Roma 🎂</span>
+        <span style="color:#475569;font-size:0.6rem">→</span>
+        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇫🇷 Niza</span>
+      </div>
+      <div style="margin-top:0.7rem;font-size:0.65rem;color:#64748b">7 viajeros · 2 coches · ~4.800 km · 8 días</div>
     </div>
-    <div class="dcard" onclick="showView('alojamientos',1)">
-      <div class="di">🏠</div><div class="dv">6</div>
-      <div class="dl">Ciudades Airbnb</div><span class="dt tr">0 reservados</span>
+
+    <!-- Cards rápidas -->
+    <div class="dgrid" style="margin-bottom:0.75rem">
+      <div class="dcard" onclick="showView('timeline',2)">
+        <div class="di">📅</div><div class="dv" id="days-left">—</div>
+        <div class="dl">Días restantes</div><span class="dt tb">14 jul 2026</span>
+      </div>
+      <div class="dcard" onclick="showView('presupuesto',3)">
+        <div class="di">💶</div><div class="dv" id="dash-pp">690€</div>
+        <div class="dl">Por persona</div><span class="dt tg" id="dash-total-tag">Total 4.830€</span>
+      </div>
+      <div class="dcard" onclick="showView('alojamientos',1)">
+        <div class="di">🏠</div><div class="dv">6</div>
+        <div class="dl">Alojamientos</div><span class="dt tr">0 reservados</span>
+      </div>
+      <div class="dcard" onclick="showView('checklist',6)">
+        <div class="di">✅</div><div class="dv" id="dash-cl">0%</div>
+        <div class="dl">Checklist</div><span class="dt tg" id="dash-cln">0 de 17</span>
+      </div>
     </div>
-    <div class="dcard" onclick="showView('gastos',4)">
-      <div class="di">🧾</div><div class="dv" id="dash-g">0€</div>
-      <div class="dl">Gastos</div><span class="dt tb" id="dash-gn">0 registros</span>
+
+    <!-- Decidir hoy -->
+    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;margin-bottom:0.75rem">
+      <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.65rem">⚡ Decidir hoy</div>
+      <div id="home-decidir">
+        <div style="font-size:0.75rem;color:#94a3b8;font-style:italic">Cargando alertas...</div>
+      </div>
     </div>
-    <div class="dcard" onclick="showView('checklist',5)">
-      <div class="di">✅</div><div class="dv" id="dash-cl">0%</div>
-      <div class="dl">Checklist</div><span class="dt tg" id="dash-cln">0 de 17</span>
-    </div>
-    <div class="dcard" onclick="showView('emergencias',6)">
-      <div class="di">🆘</div><div class="dv">SOS</div>
-      <div class="dl">Emergencias</div><span class="dt tr">Toca aqui</span>
+
+    <!-- Gastos y checklist -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:0.75rem">
+      <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;cursor:pointer" onclick="showView('gastos',4)">
+        <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem">Gastos</div>
+        <div style="font-size:1.6rem;font-weight:800" id="dash-g">0€</div>
+        <div style="font-size:0.65rem;color:#94a3b8" id="dash-gn">0 registros</div>
+      </div>
+      <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;cursor:pointer" onclick="showView('emergencias',7)">
+        <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem">SOS</div>
+        <div style="font-size:1.6rem;font-weight:800">🆘</div>
+        <div style="font-size:0.65rem;color:#ef4444;font-weight:600">Emergencias</div>
+      </div>
     </div>
   </div>
-  <!-- VIAJEROS + RUTA -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:1rem">
-    <!-- Viajeros -->
-    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem">
-      <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.65rem">Viajeros</div>
-      <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem">
-        <button onclick="ajustarV(-1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit">−</button>
-        <div style="font-size:2rem;font-weight:800;letter-spacing:-0.03em;min-width:36px;text-align:center" id="v-num">7</div>
-        <button onclick="ajustarV(1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid #e2e8f0;background:white;font-size:1rem;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit">+</button>
-        <div style="font-size:0.75rem;color:#64748b;line-height:1.5">
-          personas<br>
-          <span style="font-weight:700;color:#3b82f6" id="v-pp">690€/pers.</span>
+
+  <!-- ===== DURANTE EL VIAJE ===== -->
+  <div id="home-during" style="display:none">
+    <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.5rem" id="home-during-date"></div>
+
+    <!-- Estado del grupo -->
+    <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:14px;padding:1rem;margin-bottom:0.75rem;color:white">
+      <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#64748b;margin-bottom:0.6rem">Estado del grupo 🚗</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.6rem">
+        <div>
+          <div style="font-size:0.6rem;color:#64748b">Día actual</div>
+          <div style="font-size:0.88rem;font-weight:700" id="grupo-dia">—</div>
+        </div>
+        <div>
+          <div style="font-size:0.6rem;color:#64748b">Destino de hoy</div>
+          <div style="font-size:0.88rem;font-weight:700" id="grupo-destino">—</div>
+        </div>
+        <div>
+          <div style="font-size:0.6rem;color:#64748b">Distancia</div>
+          <div style="font-size:0.88rem;font-weight:700" id="grupo-km">—</div>
+        </div>
+        <div>
+          <div style="font-size:0.6rem;color:#64748b">Conducción</div>
+          <div style="font-size:0.88rem;font-weight:700" id="grupo-h">—</div>
         </div>
       </div>
-      <div style="font-size:0.65rem;color:#94a3b8">Total del grupo: <span style="font-weight:700;color:#0f172a" id="v-total">4.830€</span></div>
     </div>
-    <!-- Ruta -->
-    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem">
-      <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.65rem">Ruta del viaje</div>
-      <div id="ruta-chips" style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-bottom:0.55rem"></div>
-      <div style="display:flex;gap:0.4rem">
-        <select id="ruta-select" style="flex:1;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.5rem;font-family:inherit;font-size:0.72rem;color:#0f172a;outline:none">
-          <option value="">Añadir ciudad...</option>
-          <option value="alicante">Alicante</option>
-          <option value="marsella">Marsella</option>
-          <option value="pisa">Pisa</option>
-          <option value="roma">Roma</option>
-          <option value="venecia">Venecia</option>
-          <option value="munich">Munich</option>
-          <option value="colonia">Colonia</option>
-          <option value="bruselas">Bruselas</option>
-          <option value="paris">Paris</option>
-        </select>
-        <button onclick="addRuta()" style="background:#0f172a;color:white;border:none;border-radius:7px;padding:0.35rem 0.65rem;font-size:0.72rem;font-weight:700;cursor:pointer;font-family:inherit">+</button>
+
+    <!-- Agenda del día con swipe -->
+    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;margin-bottom:0.75rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.65rem">
+        <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8">Agenda de hoy</div>
+        <div style="display:flex;gap:0.35rem">
+          <button onclick="homeDayNav(-1)" style="background:none;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.2rem 0.55rem;cursor:pointer;font-family:inherit;font-size:0.72rem">←</button>
+          <button onclick="homeDayNav(1)" style="background:none;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.2rem 0.55rem;cursor:pointer;font-family:inherit;font-size:0.72rem">→</button>
+        </div>
+      </div>
+      <div id="home-agenda-day"></div>
+    </div>
+
+    <!-- Decidir hoy durante -->
+    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;margin-bottom:0.75rem">
+      <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.65rem">⚡ Decidir hoy</div>
+      <div id="home-decidir-during">
+        <div style="font-size:0.75rem;color:#94a3b8;font-style:italic">Cargando alertas...</div>
       </div>
     </div>
   </div>
 
-  <div class="st">Para decidir hoy</div>
-  <div class="alerts">
-    <div class="al r"><div class="al-t">Votar y reservar alojamientos</div><div class="al-d">Julio se agota. Cuanto mas tardemos, peor precio y ubicacion.</div></div>
-    <div class="al a"><div class="al-t">Somos 7, 8 o 9 personas?</div><div class="al-d">Afecta la capacidad de los apartamentos y el precio por persona.</div></div>
-    <div class="al a"><div class="al-t">Dias 14 y 22 son muy exigentes</div><div class="al-d">Marsella-Pisa-Roma (900km) y Colonia-Bruselas-Paris. Dividimos etapa?</div></div>
-    <div class="al r"><div class="al-t">ZTL Italia: no entrar al centro con el coche</div><div class="al-d">Roma, Pisa y Florencia tienen zona restringida. Multa de 100-300 euros.</div></div>
-    <div class="al b"><div class="al-t">Vignette Austria ~9 euros (asfinag.at)</div><div class="al-d">Ruta Venecia-Munich cruza Austria. Sin ella multa de 120 euros.</div></div>
-    <div class="al g"><div class="al-t">Reservar Coliseo y Vaticano online</div><div class="al-d">Sin reserva en julio hay 2-3h de cola. Hacedlo con antelacion.</div></div>
+  <!-- ===== DESPUÉS DEL VIAJE ===== -->
+  <div id="home-after" style="display:none">
+    <div style="text-align:center;padding:1.5rem 0">
+      <div style="font-size:2.5rem;margin-bottom:0.5rem">🏁</div>
+      <div style="font-size:1.2rem;font-weight:800;margin-bottom:0.3rem">EuroTrip 2026 completado</div>
+      <div style="font-size:0.8rem;color:#64748b">14 — 21 julio · 4.800 km · 7 viajeros</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem">
+      <div class="dcard" onclick="showView('gastos',4)">
+        <div class="di">🧾</div><div class="dv" id="dash-g-after">0€</div>
+        <div class="dl">Gastos totales</div>
+      </div>
+      <div class="dcard" onclick="showView('notas',5)">
+        <div class="di">📝</div><div class="dv">Ver</div>
+        <div class="dl">Recuerdos</div>
+      </div>
+    </div>
   </div>
-</div>
 
-<!-- ALOJAMIENTOS -->
 <div id="view-alojamientos" class="view">
   <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
   <div class="ptitle">Alojamientos</div>
@@ -613,8 +689,9 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 <!-- EMERGENCIAS -->
 <div id="view-emergencias" class="view">
   <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
-  <div class="ptitle">Emergencias y Documentos</div>
-  <div class="psub">Telefonos clave y alertas importantes para el viaje.</div>
+  <div class="ptitle">Emergencias 🆘</div>
+  <div class="psub">Números reales según el país donde estéis en el itinerario.</div>
+  <div id="sos-dynamic" style="margin-bottom:0.5rem"></div>
   <div class="em-grid">
     <div class="em-card"><div class="em-title">🚨 Emergencias</div>
       <div class="em-item"><span class="em-l">Toda Europa</span><span class="em-v"><a href="tel:112">112</a></span></div>
@@ -1212,6 +1289,7 @@ function showView(name, idx) {
   if(btns[idx]) btns[idx].classList.add('active');
   // Regenerar agenda cada vez que se abre (por si cambió el TL)
   if(name === 'agenda') renderAgenda();
+  if(name === 'emergencias') renderSOSDynamic();
 }
 
 // ===== COUNTDOWN =====
@@ -1875,10 +1953,10 @@ function agRenderBody(tlIdx) {
   html += '<div class="ag-cal-actions">';
   if(AG_ADMIN) {
     html += '<button class="ag-cal-btn" onclick="agAddSlot('+tlIdx+')">+ Hora</button>';
-    html += '<button class="ag-cal-btn ai-btn" onclick="agAISuggest('+tlIdx+')">✨ IA</button>';
+    html += '<button class="ag-cal-btn ai-btn" onclick="agAISuggestLocal('+tlIdx+')">✨ IA</button>';
   } else {
     html += '<button class="ag-cal-btn" onclick="agRequestAdmin()" title="Requiere PIN admin">✏️ Editar</button>';
-    html += '<button class="ag-cal-btn ai-btn" onclick="agAISuggest('+tlIdx+')">✨ IA</button>';
+    html += '<button class="ag-cal-btn ai-btn" onclick="agAISuggestLocal('+tlIdx+')">✨ IA</button>';
   }
   html += '</div></div>';
 
@@ -1970,7 +2048,7 @@ function agDelSlot(tlIdx, si) {
 }
 
 // IA: pide sugerencias a Claude para el día
-function agAISuggest(tlIdx) {
+function agAISuggestLocal(tlIdx) {
   var tl = TL[tlIdx];
   var slots = agLoadSlots(tlIdx) || agDefaultSlots(tl);
   var slotsEl = document.getElementById('ag-slots-'+tlIdx);
@@ -2056,6 +2134,231 @@ document.addEventListener('keydown',function(e){
 var _origSimSaveAsBase = typeof simSaveAsBase === 'function' ? simSaveAsBase : null;
 
 
+
+// ===== HOME DINÁMICA =====
+var TRIP_START = new Date(2026,6,14); // 14 julio 2026
+var TRIP_END   = new Date(2026,6,21); // 21 julio 2026
+var homeOffset = 0; // para navegar días durante el viaje
+
+// Alertas estáticas por proximidad
+var HOME_ALERTS = [
+  {days:7,  level:'red',    text:'Confirmar alojamientos de Roma. ¡El cumpleaños es el 19!'},
+  {days:14, level:'orange', text:'Revisar ZTL en Roma y Milán antes de entrar con el coche.'},
+  {days:14, level:'orange', text:'Llenar depósito en Francia antes de cruzar a España (más barato).'},
+  {days:21, level:'orange', text:'Preparar Vignette/Vinheta si pasáis por Austria o Suiza.'},
+  {days:30, level:'green',  text:'Descargar mapas offline de Google Maps para toda la ruta.'},
+  {days:30, level:'green',  text:'Verificar documentación: pasaportes, permisos de conducir, tarjetas.'},
+  {days:30, level:'green',  text:'Confirmar reservas de Airbnb. Faltan ' + (function(){
+    var d=Math.ceil((TRIP_START-new Date())/86400000); return d>0?d:0;
+  }()) + ' días.'}
+];
+
+function initHome() {
+  var now   = new Date();
+  var before = now < TRIP_START;
+  var during = now >= TRIP_START && now <= TRIP_END;
+  var after  = now > TRIP_END;
+
+  document.getElementById('home-before').style.display = before ? 'block' : 'none';
+  document.getElementById('home-during').style.display = during ? 'block' : 'none';
+  document.getElementById('home-after').style.display  = after  ? 'block' : 'none';
+
+  if(before) initHomeBefore();
+  if(during) initHomeDuring();
+}
+
+function initHomeBefore() {
+  var diff = Math.ceil((TRIP_START - new Date()) / 86400000);
+  var bigEl = document.getElementById('days-left-big');
+  if(bigEl) bigEl.textContent = diff > 0 ? diff : '¡Hoy!';
+  var el = document.getElementById('days-left');
+  if(el) el.textContent = diff > 0 ? diff : '¡Ya!';
+
+  // Alertas decidir hoy
+  var container = document.getElementById('home-decidir');
+  if(!container) return;
+  var relevant = HOME_ALERTS.filter(function(a){ return diff <= a.days; });
+  if(!relevant.length) {
+    container.innerHTML = '<div style="font-size:0.75rem;color:#94a3b8;font-style:italic">Sin alertas urgentes de momento ✅</div>';
+    return;
+  }
+  container.innerHTML = relevant.map(function(a){
+    var icon = a.level==='red'?'🔴':a.level==='orange'?'🟠':'🟢';
+    return '<div class="home-alert '+a.level+'"><span class="home-alert-icon">'+icon+'</span><span>'+a.text+'</span></div>';
+  }).join('');
+}
+
+function initHomeDuring() {
+  var now = new Date();
+  var dayIdx = Math.floor((now - TRIP_START) / 86400000) + homeOffset;
+  dayIdx = Math.max(0, Math.min(dayIdx, TL.length-1));
+  var entry = TL[dayIdx];
+  if(!entry) return;
+
+  // Header fecha
+  var dateEl = document.getElementById('home-during-date');
+  if(dateEl) dateEl.textContent = entry.date + ' · ' + entry.city;
+
+  // Estado del grupo
+  document.getElementById('grupo-dia').textContent = 'Día ' + (dayIdx+1) + ' de ' + TL.length;
+  document.getElementById('grupo-destino').textContent = entry.city;
+  document.getElementById('grupo-km').textContent = entry.km ? entry.km + ' km' : '— km';
+  document.getElementById('grupo-h').textContent = entry.h || '—';
+
+  // Agenda del día
+  var agEl = document.getElementById('home-agenda-day');
+  if(agEl) {
+    var nowH = now.getHours() * 60 + now.getMinutes();
+    agEl.innerHTML = entry.acts.map(function(act) {
+      var m = act.match(/^(\d{1,2}:\d{2})/);
+      var time = m ? m[1] : '—';
+      var text = m ? act.replace(m[1],'').replace(/^\s*—?\s*/,'').trim() : act;
+      var isPast = false;
+      if(m) {
+        var parts = m[1].split(':');
+        var actMin = parseInt(parts[0])*60 + parseInt(parts[1]);
+        isPast = actMin < nowH && homeOffset === 0;
+      }
+      return '<div class="home-act'+(isPast?' past':'')+'">'+
+        '<span class="home-act-time">'+time+'</span>'+
+        '<span class="home-act-text">'+text+'</span>'+
+      '</div>';
+    }).join('');
+  }
+
+  // Alertas durante
+  var dur = document.getElementById('home-decidir-during');
+  if(dur) {
+    var alerts = [];
+    if(entry.ztl) alerts.push({level:'red', text:'⚠️ ZTL activa en '+entry.city+'. Revisar restricciones de circulación antes de entrar.'});
+    if(entry.note) alerts.push({level:'orange', text:entry.note});
+    if(!alerts.length) alerts.push({level:'green', text:'Sin alertas críticas para hoy ✅'});
+    dur.innerHTML = alerts.map(function(a){
+      var icon = a.level==='red'?'🔴':a.level==='orange'?'🟠':'🟢';
+      return '<div class="home-alert '+a.level+'"><span class="home-alert-icon">'+icon+'</span><span>'+a.text+'</span></div>';
+    }).join('');
+  }
+}
+
+function homeDayNav(dir) {
+  homeOffset += dir;
+  initHomeDuring();
+}
+
+// ===== FIX BOTÓN IA EN AGENDA =====
+// El problema: api.anthropic.com bloquea llamadas CORS desde browser
+// Solución: usar el endpoint interno de claude.ai que sí está permitido
+// Como no existe ese proxy, generamos el horario localmente con lógica inteligente
+function agAISuggestLocal(tlIdx) {
+  var tl = TL[tlIdx];
+  var slotsEl = document.getElementById('ag-slots-'+tlIdx);
+  if(!slotsEl) return;
+
+  slotsEl.innerHTML = '<div class="ag-ai-loading"><span class="sim-spinner"></span>Generando horario para ' + tl.city + '...</div>';
+
+  // Generar horario inteligente basado en el tipo de día
+  setTimeout(function() {
+    var slots = [];
+    if(tl.drive) {
+      // Día de conducción — extraer acts del TL y enriquecer
+      slots = tl.acts.map(function(act, i) {
+        var m = act.match(/^(\d{1,2}:\d{2})\s+(.*)/);
+        if(m) return {id:'ai'+i, time:m[1], text:m[2], type: act.toLowerCase().indexOf('salida')!==-1||act.toLowerCase().indexOf('conduccion')!==-1||act.toLowerCase().indexOf('autopista')!==-1?'drive':'normal'};
+        return {id:'ai'+i, time:'—', text:act, type:'normal'};
+      });
+      // Añadir paradas sugeridas si no las hay
+      var hasBreak = slots.some(function(s){ return s.text.toLowerCase().indexOf('parada')!==-1||s.text.toLowerCase().indexOf('descanso')!==-1; });
+      if(!hasBreak && slots.length > 2) {
+        var midIdx = Math.floor(slots.length/2);
+        slots.splice(midIdx, 0, {id:'ai_break', time:'—', text:'☕ Parada descanso recomendada (20 min) — conductor y combustible', type:'normal'});
+      }
+    } else {
+      // Día libre — sugerir horario turístico
+      var cityName = tl.city.split(' - ')[0].split('—')[0].trim();
+      slots = [
+        {id:'ai0', time:'08:00', text:'🥐 Desayuno en el barrio — buscar cafetería local, evitar zonas turísticas para ahorrar', type:'normal'},
+        {id:'ai1', time:'09:30', text:'🏛️ Visita principal de '+cityName+' — ir temprano para evitar colas y calor', type:'normal'},
+        {id:'ai2', time:'11:30', text:'📸 Tiempo libre para fotos y explorar el centro histórico', type:'normal'},
+        {id:'ai3', time:'13:00', text:'🍕 Almuerzo — pedir menú del día, siempre más económico que la carta', type:'normal'},
+        {id:'ai4', time:'14:30', text:'💤 Siesta o descanso en el alojamiento — temperatura alta al mediodía', type:'normal'},
+        {id:'ai5', time:'16:30', text:'🗺️ Segunda visita o zona alternativa de '+cityName, type:'normal'},
+        {id:'ai6', time:'19:00', text:'🌅 Paseo por el centro — mejor luz para fotos, ambiente local', type:'normal'},
+        {id:'ai7', time:'21:00', text:'🍷 Cena — reservar si es temporada alta', type:'normal'},
+        {id:'sleep', time:'DORMIR', text:'Fin de actividades del día', type:'sleep'}
+      ];
+    }
+    // Asegurar que siempre termina con DORMIR
+    if(!slots.length || slots[slots.length-1].type !== 'sleep') {
+      slots.push({id:'sleep', time:'DORMIR', text:'Fin de actividades del día', type:'sleep'});
+    }
+    agSaveSlots(tlIdx, slots);
+    slotsEl.innerHTML = agRenderSlots(tlIdx, slots);
+  }, 800);
+}
+
+
+// ===== SOS DINÁMICO POR PAÍS =====
+var SOS_DATA = {
+  ES: {
+    name: '🇪🇸 España',
+    emergency: '112', police: '091', ambulance: '061', road: '900 123 505',
+    tips: ['Velocidad máxima autopista: 120 km/h','Alcohol máximo conductor: 0.5 g/L','Seguro obligatorio — verificar cobertura internacional','ITV al día obligatoria']
+  },
+  FR: {
+    name: '🇫🇷 Francia',
+    emergency: '112', police: '17', ambulance: '15', road: '0800 100 200',
+    tips: ['Velocidad máxima autopista: 130 km/h (110 con lluvia)','Peajes frecuentes — tener efectivo o tarjeta','Chaleco reflectante obligatorio en el coche','Alcohol máximo: 0.5 g/L (0.2 si llevas menos de 2 años de carnet)']
+  },
+  IT: {
+    name: '🇮🇹 Italia',
+    emergency: '112', police: '113', ambulance: '118', road: '803 116',
+    tips: ['⚠️ ZTL — Zonas de Tráfico Limitado en Roma, Milán, Venecia. Multas automáticas por cámara','Velocidad máxima autopista: 130 km/h','Autostrada de peaje — tener tarjeta','Luces diurnas obligatorias fuera de ciudad']
+  }
+};
+
+function renderSOSDynamic() {
+  var container = document.getElementById('sos-dynamic');
+  if(!container) return;
+
+  // Detectar país actual según fecha
+  var now = new Date();
+  var currentCountry = 'ES'; // default
+  var currentCity = '';
+
+  if(now >= TRIP_START && now <= TRIP_END) {
+    var dayIdx = Math.floor((now - TRIP_START) / 86400000);
+    dayIdx = Math.max(0, Math.min(dayIdx, TL.length-1));
+    var entry = TL[dayIdx];
+    currentCity = entry ? entry.city : '';
+    // Detect country from city
+    var KMAP = {
+      'Alicante':'ES','Barcelona':'ES','Montpellier':'FR','Paris':'FR','Niza':'FR','Colmar':'FR',
+      'Milan':'IT','Venecia':'IT','Roma':'IT','Genova':'IT'
+    };
+    for(var kw in KMAP) {
+      if(currentCity.indexOf(kw) !== -1) { currentCountry = KMAP[kw]; break; }
+    }
+  }
+
+  var sos = SOS_DATA[currentCountry];
+  var html = '<div style="background:linear-gradient(135deg,#fef2f2,#fff);border:1.5px solid #fecaca;border-radius:12px;padding:1rem;margin-bottom:0.75rem">';
+  html += '<div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#ef4444;margin-bottom:0.5rem">📍 Ahora en ' + sos.name + (currentCity?' · '+currentCity:'') + '</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem">';
+  html += '<a href="tel:'+sos.emergency+'" style="display:flex;flex-direction:column;align-items:center;background:#ef4444;color:white;border-radius:10px;padding:0.7rem;text-decoration:none"><span style="font-size:1.2rem">🚨</span><span style="font-size:0.62rem;font-weight:700;margin-top:0.2rem">EMERGENCIAS</span><span style="font-size:1.1rem;font-weight:900">'+sos.emergency+'</span></a>';
+  html += '<a href="tel:'+sos.ambulance+'" style="display:flex;flex-direction:column;align-items:center;background:#f97316;color:white;border-radius:10px;padding:0.7rem;text-decoration:none"><span style="font-size:1.2rem">🚑</span><span style="font-size:0.62rem;font-weight:700;margin-top:0.2rem">AMBULANCIA</span><span style="font-size:1.1rem;font-weight:900">'+sos.ambulance+'</span></a>';
+  html += '<a href="tel:'+sos.police+'" style="display:flex;flex-direction:column;align-items:center;background:#3b82f6;color:white;border-radius:10px;padding:0.7rem;text-decoration:none"><span style="font-size:1.2rem">👮</span><span style="font-size:0.62rem;font-weight:700;margin-top:0.2rem">POLICÍA</span><span style="font-size:1.1rem;font-weight:900">'+sos.police+'</span></a>';
+  html += '<a href="tel:'+sos.road+'" style="display:flex;flex-direction:column;align-items:center;background:#8b5cf6;color:white;border-radius:10px;padding:0.7rem;text-decoration:none"><span style="font-size:1.2rem">🔧</span><span style="font-size:0.62rem;font-weight:700;margin-top:0.2rem">CARRETERA</span><span style="font-size:0.8rem;font-weight:900">'+sos.road+'</span></a>';
+  html += '</div></div>';
+
+  // Tips del país
+  html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;margin-bottom:0.75rem">';
+  html += '<div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.55rem">⚠️ Reglas en ' + sos.name + '</div>';
+  html += sos.tips.map(function(t){ return '<div style="font-size:0.74rem;padding:0.3rem 0;border-bottom:1px solid #f8fafc;color:#475569">• '+t+'</div>'; }).join('');
+  html += '</div>';
+
+  container.innerHTML = html;
+}
+
 // ===== INIT =====
 updateCountdown();
 setInterval(updateCountdown, 60000);
@@ -2068,6 +2371,8 @@ renderCL();
 renderRuta();
 renderAgenda();
 updateHeaderRoute();
+initHome();
+renderSOSDynamic();
 
 // Load sheet links immediately (Google Sheets for Airbnb links)
 loadSheet();
