@@ -294,6 +294,10 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .eact-tip{font-size:0.72rem;color:#475569;line-height:1.5;padding:0.35rem 0.5rem;background:white;border-radius:7px;border:1px solid #e2e8f0}
 .eact-alerta{font-size:0.7rem;color:#dc2626;line-height:1.4;padding:0.35rem 0.5rem;background:#fef2f2;border-radius:7px;border:1px solid #fecaca;margin-bottom:0.35rem}
 
+
+/* ===== TURNOS DE CONDUCCIÓN ===== */
+.turno-card{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.75rem;margin-top:0.5rem}
+
 @media(max-width:600px){
   .dgrid{grid-template-columns:repeat(2,1fr)}
   .tl-row.open .tl-body{grid-template-columns:1fr}
@@ -466,6 +470,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
           <div style="font-size:0.88rem;font-weight:700" id="grupo-h">—</div>
         </div>
       </div>
+      <div id="grupo-conductores" style="margin-top:0.6rem;border-top:1px solid rgba(255,255,255,0.1);padding-top:0.6rem"></div>
     </div>
 
     <!-- Agenda del día con swipe -->
@@ -919,7 +924,10 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
       <div class="ptitle">Agenda 📆</div>
       <div class="psub" style="margin-bottom:0">Horario por ciudad. Basado en el itinerario de Ruta.</div>
     </div>
-    <span id="ag-admin-badge" class="ag-admin-badge locked" onclick="agRequestAdmin()">🔒 Admin</span>
+    <div style="display:flex;gap:0.4rem;align-items:center">
+      <button onclick="abrirGestionConductores()" style="font-size:0.62rem;font-weight:700;padding:0.18rem 0.5rem;border-radius:6px;background:#f1f5f9;border:1.5px solid #e2e8f0;cursor:pointer;font-family:inherit;color:#64748b">👥 Conductores</button>
+      <span id="ag-admin-badge" class="ag-admin-badge locked" onclick="agRequestAdmin()">🔒 Admin</span>
+    </div>
   </div>
 
   <!-- PIN modal -->
@@ -964,6 +972,17 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
       </div>
     </a>
     <button class="nav-picker-cancel" onclick="navPickerClose()">Cancelar</button>
+  </div>
+</div>
+
+
+<!-- CONDUCTORES MODAL -->
+<div id="conductores-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:flex-end;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:white;border-radius:20px 20px 0 0;padding:1.2rem 1rem 2rem;width:100%;max-width:480px">
+    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;text-align:center;margin-bottom:1rem">Gestionar conductores</div>
+    <div id="conductores-modal-list"></div>
+    <button onclick="addConductor()" style="width:100%;padding:0.65rem;border:1.5px dashed #e2e8f0;border-radius:10px;background:white;font-family:inherit;font-size:0.78rem;color:#64748b;cursor:pointer;margin-top:0.4rem">+ Añadir conductor</button>
+    <button onclick="document.getElementById('conductores-modal').style.display='none'" style="width:100%;padding:0.65rem;border:none;background:#f8fafc;border-radius:10px;font-family:inherit;font-size:0.8rem;color:#64748b;cursor:pointer;margin-top:0.5rem;font-weight:600">Cerrar</button>
   </div>
 </div>
 
@@ -1550,7 +1569,7 @@ function renderTL(tlData, containerId) {
       '<span class="tl-ch">▾</span></div>'+
       '<div class="tl-body">'+
         '<div><div class="tsub">Horario del dia</div>'+acts+ztl+
-        '<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div>'+mapsBtn+'</div>'+
+        '<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div>'+mapsBtn+'</div>'+(d.drive?renderTurnoCard(i):'')+'</div>'+
         '<div><div class="tsub">Alojamiento</div><div class="tstay">'+d.stay+'</div>'+tray+'</div>'+
       '</div></div>';
   }).join('');
@@ -2438,6 +2457,9 @@ function initHomeDuring() {
     }).join('');
   }
 
+  // Conductores en estado
+  renderEstadoGrupo();
+
   // Alertas durante
   var dur = document.getElementById('home-decidir-during');
   if(dur) {
@@ -2714,6 +2736,158 @@ function renderEnrichedAct(actText) {
 }
 
 function toggleEact(id) { var el = document.getElementById(id); if(el) el.classList.toggle("open"); }
+
+
+// ===== CONDUCTORES / TURNOS =====
+// Lista de conductores del grupo (persiste en localStorage)
+var CONDUCTORES = (function() {
+  try {
+    var saved = localStorage.getItem('et26_conductores');
+    return saved ? JSON.parse(saved) : [
+      {nombre:'Conductor 1', coche:1},
+      {nombre:'Conductor 2', coche:2}
+    ];
+  } catch(e) {
+    return [{nombre:'Conductor 1', coche:1},{nombre:'Conductor 2', coche:2}];
+  }
+})();
+
+// Asignaciones: {dayIdx: {coche1: nombre, coche2: nombre}}
+var TURNOS = (function() {
+  try {
+    var saved = localStorage.getItem('et26_turnos');
+    return saved ? JSON.parse(saved) : {};
+  } catch(e) { return {}; }
+})();
+
+function saveConductores() {
+  try { localStorage.setItem('et26_conductores', JSON.stringify(CONDUCTORES)); } catch(e) {}
+}
+
+function saveTurnos() {
+  try { localStorage.setItem('et26_turnos', JSON.stringify(TURNOS)); } catch(e) {}
+}
+
+// Asignar conductor a un día y coche
+function asignarConductor(dayIdx, coche, nombre) {
+  if(!TURNOS[dayIdx]) TURNOS[dayIdx] = {};
+  TURNOS[dayIdx]['coche'+coche] = nombre;
+  saveTurnos();
+  // Re-render turno card if visible
+  var card = document.getElementById('turno-card-'+dayIdx);
+  if(card) card.innerHTML = renderTurnoCardInner(dayIdx);
+  // Update home estado
+  renderEstadoGrupo();
+}
+
+// Render tarjeta de turnos para un día
+function renderTurnoCard(dayIdx) {
+  var d = TL[dayIdx];
+  if(!d || !d.drive) return '';
+
+  var el = document.createElement('div');
+  el.id = 'turno-card-' + dayIdx;
+  el.className = 'turno-card';
+  el.innerHTML = renderTurnoCardInner(dayIdx);
+  return el.outerHTML;
+}
+
+function renderTurnoCardInner(dayIdx) {
+  var d = TL[dayIdx];
+  var turno = TURNOS[dayIdx] || {};
+  var conductoresList = CONDUCTORES.length ?
+    CONDUCTORES : [{nombre:'Sin asignar', coche:1},{nombre:'Sin asignar', coche:2}];
+
+  var html = '<div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.55rem">🚗 Conductores del día</div>';
+
+  [1,2].forEach(function(coche) {
+    var assigned = turno['coche'+coche] || '';
+    var opts = '<option value="">— Sin asignar —</option>' +
+      conductoresList
+        .filter(function(c){ return c.coche === coche || !c.coche; })
+        .map(function(c){
+          return '<option value="' + c.nombre + '"' +
+            (assigned === c.nombre ? ' selected' : '') +
+            '>' + c.nombre + '</option>';
+        }).join('') +
+      conductoresList
+        .filter(function(c){ return c.coche !== coche && c.coche; })
+        .map(function(c){
+          return '<option value="' + c.nombre + '"' +
+            (assigned === c.nombre ? ' selected' : '') +
+            '>' + c.nombre + ' (Coche ' + c.coche + ')</option>';
+        }).join('');
+
+    html += '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">';
+    html += '<span style="font-size:0.65rem;font-weight:700;background:#f1f5f9;padding:0.2rem 0.5rem;border-radius:5px;white-space:nowrap">🚙 Coche ' + coche + '</span>';
+
+    if(AG_ADMIN) {
+      html += '<select onchange="asignarConductor(' + dayIdx + ',' + coche + ',this.value)" ' +
+        'style="flex:1;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.28rem 0.5rem;font-family:inherit;font-size:0.72rem;outline:none">' +
+        opts + '</select>';
+    } else {
+      html += '<span style="flex:1;font-size:0.75rem;color:' + (assigned ? '#0f172a' : '#94a3b8') + ';font-style:' + (assigned ? 'normal' : 'italic') + '">' +
+        (assigned || 'Sin asignar') + '</span>';
+      html += '<button onclick="agRequestAdmin()" style="font-size:0.6rem;color:#94a3b8;background:none;border:none;cursor:pointer">✏️</button>';
+    }
+    html += '</div>';
+  });
+
+  return html;
+}
+
+// Estado del grupo — para home durante el viaje
+function renderEstadoGrupo() {
+  var now = new Date();
+  if(now < TRIP_START || now > TRIP_END) return;
+  var dayIdx = Math.floor((now - TRIP_START) / 86400000) + homeOffset;
+  dayIdx = Math.max(0, Math.min(dayIdx, TL.length-1));
+  var entry = TL[dayIdx];
+  if(!entry) return;
+
+  // Update estado cards
+  var grupoEl = document.getElementById('grupo-conductores');
+  if(!grupoEl) return;
+  var turno = TURNOS[dayIdx] || {};
+  var c1 = turno.coche1 || '—';
+  var c2 = turno.coche2 || '—';
+  grupoEl.innerHTML =
+    '<div style="font-size:0.6rem;color:#64748b">Coche 1</div>' +
+    '<div style="font-size:0.82rem;font-weight:700;color:white">' + c1 + '</div>' +
+    '<div style="font-size:0.6rem;color:#64748b;margin-top:0.3rem">Coche 2</div>' +
+    '<div style="font-size:0.82rem;font-weight:700;color:white">' + c2 + '</div>';
+}
+
+// Gestión de conductores (admin)
+function abrirGestionConductores() {
+  if(!AG_ADMIN) { agRequestAdmin(); return; }
+  var modal = document.getElementById('conductores-modal');
+  if(modal) { renderConductoresModal(); modal.style.display='flex'; }
+}
+
+function renderConductoresModal() {
+  var list = document.getElementById('conductores-modal-list');
+  if(!list) return;
+  list.innerHTML = CONDUCTORES.map(function(c, i) {
+    return '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">' +
+      '<input value="' + c.nombre + '" onchange="CONDUCTORES[' + i + '].nombre=this.value;saveConductores()" ' +
+        'style="flex:1;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.6rem;font-family:inherit;font-size:0.8rem;outline:none">' +
+      '<select onchange="CONDUCTORES[' + i + '].coche=parseInt(this.value);saveConductores()" ' +
+        'style="border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.5rem;font-family:inherit;font-size:0.75rem;outline:none">' +
+        '<option value="1"' + (c.coche===1?' selected':'') + '>Coche 1</option>' +
+        '<option value="2"' + (c.coche===2?' selected':'') + '>Coche 2</option>' +
+      '</select>' +
+      '<button onclick="CONDUCTORES.splice(' + i + ',1);saveConductores();renderConductoresModal()" ' +
+        'style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.9rem">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function addConductor() {
+  CONDUCTORES.push({nombre:'Nuevo conductor', coche:1});
+  saveConductores();
+  renderConductoresModal();
+}
 
 // ===== INIT =====
 updateCountdown();
