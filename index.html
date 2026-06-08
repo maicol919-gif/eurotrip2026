@@ -1123,6 +1123,12 @@ function updateHeaderRoute() {
   };
   var CNAMES = {ES:'🇪🇸 España',FR:'🇫🇷 Francia',IT:'🇮🇹 Italia',DE:'🇩🇪 Alemania',BE:'🇧🇪 Bélgica',NL:'🇳🇱 Países Bajos'};
 
+  // Mapa nombre → id de CITY_META (los que tienen detalle)
+  var NAME_TO_ID = {};
+  for(var id in CITY_META) {
+    NAME_TO_ID[CITY_META[id].name.toLowerCase()] = id;
+  }
+
   function detectCountry(text) {
     for(var kw in KMAP) { if(text.indexOf(kw) !== -1) return KMAP[kw]; }
     return 'XX';
@@ -1136,7 +1142,9 @@ function updateHeaderRoute() {
     var country = detectCountry(n);
     if(country === 'XX') return;
     seenCity[n] = true;
-    allCities.push({name:n, country:country});
+    // Buscar si tiene detalle en CITY_META
+    var cityId = NAME_TO_ID[n.toLowerCase()] || null;
+    allCities.push({name:n, country:country, id:cityId});
   }
 
   TL.forEach(function(entry) {
@@ -1144,14 +1152,14 @@ function updateHeaderRoute() {
       addCity(part.replace(/\(.*?\)/g,'').replace(/[—–].*/,'').trim());
     });
     (entry.acts || []).forEach(function(act) {
-      var mS = act.match(/Salida desde ([A-Z][a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+?)(?:\s*—|\s*\(|$)/);
-      var mL = act.match(/Llegada ([A-Z][a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+?)(?:\s*—|\s*\(|$)/);
-      if(mS) addCity(mS[1]);
-      if(mL) addCity(mL[1]);
+      var mS = act.match(/Salida desde ([A-ZÁÉÍÓÚÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+?)(?:\s*—|\s*\(|\s*\d|$)/);
+      var mL = act.match(/Llegada ([A-ZÁÉÍÓÚÑ][a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+?)(?:\s*—|\s*\(|\s*\d|$)/);
+      if(mS) addCity(mS[1].trim());
+      if(mL) addCity(mL[1].trim());
     });
   });
 
-  // Fila 1: países — usando data-attr + listener delegado
+  // Fila 1: países
   var cel = document.getElementById('header-countries');
   if(cel) {
     var countries = [], seenC = {};
@@ -1162,22 +1170,23 @@ function updateHeaderRoute() {
       return (i>0?'<span class="hcountry-arr">→</span>':'')+
         '<span class="hcountry" data-country="'+code+'">'+CNAMES[code]+'</span>';
     }).join('');
-    // Attach listeners after innerHTML
     cel.querySelectorAll('[data-country]').forEach(function(el) {
       el.addEventListener('click', function(){ agOpenCountry(this.getAttribute('data-country')); });
     });
   }
 
-  // Fila 2: ciudades — usando data-attr + listener delegado
+  // Fila 2: ciudades — solo clickeables si tienen CITY_META
   var el = document.getElementById('header-route');
   if(el) {
     el.innerHTML = allCities.map(function(c, i) {
+      var cls = c.id ? 'hcity' : 'hcity' ; // siempre mismo estilo
+      var attr = c.id ? ' data-cityid="'+c.id+'"' : '';
+      var style = c.id ? '' : ' style="cursor:default;opacity:0.6"';
       return (i>0?'<span class="harr">→</span>':'')+
-        '<span class="hcity" data-cityname="'+c.name+'">'+c.name+'</span>';
+        '<span class="'+cls+'"'+attr+style+'>'+c.name+'</span>';
     }).join('');
-    // Attach listeners after innerHTML
-    el.querySelectorAll('[data-cityname]').forEach(function(span) {
-      span.addEventListener('click', function(){ openCity(this.getAttribute('data-cityname')); });
+    el.querySelectorAll('[data-cityid]').forEach(function(span) {
+      span.addEventListener('click', function(){ openCity(this.getAttribute('data-cityid')); });
     });
   }
 }
