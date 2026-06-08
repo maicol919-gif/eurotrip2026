@@ -4562,16 +4562,16 @@ function simMakeParadaOpt(p, fromId, toId, insertIdx) {
   });
   actions.appendChild(analBtn);
 
-  // Añadir button (adds to route)
-  if(p.id && SIM_NAMES[p.id]) {
-    var addBtn = document.createElement('button');
-    addBtn.className = 'parada-btn anadir';
-    addBtn.textContent = '+ Añadir a ruta';
-    addBtn.addEventListener('click', function() {
-      simInsertParada(p.id, insertIdx + 1);
-    });
-    actions.appendChild(addBtn);
-  }
+  // Añadir button — siempre disponible para cualquier parada sugerida
+  var addBtn = document.createElement('button');
+  addBtn.className = 'parada-btn anadir';
+  addBtn.textContent = '+ Añadir a ruta';
+  addBtn.addEventListener('click', function() {
+    // Register city in SIM_NAMES if not already there
+    if(p.id && !SIM_NAMES[p.id]) SIM_NAMES[p.id] = p.name;
+    simInsertParada(p.id || p.name.toLowerCase().replace(/\s+/g,'-'), insertIdx + 1);
+  });
+  actions.appendChild(addBtn);
 
   card.appendChild(actions);
 
@@ -4644,8 +4644,8 @@ function simAnalizarParada(p, fromId, toId, insertIdx, card) {
       '<div style="font-size:0.72rem;font-weight:800;color:'+verColor+';margin-bottom:0.4rem;padding:0.25rem 0.5rem;background:'+verColor+'1a;border-radius:6px;display:inline-block">'+veredicto+'</div>'+
       '<div style="font-size:0.7rem;color:#475569;line-height:1.5;margin-top:0.3rem">'+cleanText.replace(/\n/g,'<br>')+'</div>';
 
-    // Show "añadir" button if not conviene
-    if(veredicto !== 'NO CONVIENE' && p.id && SIM_NAMES[p.id]) {
+    // Show "añadir" button always — user decides
+    if(p.id) {
       var addBtn2 = document.createElement('button');
       addBtn2.className = 'parada-btn anadir';
       addBtn2.style.cssText = 'margin-top:0.5rem;width:100%';
@@ -4666,8 +4666,8 @@ function simAnalizarParada(p, fromId, toId, insertIdx, card) {
         'Impacto: '+extraHStr2+' en el día. '+
         p.pros+'. Tener en cuenta: '+p.contras+
       '</div>'+
-      (p.id && SIM_NAMES[p.id] ?
-        '<button class="parada-btn anadir" data-insertcity="'+p.id+'" data-insertpos="'+(insertIdx+1)+'" style="margin-top:0.5rem;width:100%">+ A\xf1adir '+p.name+' a la ruta</button>' : '');
+      (p.id ?
+        '<button class="parada-btn anadir" data-insertcity="'+p.id+'" data-insertpos="'+(insertIdx+1)+'" style="margin-top:0.5rem;width:100%">+ A\u00f1adir '+p.name+' a la ruta</button>' : '');
   });
 }
 
@@ -4807,7 +4807,15 @@ var SIM_KM = {
   'marsella|milan':650,'madrid|alicante':420,'madrid|barcelona':620,
   'paris|barcelona':1040,'zurich|milan':330,'zurich|paris':620,
   'amsterdam|paris':500,'bruselas|paris':310,'berlin|amsterdam':650,
-  'munich|milan':380,'munich|zurich':320,'frankfurt|paris':580
+  'munich|milan':380,'munich|zurich':320,'frankfurt|paris':580,
+  'tarragona|montpellier':280,'alicante|tarragona':290,
+  'reims|paris':150,'reims|colmar':330,'nancy|paris':310,'nancy|colmar':200,
+  'vichy|paris':350,'vichy|montpellier':370,'clermont|paris':420,'clermont|montpellier':340,
+  'lyon|paris':470,'lyon|montpellier':310,'lyon|milan':460,
+  'perpignan|niza':420,'perpignan|montpellier':160,'perpignan|barcelona':190,
+  'verona|milan':160,'verona|venecia':120,'brescia|milan':100,'brescia|venecia':180,
+  'berna|colmar':180,'berna|milan':330,'sanremo|niza':55,'sanremo|genova':160,
+  'marsella|niza':200,'marsella|montpellier':170,'marsella|alicante':540
 };
 
 var SIM_MODES = {
@@ -4843,15 +4851,17 @@ function simTotalCost(){
   return total * 7; // total for group of 7
 }
 var SIM_NAMES = {
-  alicante:'Alicante', madrid:'Madrid', barcelona:'Barcelona',
+  alicante:'Alicante', madrid:'Madrid', barcelona:'Barcelona', tarragona:'Tarragona',
   montpellier:'Montpellier', paris:'Paris', colmar:'Colmar',
   lyon:'Lyon', marsella:'Marsella', niza:'Niza', monaco:'Monaco', burdeos:'Burdeos',
+  reims:'Reims', nancy:'Nancy', vichy:'Vichy', perpignan:'Perpiñán',
   milan:'Milan', venecia:'Venecia', roma:'Roma', florencia:'Florencia',
   pisa:'Pisa', genova:'Genova', bologna:'Bolonia', napoles:'Napoles',
+  verona:'Verona', brescia:'Brescia', berna:'Berna',
   zurich:'Zurich', ginebra:'Ginebra',
   amsterdam:'Amsterdam', bruselas:'Bruselas',
   berlin:'Berlin', munich:'Munich', frankfurt:'Frankfurt', colonia:'Colonia',
-  genova:'Genova', sanremo:'Sanremo'
+  sanremo:'Sanremo', clermont:'Clermont-Ferrand'
 };
 var SIM_FLAGS = {
   alicante:'ES', madrid:'ES', barcelona:'ES',
