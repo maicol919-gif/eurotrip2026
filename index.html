@@ -4851,6 +4851,20 @@ function supaRealtimeConnect() {
   }
 }
 
+// ===== SUPABASE KEEP-ALIVE =====
+// Supabase pausa proyectos gratuitos tras 7 días sin actividad
+// Este ping hace una consulta cada 4 días para mantenerlo activo
+function supaKeepAlive() {
+  supa('GET','alojamientos_estado','','?limit=1').then(function() {
+    console.log('Supabase keep-alive OK');
+  }).catch(function() {
+    console.warn('Supabase keep-alive failed — proyecto puede estar pausado');
+  });
+}
+// Ping inmediato al cargar + cada 4 días
+supaKeepAlive();
+setInterval(supaKeepAlive, 4 * 24 * 60 * 60 * 1000);
+
 // ===== INIT =====
 updateCountdown();
 setInterval(updateCountdown, 60000);
@@ -5274,9 +5288,10 @@ function simRenderUnified(){
       row.appendChild(transSel);
     }
 
-    // Remove button (non-base cities or admin)
+    // Remove button — admin can remove any stop except first and last
     var isBase=SIM_BASE_ROUTE.indexOf(cityId)!==-1;
-    if(!isBase){
+    var isFirstOrLast = (i === 0 || i === simRoute.length - 1);
+    if(simIsAdmin && !isFirstOrLast){
       var rm=document.createElement('button');
       rm.style.cssText='background:none;border:none;color:#94a3b8;cursor:pointer;font-size:0.9rem;padding:0 2px;flex-shrink:0';
       rm.textContent='×';
@@ -5588,11 +5603,18 @@ function simDeleteCandidate(cityId){
 }
 
 function simRemoveFromRoute(cityId){
+  if(!simIsAdmin) {
+    simShowMsg('\uD83D\uDD12 Solo el admin puede modificar la ruta.');
+    return;
+  }
   simRoute=simRoute.filter(function(c){return c!==cityId;});
+  SIM_BASE_ROUTE=simRoute.slice(); // Update base so button logic works
+  simSaveRoute(); // Persist to Supabase
   simMarkModified();
   simRenderUnified();
   simDrawMap();
   simCalcStats();
+  simShowMsg('\u2705 '+(SIM_NAMES[cityId]||cityId)+' eliminada de la ruta.');
 }
 
 // ===== SAVE / DISCARD =====
