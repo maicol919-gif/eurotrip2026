@@ -1538,9 +1538,37 @@ var SIM_KM = {
 };
 
 var SIM_MODES = {
-  // All car now — modes can be overridden when AI generates a city with a specific transport
+  // Overridden by user via transport selector
 };
-var SIM_SPEEDS = {coche:80, tren_av:200, tren:120, ferry:40, bus:70};
+// User transport overrides: key = 'cityA|cityB', value = 'coche'|'tren'|'avion'
+var SIM_TRANSPORT_OVERRIDE = {};
+
+function simGetEffectiveMode(a, b){
+  var key = a+'|'+b;
+  var rkey = b+'|'+a;
+  return SIM_TRANSPORT_OVERRIDE[key] || SIM_TRANSPORT_OVERRIDE[rkey] ||
+         SIM_MODES[key] || SIM_MODES[rkey] || 'coche';
+}
+var SIM_SPEEDS = {coche:80, tren_av:200, tren:120, avion:600, ferry:40, bus:70};
+// Cost per person estimates (€) for non-car segments
+var SIM_TRANSPORT_COST = {
+  coche: function(km){ return Math.round((km/100)*7.5*1.75/3.5); }, // fuel per person (7 pax, 2 cars)
+  tren: function(km){ return Math.round(km * 0.12); }, // ~12c/km
+  tren_av: function(km){ return Math.round(km * 0.18); }, // ~18c/km AV
+  avion: function(km){ return Math.round(30 + km * 0.08); }, // base + per km
+  ferry: function(km){ return Math.round(km * 0.15); }
+};
+function simSegmentCost(a, b){
+  var km = simGetKm(a,b);
+  var mode = simGetMode(a,b);
+  var fn = SIM_TRANSPORT_COST[mode] || SIM_TRANSPORT_COST.coche;
+  return fn(km);
+}
+function simTotalCost(){
+  var total = 0;
+  for(var i=0;i<simRoute.length-1;i++) total += simSegmentCost(simRoute[i],simRoute[i+1]);
+  return total * 7; // total for group of 7
+}
 var SIM_NAMES = {
   alicante:'Alicante', madrid:'Madrid', barcelona:'Barcelona',
   montpellier:'Montpellier', paris:'Paris', colmar:'Colmar',
@@ -1594,7 +1622,7 @@ function simCheckPIN(){
 
 // ===== CORE CALC =====
 function simGetKm(a,b){return SIM_KM[a+'|'+b]||SIM_KM[b+'|'+a]||400;}
-function simGetMode(a,b){return SIM_MODES[a+'|'+b]||SIM_MODES[b+'|'+a]||'coche';}
+function simGetMode(a,b){return simGetEffectiveMode(a,b);}
 function simGetHours(a,b){return simGetKm(a,b)/(SIM_SPEEDS[simGetMode(a,b)]||80);}
 function simGetModeIcon(mode){return {coche:'🚗',tren_av:'🚄',tren:'🚂',ferry:'⛴️',bus:'🚌'}[mode]||'🚗';}
 
@@ -1617,9 +1645,12 @@ function simCalcStats(){
       maxH=h; maxSeg=(SIM_NAMES[simRoute[i]]||simRoute[i]);
     }
   }
+  var totalH=0;
+  for(var si=0;si<simRoute.length-1;si++) totalH+=simGetHours(simRoute[si],simRoute[si+1]);
+  var totalCost=simTotalCost();
   document.getElementById('sim-total-km').textContent=km.toLocaleString();
-  document.getElementById('sim-total-h').textContent='~'+Math.round(km/80)+'h';
-  document.getElementById('sim-total-fuel').textContent='~'+Math.round((km/100)*7.5*1.75*2)+'€';
+  document.getElementById('sim-total-h').textContent='~'+Math.round(totalH)+'h';
+  document.getElementById('sim-total-fuel').textContent='~'+totalCost+'€';
   var mx=document.getElementById('sim-max-day');
   mx.textContent=maxH.toFixed(1)+'h';
   mx.style.color=maxH>9?'#ef4444':maxH>7?'#f59e0b':'#4ade80';
@@ -1658,13 +1689,26 @@ function simDrawMap(routeToShow, highlightId, highlightInsertAt){
   for(var i=0;i<displayRoute.length-1;i++){
     var c1=displayRoute[i], c2=displayRoute[i+1];
     var p1=SIM_COORDS[c1]||[5,44], p2=SIM_COORDS[c2]||[5,44];
+    var x1=toX(p1[0]),y1=toY(p1[1]),x2=toX(p2[0]),y2=toY(p2[1]);
     var isNewSeg=highlightId&&(c1===highlightId||c2===highlightId);
     var col=isNewSeg?'#10b981':DAY_COLORS[i%DAY_COLORS.length];
-    var opacity=isNewSeg?'1':'0.65';
-    var sw=isNewSeg?'3':'2.5';
-    segs+='<line x1="'+toX(p1[0]).toFixed(1)+'" y1="'+toY(p1[1]).toFixed(1)+
-      '" x2="'+toX(p2[0]).toFixed(1)+'" y2="'+toY(p2[1]).toFixed(1)+
-      '" stroke="'+col+'" stroke-width="'+sw+'" stroke-opacity="'+opacity+'" stroke-linecap="round"/>';
+    var opacity=isNewSeg?'1':'0.7';
+    var sw=isNewSeg?'3.5':'2.5';
+    var segMode=simGetMode(c1,c2);
+    var isDashed=(segMode==='tren'||segMode==='tren_av'||segMode==='avion');
+    // Shadow line
+    segs+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+
+      '" stroke="rgba(0,0,0,0.15)" stroke-width="'+(parseFloat(sw)+2)+'" stroke-linecap="round"/>';
+    segs+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+
+      '" stroke="'+col+'" stroke-width="'+sw+'" stroke-opacity="'+opacity+'" stroke-linecap="round"'+
+      (isDashed?' stroke-dasharray="8 4"':'')+'/>';
+    // Mode icon at midpoint (only for non-car)
+    if(segMode!=='coche'){
+      var mx=((x1+x2)/2).toFixed(1), my=((y1+y2)/2).toFixed(1);
+      var modeEmoji={tren:'🚂',tren_av:'🚄',avion:'✈',ferry:'⛴'}[segMode]||'';
+      segs+='<circle cx="'+mx+'" cy="'+my+'" r="8" fill="white" stroke="'+col+'" stroke-width="1.5"/>'+
+            '<text x="'+mx+'" y="'+(parseFloat(my)+1)+'" font-size="9" text-anchor="middle" dominant-baseline="middle">'+modeEmoji+'</text>';
+    }
   }
 
   // Dots
@@ -1686,13 +1730,20 @@ function simDrawMap(routeToShow, highlightId, highlightInsertAt){
       // Pulse ring for candidate
       dots+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="20" fill="#10b981" fill-opacity="0.1"><animate attributeName="r" values="15;22;15" dur="2s" repeatCount="indefinite"/></circle>';
     }
-    dots+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" fill="'+color+'" stroke="white" stroke-width="2"/>';
-    dots+='<text x="'+x.toFixed(1)+'" y="'+(y+1).toFixed(1)+'" font-size="'+(isCand?'8':'7.5')+'" fill="white" font-family="sans-serif" text-anchor="middle" dominant-baseline="middle" font-weight="800">'+dayLabel+'</text>';
-    dots+='<text x="'+labelX.toFixed(1)+'" y="'+(y-3).toFixed(1)+'" font-size="8" fill="'+color+'" font-family="sans-serif" text-anchor="'+anchor+'" font-weight="700">'+short+'</text>';
+    // Shadow for dot
+    dots+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+2)+'" fill="rgba(0,0,0,0.18)"/>';
+    dots+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" fill="'+color+'" stroke="white" stroke-width="2.5"/>';
+    dots+='<text x="'+x.toFixed(1)+'" y="'+(y+1).toFixed(1)+'" font-size="'+(isCand?'8.5':'8')+'" fill="white" font-family="system-ui,sans-serif" text-anchor="middle" dominant-baseline="middle" font-weight="900" letter-spacing="-0.5">'+dayLabel+'</text>';
+    // Label pill background
+    var labelW=short.length*5.2+8;
+    var pillX=anchor==='start'?labelX-4:labelX-labelW+4;
+    dots+='<rect x="'+pillX.toFixed(1)+'" y="'+(y-13).toFixed(1)+'" width="'+labelW.toFixed(1)+'" height="13" rx="3" fill="white" fill-opacity="0.88"/>';
+    dots+='<text x="'+labelX.toFixed(1)+'" y="'+(y-3.5).toFixed(1)+'" font-size="9" fill="'+color+'" font-family="system-ui,sans-serif" text-anchor="'+anchor+'" font-weight="800" letter-spacing="-0.3">'+short+'</text>';
     if(!isCand&&routeIdx<TL_DATES.length){
-      dots+='<text x="'+labelX.toFixed(1)+'" y="'+(y+6).toFixed(1)+'" font-size="6.5" fill="#94a3b8" font-family="sans-serif" text-anchor="'+anchor+'">'+TL_DATES[routeIdx]+'</text>';
+      dots+='<text x="'+labelX.toFixed(1)+'" y="'+(y+r+8).toFixed(1)+'" font-size="7.5" fill="#1e293b" font-family="system-ui,sans-serif" text-anchor="'+anchor+'" font-weight="600" opacity="0.75">'+TL_DATES[routeIdx]+'</text>';
     } else if(isCand){
-      dots+='<text x="'+labelX.toFixed(1)+'" y="'+(y+6).toFixed(1)+'" font-size="6.5" fill="#10b981" font-family="sans-serif" text-anchor="'+anchor+'">NUEVA</text>';
+      dots+='<rect x="'+(labelX-(anchor==='start'?4:36)).toFixed(1)+'" y="'+(y+r+1).toFixed(1)+'" width="36" height="11" rx="3" fill="#10b981"/>'+
+             '<text x="'+labelX.toFixed(1)+'" y="'+(y+r+9).toFixed(1)+'" font-size="7.5" fill="white" font-family="system-ui,sans-serif" text-anchor="'+anchor+'" font-weight="800">NUEVA</text>';
     }
     if(!isCand) routeIdx++;
   });
@@ -1708,12 +1759,13 @@ function simDrawMap(routeToShow, highlightId, highlightInsertAt){
   var gmCoords=displayRoute.map(function(c){var co=SIM_COORDS[c];return co?co[1]+','+co[0]:(SIM_NAMES[c]||c)+',Europe';});
   var gmUrl='https://www.google.com/maps/dir/'+gmCoords.map(encodeURIComponent).join('/');
 
-  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;height:100%;background:#e8f4fb">'+
-    '<rect width="'+W+'" height="'+H+'" fill="#e8f4fb"/>'+
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;height:100%">'+
+    '<defs><linearGradient id="mapbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#dbeafe"/><stop offset="100%" stop-color="#e0f2fe"/></linearGradient></defs>'+
+    '<rect width="'+W+'" height="'+H+'" fill="url(#mapbg)"/>'+
     '<path d="'+displayRoute.map(function(c,i){var p=SIM_COORDS[c]||[5,44];return (i?'L':'M')+toX(p[0]).toFixed(1)+','+toY(p[1]).toFixed(1);}).join(' ')+'" fill="none" stroke="#0f172a" stroke-width="5" stroke-opacity="0.06"/>'+
     segs+dots+
-    '<rect x="3" y="'+(H-20)+'" width="'+(highlightId?160:120)+'" height="16" rx="3" fill="#0f172a" fill-opacity="0.7"/>'+
-    '<text x="8" y="'+(H-8)+'" font-size="8" fill="white" font-family="sans-serif">'+totalKm.toLocaleString()+' km'+(highlightId?' (con '+(SIM_NAMES[highlightId]||highlightId)+')'  :'')+' </text>'+
+    '<rect x="3" y="'+(H-22)+'" width="'+(highlightId?170:130)+'" height="19" rx="5" fill="#0f172a" fill-opacity="0.82"/>'+
+    '<text x="9" y="'+(H-8)+'" font-size="9.5" fill="white" font-family="system-ui,sans-serif" font-weight="700">'+totalKm.toLocaleString()+' km'+(highlightId?' + '+(SIM_NAMES[highlightId]||highlightId):'')+' </text>'+
     '</svg>';
 
   var svg_el=document.getElementById('sim-map-svg');
@@ -1767,6 +1819,40 @@ function simRenderUnified(){
         '<div style="font-size:0.6rem;color:#94a3b8">'+h.toFixed(1)+'h</div>'+
       '</div>':'<div style="font-size:0.62rem;color:#10b981;font-weight:700">FIN</div>')+
       '<span style="color:#cbd5e1;cursor:grab;font-size:0.75rem;padding:0 2px">&#9776;</span>';
+
+    // Transport selector (between this city and next)
+    if(!isLast){
+      var transSel=document.createElement('select');
+      transSel.style.cssText='border:1px solid #e2e8f0;border-radius:5px;padding:0.15rem 0.25rem;font-family:inherit;font-size:0.6rem;color:#374151;background:white;cursor:pointer;margin-left:2px;flex-shrink:0';
+      transSel.title='Modo de transporte hasta la siguiente ciudad';
+      var currentMode=simGetMode(cityId,simRoute[i+1]);
+      var modeOpts=[
+        {val:'coche',label:'🚗 Coche'},
+        {val:'tren',label:'🚂 Tren'},
+        {val:'tren_av',label:'🚄 Tren AV'},
+        {val:'avion',label:'✈️ Avion'},
+        {val:'ferry',label:'⛴️ Ferry'}
+      ];
+      modeOpts.forEach(function(opt){
+        var o=document.createElement('option');
+        o.value=opt.val; o.textContent=opt.label;
+        if(opt.val===currentMode) o.selected=true;
+        transSel.appendChild(o);
+      });
+      (function(from,to){
+        transSel.onchange=function(e){
+          e.stopPropagation();
+          var newMode=transSel.value;
+          SIM_TRANSPORT_OVERRIDE[from+'|'+to]=newMode;
+          SIM_TRANSPORT_OVERRIDE[to+'|'+from]=newMode;
+          simMarkModified();
+          simRenderUnified();
+          simDrawMap();
+          simCalcStats();
+        };
+      })(cityId, simRoute[i+1]);
+      row.appendChild(transSel);
+    }
 
     // Remove button (non-base cities or admin)
     var isBase=SIM_BASE_ROUTE.indexOf(cityId)!==-1;
@@ -2129,15 +2215,24 @@ function simSaveAsBase(){
         var dl=d.city.toLowerCase();
         if(dl.indexOf((SIM_NAMES[c]||c).toLowerCase().split(' ')[0])!==-1) existing=d;
       });
+      var modeLabel={coche:'coche',tren:'tren',tren_av:'tren AV',avion:'avion',ferry:'ferry'}[mode]||mode;
+      var hReal=(km/(SIM_SPEEDS[mode]||80)).toFixed(1);
+      var segCost=simSegmentCost(c,nextC)*7;
       if(existing){
         var upd=JSON.parse(JSON.stringify(existing));
         upd.date=DATES[i]||'';
+        upd.drive=(mode==='coche'||mode==='ferry');
+        upd.h=hReal+'h'+(mode!=='coche'?' '+modeLabel:'');
+        upd.modo=mode;
         newTL.push(upd);
       } else {
-        newTL.push({date:DATES[i]||'',city:(SIM_NAMES[c]||c)+' - '+(SIM_NAMES[nextC]||nextC),
-          drive:mode==='coche',km:km,h:h+'h',ztl:false,maps:'',
-          acts:['08:00 Salida desde '+(SIM_NAMES[c]||c),'Llegada a '+(SIM_NAMES[nextC]||nextC)],
-          stay:'Por confirmar en '+(SIM_NAMES[nextC]||nextC),note:'Añadido desde simulador'});
+        newTL.push({date:DATES[i]||'',city:(SIM_NAMES[c]||c)+' - '+(SIM_NAMES[nextC]||nextC)+
+          (mode!=='coche'?' ('+modeLabel+')':''),
+          drive:(mode==='coche'),km:km,h:hReal+'h',modo:mode,ztl:false,
+          maps:mode==='coche'?'https://www.google.com/maps/dir/'+encodeURIComponent(SIM_NAMES[c]||c)+'/'+encodeURIComponent(SIM_NAMES[nextC]||nextC):'',
+          acts:['08:00 Salida desde '+(SIM_NAMES[c]||c),'Llegada a '+(SIM_NAMES[nextC]||nextC)+' (~'+hReal+'h)'],
+          stay:'Por confirmar en '+(SIM_NAMES[nextC]||nextC),
+          note:'Modo: '+modeLabel+'. Coste estimado grupo: ~'+segCost+'€. Actualizar detalles.'});
       }
     });
     TL.length=0; newTL.forEach(function(d){TL.push(d);});
