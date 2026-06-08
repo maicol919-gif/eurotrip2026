@@ -398,6 +398,15 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
       </div>
     </div>
 
+    <!-- Riesgos próximos -->
+    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;margin-bottom:0.75rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.65rem">
+        <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8">⚠️ Riesgos del viaje</div>
+        <span style="font-size:0.6rem;color:#94a3b8">Detectados desde el itinerario</span>
+      </div>
+      <div id="home-riesgos"></div>
+    </div>
+
     <!-- Gastos y checklist -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:0.75rem">
       <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;cursor:pointer" onclick="showView('gastos',4)">
@@ -2180,15 +2189,159 @@ var homeOffset = 0; // para navegar días durante el viaje
 // Alertas estáticas por proximidad
 var HOME_ALERTS = [
   {days:7,  level:'red',    text:'Confirmar alojamientos de Roma. ¡El cumpleaños es el 19!'},
-  {days:14, level:'orange', text:'Revisar ZTL en Roma y Milán antes de entrar con el coche.'},
-  {days:14, level:'orange', text:'Llenar depósito en Francia antes de cruzar a España (más barato).'},
-  {days:21, level:'orange', text:'Preparar Vignette/Vinheta si pasáis por Austria o Suiza.'},
-  {days:30, level:'green',  text:'Descargar mapas offline de Google Maps para toda la ruta.'},
-  {days:30, level:'green',  text:'Verificar documentación: pasaportes, permisos de conducir, tarjetas.'},
-  {days:30, level:'green',  text:'Confirmar reservas de Airbnb. Faltan ' + (function(){
-    var d=Math.ceil((TRIP_START-new Date())/86400000); return d>0?d:0;
-  }()) + ' días.'}
+  {days:14, level:'orange', text:'Llenar depósito en Francia antes de cruzar a España — más barato que en España.'},
+  {days:21, level:'orange', text:'Descargar mapas offline de Google Maps para toda la ruta antes de salir.'},
+  {days:30, level:'green',  text:'Verificar documentación: pasaportes, permisos de conducir, tarjetas de crédito.'},
+  {days:30, level:'green',  text:'Confirmar reservas de Airbnb pendientes.'}
 ];
+
+// ===== RIESGOS PRÓXIMOS =====
+// Base de datos de riesgos por ciudad/país — se cruza con el TL
+var RISK_DB = {
+  // Italia
+  'Roma': [
+    {level:'red',   icon:'🚫', title:'ZTL Roma', text:'Zona de Tráfico Limitado activa en el centro histórico. No entrar con el coche. Multa automática por cámara: 100–300€. Aparcar en parkings de la periferia (Parcheggio Villa Borghese, Ostiense).'},
+    {level:'orange',icon:'💶', title:'Peajes A1', text:'La autopista A1 (Milán→Roma) tiene peajes frecuentes. Llevar tarjeta de crédito o efectivo. Coste estimado: ~25€ por coche.'},
+    {level:'green', icon:'📱', title:'App recomendada', text:'Descarga "MyCicero" o "EasyPark" para parkings en Roma. Evita perder tiempo buscando aparcamiento.'}
+  ],
+  'Milan': [
+    {level:'red',   icon:'🚫', title:'ZTL Milán + Area C', text:'Milán tiene peaje urbano (Area C) para entrar al centro: ~5€/día. Si el Airbnb está en el centro, verificar si incluye pase. Activo L-V 7:30–19:30.'},
+    {level:'orange',icon:'⚡', title:'Restricciones ambientales', text:'Milán aplica restricciones por nivel de emisiones (Área B). Coches diésel Euro 4 o inferiores no pueden entrar. Verificar etiqueta del vehículo.'}
+  ],
+  'Venecia': [
+    {level:'red',   icon:'🚫', title:'Sin coches en Venecia', text:'Venecia es peatonal. Aparcar en Piazzale Roma o Tronchetto (parking de entrada). Coste: ~25–35€/día. Reservar con antelación en verano.'},
+    {level:'orange',icon:'💶', title:'Acceso turístico (verano)', text:'En julio Venecia puede aplicar una tasa de acceso diurno de 5€ por persona para turistas de día. Verificar fechas exactas antes de llegar.'}
+  ],
+  'Genova': [
+    {level:'orange',icon:'🌊', title:'Túneles y viaductos', text:'La A7/A10 cerca de Génova tiene tramos con altura y anchura limitadas. Sin problema para coches normales pero ojo con furgonetas o vehículos grandes.'}
+  ],
+  // Francia
+  'Paris': [
+    {level:'red',   icon:'🚫', title:'ZFE París (Crit'Air)', text:'París exige pegatina Crit'Air para circular. Sin ella, multa de 135€. Solicitar en critair.fr con mínimo 2 semanas de antelación. Coste: ~4€.'},
+    {level:'orange',icon:'🅿️', title:'Aparcamiento en París', text:'Aparcar en París es muy difícil y caro (4–6€/h en superficie). Usar parkings de Park&Ride (P+R) en la periferia y metro al centro. Opción: Parking Bercy, Vincennes.'},
+    {level:'green', icon:'🚇', title:'Metro recomendado', text:'Para moverse por París usar el metro o RER. Día de estancia: comprar carnet de 10 viajes (Navigo Liberté+) o Navigo Jour (~8€/día).'}
+  ],
+  'Niza': [
+    {level:'orange',icon:'🌊', title:'Costa Azul en julio', text:'Niza en julio está masificada. Las playas del centro (Plage de la Promenade) llenas. Alternativa: Plage de Coco o Villefranche-sur-Mer (15 min).'},
+    {level:'green', icon:'⛽', title:'Último depósito en Francia', text:'Llenar el depósito en Niza antes de volver a España. La gasolina en Francia es más barata que en España. Ahorro estimado: ~8–12€ por depósito.'}
+  ],
+  'Montpellier': [
+    {level:'green', icon:'⛽', title:'Parada de combustible', text:'Montpellier es un buen punto para repostar. Estación recomendada: Intermarché o Leclerc (más baratas que en autopista).'}
+  ],
+  // España
+  'Alicante': [
+    {level:'green', icon:'📋', title:'Punto de salida', text:'Verificar antes de salir: ITV al día, seguro vigente con cobertura europea, triángulos y chaleco reflectante en el maletero (obligatorio en Francia e Italia).'}
+  ],
+  'Barcelona': [
+    {level:'red',   icon:'🚫', title:'ZBE Barcelona', text:'Barcelona tiene Zona de Bajas Emisiones. Coches sin pegatina ambiental no pueden circular en algunas zonas. Verificar etiqueta DGT.'},
+    {level:'orange',icon:'🅿️', title:'Aparcamiento', text:'Aparcar en Barcelona es difícil y caro. Usar parking Parc de l'Arpa o aparcamientos del Eixample. Evitar dejar cosas visibles en el coche.'}
+  ]
+};
+
+// Riesgos de tramo/frontera — se detectan por el recorrido del TL
+var RISK_FRONTERAS = [
+  {from:'ES', to:'FR', level:'orange', icon:'🛂', title:'Frontera España–Francia (La Junquera)',
+   text:'La Junquera es el paso más frecuente. No hay control rutinario pero pueden hacerlo. Llevar DNI/Pasaporte. La autopista AP-7 tiene peaje justo después de cruzar. Alternativa libre: N-II por La Jonquera (añade ~20 min).'},
+  {from:'FR', to:'IT', level:'orange', icon:'🛂', title:'Frontera Francia–Italia (Ventimiglia)',
+   text:'Paso por Ventimiglia. La autopista A8/A10 tiene peaje. Pueden hacerse controles aleatorios. Sin trámites especiales dentro de Schengen.'},
+  {from:'IT', to:'FR', level:'green',  icon:'🛂', title:'Frontera Italia–Francia (Niza)',
+   text:'Sin controles habituales. Autopista de peaje A8. Llenar depósito en Italia antes del cruce si es conveniente por precio.'}
+];
+
+function buildRiesgosFromTL() {
+  var risks = [];
+  var seenRisks = {};
+  var countrySeen = {};
+
+  TL.forEach(function(entry, dayIdx) {
+    var daysUntil = dayIdx; // aproximado — día 0 = 14 jul
+
+    // 1. Riesgos de ciudad — buscar en RISK_DB
+    Object.keys(RISK_DB).forEach(function(city) {
+      if(entry.city.indexOf(city) !== -1) {
+        RISK_DB[city].forEach(function(r) {
+          var key = city + r.title;
+          if(!seenRisks[key]) {
+            seenRisks[key] = true;
+            risks.push({
+              dayIdx: dayIdx,
+              date: entry.date,
+              city: city,
+              level: r.level,
+              icon: r.icon,
+              title: r.title,
+              text: r.text
+            });
+          }
+        });
+      }
+    });
+
+    // 2. ZTL desde el TL directamente
+    if(entry.ztl && !seenRisks['ztl_'+dayIdx]) {
+      seenRisks['ztl_'+dayIdx] = true;
+      // Already covered by RISK_DB for known cities
+    }
+
+    // 3. Riesgos de frontera — detectar cambio de país
+    var CITY_COUNTRY = {
+      'Alicante':'ES','Barcelona':'ES','Montpellier':'FR','Paris':'FR',
+      'Niza':'FR','Colmar':'FR','Milan':'IT','Venecia':'IT','Roma':'IT','Genova':'IT'
+    };
+    var entryCountry = null;
+    Object.keys(CITY_COUNTRY).forEach(function(c) {
+      if(entry.city.indexOf(c) !== -1) entryCountry = CITY_COUNTRY[c];
+    });
+    if(entryCountry && !countrySeen[entryCountry]) {
+      countrySeen[entryCountry] = true;
+      if(Object.keys(countrySeen).length > 1) {
+        // Country change — find matching frontera risk
+        var prevCountry = Object.keys(countrySeen)[Object.keys(countrySeen).length-2];
+        RISK_FRONTERAS.forEach(function(f) {
+          var key = 'frontera_'+f.from+'_'+f.to;
+          if(!seenRisks[key] && f.from === prevCountry && f.to === entryCountry) {
+            seenRisks[key] = true;
+            risks.push({dayIdx:dayIdx, date:entry.date, city:'Frontera',
+              level:f.level, icon:f.icon, title:f.title, text:f.text});
+          }
+        });
+      }
+    }
+  });
+
+  return risks;
+}
+
+function renderRiesgos(containerId) {
+  var container = document.getElementById(containerId || 'home-riesgos');
+  if(!container) return;
+
+  var risks = buildRiesgosFromTL();
+  if(!risks.length) {
+    container.innerHTML = '<div style="font-size:0.75rem;color:#94a3b8;font-style:italic">No se detectaron riesgos en la ruta actual.</div>';
+    return;
+  }
+
+  // Sort: red first, then orange, then green
+  var order = {red:0, orange:1, green:2};
+  risks.sort(function(a,b){ return (order[a.level]||2)-(order[b.level]||2); });
+
+  container.innerHTML = risks.map(function(r) {
+    var bg    = r.level==='red'?'#fef2f2':r.level==='orange'?'#fff7ed':'#f0fdf4';
+    var border= r.level==='red'?'#fecaca':r.level==='orange'?'#fed7aa':'#bbf7d0';
+    var color = r.level==='red'?'#dc2626':r.level==='orange'?'#ea580c':'#16a34a';
+    var badge = r.level==='red'?'🔴 Crítico':r.level==='orange'?'🟠 Atención':'🟢 Info';
+    return '<div style="background:'+bg+';border:1.5px solid '+border+';border-radius:10px;padding:0.75rem;margin-bottom:0.5rem">' +
+      '<div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.3rem">' +
+        '<span style="font-size:1rem">'+r.icon+'</span>' +
+        '<span style="font-size:0.72rem;font-weight:700;color:'+color+'">'+r.title+'</span>' +
+        '<span style="margin-left:auto;font-size:0.58rem;font-weight:700;color:'+color+';background:white;padding:0.1rem 0.4rem;border-radius:5px;white-space:nowrap">'+badge+'</span>' +
+      '</div>' +
+      '<div style="font-size:0.65rem;font-weight:600;color:#94a3b8;margin-bottom:0.25rem">'+r.date+' · '+r.city+'</div>' +
+      '<div style="font-size:0.73rem;color:#475569;line-height:1.45">'+r.text+'</div>' +
+    '</div>';
+  }).join('');
+}
 
 function initHome() {
   var now   = new Date();
@@ -2210,6 +2363,9 @@ function initHomeBefore() {
   if(bigEl) bigEl.textContent = diff > 0 ? diff : '¡Hoy!';
   var el = document.getElementById('days-left');
   if(el) el.textContent = diff > 0 ? diff : '¡Ya!';
+
+  // Riesgos próximos
+  renderRiesgos('home-riesgos');
 
   // Alertas decidir hoy
   var container = document.getElementById('home-decidir');
@@ -2441,6 +2597,7 @@ renderAgenda();
 updateHeaderRoute();
 initHome();
 renderSOSDynamic();
+renderRiesgos('home-riesgos');
 
 // Load sheet links immediately (Google Sheets for Airbnb links)
 loadSheet();
