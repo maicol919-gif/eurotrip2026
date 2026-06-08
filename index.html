@@ -347,6 +347,22 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
    MOBILE FIRST — todo optimizado para uso real en carretera
    Pantalla estrecha, una mano, sol encima, presión de tiempo
    ============================================================ */
+
+/* ===== PIN LOGIN ===== */
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid #e2e8f0;background:white;transition:all .15s}
+.pin-dot.filled{background:#0f172a;border-color:#0f172a}
+.pin-dot.error{background:#ef4444;border-color:#ef4444}
+.pin-key{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:1rem;font-size:1.3rem;font-weight:700;font-family:inherit;cursor:pointer;transition:all .15s;color:#0f172a;text-align:center;-webkit-tap-highlight-color:transparent}
+.pin-key:active{background:#f1f5f9;transform:scale(0.95)}
+.pin-key.del{font-size:1rem;color:#94a3b8}
+.pin-key.empty{background:transparent;border-color:transparent;pointer-events:none}
+.viajero-row{display:flex;align-items:center;gap:0.6rem;padding:0.6rem 0.75rem;background:white;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:0.4rem}
+.viajero-avatar{width:34px;height:34px;border-radius:50%;background:#0f172a;color:white;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;flex-shrink:0}
+.viajero-name{flex:1;font-size:0.82rem;font-weight:700}
+.viajero-pin{font-size:0.65rem;color:#94a3b8;font-family:monospace;letter-spacing:0.15em}
+.viajero-del{background:none;border:none;color:#e2e8f0;cursor:pointer;font-size:0.85rem;padding:0;transition:color .15s}
+.viajero-del:hover{color:#ef4444}
+
 @media(max-width:640px){
   /* Base */
   body{font-size:15px}
@@ -486,7 +502,11 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
       <div id="header-route" class="hroute-cities"></div>
     </div>
   </div>
-  <div class="hbadge" id="badge">🌍 EuroTrip</div>
+  <div style="display:flex;align-items:center;gap:0.5rem">
+    <button id="pin-logout-btn" onclick="pinLogout()" style="display:none;align-items:center;gap:0.3rem;background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:0.3rem 0.65rem;color:white;font-family:inherit;font-size:0.65rem;font-weight:600;cursor:pointer" title="Cerrar sesión">🚪</button>
+    <button onclick="pinOpenAdmin()" id="admin-viajeros-btn" style="display:none;background:rgba(255,255,255,0.1);border:none;border-radius:8px;padding:0.3rem 0.65rem;color:white;font-family:inherit;font-size:0.65rem;font-weight:600;cursor:pointer">👥</button>
+    <div class="hbadge" id="badge">🌍 EuroTrip</div>
+  </div>
 </div>
 
 <div class="main">
@@ -1184,13 +1204,46 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 <!-- PERFIL / TURNOS DE CONDUCCIÓN -->
 
 
-<!-- NOMBRE MODAL -->
+<!-- LOGIN MODAL -->
 <div class="nmodal" id="nmodal">
-  <div class="nmodal-box">
-    <div class="nmodal-t">Bienvenido al EuroTrip 2026</div>
-    <div class="nmodal-s">Como te llamas? Asi identificamos tus votos y gastos.</div>
-    <input class="fi" id="ninput" type="text" placeholder="Tu nombre..." style="margin-bottom:0.75rem">
-    <button class="btn-add" onclick="guardarNombre()">Entrar</button>
+  <div class="nmodal-box" style="max-width:340px;padding:1.75rem 1.5rem">
+    <div style="text-align:center;margin-bottom:1.25rem">
+      <div style="font-size:2rem;margin-bottom:0.4rem">🌍</div>
+      <div class="nmodal-t" style="font-size:1.1rem">EuroTrip 2026</div>
+      <div class="nmodal-s" style="margin-top:0.25rem">Ingresa tu PIN para entrar</div>
+    </div>
+
+    <!-- PIN display -->
+    <div id="pin-display" style="display:flex;justify-content:center;gap:0.6rem;margin-bottom:1.25rem">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+
+    <!-- Numpad -->
+    <div id="pin-numpad" style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:0.75rem">
+    </div>
+
+    <div id="pin-error" style="color:#ef4444;font-size:0.72rem;text-align:center;margin-bottom:0.5rem;display:none">PIN incorrecto. Intenta de nuevo.</div>
+    <div id="pin-who" style="color:#94a3b8;font-size:0.7rem;text-align:center;font-style:italic"></div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL VIAJEROS -->
+<div id="admin-panel-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:flex-end;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:white;border-radius:20px 20px 0 0;padding:1.25rem 1rem 2rem;width:100%;max-width:480px;max-height:85vh;overflow-y:auto">
+    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;text-align:center;margin-bottom:1rem">👥 Gestionar viajeros</div>
+    <div id="admin-viajeros-list" style="margin-bottom:0.75rem"></div>
+    <div style="background:#f8fafc;border-radius:10px;padding:0.85rem;margin-bottom:0.5rem">
+      <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.6rem">+ Nuevo viajero</div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:0.5rem;margin-bottom:0.5rem">
+        <input id="new-viajero-nombre" placeholder="Nombre" style="border:1.5px solid #e2e8f0;border-radius:8px;padding:0.45rem 0.65rem;font-family:inherit;font-size:0.82rem;outline:none">
+        <input id="new-viajero-pin" placeholder="PIN 4 dígitos" maxlength="4" type="number" style="width:90px;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.45rem 0.65rem;font-family:monospace;font-size:0.9rem;letter-spacing:0.2em;outline:none;text-align:center">
+      </div>
+      <button id="new-viajero-btn" style="width:100%;background:#0f172a;color:white;border:none;border-radius:8px;padding:0.6rem;font-family:inherit;font-weight:700;font-size:0.82rem;cursor:pointer">Crear viajero</button>
+    </div>
+    <button onclick="document.getElementById('admin-panel-modal').style.display='none'" style="width:100%;padding:0.6rem;border:none;background:#f8fafc;border-radius:10px;font-family:inherit;font-size:0.8rem;color:#64748b;cursor:pointer;font-weight:600">Cerrar</button>
   </div>
 </div>
 
@@ -1584,15 +1637,240 @@ function updateCountdown() {
 }
 
 // ===== NOMBRE =====
-function guardarNombre() {
-  var v = document.getElementById('ninput').value.trim();
-  if(!v) return;
-  NOMBRE = v;
-  localStorage.setItem('et_nombre', v);
-  document.getElementById('nmodal').classList.remove('open');
-  // Broadcast name to all modules
-  document.querySelectorAll('.user-name-display').forEach(function(el){ el.textContent = v; });
+// ===== PIN LOGIN SYSTEM =====
+// Viajeros guardados localmente + Supabase
+var PIN_VIAJEROS = (function() {
+  try {
+    var saved = localStorage.getItem('et26_viajeros');
+    return saved ? JSON.parse(saved) : [];
+  } catch(e) { return []; }
+})();
+
+// Defaults — siempre incluye admin
+var PIN_DEFAULT_VIAJEROS = [
+  {nombre:'Carlos',  pin:'1111', avatar:'C', isAdmin:false},
+  {nombre:'Lucia',   pin:'2222', avatar:'L', isAdmin:false},
+  {nombre:'Marco',   pin:'3333', avatar:'M', isAdmin:false},
+  {nombre:'Sofia',   pin:'4444', avatar:'S', isAdmin:false},
+  {nombre:'Diego',   pin:'5555', avatar:'D', isAdmin:false},
+  {nombre:'Ana',     pin:'6666', avatar:'A', isAdmin:false},
+  {nombre:'Javi',    pin:'7777', avatar:'J', isAdmin:false},
+  {nombre:'Admin',   pin:'2026', avatar:'👑', isAdmin:true}
+];
+
+function pinGetViajeros() {
+  return PIN_VIAJEROS.length ? PIN_VIAJEROS : PIN_DEFAULT_VIAJEROS;
 }
+
+function pinSaveViajeros() {
+  try { localStorage.setItem('et26_viajeros', JSON.stringify(PIN_VIAJEROS)); } catch(e) {}
+}
+
+// Current session
+var PIN_SESSION = (function() {
+  try {
+    var s = localStorage.getItem('et26_session');
+    return s ? JSON.parse(s) : null;
+  } catch(e) { return null; }
+})();
+
+function pinSaveSession(viajero) {
+  try { localStorage.setItem('et26_session', JSON.stringify(viajero)); } catch(e) {}
+}
+
+function pinClearSession() {
+  try { localStorage.removeItem('et26_session'); } catch(e) {}
+  PIN_SESSION = null;
+}
+
+// PIN input state
+var pinCurrent = '';
+var pinMaxLen = 4;
+
+function pinInit() {
+  // Build numpad
+  var numpad = document.getElementById('pin-numpad');
+  if(!numpad) return;
+  numpad.innerHTML = '';
+  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(function(k) {
+    var btn = document.createElement('button');
+    btn.className = 'pin-key' + (k===''?' empty':k==='⌫'?' del':'');
+    btn.textContent = k;
+    if(k !== '') {
+      btn.addEventListener('click', function() {
+        if(k === '⌫') pinBackspace();
+        else pinPress(String(k));
+      });
+    }
+    numpad.appendChild(btn);
+  });
+  pinCurrent = '';
+  pinUpdateDisplay();
+  document.getElementById('pin-error').style.display = 'none';
+  document.getElementById('pin-who').textContent = '';
+}
+
+function pinPress(digit) {
+  if(pinCurrent.length >= pinMaxLen) return;
+  pinCurrent += digit;
+  pinUpdateDisplay();
+  if(pinCurrent.length === pinMaxLen) {
+    setTimeout(pinCheck, 150);
+  }
+}
+
+function pinBackspace() {
+  pinCurrent = pinCurrent.slice(0, -1);
+  pinUpdateDisplay();
+}
+
+function pinUpdateDisplay() {
+  for(var i = 0; i < 4; i++) {
+    var dot = document.getElementById('pd'+i);
+    if(dot) {
+      dot.classList.toggle('filled', i < pinCurrent.length);
+      dot.classList.remove('error');
+    }
+  }
+}
+
+function pinCheck() {
+  var viajeros = pinGetViajeros();
+  var match = null;
+
+  // Check admin PIN first
+  if(pinCurrent === ADMIN_PIN) {
+    match = {nombre:'Admin', pin:ADMIN_PIN, avatar:'👑', isAdmin:true};
+  } else {
+    viajeros.forEach(function(v) {
+      if(v.pin === pinCurrent) match = v;
+    });
+  }
+
+  if(match) {
+    // Success
+    PIN_SESSION = match;
+    pinSaveSession(match);
+    NOMBRE = match.nombre;
+    localStorage.setItem('et_nombre', match.nombre);
+
+    // Set admin flags
+    if(match.isAdmin || match.pin === ADMIN_PIN) {
+      AG_ADMIN = true;
+      simIsAdmin = true;
+    }
+
+    // Update UI
+    document.querySelectorAll('.user-name-display').forEach(function(el){ el.textContent = match.nombre; });
+    document.getElementById('nmodal').classList.remove('open');
+
+    // Show admin button if admin
+    pinUpdateAdminBtn();
+    renderAgenda();
+
+    // Show welcome
+    var who = document.getElementById('pin-who');
+    if(who) who.textContent = '¡Bienvenido, ' + match.nombre + '!';
+
+  } else {
+    // Error
+    for(var i = 0; i < 4; i++) {
+      var dot = document.getElementById('pd'+i);
+      if(dot) dot.classList.add('error');
+    }
+    document.getElementById('pin-error').style.display = 'block';
+    setTimeout(function() {
+      pinCurrent = '';
+      pinUpdateDisplay();
+      document.getElementById('pin-error').style.display = 'none';
+    }, 1200);
+  }
+}
+
+function pinUpdateAdminBtn() {
+  // Show "gestionar viajeros" button if admin
+  var badge = document.getElementById('ag-admin-badge');
+  if(badge && PIN_SESSION && PIN_SESSION.isAdmin) {
+    badge.textContent = '👑 Admin';
+    badge.className = 'ag-admin-badge';
+  }
+  // Show logout option
+  var logoutBtn = document.getElementById('pin-logout-btn');
+  if(logoutBtn) logoutBtn.style.display = 'flex';
+  var adminBtn = document.getElementById('admin-viajeros-btn');
+  if(adminBtn && PIN_SESSION && PIN_SESSION.isAdmin) adminBtn.style.display = 'block';
+}
+
+function pinLogout() {
+  pinClearSession();
+  NOMBRE = '';
+  AG_ADMIN = false;
+  simIsAdmin = false;
+  pinCurrent = '';
+  document.getElementById('nmodal').classList.add('open');
+  pinInit();
+}
+
+// Admin: gestionar viajeros
+function pinOpenAdmin() {
+  var modal = document.getElementById('admin-panel-modal');
+  if(!modal) return;
+  pinRenderAdminList();
+  modal.style.display = 'flex';
+}
+
+function pinRenderAdminList() {
+  var list = document.getElementById('admin-viajeros-list');
+  if(!list) return;
+  var viajeros = pinGetViajeros();
+  list.innerHTML = '';
+  viajeros.filter(function(v){ return !v.isAdmin; }).forEach(function(v, i) {
+    var row = document.createElement('div');
+    row.className = 'viajero-row';
+    var initial = v.nombre.charAt(0).toUpperCase();
+    row.innerHTML =
+      '<div class="viajero-avatar">'+initial+'</div>'+
+      '<div style="flex:1"><div class="viajero-name">'+v.nombre+'</div>'+
+      '<div class="viajero-pin">PIN: '+v.pin+'</div></div>';
+    var del = document.createElement('button');
+    del.className = 'viajero-del';
+    del.textContent = '✕';
+    del.setAttribute('data-vidx', i);
+    del.addEventListener('click', function() {
+      var idx = parseInt(this.getAttribute('data-vidx'));
+      var all = pinGetViajeros().filter(function(v){ return !v.isAdmin; });
+      all.splice(idx, 1);
+      PIN_VIAJEROS = all;
+      pinSaveViajeros();
+      pinRenderAdminList();
+    });
+    row.appendChild(del);
+    list.appendChild(row);
+  });
+}
+
+// Add viajero button
+document.addEventListener('DOMContentLoaded', function() {
+  var btn = document.getElementById('new-viajero-btn');
+  if(btn) btn.addEventListener('click', function() {
+    var nombre = document.getElementById('new-viajero-nombre').value.trim();
+    var pin = document.getElementById('new-viajero-pin').value.trim();
+    if(!nombre || pin.length < 4) return;
+    var all = pinGetViajeros().filter(function(v){ return !v.isAdmin; });
+    all.push({nombre:nombre, pin:pin, avatar:nombre.charAt(0).toUpperCase(), isAdmin:false});
+    PIN_VIAJEROS = all;
+    pinSaveViajeros();
+    document.getElementById('new-viajero-nombre').value = '';
+    document.getElementById('new-viajero-pin').value = '';
+    pinRenderAdminList();
+  });
+});
+
+// Legacy compatibility
+function guardarNombre() {
+  pinCheck();
+}
+
 
 // ===== SUPABASE LOAD =====
 function loadData() {
@@ -3599,15 +3877,22 @@ setTimeout(function() {
   setInterval(loadData, 15000);
 }, 500);
 
-// Show nombre modal if needed
-if(!NOMBRE){
+// PIN Login — check session
+pinInit();
+if(PIN_SESSION) {
+  // Restore session
+  NOMBRE = PIN_SESSION.nombre;
+  localStorage.setItem('et_nombre', NOMBRE);
+  if(PIN_SESSION.isAdmin || PIN_SESSION.pin === ADMIN_PIN) {
+    AG_ADMIN = true;
+    simIsAdmin = true;
+  }
+  document.querySelectorAll('.user-name-display').forEach(function(el){ el.textContent = NOMBRE; });
+  pinUpdateAdminBtn();
+} else {
+  // Show login
   document.getElementById('nmodal').classList.add('open');
-  setTimeout(function(){ var i=document.getElementById('ninput'); if(i) i.focus(); },100);
 }
-
-document.addEventListener('keydown',function(e){
-  if(e.key==='Enter'&&document.getElementById('nmodal').classList.contains('open')) guardarNombre();
-});
 
 
 // ===== SIMULADOR v2 — UNIFIED =====
