@@ -746,7 +746,8 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
         </button>
       </div>
       <!-- Admin actions (sim mode only) -->
-      <button id="ruta-save-btn" onclick="simSaveAsBase()" style="display:none;background:#10b981;color:white;border:none;border-radius:8px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">💾 Guardar</button>
+      <button id="ruta-save-btn" onclick="simSaveAsBase()" style="display:none;background:#10b981;color:white;border:none;border-radius:8px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">💾 Guardar para todos</button>
+      <button id="ruta-propose-btn" onclick="simProposeRoute()" style="display:none;background:#7c3aed;color:white;border:none;border-radius:8px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">📤 Proponer al admin</button>
       <button id="ruta-discard-btn" onclick="simDiscardAll()" style="display:none;background:#ef4444;color:white;border:none;border-radius:8px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">↩</button>
     </div>
   </div>
@@ -4725,12 +4726,6 @@ function simLoadRoute(callback) {
 
 function simInsertParada(cityId, pos) {
   // Solo admin puede hacer cambios reales
-  if(!simIsAdmin) {
-    simRequestAdmin(function() {
-      simInsertParada(cityId, pos);
-    });
-    return;
-  }
   if(simRoute.indexOf(cityId) !== -1) {
     simShowMsg((SIM_NAMES[cityId]||cityId)+' ya está en la ruta.');
     return;
@@ -4864,6 +4859,25 @@ function supaKeepAlive() {
 // Ping inmediato al cargar + cada 4 días
 supaKeepAlive();
 setInterval(supaKeepAlive, 4 * 24 * 60 * 60 * 1000);
+
+
+function simProposeRoute() {
+  // Non-admin proposes route to admin via Supabase
+  var proposerName = NOMBRE || 'Un viajero';
+  var payload = {
+    ciudad: 'sim_proposal_' + Date.now(),
+    notas: JSON.stringify({
+      proposer: proposerName,
+      route: simRoute,
+      timestamp: new Date().toISOString()
+    })
+  };
+  supa('POST','alojamientos_estado', payload, '').then(function() {
+    simShowMsg('\uD83D\uDCE4 Propuesta enviada al admin. Revisará los cambios.');
+  }).catch(function() {
+    simShowMsg('\u26A0\uFE0F No se pudo enviar la propuesta.');
+  });
+}
 
 // ===== INIT =====
 updateCountdown();
@@ -5291,7 +5305,7 @@ function simRenderUnified(){
     // Remove button — admin can remove any stop except first and last
     var isBase=SIM_BASE_ROUTE.indexOf(cityId)!==-1;
     var isFirstOrLast = (i === 0 || i === simRoute.length - 1);
-    if(simIsAdmin && !isFirstOrLast){
+    if(!isFirstOrLast){
       var rm=document.createElement('button');
       rm.style.cssText='background:none;border:none;color:#94a3b8;cursor:pointer;font-size:0.9rem;padding:0 2px;flex-shrink:0';
       rm.textContent='×';
@@ -5309,11 +5323,6 @@ function simRenderUnified(){
       var target=parseInt(e.currentTarget.dataset.i);
       if(dragSrc===null||dragSrc===target||dragSrc===undefined){dragSrc=null;return;}
       var moved=simRoute.splice(dragSrc,1)[0];
-      if(!simIsAdmin) {
-        dragSrc=null;
-        simShowMsg('\uD83D\uDD12 Solo el admin puede modificar la ruta oficial. Puedes simular sin guardar.');
-        return;
-      }
       simRoute.splice(target,0,moved);
       dragSrc=null;
       simMarkModified();
@@ -5603,13 +5612,9 @@ function simDeleteCandidate(cityId){
 }
 
 function simRemoveFromRoute(cityId){
-  if(!simIsAdmin) {
-    simShowMsg('\uD83D\uDD12 Solo el admin puede modificar la ruta.');
-    return;
-  }
   simRoute=simRoute.filter(function(c){return c!==cityId;});
-  SIM_BASE_ROUTE=simRoute.slice(); // Update base so button logic works
-  simSaveRoute(); // Persist to Supabase
+  SIM_BASE_ROUTE=simRoute.slice();
+  if(simIsAdmin) simSaveRoute(); // Solo admin persiste
   simMarkModified();
   simRenderUnified();
   simDrawMap();
@@ -5620,14 +5625,22 @@ function simRemoveFromRoute(cityId){
 // ===== SAVE / DISCARD =====
 function simMarkModified(){
   simIsModified=true;
+  // Show save/discard only for admin (has real impact)
+  // Non-admin sees a "Proponer" button instead
   var s=document.getElementById('ruta-save-btn');
   var d=document.getElementById('ruta-discard-btn');
-  if(s) s.style.display='block';
-  if(d) d.style.display='block';
+  var p=document.getElementById('ruta-propose-btn');
+  if(simIsAdmin) {
+    if(s) s.style.display='block';
+    if(d) d.style.display='block';
+    if(p) p.style.display='none';
+    simSaveRoute(); // Admin: persist immediately
+  } else {
+    if(s) s.style.display='none';
+    if(d) d.style.display='block';
+    if(p) p.style.display='block';
+  }
   simCalcStats();
-  // Save route if admin (persists across reloads)
-  if(simIsAdmin) simSaveRoute();
-  // Live: regenerate TL & agenda from route changes
   rutaFullRefresh();
 }
 
