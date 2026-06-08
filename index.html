@@ -2795,48 +2795,73 @@ function renderTurnoCard(dayIdx) {
 function renderTurnoCardInner(dayIdx) {
   var d = TL[dayIdx];
   var turno = TURNOS[dayIdx] || {};
-  var conductoresList = CONDUCTORES.length ?
-    CONDUCTORES : [{nombre:'Sin asignar', coche:1},{nombre:'Sin asignar', coche:2}];
+  var conductoresList = CONDUCTORES.length
+    ? CONDUCTORES
+    : [{nombre:'Sin asignar', coche:1},{nombre:'Sin asignar', coche:2}];
 
-  var html = '<div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.55rem">🚗 Conductores del día</div>';
+  var wrap = document.createElement('div');
+
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.55rem';
+  title.textContent = '\uD83D\uDE97 Conductores del d\u00EDa';
+  wrap.appendChild(title);
 
   [1,2].forEach(function(coche) {
     var assigned = turno['coche'+coche] || '';
-    var opts = '<option value="">— Sin asignar —</option>' +
-      conductoresList
-        .filter(function(c){ return c.coche === coche || !c.coche; })
-        .map(function(c){
-          return '<option value="' + c.nombre + '"' +
-            (assigned === c.nombre ? ' selected' : '') +
-            '>' + c.nombre + '</option>';
-        }).join('') +
-      conductoresList
-        .filter(function(c){ return c.coche !== coche && c.coche; })
-        .map(function(c){
-          return '<option value="' + c.nombre + '"' +
-            (assigned === c.nombre ? ' selected' : '') +
-            '>' + c.nombre + ' (Coche ' + c.coche + ')</option>';
-        }).join('');
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem';
 
-    html += '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">';
-    html += '<span style="font-size:0.65rem;font-weight:700;background:#f1f5f9;padding:0.2rem 0.5rem;border-radius:5px;white-space:nowrap">🚙 Coche ' + coche + '</span>';
+    var badge = document.createElement('span');
+    badge.style.cssText = 'font-size:0.65rem;font-weight:700;background:#f1f5f9;padding:0.2rem 0.5rem;border-radius:5px;white-space:nowrap';
+    badge.textContent = '\uD83D\uDE99 Coche ' + coche;
+    row.appendChild(badge);
 
     if(AG_ADMIN) {
-      html += '<select onchange="asignarConductor(' + dayIdx + ',' + coche + ',this.value)" ' +
-        'style="flex:1;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.28rem 0.5rem;font-family:inherit;font-size:0.72rem;outline:none">' +
-        opts + '</select>';
+      var sel = document.createElement('select');
+      sel.style.cssText = 'flex:1;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.28rem 0.5rem;font-family:inherit;font-size:0.72rem;outline:none';
+      sel.setAttribute('data-dayidx', dayIdx);
+      sel.setAttribute('data-coche', coche);
+
+      var emptyOpt = document.createElement('option');
+      emptyOpt.value = '';
+      emptyOpt.textContent = '\u2014 Sin asignar \u2014';
+      sel.appendChild(emptyOpt);
+
+      conductoresList.forEach(function(c) {
+        var opt = document.createElement('option');
+        opt.value = c.nombre;
+        opt.textContent = c.nombre + (c.coche !== coche ? ' (Coche ' + c.coche + ')' : '');
+        if(c.nombre === assigned) opt.selected = true;
+        sel.appendChild(opt);
+      });
+
+      sel.addEventListener('change', function() {
+        asignarConductor(
+          parseInt(this.getAttribute('data-dayidx')),
+          parseInt(this.getAttribute('data-coche')),
+          this.value
+        );
+      });
+      row.appendChild(sel);
     } else {
-      html += '<span style="flex:1;font-size:0.75rem;color:' + (assigned ? '#0f172a' : '#94a3b8') + ';font-style:' + (assigned ? 'normal' : 'italic') + '">' +
-        (assigned || 'Sin asignar') + '</span>';
-      html += '<button onclick="agRequestAdmin()" style="font-size:0.6rem;color:#94a3b8;background:none;border:none;cursor:pointer">✏️</button>';
+      var nameEl = document.createElement('span');
+      nameEl.style.cssText = 'flex:1;font-size:0.75rem;color:' + (assigned ? '#0f172a' : '#94a3b8') + ';font-style:' + (assigned ? 'normal' : 'italic');
+      nameEl.textContent = assigned || 'Sin asignar';
+      row.appendChild(nameEl);
+
+      var editBtn = document.createElement('button');
+      editBtn.style.cssText = 'font-size:0.6rem;color:#94a3b8;background:none;border:none;cursor:pointer';
+      editBtn.textContent = '\u270F\uFE0F';
+      editBtn.addEventListener('click', agRequestAdmin);
+      row.appendChild(editBtn);
     }
-    html += '</div>';
+
+    wrap.appendChild(row);
   });
 
-  return html;
+  return wrap.outerHTML;
 }
 
-// Estado del grupo — para home durante el viaje
 function renderEstadoGrupo() {
   var now = new Date();
   if(now < TRIP_START || now > TRIP_END) return;
@@ -2868,19 +2893,51 @@ function abrirGestionConductores() {
 function renderConductoresModal() {
   var list = document.getElementById('conductores-modal-list');
   if(!list) return;
-  list.innerHTML = CONDUCTORES.map(function(c, i) {
-    return '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem">' +
-      '<input value="' + c.nombre + '" onchange="CONDUCTORES[' + i + '].nombre=this.value;saveConductores()" ' +
-        'style="flex:1;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.6rem;font-family:inherit;font-size:0.8rem;outline:none">' +
-      '<select onchange="CONDUCTORES[' + i + '].coche=parseInt(this.value);saveConductores()" ' +
-        'style="border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.5rem;font-family:inherit;font-size:0.75rem;outline:none">' +
-        '<option value="1"' + (c.coche===1?' selected':'') + '>Coche 1</option>' +
-        '<option value="2"' + (c.coche===2?' selected':'') + '>Coche 2</option>' +
-      '</select>' +
-      '<button onclick="CONDUCTORES.splice(' + i + ',1);saveConductores();renderConductoresModal()" ' +
-        'style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.9rem">✕</button>' +
-    '</div>';
-  }).join('');
+  list.innerHTML = '';
+
+  CONDUCTORES.forEach(function(c, i) {
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem';
+
+    var inp = document.createElement('input');
+    inp.value = c.nombre;
+    inp.style.cssText = 'flex:1;border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.6rem;font-family:inherit;font-size:0.8rem;outline:none';
+    inp.setAttribute('data-idx', i);
+    inp.addEventListener('change', function() {
+      CONDUCTORES[parseInt(this.getAttribute('data-idx'))].nombre = this.value;
+      saveConductores();
+    });
+
+    var sel = document.createElement('select');
+    sel.style.cssText = 'border:1.5px solid #e2e8f0;border-radius:7px;padding:0.35rem 0.5rem;font-family:inherit;font-size:0.75rem;outline:none';
+    sel.setAttribute('data-idx', i);
+    [1,2].forEach(function(n) {
+      var opt = document.createElement('option');
+      opt.value = n;
+      opt.textContent = 'Coche ' + n;
+      if(c.coche === n) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.addEventListener('change', function() {
+      CONDUCTORES[parseInt(this.getAttribute('data-idx'))].coche = parseInt(this.value);
+      saveConductores();
+    });
+
+    var del = document.createElement('button');
+    del.style.cssText = 'background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.9rem';
+    del.textContent = '\u2715';
+    del.setAttribute('data-idx', i);
+    del.addEventListener('click', function() {
+      CONDUCTORES.splice(parseInt(this.getAttribute('data-idx')), 1);
+      saveConductores();
+      renderConductoresModal();
+    });
+
+    row.appendChild(inp);
+    row.appendChild(sel);
+    row.appendChild(del);
+    list.appendChild(row);
+  });
 }
 
 function addConductor() {
