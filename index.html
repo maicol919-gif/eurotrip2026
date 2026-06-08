@@ -1113,7 +1113,6 @@ function removeRuta(idx) {
   renderRuta();
 }
 function updateHeaderRoute() {
-  // Mapa ciudad → país (compartido con Agenda)
   var KMAP = {
     'Alicante':'ES','Barcelona':'ES','Cartagena':'ES','Murcia':'ES',
     'Montpellier':'FR','Paris':'FR','Niza':'FR','Nice':'FR','Clermont':'FR',
@@ -1122,70 +1121,65 @@ function updateHeaderRoute() {
     'Munich':'DE','Colonia':'DE','Berlin':'DE',
     'Bruselas':'BE','Amsterdam':'NL'
   };
-  var CNAMES = {ES:'🇪🇸 España', FR:'🇫🇷 Francia', IT:'🇮🇹 Italia', DE:'🇩🇪 Alemania', BE:'🇧🇪 Bélgica', NL:'🇳🇱 Países Bajos'};
+  var CNAMES = {ES:'🇪🇸 España',FR:'🇫🇷 Francia',IT:'🇮🇹 Italia',DE:'🇩🇪 Alemania',BE:'🇧🇪 Bélgica',NL:'🇳🇱 Países Bajos'};
 
-  // --- Extraer todas las ciudades de TL sin repetir ---
-  // Fuente 1: nombre del día (ej: "Alicante - Barcelona - Montpellier")
-  // Fuente 2: acts con "Llegada" o "Salida" (ej: "07:00 Salida desde Alicante")
-  var allCities = []; // [{name, country}]
-  var seenCity = {};
+  function detectCountry(text) {
+    for(var kw in KMAP) { if(text.indexOf(kw) !== -1) return KMAP[kw]; }
+    return 'XX';
+  }
+
+  // Recoger todas las ciudades en orden cronológico, sin repetir
+  var allCities = [];
+  var seenCity  = {};
 
   function addCity(name) {
-    var trimmed = name.trim();
-    if(!trimmed || seenCity[trimmed]) return;
-    // Detectar país
-    var country = 'XX';
-    for(var kw in KMAP) {
-      if(trimmed.indexOf(kw) !== -1) { country = KMAP[kw]; break; }
-    }
-    if(country === 'XX') return; // ignorar si no reconocemos
-    seenCity[trimmed] = true;
-    allCities.push({name: trimmed, country: country});
+    var n = name.trim().replace(/\s+/g,' ');
+    if(!n || seenCity[n]) return;
+    var country = detectCountry(n);
+    if(country === 'XX') return;
+    seenCity[n] = true;
+    allCities.push({name:n, country:country});
   }
 
   TL.forEach(function(entry) {
-    // Fuente 1: split por " - " en el título del día
+    // Fuente 1: título del día dividido por " - "
     entry.city.split(' - ').forEach(function(part) {
-      // Limpiar sufijos como "(coche)", "dia libre", etc.
-      var clean = part.replace(/\(.*?\)/g,'').replace(/—.*/,'').trim();
-      // Tomar solo la primera palabra clave si hay "Dia del Cumpleaños" etc
-      addCity(clean);
+      addCity(part.replace(/\(.*?\)/g,'').replace(/[—–].*/,'').trim());
     });
-
-    // Fuente 2: acts con "Salida desde" o "Llegada"
-    if(entry.acts) {
-      entry.acts.forEach(function(act) {
-        var mLlegada = act.match(/Llegada\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ\s\-]+?)(?:\s*—|\s*\(|$)/);
-        var mSalida  = act.match(/Salida desde\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ\s\-]+?)(?:\s*—|\s*\(|$)/);
-        if(mLlegada) addCity(mLlegada[1]);
-        if(mSalida)  addCity(mSalida[1]);
-      });
-    }
+    // Fuente 2: acts con "Salida desde X" o "Llegada X"
+    (entry.acts || []).forEach(function(act) {
+      var mS = act.match(/Salida desde ([A-ZÁÉÍÓÚÑ][^\s—(]+(?:\s[A-ZÁÉÍÓÚÑ][^\s—(]+)*)/);
+      var mL = act.match(/Llegada ([A-ZÁÉÍÓÚÑ][^\s—(]+(?:\s[A-ZÁÉÍÓÚÑ][^\s—(]+)*)/);
+      if(mS) addCity(mS[1]);
+      if(mL) addCity(mL[1]);
+    });
   });
 
-  // --- Fila 1: países en orden cronológico, sin repetir ---
+  // Fila 1: países únicos en orden de aparición
   var cel = document.getElementById('header-countries');
   if(cel) {
-    var countries = [];
-    var seenC = {};
+    var countries = [], seenC = {};
     allCities.forEach(function(c) {
-      if(c.country !== 'XX' && !seenC[c.country]) {
-        seenC[c.country] = true;
-        countries.push(c.country);
-      }
+      if(!seenC[c.country]) { seenC[c.country]=true; countries.push(c.country); }
     });
     cel.innerHTML = countries.map(function(code, i) {
-      return (i>0?'<span class="hcountry-arr">→</span>':'')+
-        '<span class="hcountry" onclick="agOpenCountry(''+code+'')">'+CNAMES[code]+'</span>';
+      var span = document.createElement('span');
+      span.className = 'hcountry';
+      span.textContent = CNAMES[code];
+      span.onclick = (function(c){ return function(){ agOpenCountry(c); }; })(code);
+      return (i>0?'<span class="hcountry-arr">→</span>':'') + span.outerHTML;
     }).join('');
   }
 
-  // --- Fila 2: todas las ciudades en orden cronológico ---
+  // Fila 2: todas las ciudades
   var el = document.getElementById('header-route');
   if(el) {
     el.innerHTML = allCities.map(function(c, i) {
-      return (i>0?'<span class="harr">→</span>':'')+
-        '<span class="hcity" onclick="openCity(''+c.name+'')">'+c.name+'</span>';
+      var span = document.createElement('span');
+      span.className = 'hcity';
+      span.textContent = c.name;
+      span.onclick = (function(n){ return function(){ openCity(n); }; })(c.name);
+      return (i>0?'<span class="harr">→</span>':'') + span.outerHTML;
     }).join('');
   }
 }
@@ -2066,6 +2060,7 @@ renderNotas();
 renderCL();
 renderRuta();
 renderAgenda();
+updateHeaderRoute();
 
 // Load sheet links immediately (Google Sheets for Airbnb links)
 loadSheet();
