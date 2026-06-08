@@ -557,6 +557,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
       </div>
     </div>
   </div>
+</div>
 
 <div id="view-alojamientos" class="view">
   <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
@@ -1004,23 +1005,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
   </div>
 </div>
 
-</div><!-- end main -->
 
-<!-- BOTTOM NAV -->
-<div class="bnav">
-  <button class="bnb active" onclick="showView('dashboard',0)"><span class="bnb-i">🏠</span><span class="bnb-l">Inicio</span></button>
-  <button class="bnb" onclick="showView('alojamientos',1)"><span class="bnb-i">🛏</span><span class="bnb-l">Alojam.</span></button>
-  <button class="bnb" onclick="showView('timeline',2)"><span class="bnb-i">🗺️</span><span class="bnb-l">Ruta</span></button>
-  <button class="bnb" onclick="showView('agenda',3)"><span class="bnb-i">📆</span><span class="bnb-l">Agenda</span></button>
-  <button class="bnb" onclick="showView('gastos',4)"><span class="bnb-i">🧾</span><span class="bnb-l">Gastos</span></button>
-  <button class="bnb" onclick="showView('notas',5)"><span class="bnb-i">📝</span><span class="bnb-l">Notas</span></button>
-  <button class="bnb" onclick="showView('checklist',6)"><span class="bnb-i">✅</span><span class="bnb-l">Check</span></button>
-  <button class="bnb" onclick="showView('perfil',7)"><span class="bnb-i">🚗</span><span class="bnb-l">Turnos</span></button>
-  <button class="bnb" onclick="showView('emergencias',8)"><span class="bnb-i">🆘</span><span class="bnb-l">SOS</span></button>
-</div>
-
-
-<!-- AGENDA POR PAISES -->
 <div id="view-agenda" class="view">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;gap:0.5rem">
     <div>
@@ -1054,6 +1039,42 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
   <!-- Paneles -->
   <div id="ag-panels"></div>
 </div>
+<div id="view-perfil" class="view">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+    <div>
+      <div class="ptitle">Mis turnos 🚗</div>
+      <div class="psub" style="margin-bottom:0">Cronograma de conducción por viajero.</div>
+    </div>
+    <button id="perfil-edit-btn" style="font-size:0.65rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:7px;background:#f1f5f9;border:1.5px solid #e2e8f0;cursor:pointer;font-family:inherit;color:#64748b">✏️ Editar</button>
+  </div>
+
+  <!-- Selector de conductor -->
+  <div class="perfil-selector" id="perfil-selector"></div>
+
+  <!-- Resumen estadísticas -->
+  <div class="perfil-resumen" id="perfil-resumen"></div>
+
+  <!-- Lista de turnos -->
+  <div id="perfil-turnos-list"></div>
+</div>
+</div><!-- end main -->
+
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="bnb active" onclick="showView('dashboard',0)"><span class="bnb-i">🏠</span><span class="bnb-l">Inicio</span></button>
+  <button class="bnb" onclick="showView('alojamientos',1)"><span class="bnb-i">🛏</span><span class="bnb-l">Alojam.</span></button>
+  <button class="bnb" onclick="showView('timeline',2)"><span class="bnb-i">🗺️</span><span class="bnb-l">Ruta</span></button>
+  <button class="bnb" onclick="showView('agenda',3)"><span class="bnb-i">📆</span><span class="bnb-l">Agenda</span></button>
+  <button class="bnb" onclick="showView('gastos',4)"><span class="bnb-i">🧾</span><span class="bnb-l">Gastos</span></button>
+  <button class="bnb" onclick="showView('notas',5)"><span class="bnb-i">📝</span><span class="bnb-l">Notas</span></button>
+  <button class="bnb" onclick="showView('checklist',6)"><span class="bnb-i">✅</span><span class="bnb-l">Check</span></button>
+  <button class="bnb" onclick="showView('perfil',7)"><span class="bnb-i">🚗</span><span class="bnb-l">Turnos</span></button>
+  <button class="bnb" onclick="showView('emergencias',8)"><span class="bnb-i">🆘</span><span class="bnb-l">SOS</span></button>
+</div>
+
+
+<!-- AGENDA POR PAISES -->
+
 
 
 <!-- NAV PICKER MODAL -->
@@ -1091,24 +1112,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 
 <!-- PERFIL / TURNOS DE CONDUCCIÓN -->
-<div id="view-perfil" class="view">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
-    <div>
-      <div class="ptitle">Mis turnos 🚗</div>
-      <div class="psub" style="margin-bottom:0">Cronograma de conducción por viajero.</div>
-    </div>
-    <button id="perfil-edit-btn" style="font-size:0.65rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:7px;background:#f1f5f9;border:1.5px solid #e2e8f0;cursor:pointer;font-family:inherit;color:#64748b">✏️ Editar</button>
-  </div>
 
-  <!-- Selector de conductor -->
-  <div class="perfil-selector" id="perfil-selector"></div>
-
-  <!-- Resumen estadísticas -->
-  <div class="perfil-resumen" id="perfil-resumen"></div>
-
-  <!-- Lista de turnos -->
-  <div id="perfil-turnos-list"></div>
-</div>
 
 <!-- NOMBRE MODAL -->
 <div class="nmodal" id="nmodal">
