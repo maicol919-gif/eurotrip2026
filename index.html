@@ -1113,47 +1113,82 @@ function removeRuta(idx) {
   renderRuta();
 }
 function updateHeaderRoute() {
-  // --- Fila 2: ciudades (desde miRuta, sin cambios) ---
-  var el = document.getElementById('header-route');
-  if(el) {
-    el.innerHTML = miRuta.map(function(c, i) {
-      return (i>0?'<span class="harr">→</span>':'')+
-        '<span class="hcity" onclick="openCity(\'' + c + '\')">'+CITY_NAMES[c]+'</span>';
-    }).join('');
-  }
-
-  // --- Fila 1: países agrupados desde TL (se actualiza sola con el itinerario) ---
-  var cel = document.getElementById('header-countries');
-  if(!cel) return;
-
-  // Mapa de detección de país (mismo que usa Agenda)
+  // Mapa ciudad → país (compartido con Agenda)
   var KMAP = {
-    'Alicante':'ES','Barcelona':'ES','Cartagena':'ES',
-    'Montpellier':'FR','Paris':'FR','Niza':'FR','Nice':'FR','Clermont':'FR','Perpignan':'FR','Lyon':'FR','Marsella':'FR','Marseille':'FR','Colmar':'FR',
-    'Milan':'IT','Venecia':'IT','Roma':'IT','Pisa':'IT','Genova':'IT','Florencia':'IT',
+    'Alicante':'ES','Barcelona':'ES','Cartagena':'ES','Murcia':'ES',
+    'Montpellier':'FR','Paris':'FR','Niza':'FR','Nice':'FR','Clermont':'FR',
+    'Perpignan':'FR','Lyon':'FR','Marsella':'FR','Marseille':'FR','Colmar':'FR',
+    'Milan':'IT','Venecia':'IT','Roma':'IT','Pisa':'IT','Genova':'IT','Florencia':'IT','Bologna':'IT',
     'Munich':'DE','Colonia':'DE','Berlin':'DE',
     'Bruselas':'BE','Amsterdam':'NL'
   };
   var CNAMES = {ES:'🇪🇸 España', FR:'🇫🇷 Francia', IT:'🇮🇹 Italia', DE:'🇩🇪 Alemania', BE:'🇧🇪 Bélgica', NL:'🇳🇱 Países Bajos'};
 
-  // Detectar países en orden cronológico desde TL
-  var countries = [];
-  var seenC = {};
+  // --- Extraer todas las ciudades de TL sin repetir ---
+  // Fuente 1: nombre del día (ej: "Alicante - Barcelona - Montpellier")
+  // Fuente 2: acts con "Llegada" o "Salida" (ej: "07:00 Salida desde Alicante")
+  var allCities = []; // [{name, country}]
+  var seenCity = {};
+
+  function addCity(name) {
+    var trimmed = name.trim();
+    if(!trimmed || seenCity[trimmed]) return;
+    // Detectar país
+    var country = 'XX';
+    for(var kw in KMAP) {
+      if(trimmed.indexOf(kw) !== -1) { country = KMAP[kw]; break; }
+    }
+    if(country === 'XX') return; // ignorar si no reconocemos
+    seenCity[trimmed] = true;
+    allCities.push({name: trimmed, country: country});
+  }
+
   TL.forEach(function(entry) {
-    var code = 'XX';
-    for(var kw in KMAP) { if(entry.city.indexOf(kw) !== -1) { code = KMAP[kw]; break; } }
-    if(code !== 'XX' && !seenC[code]) {
-      seenC[code] = true;
-      countries.push(code);
+    // Fuente 1: split por " - " en el título del día
+    entry.city.split(' - ').forEach(function(part) {
+      // Limpiar sufijos como "(coche)", "dia libre", etc.
+      var clean = part.replace(/\(.*?\)/g,'').replace(/—.*/,'').trim();
+      // Tomar solo la primera palabra clave si hay "Dia del Cumpleaños" etc
+      addCity(clean);
+    });
+
+    // Fuente 2: acts con "Salida desde" o "Llegada"
+    if(entry.acts) {
+      entry.acts.forEach(function(act) {
+        var mLlegada = act.match(/Llegada\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ\s\-]+?)(?:\s*—|\s*\(|$)/);
+        var mSalida  = act.match(/Salida desde\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñA-ZÁÉÍÓÚÑ\s\-]+?)(?:\s*—|\s*\(|$)/);
+        if(mLlegada) addCity(mLlegada[1]);
+        if(mSalida)  addCity(mSalida[1]);
+      });
     }
   });
 
-  cel.innerHTML = countries.map(function(code, i) {
-    return (i>0?'<span class="hcountry-arr">→</span>':'')+
-      '<span class="hcountry" onclick="agOpenCountry(\'' + code + '\')">'+CNAMES[code]+'</span>';
-  }).join('');
-}
+  // --- Fila 1: países en orden cronológico, sin repetir ---
+  var cel = document.getElementById('header-countries');
+  if(cel) {
+    var countries = [];
+    var seenC = {};
+    allCities.forEach(function(c) {
+      if(c.country !== 'XX' && !seenC[c.country]) {
+        seenC[c.country] = true;
+        countries.push(c.country);
+      }
+    });
+    cel.innerHTML = countries.map(function(code, i) {
+      return (i>0?'<span class="hcountry-arr">→</span>':'')+
+        '<span class="hcountry" onclick="agOpenCountry(''+code+'')">'+CNAMES[code]+'</span>';
+    }).join('');
+  }
 
+  // --- Fila 2: todas las ciudades en orden cronológico ---
+  var el = document.getElementById('header-route');
+  if(el) {
+    el.innerHTML = allCities.map(function(c, i) {
+      return (i>0?'<span class="harr">→</span>':'')+
+        '<span class="hcity" onclick="openCity(''+c.name+'')">'+c.name+'</span>';
+    }).join('');
+  }
+}
 // Ir a la pestaña de ese país en Agenda
 function agOpenCountry(code) {
   showView('agenda', 3);
