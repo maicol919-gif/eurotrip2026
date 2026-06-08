@@ -4673,25 +4673,54 @@ function simAnalizarParada(p, fromId, toId, insertIdx, card) {
 
 // Insert parada into simRoute at position
 function simSaveRoute() {
-  // Solo guarda si es admin — usuarios normales solo simulan
+  // Solo admin puede guardar cambios reales
   if(!simIsAdmin) return;
+  var payload = {ciudad:'sim_route', notas: JSON.stringify(simRoute)};
+  // Check if exists first — use PATCH if yes, POST if no
+  supa('GET','alojamientos_estado','','?ciudad=eq.sim_route').then(function(rows) {
+    if(rows && rows.length > 0) {
+      supa('PATCH','alojamientos_estado',payload,'?ciudad=eq.sim_route');
+    } else {
+      supa('POST','alojamientos_estado',payload,'');
+    }
+  });
+  // Also save locally as cache
   try { localStorage.setItem('et26_simroute', JSON.stringify(simRoute)); } catch(e) {}
 }
 
-function simLoadRoute() {
-  try {
-    var saved = localStorage.getItem('et26_simroute');
-    if(saved) {
-      var r = JSON.parse(saved);
-      if(r && r.length > 1) {
-        simRoute.length = 0;
-        r.forEach(function(c){ simRoute.push(c); });
-        SIM_BASE_ROUTE = simRoute.slice();
-        return true;
-      }
+function simLoadRoute(callback) {
+  // Try Supabase first (source of truth)
+  supa('GET','alojamientos_estado','','?ciudad=eq.sim_route').then(function(rows) {
+    if(rows && rows.length > 0 && rows[0].notas) {
+      try {
+        var r = JSON.parse(rows[0].notas);
+        if(r && r.length > 1) {
+          simRoute.length = 0;
+          r.forEach(function(c){ simRoute.push(c); });
+          SIM_BASE_ROUTE = simRoute.slice();
+          // Update local cache
+          try { localStorage.setItem('et26_simroute', JSON.stringify(simRoute)); } catch(e) {}
+          if(callback) callback();
+          rutaFullRefresh();
+          return;
+        }
+      } catch(e) {}
     }
-  } catch(e) {}
-  return false;
+    // Fallback: try localStorage cache
+    try {
+      var cached = localStorage.getItem('et26_simroute');
+      if(cached) {
+        var r2 = JSON.parse(cached);
+        if(r2 && r2.length > 1) {
+          simRoute.length = 0;
+          r2.forEach(function(c){ simRoute.push(c); });
+          SIM_BASE_ROUTE = simRoute.slice();
+          if(callback) callback();
+          rutaFullRefresh();
+        }
+      }
+    } catch(e) {}
+  });
 }
 
 function simInsertParada(cityId, pos) {
@@ -4775,7 +4804,11 @@ loadSheet();
 // Try Supabase in background — don't block UI
 setTimeout(function() {
   loadData();
-  setInterval(loadData, 15000);
+  // Poll for route changes every 15s (so non-admin users see admin's changes)
+  setInterval(function() {
+    loadData();
+    simLoadRoute();
+  }, 15000);
 }, 500);
 
 // PIN Login — check session
@@ -5881,11 +5914,12 @@ function rutaSetMode(mode){
 
 
 // Final init — all vars defined, safe to run full refresh
-// Load persisted route if admin session exists
-if(PIN_SESSION && (PIN_SESSION.isAdmin || PIN_SESSION.pin === ADMIN_PIN)) {
-  simIsAdmin = true;
-  simLoadRoute(); // Restore admin's saved route
-}
+// Always load route from Supabase (shared across all users)
+simLoadRoute(function() {
+  // Called after route is loaded from Supabase
+  console.log('Route loaded from Supabase');
+});
+// Run initial refresh with hardcoded route while Supabase loads
 rutaFullRefresh();
 </script>
 </body>
