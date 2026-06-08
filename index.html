@@ -2352,9 +2352,9 @@ function rutaSetMode(mode){
     btnSim.style.background = '#0f172a'; btnSim.style.color = 'white';
     btnVer.style.background = 'transparent'; btnVer.style.color = '#64748b';
     if(title) title.textContent = 'Simulador';
-    simRenderUnified();
     simLoadCandidatas();
-    simPopulateEndpoints();
+    simRenderUnified();
+    simDrawMap();
     if(simIsModified){
       if(saveBtn) saveBtn.style.display = 'block';
       if(discardBtn) discardBtn.style.display = 'block';
