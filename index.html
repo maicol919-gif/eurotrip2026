@@ -298,6 +298,29 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 /* ===== TURNOS DE CONDUCCIÓN ===== */
 .turno-card{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.75rem;margin-top:0.5rem}
 
+
+/* ===== GASTOS MEJORADOS ===== */
+.g-tab{background:none;border:none;padding:0.5rem 0.9rem;font-family:inherit;font-size:0.74rem;font-weight:700;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.g-tab.active{color:#0f172a;border-bottom-color:#3b82f6}
+.g-filter{background:white;border:1.5px solid #e2e8f0;border-radius:20px;padding:0.22rem 0.65rem;font-family:inherit;font-size:0.68rem;font-weight:600;color:#64748b;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.g-filter.active{background:#0f172a;color:white;border-color:#0f172a}
+.g-applies-chip{display:inline-flex;align-items:center;gap:0.25rem;padding:0.22rem 0.6rem;border-radius:20px;border:1.5px solid #e2e8f0;font-size:0.68rem;font-weight:600;color:#64748b;cursor:pointer;transition:all .15s;background:white}
+.g-applies-chip.selected{background:#0f172a;color:white;border-color:#0f172a}
+.gi2{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem 0.75rem;margin-bottom:0.35rem;display:flex;align-items:flex-start;gap:0.6rem}
+.gi2-cat{font-size:1rem;flex-shrink:0;margin-top:0.05rem}
+.gi2-body{flex:1;min-width:0}
+.gi2-name{font-size:0.8rem;font-weight:700;color:#0f172a;margin-bottom:0.1rem}
+.gi2-meta{font-size:0.62rem;color:#94a3b8;display:flex;gap:0.4rem;flex-wrap:wrap}
+.gi2-applies{font-size:0.6rem;color:#64748b;margin-top:0.15rem}
+.gi2-right{display:flex;flex-direction:column;align-items:flex-end;gap:0.25rem;flex-shrink:0}
+.gi2-amt{font-size:0.92rem;font-weight:800;color:#0f172a}
+.gi2-pp{font-size:0.62rem;color:#94a3b8}
+.gi2-del{background:none;border:none;color:#e2e8f0;cursor:pointer;font-size:0.85rem;padding:0;transition:color .15s}
+.gi2-del:hover{color:#ef4444}
+.g-city-group{margin-bottom:0.75rem}
+.g-city-group-h{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.4rem;display:flex;align-items:center;justify-content:space-between}
+.g-city-total{font-size:0.7rem;font-weight:700;color:#0f172a}
+
 @media(max-width:600px){
   .dgrid{grid-template-columns:repeat(2,1fr)}
   .tl-row.open .tl-body{grid-template-columns:1fr}
@@ -681,36 +704,93 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <!-- GASTOS -->
 <div id="view-gastos" class="view">
-  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
-  <div class="ptitle">Gastos compartidos</div>
-  <div class="module-user">Hola, <strong class="user-name-display">—</strong></div>
-  <div class="psub">Quien pago que. Los balances se calculan solos.</div>
-  <div class="gf">
-    <div class="gf-row">
-      <div><label class="fl">Quien pago</label>
-        <select class="fi" id="g-payer">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+    <div>
+      <div class="ptitle">Gastos 🧾</div>
+      <div class="psub" style="margin-bottom:0">Quién pagó qué. Balances automáticos.</div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-size:1.4rem;font-weight:900" id="g-total-big">0€</div>
+      <div style="font-size:0.62rem;color:#94a3b8" id="g-total-sub">0 registros</div>
+    </div>
+  </div>
+
+  <!-- Formulario nuevo gasto -->
+  <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;margin-bottom:0.75rem">
+    <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.65rem">+ Nuevo gasto</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.5rem">
+      <div>
+        <label class="fl">Quién pagó</label>
+        <select class="fi" id="g-payer" style="width:100%">
           <option value="">Seleccionar...</option>
-          <option>Carlos</option><option>Lucia</option><option>Marco</option>
-          <option>Sofia</option><option>Diego</option><option>Ana</option><option>Javi</option>
         </select>
       </div>
-      <div><label class="fl">Monto (euros)</label>
-        <input class="fi" type="number" id="g-amt" placeholder="0.00" min="0" step="0.01">
+      <div>
+        <label class="fl">Monto (€)</label>
+        <input class="fi" type="number" id="g-amt" placeholder="0.00" min="0" step="0.01" style="width:100%">
       </div>
     </div>
-    <div><label class="fl">Descripcion</label>
-      <input class="fi" type="text" id="g-desc" placeholder="ej: Gasolina Francia">
+
+    <div style="margin-bottom:0.5rem">
+      <label class="fl">Descripción</label>
+      <input class="fi" type="text" id="g-desc" placeholder="ej: Gasolina Francia" style="width:100%">
     </div>
-    <button class="btn-add" onclick="addGasto()">+ Anadir gasto</button>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.5rem">
+      <div>
+        <label class="fl">Categoría</label>
+        <select class="fi" id="g-cat" style="width:100%">
+          <option value="general">🏷️ General</option>
+          <option value="gasolina">⛽ Gasolina</option>
+          <option value="comida">🍕 Comida</option>
+          <option value="alojamiento">🏠 Alojamiento</option>
+          <option value="transporte">🚗 Transporte</option>
+          <option value="entradas">🎟️ Entradas</option>
+          <option value="compras">🛍️ Compras</option>
+          <option value="otro">📦 Otro</option>
+        </select>
+      </div>
+      <div>
+        <label class="fl">Ciudad</label>
+        <select class="fi" id="g-city" style="width:100%">
+          <option value="">Toda la ruta</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:0.65rem">
+      <label class="fl">¿A quién aplica?</label>
+      <div id="g-applies-grid" style="display:flex;flex-wrap:wrap;gap:0.35rem;margin-top:0.3rem"></div>
+    </div>
+
+    <button class="btn-add" id="g-add-btn">+ Añadir gasto</button>
   </div>
-  <div class="st">Movimientos</div>
-  <div id="glist" class="glist"></div>
-  <div class="st">Balances</div>
-  <div class="bal-grid" id="bal-grid"></div>
-  <div class="st" style="margin-top:0.75rem">Liquidacion optima</div>
-  <div class="liq-card">
-    <div class="liq-h">Minimas transferencias para saldar todo</div>
-    <div id="liq-list"><div class="liq-empty">Sin gastos todavia.</div></div>
+
+  <!-- Tabs: Movimientos / Balances / Liquidación -->
+  <div style="display:flex;border-bottom:2px solid #e2e8f0;margin-bottom:0.75rem">
+    <button class="g-tab active" data-gtab="movimientos" onclick="gSwitchTab('movimientos')">Movimientos</button>
+    <button class="g-tab" data-gtab="balances" onclick="gSwitchTab('balances')">Balances</button>
+    <button class="g-tab" data-gtab="liquidacion" onclick="gSwitchTab('liquidacion')">Liquidación</button>
+  </div>
+
+  <div id="g-panel-movimientos">
+    <!-- Filtro por ciudad -->
+    <div style="display:flex;gap:0.35rem;overflow-x:auto;margin-bottom:0.6rem;padding-bottom:0.2rem;scrollbar-width:none">
+      <button class="g-filter active" data-city="" onclick="gFilterCity('')">Todos</button>
+    </div>
+    <div id="glist" class="glist"></div>
+  </div>
+
+  <div id="g-panel-balances" style="display:none">
+    <div class="bal-grid" id="bal-grid"></div>
+  </div>
+
+  <div id="g-panel-liquidacion" style="display:none">
+    <div class="liq-card">
+      <div class="liq-h">Mínimas transferencias para saldar todo</div>
+      <div id="liq-list"><div class="liq-empty">Sin gastos todavía.</div></div>
+    </div>
   </div>
 </div>
 
@@ -1374,6 +1454,7 @@ function showView(name, idx) {
   // Regenerar agenda cada vez que se abre (por si cambió el TL)
   if(name === 'agenda') renderAgenda();
   if(name === 'emergencias') renderSOSDynamic();
+  if(name === 'gastos') gInitForm();
 }
 
 // ===== COUNTDOWN =====
@@ -1606,71 +1687,288 @@ function renderBudget() {
 }
 
 // ===== GASTOS =====
+// ===== GASTOS MEJORADOS =====
+var G_CAT_ICONS = {
+  gasolina:'⛽', comida:'🍕', alojamiento:'🏠', transporte:'🚗',
+  entradas:'🎟️', compras:'🛍️', general:'🏷️', otro:'📦'
+};
+var gCityFilter = '';
+var gSelectedApplies = []; // [] means todos
+
+function gInitForm() {
+  // Populate payer select
+  var payerSel = document.getElementById('g-payer');
+  if(!payerSel || payerSel.options.length > 1) return;
+  PEOPLE.forEach(function(p) {
+    var opt = document.createElement('option');
+    opt.value = p; opt.textContent = p;
+    payerSel.appendChild(opt);
+  });
+
+  // Populate city select from TL
+  var citySel = document.getElementById('g-city');
+  if(citySel) {
+    TL.forEach(function(entry) {
+      var opt = document.createElement('option');
+      opt.value = entry.city;
+      opt.textContent = entry.date + ' · ' + entry.city.split(' - ')[0];
+      citySel.appendChild(opt);
+    });
+  }
+
+  // Populate applies chips
+  gSelectedApplies = PEOPLE.slice(); // default: todos
+  gRenderAppliesChips();
+
+  // Add btn
+  var btn = document.getElementById('g-add-btn');
+  if(btn) btn.addEventListener('click', addGasto);
+}
+
+function gRenderAppliesChips() {
+  var grid = document.getElementById('g-applies-grid');
+  if(!grid) return;
+  grid.innerHTML = '';
+
+  // "Todos" chip
+  var todosChip = document.createElement('span');
+  todosChip.className = 'g-applies-chip' + (gSelectedApplies.length === PEOPLE.length ? ' selected' : '');
+  todosChip.textContent = 'Todos';
+  todosChip.addEventListener('click', function() {
+    gSelectedApplies = PEOPLE.slice();
+    gRenderAppliesChips();
+  });
+  grid.appendChild(todosChip);
+
+  PEOPLE.forEach(function(p) {
+    var chip = document.createElement('span');
+    var isSelected = gSelectedApplies.indexOf(p) !== -1;
+    chip.className = 'g-applies-chip' + (isSelected ? ' selected' : '');
+    chip.textContent = p;
+    chip.addEventListener('click', function() {
+      var idx = gSelectedApplies.indexOf(p);
+      if(idx !== -1) gSelectedApplies.splice(idx, 1);
+      else gSelectedApplies.push(p);
+      if(!gSelectedApplies.length) gSelectedApplies = PEOPLE.slice();
+      gRenderAppliesChips();
+    });
+    grid.appendChild(chip);
+  });
+}
+
 function addGasto() {
   var payer = document.getElementById('g-payer').value;
   var desc  = document.getElementById('g-desc').value.trim();
   var amt   = parseFloat(document.getElementById('g-amt').value);
+  var cat   = document.getElementById('g-cat') ? document.getElementById('g-cat').value : 'general';
+  var city  = document.getElementById('g-city') ? document.getElementById('g-city').value : '';
+  var applies = gSelectedApplies.length === PEOPLE.length ? [] : gSelectedApplies.slice();
   if(!payer||!desc||!amt||amt<=0) return;
-  supa('POST','gastos',{payer:payer, descripcion:desc, monto:amt},'').then(function(){
-    document.getElementById('g-desc').value='';
-    document.getElementById('g-amt').value='';
+
+  var payload = {
+    payer: payer,
+    descripcion: desc,
+    monto: amt,
+    categoria: cat,
+    ciudad: city,
+    aplica_a: JSON.stringify(applies)
+  };
+
+  supa('POST','gastos', payload, '').then(function(){
+    document.getElementById('g-desc').value = '';
+    document.getElementById('g-amt').value = '';
+    gSelectedApplies = PEOPLE.slice();
+    gRenderAppliesChips();
     loadData();
   });
 }
+
 function deleteGasto(id) {
   supa('DELETE','gastos','','?id=eq.'+id).then(loadData);
 }
+
+function gSwitchTab(tab) {
+  ['movimientos','balances','liquidacion'].forEach(function(t) {
+    var panel = document.getElementById('g-panel-'+t);
+    if(panel) panel.style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.g-tab').forEach(function(el) {
+    el.classList.toggle('active', el.getAttribute('data-gtab') === tab);
+  });
+}
+
+function gFilterCity(city) {
+  gCityFilter = city;
+  document.querySelectorAll('.g-filter').forEach(function(el) {
+    el.classList.toggle('active', el.getAttribute('data-city') === city);
+  });
+  renderGastos();
+}
 function renderGastos() {
-  var html = gastos.length ? gastos.map(function(g){
-    return '<div class="gi"><div class="gi-desc"><div class="gi-name">'+g.desc+'</div>' +
-      '<div class="gi-who">Pago: '+g.payer+'</div></div>' +
-      '<div class="gi-amt">'+g.amt.toFixed(2)+'€</div>' +
-      '<button class="gi-del" onclick="deleteGasto(\''+g.id+'\')">×</button></div>';
-  }).join('') : '<div style="font-size:0.78rem;color:#94a3b8">Sin gastos todavia.</div>';
-  document.getElementById('glist').innerHTML = html;
-
   var total = gastos.reduce(function(s,g){return s+g.amt;},0);
-  var share = total/PEOPLE.length;
-  var paid  = {};
-  PEOPLE.forEach(function(p){paid[p]=0;});
-  gastos.forEach(function(g){if(paid[g.payer]!==undefined) paid[g.payer]+=g.amt;});
+  var bigEl = document.getElementById('g-total-big');
+  var subEl = document.getElementById('g-total-sub');
+  if(bigEl) bigEl.textContent = total.toFixed(0)+'€';
+  if(subEl) subEl.textContent = gastos.length+' registro'+(gastos.length!==1?'s':'');
 
-  document.getElementById('bal-grid').innerHTML = PEOPLE.map(function(p){
-    var bal = (paid[p]||0)-share;
-    return '<div class="bal-c"><div class="bal-n">'+p+'</div>' +
-      '<div class="bal-a '+(bal>=0?'bal-pos':'bal-neg')+'">'+(bal>=0?'+':'')+bal.toFixed(0)+'€</div>' +
-      '<div class="bal-l">'+(bal>=0?'Le deben':'Debe')+'</div></div>';
-  }).join('');
+  // Update dashboard
+  var dge = document.getElementById('dash-g');
+  var dgn = document.getElementById('dash-gn');
+  if(dge) dge.textContent = total.toFixed(0)+'€';
+  if(dgn) dgn.textContent = gastos.length+' registro'+(gastos.length!==1?'s':'');
 
-  // Liquidacion optima
-  var deb=[],cre=[];
-  PEOPLE.forEach(function(p){
-    var b=(paid[p]||0)-share;
-    if(b<-0.01) deb.push({name:p,amt:-b});
-    else if(b>0.01) cre.push({name:p,amt:b});
+  // Build city filter buttons
+  var filterBar = document.querySelector('#g-panel-movimientos .g-filter')
+    ? document.querySelector('#g-panel-movimientos div[style*="overflow-x"]') : null;
+  if(filterBar) {
+    var cities = [];
+    gastos.forEach(function(g) { if(g.ciudad && cities.indexOf(g.ciudad) === -1) cities.push(g.ciudad); });
+    filterBar.innerHTML = '';
+    var allBtn = document.createElement('button');
+    allBtn.className = 'g-filter' + (gCityFilter === '' ? ' active' : '');
+    allBtn.setAttribute('data-city','');
+    allBtn.textContent = 'Todos';
+    allBtn.addEventListener('click', function(){ gFilterCity(''); });
+    filterBar.appendChild(allBtn);
+    cities.forEach(function(c) {
+      var btn = document.createElement('button');
+      btn.className = 'g-filter' + (gCityFilter === c ? ' active' : '');
+      btn.setAttribute('data-city', c);
+      btn.textContent = c.split(' - ')[0].split('—')[0].trim().substring(0,12);
+      btn.addEventListener('click', (function(city){ return function(){ gFilterCity(city); }; })(c));
+      filterBar.appendChild(btn);
+    });
+  }
+
+  // Render movimientos grouped by city
+  var glist = document.getElementById('glist');
+  if(glist) {
+    var filtered = gCityFilter
+      ? gastos.filter(function(g){ return g.ciudad === gCityFilter; })
+      : gastos;
+
+    if(!filtered.length) {
+      glist.innerHTML = '<div style="font-size:0.78rem;color:#94a3b8;text-align:center;padding:1rem">Sin gastos todavía.</div>';
+    } else {
+      // Group by city
+      var groups = {};
+      var groupOrder = [];
+      filtered.forEach(function(g) {
+        var key = g.ciudad || 'Sin ciudad';
+        if(!groups[key]) { groups[key] = []; groupOrder.push(key); }
+        groups[key].push(g);
+      });
+
+      glist.innerHTML = '';
+      groupOrder.forEach(function(cityKey) {
+        var grp = groups[cityKey];
+        var cityTotal = grp.reduce(function(s,g){return s+g.amt;},0);
+
+        var groupEl = document.createElement('div');
+        groupEl.className = 'g-city-group';
+
+        var header = document.createElement('div');
+        header.className = 'g-city-group-h';
+        header.innerHTML = '<span>' + cityKey.split(' - ')[0].split('—')[0].trim() + '</span>' +
+          '<span class="g-city-total">' + cityTotal.toFixed(2) + '€</span>';
+        groupEl.appendChild(header);
+
+        grp.forEach(function(g) {
+          var cat = g.categoria || 'general';
+          var icon = G_CAT_ICONS[cat] || '🏷️';
+          var applies = [];
+          try { applies = g.aplica_a ? JSON.parse(g.aplica_a) : []; } catch(e) {}
+          var nApplies = applies.length || PEOPLE.length;
+          var perPerson = (g.amt / nApplies).toFixed(2);
+
+          var item = document.createElement('div');
+          item.className = 'gi2';
+          item.innerHTML =
+            '<span class="gi2-cat">' + icon + '</span>' +
+            '<div class="gi2-body">' +
+              '<div class="gi2-name">' + g.desc + '</div>' +
+              '<div class="gi2-meta">' +
+                '<span>💳 ' + g.payer + '</span>' +
+                (g.ciudad ? '<span>📍 ' + g.ciudad.split(' - ')[0].trim() + '</span>' : '') +
+              '</div>' +
+              (applies.length && applies.length < PEOPLE.length
+                ? '<div class="gi2-applies">Para: ' + applies.join(', ') + '</div>'
+                : '') +
+            '</div>' +
+            '<div class="gi2-right">' +
+              '<span class="gi2-amt">' + g.amt.toFixed(2) + '€</span>' +
+              '<span class="gi2-pp">' + perPerson + '€/pers</span>' +
+              '<button class="gi2-del" data-gid="' + g.id + '">✕</button>' +
+            '</div>';
+
+          item.querySelector('.gi2-del').addEventListener('click', function() {
+            deleteGasto(this.getAttribute('data-gid'));
+          });
+
+          groupEl.appendChild(item);
+        });
+        glist.appendChild(groupEl);
+      });
+    }
+  }
+
+  // Balances — respecting aplica_a
+  var paid = {}, owes = {};
+  PEOPLE.forEach(function(p){ paid[p]=0; owes[p]=0; });
+
+  gastos.forEach(function(g) {
+    var applies = [];
+    try { applies = g.aplica_a ? JSON.parse(g.aplica_a) : []; } catch(e) {}
+    var members = applies.length ? applies : PEOPLE;
+    var share = g.amt / members.length;
+    if(paid[g.payer] !== undefined) paid[g.payer] += g.amt;
+    members.forEach(function(p) { if(owes[p] !== undefined) owes[p] += share; });
+  });
+
+  var balGrid = document.getElementById('bal-grid');
+  if(balGrid) {
+    balGrid.innerHTML = PEOPLE.map(function(p) {
+      var bal = (paid[p]||0) - (owes[p]||0);
+      return '<div class="bal-c">' +
+        '<div class="bal-n">' + p + '</div>' +
+        '<div class="bal-a ' + (bal>=0?'bal-pos':'bal-neg') + '">' + (bal>=0?'+':'') + bal.toFixed(0) + '€</div>' +
+        '<div class="bal-l">' + (bal>=0?'Le deben':'Debe') + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Liquidación óptima
+  var deb=[], cre=[];
+  PEOPLE.forEach(function(p) {
+    var b = (paid[p]||0) - (owes[p]||0);
+    if(b < -0.01) deb.push({name:p, amt:-b});
+    else if(b > 0.01) cre.push({name:p, amt:b});
   });
   deb.sort(function(a,b){return b.amt-a.amt;});
   cre.sort(function(a,b){return b.amt-a.amt;});
-  var transfers=[];
-  var di=0,ci=0;
-  while(di<deb.length&&ci<cre.length){
-    var amt=Math.min(deb[di].amt,cre[ci].amt);
-    if(amt>0.01) transfers.push({from:deb[di].name,to:cre[ci].name,amt:amt});
-    deb[di].amt-=amt; cre[ci].amt-=amt;
-    if(deb[di].amt<0.01) di++;
-    if(cre[ci].amt<0.01) ci++;
+  var transfers=[], di=0, ci=0;
+  while(di<deb.length && ci<cre.length) {
+    var amt = Math.min(deb[di].amt, cre[ci].amt);
+    if(amt>0.01) transfers.push({from:deb[di].name, to:cre[ci].name, amt:amt});
+    deb[di].amt -= amt; cre[ci].amt -= amt;
+    if(deb[di].amt < 0.01) di++;
+    if(cre[ci].amt < 0.01) ci++;
   }
-  document.getElementById('liq-list').innerHTML = transfers.length ?
-    transfers.map(function(t){
-      return '<div class="liq-row"><strong>'+t.from+'</strong><span class="liq-arr">→</span>' +
-        '<strong>'+t.to+'</strong><span class="liq-amt">'+t.amt.toFixed(2)+'€</span></div>';
-    }).join('') : '<div class="liq-empty">'+(total<0.01?'Sin gastos todavia.':'Todo en orden.')+'</div>';
-
-  var dge=document.getElementById('dash-g');
-  var dgn=document.getElementById('dash-gn');
-  if(dge) dge.textContent=total.toFixed(0)+'€';
-  if(dgn) dgn.textContent=gastos.length+' registro'+(gastos.length!==1?'s':'');
+  var liqList = document.getElementById('liq-list');
+  if(liqList) {
+    liqList.innerHTML = transfers.length
+      ? transfers.map(function(t) {
+          return '<div class="liq-row">' +
+            '<strong>'+t.from+'</strong>' +
+            '<span class="liq-arr">→</span>' +
+            '<strong>'+t.to+'</strong>' +
+            '<span class="liq-amt">'+t.amt.toFixed(2)+'€</span>' +
+          '</div>';
+        }).join('')
+      : '<div class="liq-empty">'+(total<0.01?'Sin gastos todavía.':'Todo en orden. ✅')+'</div>';
+  }
 }
+
 
 // ===== NOTAS =====
 function renderNotas() {
@@ -2404,6 +2702,7 @@ function initHomeBefore() {
 
   // Riesgos próximos
   renderRiesgos('home-riesgos');
+gInitForm();
 
   // Alertas decidir hoy
   var container = document.getElementById('home-decidir');
