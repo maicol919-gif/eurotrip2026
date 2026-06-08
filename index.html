@@ -321,6 +321,28 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .g-city-group-h{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.4rem;display:flex;align-items:center;justify-content:space-between}
 .g-city-total{font-size:0.7rem;font-weight:700;color:#0f172a}
 
+
+/* ===== PERFIL / TURNOS ===== */
+.turno-día{background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.85rem;margin-bottom:0.5rem}
+.turno-día-header{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.6rem}
+.turno-día-date{font-size:0.65rem;font-weight:700;color:#3b82f6;background:#eff6ff;padding:0.18rem 0.5rem;border-radius:5px;white-space:nowrap}
+.turno-día-city{font-size:0.82rem;font-weight:700;color:#0f172a;flex:1}
+.turno-día-coche{font-size:0.65rem;font-weight:700;color:#64748b;background:#f1f5f9;padding:0.18rem 0.45rem;border-radius:5px}
+.turno-stat{display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.55rem}
+.turno-stat-chip{font-size:0.68rem;font-weight:600;padding:0.2rem 0.55rem;border-radius:6px;background:#f8fafc;border:1px solid #e2e8f0;color:#475569}
+.turno-acts{border-top:1px solid #f1f5f9;padding-top:0.5rem}
+.turno-act-row{display:flex;gap:0.4rem;align-items:baseline;padding:0.18rem 0;font-size:0.73rem;color:#475569}
+.turno-act-time{font-size:0.62rem;font-weight:700;color:#94a3b8;min-width:38px;flex-shrink:0}
+.turno-no-drive{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:1rem;text-align:center;color:#16a34a;font-size:0.8rem;font-weight:600}
+.perfil-selector{display:flex;gap:0.35rem;overflow-x:auto;margin-bottom:0.75rem;padding-bottom:0.2rem;scrollbar-width:none}
+.perfil-selector::-webkit-scrollbar{display:none}
+.perfil-chip{background:white;border:1.5px solid #e2e8f0;border-radius:20px;padding:0.28rem 0.75rem;font-family:inherit;font-size:0.72rem;font-weight:700;color:#64748b;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.perfil-chip.active{background:#0f172a;color:white;border-color:#0f172a}
+.perfil-resumen{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:0.75rem}
+.perfil-stat-card{background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.65rem;text-align:center}
+.perfil-stat-val{font-size:1.2rem;font-weight:900;color:#0f172a}
+.perfil-stat-label{font-size:0.6rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-top:0.1rem}
+
 @media(max-width:600px){
   .dgrid{grid-template-columns:repeat(2,1fr)}
   .tl-row.open .tl-body{grid-template-columns:1fr}
@@ -993,7 +1015,8 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
   <button class="bnb" onclick="showView('gastos',4)"><span class="bnb-i">🧾</span><span class="bnb-l">Gastos</span></button>
   <button class="bnb" onclick="showView('notas',5)"><span class="bnb-i">📝</span><span class="bnb-l">Notas</span></button>
   <button class="bnb" onclick="showView('checklist',6)"><span class="bnb-i">✅</span><span class="bnb-l">Check</span></button>
-  <button class="bnb" onclick="showView('emergencias',7)"><span class="bnb-i">🆘</span><span class="bnb-l">SOS</span></button>
+  <button class="bnb" onclick="showView('perfil',7)"><span class="bnb-i">🚗</span><span class="bnb-l">Turnos</span></button>
+  <button class="bnb" onclick="showView('emergencias',8)"><span class="bnb-i">🆘</span><span class="bnb-l">SOS</span></button>
 </div>
 
 
@@ -1064,6 +1087,27 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
     <button onclick="addConductor()" style="width:100%;padding:0.65rem;border:1.5px dashed #e2e8f0;border-radius:10px;background:white;font-family:inherit;font-size:0.78rem;color:#64748b;cursor:pointer;margin-top:0.4rem">+ Añadir conductor</button>
     <button onclick="document.getElementById('conductores-modal').style.display='none'" style="width:100%;padding:0.65rem;border:none;background:#f8fafc;border-radius:10px;font-family:inherit;font-size:0.8rem;color:#64748b;cursor:pointer;margin-top:0.5rem;font-weight:600">Cerrar</button>
   </div>
+</div>
+
+
+<!-- PERFIL / TURNOS DE CONDUCCIÓN -->
+<div id="view-perfil" class="view">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+    <div>
+      <div class="ptitle">Mis turnos 🚗</div>
+      <div class="psub" style="margin-bottom:0">Cronograma de conducción por viajero.</div>
+    </div>
+    <button id="perfil-edit-btn" style="font-size:0.65rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:7px;background:#f1f5f9;border:1.5px solid #e2e8f0;cursor:pointer;font-family:inherit;color:#64748b">✏️ Editar</button>
+  </div>
+
+  <!-- Selector de conductor -->
+  <div class="perfil-selector" id="perfil-selector"></div>
+
+  <!-- Resumen estadísticas -->
+  <div class="perfil-resumen" id="perfil-resumen"></div>
+
+  <!-- Lista de turnos -->
+  <div id="perfil-turnos-list"></div>
 </div>
 
 <!-- NOMBRE MODAL -->
@@ -1454,6 +1498,7 @@ function showView(name, idx) {
   // Regenerar agenda cada vez que se abre (por si cambió el TL)
   if(name === 'agenda') renderAgenda();
   if(name === 'emergencias') renderSOSDynamic();
+  if(name === 'perfil') { initPerfil(); }
   if(name === 'gastos') gInitForm();
 }
 
@@ -3284,6 +3329,158 @@ function addConductor() {
   CONDUCTORES.push({nombre:'Nuevo conductor', coche:1});
   saveConductores();
   renderConductoresModal();
+}
+
+
+// ===== PERFIL / TURNOS DE CONDUCCIÓN =====
+var perfilConductorActivo = '';
+
+function initPerfil() {
+  // Default: mostrar el conductor que coincide con NOMBRE, o el primero
+  var match = CONDUCTORES.find(function(c) {
+    return c.nombre.toLowerCase() === NOMBRE.toLowerCase();
+  });
+  perfilConductorActivo = match ? match.nombre : (CONDUCTORES.length ? CONDUCTORES[0].nombre : PEOPLE[0]);
+  renderPerfil();
+}
+
+function renderPerfil() {
+  renderPerfilSelector();
+  renderPerfilTurnos();
+
+  // Edit button — only visible to admin
+  var editBtn = document.getElementById('perfil-edit-btn');
+  if(editBtn) {
+    editBtn.style.display = AG_ADMIN ? 'block' : 'none';
+    editBtn.onclick = abrirGestionConductores;
+  }
+}
+
+function renderPerfilSelector() {
+  var sel = document.getElementById('perfil-selector');
+  if(!sel) return;
+  sel.innerHTML = '';
+
+  // Show all conductores as chips
+  var lista = CONDUCTORES.length ? CONDUCTORES : PEOPLE.map(function(p){ return {nombre:p, coche:1}; });
+
+  lista.forEach(function(c) {
+    var chip = document.createElement('button');
+    chip.className = 'perfil-chip' + (c.nombre === perfilConductorActivo ? ' active' : '');
+    chip.textContent = c.nombre;
+    chip.addEventListener('click', function() {
+      perfilConductorActivo = c.nombre;
+      renderPerfilSelector();
+      renderPerfilTurnos();
+    });
+    sel.appendChild(chip);
+  });
+}
+
+function renderPerfilTurnos() {
+  var list = document.getElementById('perfil-turnos-list');
+  var resumen = document.getElementById('perfil-resumen');
+  if(!list) return;
+
+  var nombre = perfilConductorActivo;
+  var coche = 0;
+  CONDUCTORES.forEach(function(c) { if(c.nombre === nombre) coche = c.coche; });
+
+  // Find all days where this person drives
+  var misTurnos = [];
+  TL.forEach(function(entry, dayIdx) {
+    if(!entry.drive) return;
+    var turno = TURNOS[dayIdx] || {};
+    var esConductor = turno.coche1 === nombre || turno.coche2 === nombre;
+    if(!esConductor) return;
+    var miCoche = turno.coche1 === nombre ? 1 : 2;
+    misTurnos.push({ dayIdx: dayIdx, entry: entry, coche: miCoche });
+  });
+
+  // Resumen stats
+  var totalKm = misTurnos.reduce(function(s,t){ return s + (t.entry.km||0); }, 0);
+  var totalH  = misTurnos.reduce(function(s,t){
+    var h = parseFloat((t.entry.h||'0').replace('h','').trim()) || 0;
+    return s + h;
+  }, 0);
+
+  if(resumen) {
+    resumen.innerHTML =
+      '<div class="perfil-stat-card"><div class="perfil-stat-val">' + misTurnos.length + '</div><div class="perfil-stat-label">Turnos</div></div>' +
+      '<div class="perfil-stat-card"><div class="perfil-stat-val">' + totalKm.toLocaleString() + '</div><div class="perfil-stat-label">km totales</div></div>' +
+      '<div class="perfil-stat-card"><div class="perfil-stat-val">' + totalH.toFixed(0) + 'h</div><div class="perfil-stat-label">al volante</div></div>';
+  }
+
+  if(!misTurnos.length) {
+    list.innerHTML = '<div class="turno-no-drive">' +
+      '<div style="font-size:1.5rem;margin-bottom:0.4rem">😎</div>' +
+      '<div>' + nombre + ' no tiene turnos de conducción asignados.</div>' +
+      (AG_ADMIN ? '<div style="margin-top:0.5rem;font-size:0.72rem;opacity:0.8">Asigna turnos desde la vista Ruta → cada día de conducción.</div>' : '') +
+    '</div>';
+    return;
+  }
+
+  // Render each turno
+  list.innerHTML = '';
+  misTurnos.forEach(function(t) {
+    var entry = t.entry;
+
+    var card = document.createElement('div');
+    card.className = 'turno-día';
+
+    // Header
+    var header = document.createElement('div');
+    header.className = 'turno-día-header';
+    header.innerHTML =
+      '<span class="turno-día-date">' + entry.date + '</span>' +
+      '<span class="turno-día-city">' + entry.city + '</span>' +
+      '<span class="turno-día-coche">🚙 Coche ' + t.coche + '</span>';
+    card.appendChild(header);
+
+    // Stats chips
+    var stats = document.createElement('div');
+    stats.className = 'turno-stat';
+    if(entry.km) stats.innerHTML += '<span class="turno-stat-chip">📍 ' + entry.km + ' km</span>';
+    if(entry.h)  stats.innerHTML += '<span class="turno-stat-chip">⏱ ' + entry.h + '</span>';
+    if(entry.maps) {
+      var mapBtn = document.createElement('button');
+      mapBtn.className = 'turno-stat-chip nav-open-btn';
+      mapBtn.setAttribute('data-maps', entry.maps);
+      mapBtn.style.cursor = 'pointer';
+      mapBtn.style.background = '#eff6ff';
+      mapBtn.style.borderColor = '#bfdbfe';
+      mapBtn.style.color = '#3b82f6';
+      mapBtn.textContent = '🗺️ Ver ruta';
+      stats.appendChild(mapBtn);
+    }
+    card.appendChild(stats);
+
+    // Activities relevant to this driver
+    if(entry.acts && entry.acts.length) {
+      var actsDiv = document.createElement('div');
+      actsDiv.className = 'turno-acts';
+      entry.acts.forEach(function(act) {
+        var timeMatch = act.match(/^(\d{1,2}:\d{2})\s*(.*)/);
+        var row = document.createElement('div');
+        row.className = 'turno-act-row';
+        row.innerHTML =
+          '<span class="turno-act-time">' + (timeMatch ? timeMatch[1] : '—') + '</span>' +
+          '<span>' + (timeMatch ? timeMatch[2] : act).replace(/^—\s*/, '') + '</span>';
+        actsDiv.appendChild(row);
+      });
+      card.appendChild(actsDiv);
+    }
+
+    // ZTL warning
+    if(entry.ztl) {
+      var ztl = document.createElement('div');
+      ztl.style.cssText = 'margin-top:0.5rem;background:#fef2f2;border-radius:7px;padding:0.4rem 0.6rem;font-size:0.7rem;color:#dc2626';
+      ztl.textContent = '⚠️ ZTL — No entrar al centro con el coche. Multa 100-300€.';
+      card.appendChild(ztl);
+    }
+
+    list.appendChild(card);
+  });
 }
 
 // ===== INIT =====
