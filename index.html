@@ -4672,16 +4672,48 @@ function simAnalizarParada(p, fromId, toId, insertIdx, card) {
 }
 
 // Insert parada into simRoute at position
+function simSaveRoute() {
+  // Solo guarda si es admin — usuarios normales solo simulan
+  if(!simIsAdmin) return;
+  try { localStorage.setItem('et26_simroute', JSON.stringify(simRoute)); } catch(e) {}
+}
+
+function simLoadRoute() {
+  try {
+    var saved = localStorage.getItem('et26_simroute');
+    if(saved) {
+      var r = JSON.parse(saved);
+      if(r && r.length > 1) {
+        simRoute.length = 0;
+        r.forEach(function(c){ simRoute.push(c); });
+        SIM_BASE_ROUTE = simRoute.slice();
+        return true;
+      }
+    }
+  } catch(e) {}
+  return false;
+}
+
 function simInsertParada(cityId, pos) {
-  if(simRoute.indexOf(cityId) !== -1) {
-    simShowMsg(SIM_NAMES[cityId]+' ya está en la ruta.');
+  // Solo admin puede hacer cambios reales
+  if(!simIsAdmin) {
+    simRequestAdmin(function() {
+      simInsertParada(cityId, pos);
+    });
     return;
   }
+  if(simRoute.indexOf(cityId) !== -1) {
+    simShowMsg((SIM_NAMES[cityId]||cityId)+' ya está en la ruta.');
+    return;
+  }
+  // Register in SIM_NAMES if unknown
+  if(!SIM_NAMES[cityId]) SIM_NAMES[cityId] = cityId.charAt(0).toUpperCase()+cityId.slice(1);
   simRoute.splice(pos, 0, cityId);
+  simSaveRoute();
   simMarkModified();
   simRenderUnified();
   simDrawMap();
-  simShowMsg('✅ '+SIM_NAMES[cityId]+' añadida a la ruta como parada.');
+  simShowMsg('\u2705 '+(SIM_NAMES[cityId]||cityId)+' a\u00f1adida a la ruta.');
 }
 
 // AI suggestions for tramos without DB data
@@ -5161,6 +5193,11 @@ function simRenderUnified(){
       var target=parseInt(e.currentTarget.dataset.i);
       if(dragSrc===null||dragSrc===target||dragSrc===undefined){dragSrc=null;return;}
       var moved=simRoute.splice(dragSrc,1)[0];
+      if(!simIsAdmin) {
+        dragSrc=null;
+        simShowMsg('\uD83D\uDD12 Solo el admin puede modificar la ruta oficial. Puedes simular sin guardar.');
+        return;
+      }
       simRoute.splice(target,0,moved);
       dragSrc=null;
       simMarkModified();
@@ -5465,6 +5502,8 @@ function simMarkModified(){
   if(s) s.style.display='block';
   if(d) d.style.display='block';
   simCalcStats();
+  // Save route if admin (persists across reloads)
+  if(simIsAdmin) simSaveRoute();
   // Live: regenerate TL & agenda from route changes
   rutaFullRefresh();
 }
@@ -5841,7 +5880,12 @@ function rutaSetMode(mode){
 })();
 
 
-// Final init
+// Final init — all vars defined, safe to run full refresh
+// Load persisted route if admin session exists
+if(PIN_SESSION && (PIN_SESSION.isAdmin || PIN_SESSION.pin === ADMIN_PIN)) {
+  simIsAdmin = true;
+  simLoadRoute(); // Restore admin's saved route
+}
 rutaFullRefresh();
 </script>
 </body>
