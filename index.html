@@ -261,6 +261,20 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .home-act-text{flex:1;color:#475569;line-height:1.35}
 .home-act.past .home-act-time,.home-act.past .home-act-text{color:#cbd5e1}
 
+
+/* ===== NAV PICKER ===== */
+.nav-picker-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:flex-end;justify-content:center}
+.nav-picker-modal.open{display:flex}
+.nav-picker-sheet{background:white;border-radius:20px 20px 0 0;padding:1.2rem 1rem 2rem;width:100%;max-width:480px}
+.nav-picker-title{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;text-align:center;margin-bottom:1rem}
+.nav-picker-btn{display:flex;align-items:center;gap:0.9rem;padding:0.85rem 1rem;border-radius:12px;border:1.5px solid #e2e8f0;background:white;width:100%;margin-bottom:0.5rem;cursor:pointer;font-family:inherit;transition:all .15s;text-decoration:none}
+.nav-picker-btn:hover{border-color:#3b82f6;background:#eff6ff}
+.nav-picker-icon{font-size:1.5rem;width:36px;text-align:center;flex-shrink:0}
+.nav-picker-info{flex:1;text-align:left}
+.nav-picker-name{font-size:0.85rem;font-weight:700;color:#0f172a}
+.nav-picker-sub{font-size:0.65rem;color:#94a3b8;margin-top:0.1rem}
+.nav-picker-cancel{width:100%;padding:0.7rem;border:none;background:#f8fafc;border-radius:10px;font-family:inherit;font-size:0.8rem;color:#64748b;cursor:pointer;margin-top:0.3rem;font-weight:600}
+
 @media(max-width:600px){
   .dgrid{grid-template-columns:repeat(2,1fr)}
   .tl-row.open .tl-body{grid-template-columns:1fr}
@@ -900,6 +914,29 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
   <div class="ag-country-tabs" id="ag-country-tabs"></div>
   <!-- Paneles -->
   <div id="ag-panels"></div>
+</div>
+
+
+<!-- NAV PICKER MODAL -->
+<div class="nav-picker-modal" id="nav-picker-modal" onclick="if(event.target===this)navPickerClose()">
+  <div class="nav-picker-sheet">
+    <div class="nav-picker-title">Abrir ruta en...</div>
+    <a id="nav-gmaps-btn" href="#" target="_blank" class="nav-picker-btn" onclick="navPickerClose()">
+      <span class="nav-picker-icon">🗺️</span>
+      <div class="nav-picker-info">
+        <div class="nav-picker-name">Google Maps</div>
+        <div class="nav-picker-sub">Con waypoints y tráfico en tiempo real</div>
+      </div>
+    </a>
+    <a id="nav-waze-btn" href="#" target="_blank" class="nav-picker-btn" onclick="navPickerClose()">
+      <span class="nav-picker-icon">🚗</span>
+      <div class="nav-picker-info">
+        <div class="nav-picker-name">Waze</div>
+        <div class="nav-picker-sub">Alertas de tráfico y radares</div>
+      </div>
+    </a>
+    <button class="nav-picker-cancel" onclick="navPickerClose()">Cancelar</button>
+  </div>
 </div>
 
 <!-- NOMBRE MODAL -->
@@ -1728,7 +1765,7 @@ var _openCity = function(cityId) {
       if(!d) return;
       var acts = d.acts.map(function(a){return '<div class="tact">'+a+'</div>';}).join('');
       var ztl = d.ztl ? '<div class="tztl"><div class="tztl-t">⚠️ ZTL: no entrar al centro con el coche. Multa 100-300 euros.</div></div>' : '';
-      var mBtn = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;text-decoration:none;margin-top:0.5rem">🗺 Google Maps</a>' : '';
+      var mBtn = d.maps ? '<button onclick="navPickerOpen(\'' + d.maps.replace(/\'/g,\'%27\') + '\')" style="display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:0.5rem">🗺️ Ver ruta</button>' : '';
       html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:0.5rem">';
       html += '<div style="display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.9rem;border-bottom:1px solid #f1f5f9">';
       html += '<div style="font-size:0.65rem;font-weight:700;color:#3b82f6;min-width:40px">'+d.date+'</div>';
@@ -2357,6 +2394,37 @@ function renderSOSDynamic() {
   html += '</div>';
 
   container.innerHTML = html;
+}
+
+
+// ===== NAV PICKER (Google Maps / Waze) =====
+function navPickerOpen(mapsUrl) {
+  if(!mapsUrl) return;
+
+  // Build Waze URL from Google Maps URL
+  // Google: https://www.google.com/maps/dir/City1/City2/City3
+  // Waze:   https://waze.com/ul?q=destination&navigate=yes
+  var wazeUrl = '';
+  var destMatch = mapsUrl.match(/\/dir\/(.+)$/);
+  if(destMatch) {
+    var parts = destMatch[1].split('/');
+    var dest = decodeURIComponent(parts[parts.length - 1]).replace(/\+/g,' ');
+    wazeUrl = 'https://waze.com/ul?q=' + encodeURIComponent(dest) + '&navigate=yes';
+  } else {
+    var searchMatch = mapsUrl.match(/\/search\/(.+)$/);
+    if(searchMatch) {
+      var q = decodeURIComponent(searchMatch[1]).replace(/\+/g,' ');
+      wazeUrl = 'https://waze.com/ul?q=' + encodeURIComponent(q) + '&navigate=yes';
+    }
+  }
+
+  document.getElementById('nav-gmaps-btn').href = mapsUrl;
+  document.getElementById('nav-waze-btn').href  = wazeUrl || mapsUrl;
+  document.getElementById('nav-picker-modal').classList.add('open');
+}
+
+function navPickerClose() {
+  document.getElementById('nav-picker-modal').classList.remove('open');
 }
 
 // ===== INIT =====
