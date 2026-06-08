@@ -14,6 +14,11 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .hcity{font-size:0.62rem;color:#64748b;cursor:pointer;transition:color .15s;white-space:nowrap;padding:0.15rem 0.1rem;-webkit-tap-highlight-color:transparent}
 .hcity:hover,.hcity:active{color:white;text-decoration:underline}
 .harr{font-size:0.55rem;color:#334155}
+.hroute-countries{display:flex;align-items:center;gap:0.22rem;flex-wrap:wrap;margin-bottom:0.18rem}
+.hcountry{font-size:0.68rem;font-weight:700;color:white;cursor:pointer;white-space:nowrap;padding:0.1rem 0.3rem;border-radius:4px;transition:background .15s;-webkit-tap-highlight-color:transparent}
+.hcountry:hover,.hcountry:active{background:rgba(255,255,255,0.12)}
+.hcountry-arr{font-size:0.5rem;color:#475569}
+.hroute-cities{display:flex;align-items:center;gap:0.22rem;flex-wrap:wrap}
 .hbadge.live{background:rgba(16,185,129,0.2);color:#34d399}
 .bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
 .bnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.15rem;background:none;border:none;cursor:pointer;padding:0.5rem 0.1rem;font-family:inherit}
@@ -294,7 +299,10 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 <div class="header">
   <div style="display:flex;flex-direction:column;gap:0.18rem">
     <div class="hlogo" onclick="showView('dashboard',0)" style="cursor:pointer">🌍 EuroTrip 2026</div>
-    <div id="header-route" style="display:flex;align-items:center;gap:0.28rem;flex-wrap:wrap"></div>
+    <div style="display:flex;flex-direction:column;gap:0.05rem">
+      <div id="header-countries" class="hroute-countries"></div>
+      <div id="header-route" class="hroute-cities"></div>
+    </div>
   </div>
   <div class="hbadge" id="badge">🌍 EuroTrip</div>
 </div>
@@ -1105,12 +1113,57 @@ function removeRuta(idx) {
   renderRuta();
 }
 function updateHeaderRoute() {
+  // --- Fila 2: ciudades (desde miRuta, sin cambios) ---
   var el = document.getElementById('header-route');
-  if(!el) return;
-  el.innerHTML = miRuta.map(function(c, i) {
-    return (i>0?'<span class="harr">→</span>':'')+
-      '<span class="hcity" onclick="openCity(\'' + c + '\')">' + CITY_NAMES[c] + '</span>';
+  if(el) {
+    el.innerHTML = miRuta.map(function(c, i) {
+      return (i>0?'<span class="harr">→</span>':'')+
+        '<span class="hcity" onclick="openCity(\'' + c + '\')">'+CITY_NAMES[c]+'</span>';
+    }).join('');
+  }
+
+  // --- Fila 1: países agrupados desde TL (se actualiza sola con el itinerario) ---
+  var cel = document.getElementById('header-countries');
+  if(!cel) return;
+
+  // Mapa de detección de país (mismo que usa Agenda)
+  var KMAP = {
+    'Alicante':'ES','Barcelona':'ES','Cartagena':'ES',
+    'Montpellier':'FR','Paris':'FR','Niza':'FR','Nice':'FR','Clermont':'FR','Perpignan':'FR','Lyon':'FR','Marsella':'FR','Marseille':'FR','Colmar':'FR',
+    'Milan':'IT','Venecia':'IT','Roma':'IT','Pisa':'IT','Genova':'IT','Florencia':'IT',
+    'Munich':'DE','Colonia':'DE','Berlin':'DE',
+    'Bruselas':'BE','Amsterdam':'NL'
+  };
+  var CNAMES = {ES:'🇪🇸 España', FR:'🇫🇷 Francia', IT:'🇮🇹 Italia', DE:'🇩🇪 Alemania', BE:'🇧🇪 Bélgica', NL:'🇳🇱 Países Bajos'};
+
+  // Detectar países en orden cronológico desde TL
+  var countries = [];
+  var seenC = {};
+  TL.forEach(function(entry) {
+    var code = 'XX';
+    for(var kw in KMAP) { if(entry.city.indexOf(kw) !== -1) { code = KMAP[kw]; break; } }
+    if(code !== 'XX' && !seenC[code]) {
+      seenC[code] = true;
+      countries.push(code);
+    }
+  });
+
+  cel.innerHTML = countries.map(function(code, i) {
+    return (i>0?'<span class="hcountry-arr">→</span>':'')+
+      '<span class="hcountry" onclick="agOpenCountry(\'' + code + '\')">'+CNAMES[code]+'</span>';
   }).join('');
+}
+
+// Ir a la pestaña de ese país en Agenda
+function agOpenCountry(code) {
+  showView('agenda', 3);
+  setTimeout(function() {
+    var tabs = document.querySelectorAll('.ag-ctab');
+    var CNAMES = {ES:'🇪🇸 España', FR:'🇫🇷 Francia', IT:'🇮🇹 Italia', DE:'🇩🇪 Alemania', BE:'🇧🇪 Bélgica', NL:'🇳🇱 Países Bajos'};
+    tabs.forEach(function(tab) {
+      if(tab.textContent === CNAMES[code]) tab.click();
+    });
+  }, 80);
 }
 
 // ===== NAV =====
@@ -2748,7 +2801,7 @@ function simSaveAsBase(){
     simIsModified=false;
     simSaveTL();
     renderTL();
-    renderAgenda(); // Actualizar tabs de países cuando cambia el itinerario
+    renderAgenda(); updateHeaderRoute(); // Actualizar tabs de países cuando cambia el itinerario
     var s=document.getElementById('ruta-save-btn');
     var d=document.getElementById('ruta-discard-btn');
     if(s) s.style.display='none';
