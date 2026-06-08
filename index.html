@@ -1793,7 +1793,7 @@ var _openCity = function(cityId) {
       if(!d) return;
       var acts = d.acts.map(function(a){return renderEnrichedAct(a);}).join('');
       var ztl = d.ztl ? '<div class="tztl"><div class="tztl-t">⚠️ ZTL: no entrar al centro con el coche. Multa 100-300 euros.</div></div>' : '';
-      var mBtn = d.maps ? '<button onclick="navPickerOpen(\'' + d.maps.replace(/\'/g,\'%27\') + '\')" style="display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:0.5rem">🗺️ Ver ruta</button>' : '';
+      var mBtn = d.maps ? '<button class="nav-open-btn" data-maps="' + d.maps.replace(/"/g,'&quot;') + '" style="display:inline-flex;align-items:center;gap:0.28rem;background:#2563eb;color:white;border:none;border-radius:7px;padding:0.35rem 0.68rem;font-size:0.66rem;font-weight:700;cursor:pointer;font-family:inherit;margin-top:0.5rem">🗺️ Ver ruta</button>' : '';
       html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:0.5rem">';
       html += '<div style="display:flex;align-items:center;gap:0.65rem;padding:0.65rem 0.9rem;border-bottom:1px solid #f1f5f9">';
       html += '<div style="font-size:0.65rem;font-weight:700;color:#3b82f6;min-width:40px">'+d.date+'</div>';
@@ -2236,7 +2236,7 @@ var RISK_DB = {
   ],
   // Francia
   'Paris': [
-    {level:'red',   icon:'🚫', title:'ZFE París (Crit'Air)', text:'París exige pegatina Crit'Air para circular. Sin ella, multa de 135€. Solicitar en critair.fr con mínimo 2 semanas de antelación. Coste: ~4€.'},
+    {level:'red',   icon:'🚫', title:'ZFE París (Crit Air)', text:'París exige pegatina Crit Air para circular. Sin ella, multa de 135€. Solicitar en critair.fr con mínimo 2 semanas de antelación. Coste: ~4€.'},
     {level:'orange',icon:'🅿️', title:'Aparcamiento en París', text:'Aparcar en París es muy difícil y caro (4–6€/h en superficie). Usar parkings de Park&Ride (P+R) en la periferia y metro al centro. Opción: Parking Bercy, Vincennes.'},
     {level:'green', icon:'🚇', title:'Metro recomendado', text:'Para moverse por París usar el metro o RER. Día de estancia: comprar carnet de 10 viajes (Navigo Liberté+) o Navigo Jour (~8€/día).'}
   ],
@@ -2253,7 +2253,7 @@ var RISK_DB = {
   ],
   'Barcelona': [
     {level:'red',   icon:'🚫', title:'ZBE Barcelona', text:'Barcelona tiene Zona de Bajas Emisiones. Coches sin pegatina ambiental no pueden circular en algunas zonas. Verificar etiqueta DGT.'},
-    {level:'orange',icon:'🅿️', title:'Aparcamiento', text:'Aparcar en Barcelona es difícil y caro. Usar parking Parc de l'Arpa o aparcamientos del Eixample. Evitar dejar cosas visibles en el coche.'}
+    {level:'orange',icon:'🅿️', title:'Aparcamiento', text:'Aparcar en Barcelona es difícil y caro. Usar parking Parc de l Arpa o aparcamientos del Eixample. Evitar dejar cosas visibles en el coche.'}
   ]
 };
 
@@ -2602,6 +2602,22 @@ function navPickerClose() {
   document.getElementById('nav-picker-modal').classList.remove('open');
 }
 
+// Delegated listeners - avoids inline onclick in JS strings
+document.addEventListener('click', function(e) {
+  // Nav picker buttons
+  var navBtn = e.target.closest('.nav-open-btn');
+  if(navBtn) {
+    var url = navBtn.getAttribute('data-maps');
+    if(url) navPickerOpen(url);
+  }
+  // Enriched activity toggle
+  var eactBtn = e.target.closest('[data-eacttoggle]');
+  if(eactBtn) {
+    var wrap = eactBtn.parentElement;
+    if(wrap) wrap.classList.toggle('open');
+  }
+});
+
 
 // ===== BASE DE DATOS DE ACTIVIDADES ENRIQUECIDAS =====
 // Cada actividad tiene: match (palabra clave), icon, tiempo, tip, foto-emoji
@@ -2613,14 +2629,14 @@ var ACTIVITY_DB = {
   'Coliseo': {icon:'🏛️', tiempo:'2-3h', tip:'Reserva online obligatoria en verano (coopculture.it). El ticket incluye el Foro Romano y el Palatino. Llevar agua — no hay sombra. Mejor luz para fotos: tarde (17-19h).', alerta:'Sin reserva online, las colas superan las 3h en julio. No lo dejes para el día.'},
   'Foro Romano': {icon:'🏺', tiempo:'1-2h', tip:'Incluido con el ticket del Coliseo. Caminar entre ruinas de más de 2.000 años. Hay poca sombra — usar protector solar. La mejor vista panorámica: desde el Monte Palatino.', alerta:null},
   'Trastevere': {icon:'🍷', tiempo:'2-3h', tip:'Barrio más auténtico de Roma. Perfecto para cenar (mejor después de las 20:00 cuando los locales van). Platos típicos: cacio e pepe, carbonara, supplì. Evita restaurantes con foto en el menú.', alerta:null},
-  'Castel Sant'Angelo': {icon:'🏰', tiempo:'1.5-2h', tip:'Antigua fortaleza papal con vistas panorámicas de Roma desde la terraza. Mucho menos concurrido que el Coliseo. Entrada: ~15€. Ir por la tarde para la mejor luz.', alerta:null},
+  'Castel Sant Angelo': {icon:'🏰', tiempo:'1.5-2h', tip:'Antigua fortaleza papal con vistas panorámicas de Roma desde la terraza. Mucho menos concurrido que el Coliseo. Entrada: ~15€. Ir por la tarde para la mejor luz.', alerta:null},
   // PARIS
   'Torre Eiffel': {icon:'🗼', tiempo:'2-3h', tip:'Al amanecer (5:30-7:00 en julio) no hay nadie y la luz es espectacular. Para subir: reservar online en toureiffel.paris. La vista desde el Trocadéro es la foto clásica (gratis).', alerta:'En julio las colas para subir sin reserva son de 2-3h. Reservar con semanas de antelación.'},
   'Louvre': {icon:'🖼️', tiempo:'3-4h', tip:'El museo más visitado del mundo — imposible verlo todo. Estrategia: decidir 3-4 obras clave (Mona Lisa, Venus de Milo, Victoria de Samotracia) y ir a ellas directamente. Reserva online obligatoria.', alerta:'La Mona Lisa está en la sala 711, primer piso. Siempre rodeada de gente — llegar a primera hora.'},
   'Montmartre': {icon:'⛪', tiempo:'2-3h', tip:'Subir a pie por las escaleras o en funicular (vale 1 viaje de metro). La Basílica del Sacré-Cœur es gratis. El barrio de artistas tiene la mejor atmósfera de París. Ir temprano o al atardecer.', alerta:'La Place du Tertre (de pintores) es muy turística y cara. Los retratos cuestan 30-50€.'},
   'Champs-Élysées': {icon:'🛍️', tiempo:'1-2h', tip:'El Arco de Triunfo vale la pena subir (entrada ~13€) para ver la perspectiva de las 12 avenidas. Los Campos en sí son turísticos — para compras ir a Le Marais o Saint-Germain.', alerta:null},
-  'Le Marais': {icon:'🥐', tiempo:'2-3h', tip:'Barrio judío y LGTB+ de París. Las mejores tiendas vintage, galerías de arte y el mejor falafel de la ciudad (L'As du Fallafel en Rue des Rosiers). Museos gratuitos los primeros domingos.', alerta:null},
-  'Musée d'Orsay': {icon:'🎨', tiempo:'2-3h', tip:'Impresionismo francés — Monet, Renoir, Van Gogh, Degas. Menos masificado que el Louvre. El edificio es una antigua estación de tren. Vistas del Sena desde el reloj del último piso.', alerta:null},
+  'Le Marais': {icon:'🥐', tiempo:'2-3h', tip:'Barrio judío y LGTB+ de París. Las mejores tiendas vintage, galerías de arte y el mejor falafel de la ciudad (L As du Fallafel en Rue des Rosiers). Museos gratuitos los primeros domingos.', alerta:null},
+  'Musee d Orsay': {icon:'🎨', tiempo:'2-3h', tip:'Impresionismo francés — Monet, Renoir, Van Gogh, Degas. Menos masificado que el Louvre. El edificio es una antigua estación de tren. Vistas del Sena desde el reloj del último piso.', alerta:null},
   // VENECIA
   'Canal Grande': {icon:'🚤', tiempo:'1-2h', tip:'El vaporetto (barco bus) línea 1 recorre todo el Canal Grande por 9.50€ — es la mejor "excursión" de Venecia. Sentarse en la proa para las mejores vistas.', alerta:'Las góndolas cuestan 80-100€ por 30 min. Negociar precio antes de subir.'},
   'Rialto': {icon:'🌉', tiempo:'45min', tip:'El puente más antiguo de Venecia (1591). Mejor foto: desde abajo, desde un vaporetto o desde el puente de madera a 100m. El mercado de Rialto funciona por la mañana (8-13h).', alerta:null},
@@ -2663,37 +2679,41 @@ function renderEnrichedAct(actText) {
   var timeMatch = actText.match(/^(\d{1,2}:\d{2})\s*/);
   var time = timeMatch ? timeMatch[1] : null;
   var text = time ? actText.replace(timeMatch[0], '') : actText;
-  // Limpiar guiones iniciales
-  text = text.replace(/^—\s*/, '').trim();
+  text = text.replace(/^\u2014\s*/, '').trim();
 
   if(!detail) {
-    // Sin detalle — render simple
-    return '<div class="eact-simple">' +
-      (time ? '<span class="eact-time">'+time+'</span>' : '') +
-      '<span class="eact-text">'+text+'</span>' +
-    '</div>';
+    var d = document.createElement('div');
+    d.className = 'eact-simple';
+    d.innerHTML = (time ? '<span class="eact-time">'+time+'</span>' : '') +
+      '<span class="eact-text">'+text+'</span>';
+    return d.outerHTML;
   }
 
-  // Con detalle — render expandible
-  var id = 'eact_' + Math.random().toString(36).substr(2,6);
-  return '<div class="eact-rich" id="'+id+'">' +
-    '<div class="eact-header" onclick="toggleEact(''+id+'')">' +
-      (time ? '<span class="eact-time">'+time+'</span>' : '<span class="eact-time">'+detail.icon+'</span>') +
-      '<span class="eact-text">'+text+'</span>' +
-      (detail.tiempo ? '<span class="eact-dur">⏱ '+detail.tiempo+'</span>' : '') +
-      '<span class="eact-chevron">›</span>' +
-    '</div>' +
-    '<div class="eact-body">' +
-      (detail.alerta ? '<div class="eact-alerta">⚠️ '+detail.alerta+'</div>' : '') +
-      '<div class="eact-tip">💡 '+detail.tip+'</div>' +
-    '</div>' +
-  '</div>';
+  // Use DOM to avoid string escaping issues
+  var wrap = document.createElement('div');
+  wrap.className = 'eact-rich';
+
+  var header = document.createElement('div');
+  header.className = 'eact-header';
+  header.setAttribute('data-eacttoggle', '1');
+  header.innerHTML =
+    '<span class="eact-time">' + (time || detail.icon) + '</span>' +
+    '<span class="eact-text">' + text + '</span>' +
+    (detail.tiempo ? '<span class="eact-dur">\u23f1 ' + detail.tiempo + '</span>' : '') +
+    '<span class="eact-chevron">\u203a</span>';
+
+  var body = document.createElement('div');
+  body.className = 'eact-body';
+  body.innerHTML =
+    (detail.alerta ? '<div class="eact-alerta">\u26a0\ufe0f ' + detail.alerta + '</div>' : '') +
+    '<div class="eact-tip">\ud83d\udca1 ' + detail.tip + '</div>';
+
+  wrap.appendChild(header);
+  wrap.appendChild(body);
+  return wrap.outerHTML;
 }
 
-function toggleEact(id) {
-  var el = document.getElementById(id);
-  if(el) el.classList.toggle('open');
-}
+function toggleEact(id) { var el = document.getElementById(id); if(el) el.classList.toggle("open"); }
 
 // ===== INIT =====
 updateCountdown();
