@@ -193,6 +193,56 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .nmodal-t{font-size:1rem;font-weight:700;margin-bottom:0.4rem}
 .nmodal-s{font-size:0.78rem;color:#64748b;margin-bottom:1rem}
 
+
+/* ===== AGENDA POR PAISES ===== */
+.ag-country-tabs{display:flex;gap:0;overflow-x:auto;border-bottom:2px solid #e2e8f0;margin-bottom:0;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.ag-country-tabs::-webkit-scrollbar{display:none}
+.ag-ctab{flex-shrink:0;padding:0.55rem 1rem;font-size:0.74rem;font-weight:700;color:#94a3b8;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;font-family:inherit;transition:all .18s;white-space:nowrap;margin-bottom:-2px}
+.ag-ctab.active{color:#0f172a;border-bottom-color:#3b82f6}
+.ag-country-panel{display:none;padding-top:0.85rem}.ag-country-panel.active{display:block}
+.ag-city-row{background:white;border:1.5px solid #e2e8f0;border-radius:11px;margin-bottom:0.5rem;overflow:hidden}
+.ag-city-h{display:flex;align-items:center;gap:0.7rem;padding:0.72rem 0.9rem;cursor:pointer;transition:background .15s;user-select:none}
+.ag-city-h:hover{background:#f8fafc}
+.ag-city-flag{font-size:1.1rem}
+.ag-city-info{flex:1}
+.ag-city-name{font-size:0.86rem;font-weight:700}
+.ag-city-date{font-size:0.61rem;color:#94a3b8;margin-top:0.04rem}
+.ag-city-badge{font-size:0.59rem;font-weight:700;padding:0.14rem 0.42rem;border-radius:5px;background:#eff6ff;color:#3b82f6;white-space:nowrap;flex-shrink:0}
+.ag-city-badge.drive{background:#fffbeb;color:#d97706}
+.ag-city-body{display:none;padding:0.7rem 0.9rem;border-top:1px solid #f1f5f9}
+.ag-city-row.open .ag-city-body{display:block}
+.ag-city-chevron{font-size:0.65rem;color:#cbd5e1;transition:transform .15s;flex-shrink:0}
+.ag-city-row.open .ag-city-chevron{transform:rotate(180deg)}
+/* Slots */
+.ag-cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.55rem}
+.ag-cal-title{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8}
+.ag-cal-actions{display:flex;gap:0.35rem;flex-wrap:wrap}
+.ag-cal-btn{font-size:0.63rem;font-weight:700;padding:0.22rem 0.55rem;border-radius:6px;border:1.5px solid #e2e8f0;background:white;cursor:pointer;font-family:inherit;transition:all .15s;color:#64748b}
+.ag-cal-btn:hover{border-color:#3b82f6;color:#3b82f6}
+.ag-cal-btn.ai-btn{background:#7c3aed;color:white;border-color:#7c3aed}
+.ag-cal-btn.ai-btn:hover{background:#6d28d9;border-color:#6d28d9}
+.ag-slot{display:flex;border-radius:8px;overflow:hidden;margin-bottom:0.22rem;min-height:34px;border:1.5px solid #e2e8f0;background:white;transition:border-color .15s}
+.ag-slot:focus-within{border-color:#93c5fd}
+.ag-slot-time{font-size:0.61rem;font-weight:700;color:#94a3b8;padding:0.35rem 0.5rem;min-width:42px;background:#f8fafc;display:flex;align-items:center;border-right:1px solid #e2e8f0;flex-shrink:0}
+.ag-slot-content{flex:1;padding:0.28rem 0.5rem;display:flex;align-items:flex-start;gap:0.35rem}
+.ag-slot-text{flex:1;font-size:0.74rem;color:#475569;line-height:1.35;outline:none;border:none;background:transparent;font-family:inherit;min-height:20px;word-break:break-word}
+.ag-slot-text[contenteditable=true]:empty::before{content:attr(data-placeholder);color:#cbd5e1;font-style:italic;pointer-events:none}
+.ag-slot.ag-sleep{background:#f0fdf4;border-color:#86efac}
+.ag-slot.ag-sleep .ag-slot-time{background:#dcfce7;color:#15803d}
+.ag-slot.ag-sleep .ag-slot-text{color:#15803d;font-weight:600}
+.ag-slot.ag-drive{background:#fffbeb;border-color:#fde68a}
+.ag-slot.ag-drive .ag-slot-time{background:#fef3c7;color:#d97706}
+.ag-slot.ag-ai{background:#faf5ff;border-color:#ddd6fe}
+.ag-slot.ag-ai .ag-slot-time{background:#f3e8ff;color:#7c3aed}
+.ag-slot-del{background:none;border:none;color:#e2e8f0;cursor:pointer;font-size:0.72rem;padding:0.18rem 0.25rem;transition:color .15s;flex-shrink:0;align-self:flex-start;margin-top:0.2rem}
+.ag-slot-del:hover{color:#ef4444}
+.ag-add-slot{display:flex;align-items:center;gap:0.4rem;padding:0.35rem 0.5rem;background:#f8fafc;border:1.5px dashed #e2e8f0;border-radius:8px;cursor:pointer;font-size:0.7rem;color:#94a3b8;font-family:inherit;transition:all .15s;width:100%;margin-top:0.28rem}
+.ag-add-slot:hover{border-color:#3b82f6;color:#3b82f6;background:#eff6ff}
+.ag-ai-loading{display:flex;align-items:center;gap:0.45rem;padding:0.55rem 0.65rem;background:#faf5ff;border-radius:8px;font-size:0.71rem;color:#7c3aed;margin-bottom:0.35rem}
+.ag-admin-badge{display:inline-flex;align-items:center;gap:0.28rem;font-size:0.61rem;font-weight:700;padding:0.18rem 0.5rem;border-radius:6px;background:#ecfdf5;color:#059669}
+.ag-admin-badge.locked{background:#fef2f2;color:#ef4444;cursor:pointer}
+.ag-readonly-tip{font-size:0.68rem;color:#94a3b8;text-align:center;padding:0.4rem 0;font-style:italic}
+
 @media(max-width:600px){
   .dgrid{grid-template-columns:repeat(2,1fr)}
   .tl-row.open .tl-body{grid-template-columns:1fr}
@@ -727,11 +777,44 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
   <button class="bnb active" onclick="showView('dashboard',0)"><span class="bnb-i">🏠</span><span class="bnb-l">Inicio</span></button>
   <button class="bnb" onclick="showView('alojamientos',1)"><span class="bnb-i">🛏</span><span class="bnb-l">Alojam.</span></button>
   <button class="bnb" onclick="showView('timeline',2)"><span class="bnb-i">🗺️</span><span class="bnb-l">Ruta</span></button>
+  <button class="bnb" onclick="showView('agenda',3)"><span class="bnb-i">📆</span><span class="bnb-l">Agenda</span></button>
   <button class="bnb" onclick="showView('gastos',4)"><span class="bnb-i">🧾</span><span class="bnb-l">Gastos</span></button>
   <button class="bnb" onclick="showView('notas',5)"><span class="bnb-i">📝</span><span class="bnb-l">Notas</span></button>
-
   <button class="bnb" onclick="showView('checklist',6)"><span class="bnb-i">✅</span><span class="bnb-l">Check</span></button>
   <button class="bnb" onclick="showView('emergencias',7)"><span class="bnb-i">🆘</span><span class="bnb-l">SOS</span></button>
+</div>
+
+
+<!-- AGENDA POR PAISES -->
+<div id="view-agenda" class="view">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;gap:0.5rem">
+    <div>
+      <div class="ptitle">Agenda 📆</div>
+      <div class="psub" style="margin-bottom:0">Horario por ciudad. Basado en el itinerario de Ruta.</div>
+    </div>
+    <span id="ag-admin-badge" class="ag-admin-badge locked" onclick="agRequestAdmin()">🔒 Admin</span>
+  </div>
+
+  <!-- PIN modal -->
+  <div id="ag-pin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999;align-items:center;justify-content:center">
+    <div style="background:white;border-radius:16px;padding:24px;width:280px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+      <div style="font-size:1.5rem;margin-bottom:8px">🔐</div>
+      <div style="font-weight:800;font-size:1rem;margin-bottom:6px">Acceso Admin</div>
+      <div style="font-size:0.76rem;color:#64748b;margin-bottom:16px">PIN para editar la agenda del grupo</div>
+      <input id="ag-pin-input" type="password" placeholder="PIN" maxlength="6"
+        style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px;text-align:center;font-size:1.4rem;letter-spacing:0.4em;outline:none;margin-bottom:12px;font-family:monospace">
+      <div style="display:flex;gap:8px">
+        <button onclick="agCheckPIN()" style="flex:1;background:#0f172a;color:white;border:none;border-radius:8px;padding:10px;font-family:inherit;font-weight:700;cursor:pointer">Entrar</button>
+        <button onclick="document.getElementById('ag-pin-modal').style.display='none'" style="background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px;font-family:inherit;cursor:pointer;flex:1">Cancelar</button>
+      </div>
+      <div id="ag-pin-error" style="color:#ef4444;font-size:0.72rem;margin-top:8px;display:none">PIN incorrecto</div>
+    </div>
+  </div>
+
+  <!-- Tabs de países (se generan dinámicamente desde TL) -->
+  <div class="ag-country-tabs" id="ag-country-tabs"></div>
+  <!-- Paneles -->
+  <div id="ag-panels"></div>
 </div>
 
 <!-- NOMBRE MODAL -->
@@ -1038,6 +1121,8 @@ function showView(name, idx) {
   document.getElementById('view-'+name).classList.add('active');
   var btns = document.querySelectorAll('.bnb');
   if(btns[idx]) btns[idx].classList.add('active');
+  // Regenerar agenda cada vez que se abre (por si cambió el TL)
+  if(name === 'agenda') renderAgenda();
 }
 
 // ===== COUNTDOWN =====
@@ -1514,6 +1599,374 @@ var _openCity = function(cityId) {
   window.scrollTo(0,0);
 }
 
+
+// ===== AGENDA POR PAÍSES =====
+// Detecta el país de cada etapa del TL leyendo la ciudad
+var AG_ADMIN = false;
+var AG_SLOTS = {}; // { 'dayIndex_slotId': text }
+
+// Mapa ciudad keyword → país
+var AG_COUNTRY_MAP = {
+  'Alicante':'ES','Barcelona':'ES','Cartagena':'ES','Murcia':'ES',
+  'Montpellier':'FR','Paris':'FR','Niza':'FR','Nice':'FR','Clermont':'FR','Perpignan':'FR','Lyon':'FR','Marseille':'FR','Marsella':'FR','Colmar':'FR','Bruselas':'BE','Bruselas':'BE',
+  'Milan':'IT','Venecia':'IT','Roma':'IT','Pisa':'IT','Florencia':'IT','Genova':'IT','Bologna':'IT',
+  'Munich':'DE','Colonia':'DE','Berlín':'DE','Berlin':'DE',
+  'Amsterdam':'NL','Bruselas':'BE'
+};
+var AG_COUNTRY_NAMES = {ES:'🇪🇸 España', FR:'🇫🇷 Francia', IT:'🇮🇹 Italia', DE:'🇩🇪 Alemania', BE:'🇧🇪 Bélgica', NL:'🇳🇱 Países Bajos'};
+var AG_FLAGS = {ES:'🇪🇸',FR:'🇫🇷',IT:'🇮🇹',DE:'🇩🇪',BE:'🇧🇪',NL:'🇳🇱'};
+
+// Detecta el país de una entrada TL
+function agGetCountry(tlEntry) {
+  var cities = tlEntry.city;
+  for(var kw in AG_COUNTRY_MAP) {
+    if(cities.indexOf(kw) !== -1) return AG_COUNTRY_MAP[kw];
+  }
+  return 'XX';
+}
+
+// Agrupa TL por país manteniendo orden cronológico
+function agGroupByCountry() {
+  var groups = []; // [{code, name, days:[{tlIdx, tl}]}]
+  var seen = {};
+  TL.forEach(function(entry, idx) {
+    var code = agGetCountry(entry);
+    if(code === 'XX') return;
+    if(!seen[code]) {
+      seen[code] = {code:code, name:AG_COUNTRY_NAMES[code]||code, days:[]};
+      groups.push(seen[code]);
+    }
+    seen[code].days.push({tlIdx:idx, tl:entry});
+  });
+  return groups;
+}
+
+// Clave única para guardar slots en localStorage
+function agKey(tlIdx) { return 'ag_slots_' + tlIdx; }
+
+// Cargar slots guardados
+function agLoadSlots(tlIdx) {
+  try {
+    var raw = localStorage.getItem(agKey(tlIdx));
+    return raw ? JSON.parse(raw) : null;
+  } catch(e) { return null; }
+}
+
+// Guardar slots
+function agSaveSlots(tlIdx, slots) {
+  try { localStorage.setItem(agKey(tlIdx), JSON.stringify(slots)); } catch(e) {}
+}
+
+// Slots por defecto: construidos a partir de las actividades del TL
+function agDefaultSlots(tl) {
+  var slots = [];
+  if(tl.drive) {
+    // Día de conducción: extraer horas de acts
+    tl.acts.forEach(function(act, i) {
+      var match = act.match(/^(\d{1,2}:\d{2})\s+(.*)/);
+      if(match) {
+        slots.push({id:'s'+i, time:match[1], text:match[2], type: act.toLowerCase().indexOf('salida')!==-1||act.toLowerCase().indexOf('conduccion')!==-1?'drive':'normal'});
+      } else {
+        slots.push({id:'s'+i, time:'—', text:act, type:'normal'});
+      }
+    });
+    // Añadir slot DORMIR al final
+    slots.push({id:'sleep', time:'DORMIR', text:'Fin de actividades del día', type:'sleep'});
+  } else {
+    // Día libre: actividades
+    tl.acts.forEach(function(act, i) {
+      var match = act.match(/^(\d{1,2}:\d{2})\s+(.*)/);
+      if(match) {
+        slots.push({id:'s'+i, time:match[1], text:match[2], type:'normal'});
+      } else {
+        slots.push({id:'s'+i, time:'—', text:act, type:'normal'});
+      }
+    });
+    // Encontrar la última hora y añadir DORMIR
+    var lastHour = '23:00';
+    tl.acts.forEach(function(act) {
+      var m = act.match(/^(\d{1,2}:\d{2})/);
+      if(m) lastHour = m[1];
+    });
+    slots.push({id:'sleep', time:'DORMIR', text:'Fin de actividades del día', type:'sleep'});
+  }
+  return slots;
+}
+
+// Renderizar el módulo completo de agenda
+function renderAgenda() {
+  var groups = agGroupByCountry();
+  var tabsEl = document.getElementById('ag-country-tabs');
+  var panelsEl = document.getElementById('ag-panels');
+  if(!tabsEl || !panelsEl) return;
+
+  tabsEl.innerHTML = '';
+  panelsEl.innerHTML = '';
+
+  groups.forEach(function(g, gi) {
+    // Tab
+    var tab = document.createElement('button');
+    tab.className = 'ag-ctab' + (gi===0?' active':'');
+    tab.textContent = g.name;
+    tab.onclick = (function(idx){ return function(){
+      document.querySelectorAll('.ag-ctab').forEach(function(t){t.classList.remove('active');});
+      document.querySelectorAll('.ag-country-panel').forEach(function(p){p.classList.remove('active');});
+      tab.classList.add('active');
+      document.getElementById('ag-panel-'+idx).classList.add('active');
+    }; })(gi);
+    tabsEl.appendChild(tab);
+
+    // Panel
+    var panel = document.createElement('div');
+    panel.className = 'ag-country-panel' + (gi===0?' active':'');
+    panel.id = 'ag-panel-'+gi;
+
+    g.days.forEach(function(d) {
+      panel.appendChild(agBuildCityRow(d.tlIdx, d.tl));
+    });
+
+    panelsEl.appendChild(panel);
+  });
+
+  // Update admin badge
+  var badge = document.getElementById('ag-admin-badge');
+  if(badge) {
+    if(AG_ADMIN) { badge.textContent='🔓 Admin'; badge.className='ag-admin-badge'; }
+    else { badge.textContent='🔒 Admin'; badge.className='ag-admin-badge locked'; }
+  }
+}
+
+// Construye la fila de ciudad con su calendario
+function agBuildCityRow(tlIdx, tl) {
+  var row = document.createElement('div');
+  row.className = 'ag-city-row';
+  row.id = 'ag-row-'+tlIdx;
+
+  var isDrive = tl.drive;
+  var badge = isDrive ? '<span class="ag-city-badge drive">🚗 '+tl.h+'</span>' : '<span class="ag-city-badge">📍 Día libre</span>';
+  if(tl.city.indexOf('Cumpleaños')!==-1||tl.city.indexOf('cumpleanos')!==-1) badge = '<span class="ag-city-badge" style="background:#fdf2f8;color:#db2777">🎂 Cumpleaños</span>';
+
+  row.innerHTML =
+    '<div class="ag-city-h" onclick="agToggleCity('+tlIdx+')">' +
+      '<div class="ag-city-flag">' + (AG_FLAGS[agGetCountryFromIdx(tlIdx)]||'🏳️') + '</div>' +
+      '<div class="ag-city-info">' +
+        '<div class="ag-city-name">' + tl.city + '</div>' +
+        '<div class="ag-city-date">' + tl.date + '</div>' +
+      '</div>' +
+      badge +
+      '<span class="ag-city-chevron">▼</span>' +
+    '</div>' +
+    '<div class="ag-city-body" id="ag-body-'+tlIdx+'"></div>';
+
+  return row;
+}
+
+function agGetCountryFromIdx(tlIdx) {
+  return agGetCountry(TL[tlIdx]);
+}
+
+function agToggleCity(tlIdx) {
+  var row = document.getElementById('ag-row-'+tlIdx);
+  var body = document.getElementById('ag-body-'+tlIdx);
+  if(!row||!body) return;
+  var isOpen = row.classList.contains('open');
+  if(isOpen) { row.classList.remove('open'); return; }
+  row.classList.add('open');
+  agRenderBody(tlIdx);
+}
+
+function agRenderBody(tlIdx) {
+  var body = document.getElementById('ag-body-'+tlIdx);
+  if(!body) return;
+  var tl = TL[tlIdx];
+  var slots = agLoadSlots(tlIdx) || agDefaultSlots(tl);
+
+  var html = '<div class="ag-cal-header">';
+  html += '<span class="ag-cal-title">Horario del día</span>';
+  html += '<div class="ag-cal-actions">';
+  if(AG_ADMIN) {
+    html += '<button class="ag-cal-btn" onclick="agAddSlot('+tlIdx+')">+ Hora</button>';
+    html += '<button class="ag-cal-btn ai-btn" onclick="agAISuggest('+tlIdx+')">✨ IA</button>';
+  } else {
+    html += '<button class="ag-cal-btn" onclick="agRequestAdmin()" title="Requiere PIN admin">✏️ Editar</button>';
+    html += '<button class="ag-cal-btn ai-btn" onclick="agAISuggest('+tlIdx+')">✨ IA</button>';
+  }
+  html += '</div></div>';
+
+  html += '<div id="ag-slots-'+tlIdx+'">';
+  html += agRenderSlots(tlIdx, slots);
+  html += '</div>';
+
+  if(!AG_ADMIN) {
+    html += '<div class="ag-readonly-tip">Solo el admin puede editar · toca ✏️ para ingresar PIN</div>';
+  }
+
+  body.innerHTML = html;
+}
+
+function agRenderSlots(tlIdx, slots) {
+  var html = '';
+  slots.forEach(function(slot, si) {
+    var cls = 'ag-slot';
+    if(slot.type==='sleep') cls += ' ag-sleep';
+    else if(slot.type==='drive') cls += ' ag-drive';
+    else if(slot.type==='ai') cls += ' ag-ai';
+
+    var editable = AG_ADMIN && slot.type !== 'sleep' ? 'true' : 'false';
+    var timeEditable = AG_ADMIN && slot.type !== 'sleep' ? 'true' : 'false';
+    var delBtn = AG_ADMIN && slot.type !== 'sleep' ? '<button class="ag-slot-del" onclick="agDelSlot('+tlIdx+','+si+')">✕</button>' : '';
+    var placeholder = slot.type==='drive' ? 'Actividad de conducción...' : 'Qué haremos...';
+
+    html += '<div class="'+cls+'" id="ag-slot-'+tlIdx+'-'+si+'">';
+    html += '<div class="ag-slot-time" contenteditable="'+timeEditable+'" '+
+            'onblur="agSaveSlotTime('+tlIdx+','+si+',this)" '+
+            'style="cursor:'+(AG_ADMIN&&slot.type!=='sleep'?'text':'default')+'">'+agEsc(slot.time)+'</div>';
+    html += '<div class="ag-slot-content">';
+    html += '<div class="ag-slot-text" contenteditable="'+editable+'" data-placeholder="'+placeholder+'" '+
+            'onblur="agSaveSlotText('+tlIdx+','+si+',this)">'+agEsc(slot.text)+'</div>';
+    html += delBtn;
+    html += '</div></div>';
+  });
+
+  if(AG_ADMIN) {
+    html += '<button class="ag-add-slot" onclick="agAddSlot('+tlIdx+')">+ Añadir hora</button>';
+  }
+  return html;
+}
+
+function agEsc(str) {
+  return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function agSaveSlotText(tlIdx, si, el) {
+  if(!AG_ADMIN) return;
+  var slots = agLoadSlots(tlIdx) || agDefaultSlots(TL[tlIdx]);
+  if(slots[si]) { slots[si].text = el.textContent.trim(); agSaveSlots(tlIdx, slots); }
+}
+
+function agSaveSlotTime(tlIdx, si, el) {
+  if(!AG_ADMIN) return;
+  var slots = agLoadSlots(tlIdx) || agDefaultSlots(TL[tlIdx]);
+  if(slots[si]) { slots[si].time = el.textContent.trim(); agSaveSlots(tlIdx, slots); }
+}
+
+function agAddSlot(tlIdx) {
+  if(!AG_ADMIN) { agRequestAdmin(); return; }
+  var slots = agLoadSlots(tlIdx) || agDefaultSlots(TL[tlIdx]);
+  // Insert before last sleep slot
+  var sleepIdx = -1; slots.forEach(function(s,i){if(s.type==='sleep') sleepIdx=i;});
+  var newSlot = {id:'u'+Date.now(), time:'—', text:'', type:'normal'};
+  if(sleepIdx >= 0) slots.splice(sleepIdx, 0, newSlot);
+  else slots.push(newSlot);
+  agSaveSlots(tlIdx, slots);
+  var slotsEl = document.getElementById('ag-slots-'+tlIdx);
+  if(slotsEl) slotsEl.innerHTML = agRenderSlots(tlIdx, slots);
+  // Focus new slot text
+  setTimeout(function(){
+    var allTexts = document.querySelectorAll('#ag-slots-'+tlIdx+' .ag-slot-text');
+    var target = sleepIdx >= 0 ? allTexts[sleepIdx] : allTexts[allTexts.length-1];
+    if(target) target.focus();
+  }, 50);
+}
+
+function agDelSlot(tlIdx, si) {
+  if(!AG_ADMIN) return;
+  var slots = agLoadSlots(tlIdx) || agDefaultSlots(TL[tlIdx]);
+  if(slots[si] && slots[si].type !== 'sleep') {
+    slots.splice(si, 1);
+    agSaveSlots(tlIdx, slots);
+    var slotsEl = document.getElementById('ag-slots-'+tlIdx);
+    if(slotsEl) slotsEl.innerHTML = agRenderSlots(tlIdx, slots);
+  }
+}
+
+// IA: pide sugerencias a Claude para el día
+function agAISuggest(tlIdx) {
+  var tl = TL[tlIdx];
+  var slots = agLoadSlots(tlIdx) || agDefaultSlots(tl);
+  var slotsEl = document.getElementById('ag-slots-'+tlIdx);
+  if(!slotsEl) return;
+
+  // Mostrar loading
+  slotsEl.innerHTML = '<div class="ag-ai-loading"><span class="sim-spinner"></span>Claude está preparando el horario para ' + tl.city + '...</div>';
+
+  var existingActivities = tl.acts.join(' | ');
+  var prompt = 'Somos 7 amigos en un roadtrip por Europa. El día es: ' + tl.date + ' en ' + tl.city + '. ' +
+    (tl.drive ? 'Es un día de conducción de ' + tl.h + ' / ' + tl.km + ' km. ' : 'Es un día libre para explorar. ') +
+    'Actividades ya planificadas: ' + existingActivities + '. ' +
+    'Genera un horario detallado hora a hora desde la mañana hasta DORMIR. ' +
+    'Para cada actividad indica hora exacta (HH:MM) y descripción breve (máx 60 chars). ' +
+    'La última entrada DEBE ser exactamente: "DORMIR" como hora y "Fin de actividades del día" como texto. ' +
+    'Responde SOLO con JSON válido, sin markdown, sin texto extra. Formato: ' +
+    '[{"time":"08:00","text":"Descripcion","type":"normal"},{"time":"DORMIR","text":"Fin de actividades del día","type":"sleep"}]. ' +
+    'Tipos permitidos: normal, drive (si es traslado en coche). Genera entre 6 y 10 entradas.';
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      messages:[{role:'user', content:prompt}]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var text = (data.content||[]).map(function(b){return b.text||'';}).join('');
+    // Strip markdown if any
+    text = text.replace(/```json|```/g,'').trim();
+    var aiSlots;
+    try { aiSlots = JSON.parse(text); } catch(e) { throw new Error('JSON parse failed: '+text.substring(0,100)); }
+    // Mark as AI
+    aiSlots = aiSlots.map(function(s){ return {id:'ai'+Date.now()+Math.random(), time:s.time, text:s.text, type:s.type||'normal'}; });
+    agSaveSlots(tlIdx, aiSlots);
+    slotsEl.innerHTML = agRenderSlots(tlIdx, aiSlots);
+  })
+  .catch(function(err){
+    console.error('AI error:', err);
+    var slots = agLoadSlots(tlIdx) || agDefaultSlots(tl);
+    slotsEl.innerHTML = agRenderSlots(tlIdx, slots);
+    slotsEl.insertAdjacentHTML('afterbegin','<div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:8px;padding:0.5rem 0.7rem;font-size:0.71rem;color:#dc2626;margin-bottom:0.35rem">No se pudo conectar con la IA. Mostrando horario base.</div>');
+  });
+}
+
+// Admin PIN
+function agRequestAdmin() {
+  var m = document.getElementById('ag-pin-modal');
+  if(!m) return;
+  m.style.display = 'flex';
+  document.getElementById('ag-pin-input').value='';
+  document.getElementById('ag-pin-error').style.display='none';
+  setTimeout(function(){document.getElementById('ag-pin-input').focus();},100);
+}
+function agCheckPIN() {
+  var pin = document.getElementById('ag-pin-input').value;
+  if(pin === ADMIN_PIN) {
+    AG_ADMIN = true;
+    document.getElementById('ag-pin-modal').style.display='none';
+    renderAgenda();
+    // Re-open any currently open city body
+    document.querySelectorAll('.ag-city-row.open').forEach(function(row){
+      var idx = row.id.replace('ag-row-','');
+      agRenderBody(parseInt(idx));
+    });
+    var badge = document.getElementById('ag-admin-badge');
+    if(badge){badge.textContent='🔓 Admin';badge.className='ag-admin-badge';}
+  } else {
+    document.getElementById('ag-pin-error').style.display='block';
+    document.getElementById('ag-pin-input').value='';
+    document.getElementById('ag-pin-input').focus();
+  }
+}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&document.getElementById('ag-pin-modal').style.display==='flex') agCheckPIN();
+});
+
+// Hook: cuando se añade/modifica el TL base, regenerar agenda tabs
+// Esta función se llama desde simSaveAsBase (ya existente) después de guardar
+var _origSimSaveAsBase = typeof simSaveAsBase === 'function' ? simSaveAsBase : null;
+
+
 // ===== INIT =====
 updateCountdown();
 setInterval(updateCountdown, 60000);
@@ -1523,8 +1976,8 @@ renderBudget();
 renderGastos();
 renderNotas();
 renderCL();
-
 renderRuta();
+renderAgenda();
 
 // Load sheet links immediately (Google Sheets for Airbnb links)
 loadSheet();
@@ -2295,6 +2748,7 @@ function simSaveAsBase(){
     simIsModified=false;
     simSaveTL();
     renderTL();
+    renderAgenda(); // Actualizar tabs de países cuando cambia el itinerario
     var s=document.getElementById('ruta-save-btn');
     var d=document.getElementById('ruta-discard-btn');
     if(s) s.style.display='none';
@@ -2523,3 +2977,4 @@ function rutaSetMode(mode){
 </script>
 </body>
 </html>
+
