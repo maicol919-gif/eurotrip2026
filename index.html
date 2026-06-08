@@ -2324,15 +2324,10 @@ function tlDeleteDay(idx){
 var _origSV=showView;
 showView=function(name,idx){
   _origSV(name,idx);
-  if(name==='timeline'){
-    renderTL();
-    // Init sim if not done
-    if(!simRouteInited){ simRouteInited=true; simRenderUnified();simLoadCandidatas();simRenderConductores();simPopulateEndpoints(); }
-  }
-  if(name==='simulador'){ showView('timeline',2); } // redirect
+  if(name==='timeline'){ renderTL(); }
+  if(name==='simulador'){ showView('timeline',2); }
 };
 
-var simRouteInited = false;
 
 function rutaSetMode(mode){
   var verMode = document.getElementById('ruta-ver-mode');
