@@ -363,6 +363,35 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .viajero-del{background:none;border:none;color:#e2e8f0;cursor:pointer;font-size:0.85rem;padding:0;transition:color .15s}
 .viajero-del:hover{color:#ef4444}
 
+
+/* ===== ALERTAS DE TRAMO LARGO ===== */
+.tramo-alert{background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;margin:0.3rem 0 0.5rem 2rem;overflow:hidden}
+.tramo-alert-h{display:flex;align-items:center;gap:0.5rem;padding:0.6rem 0.75rem;cursor:pointer}
+.tramo-alert-h:hover{background:rgba(0,0,0,0.03)}
+.tramo-alert-title{font-size:0.72rem;font-weight:700;color:#d97706;flex:1}
+.tramo-alert-meta{font-size:0.62rem;color:#92400e;background:#fef3c7;padding:0.15rem 0.45rem;border-radius:5px;white-space:nowrap}
+.tramo-alert-body{display:none;padding:0 0.75rem 0.75rem}
+.tramo-alert.open .tramo-alert-body{display:block}
+.tramo-alert.critical{background:#fef2f2;border-color:#fecaca}
+.tramo-alert.critical .tramo-alert-title{color:#dc2626}
+.tramo-alert.critical .tramo-alert-meta{background:#fef2f2;color:#dc2626}
+.parada-opt{background:white;border:1.5px solid #e2e8f0;border-radius:9px;padding:0.6rem 0.7rem;margin-bottom:0.4rem;transition:border-color .15s}
+.parada-opt:hover{border-color:#3b82f6}
+.parada-opt-h{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem}
+.parada-opt-name{font-size:0.78rem;font-weight:700;color:#0f172a;flex:1}
+.parada-opt-dist{font-size:0.62rem;color:#94a3b8;white-space:nowrap}
+.parada-opt-desc{font-size:0.68rem;color:#64748b;line-height:1.4;margin-bottom:0.45rem}
+.parada-opt-actions{display:flex;gap:0.4rem}
+.parada-btn{font-size:0.65rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:7px;border:1.5px solid #e2e8f0;background:white;cursor:pointer;font-family:inherit;transition:all .15s;color:#64748b}
+.parada-btn:hover{border-color:#3b82f6;color:#3b82f6}
+.parada-btn.analizar{background:#7c3aed;color:white;border-color:#7c3aed}
+.parada-btn.analizar:hover{background:#6d28d9}
+.parada-btn.anadir{background:#0f172a;color:white;border-color:#0f172a}
+.parada-btn.anadir:hover{background:#1e293b}
+.parada-analysis{background:#faf5ff;border:1px solid #ddd6fe;border-radius:8px;padding:0.6rem 0.7rem;margin-top:0.35rem;font-size:0.7rem;color:#475569;line-height:1.5;display:none}
+.parada-analysis.show{display:block}
+.parada-analysis-loading{display:flex;align-items:center;gap:0.4rem;color:#7c3aed;font-size:0.7rem}
+
 @media(max-width:640px){
   /* Base */
   body{font-size:15px}
@@ -3748,6 +3777,13 @@ document.addEventListener('click', function(e) {
   // Remove ruta city
   var remRuta = t.closest('[data-removeruta]');
   if(remRuta) { e.stopPropagation(); removeRuta(parseInt(remRuta.getAttribute('data-removeruta'))); return; }
+
+  // Insert parada into route (from fallback analysis card)
+  var insertParada = t.closest('[data-insertcity]');
+  if(insertParada) {
+    simInsertParada(insertParada.getAttribute('data-insertcity'), parseInt(insertParada.getAttribute('data-insertpos')));
+    return;
+  }
 });
 
 
@@ -4391,6 +4427,300 @@ function rutaFullRefresh() {
   renderRiesgos('home-riesgos');
 }
 
+
+// ===== PARADAS SUGERIDAS POR TRAMO =====
+// Base de datos de paradas intermedias reales por tramo
+var PARADAS_DB = {
+  'alicante|montpellier': [
+    {id:'barcelona', name:'Barcelona', dist:'~3h desde Alicante', desc:'Ciudad imprescindible. Barrio Gótico, La Barceloneta, Sagrada Familia (exterior). Perfecto para almorzar y estirar las piernas.', pros:'Gran ciudad, fácil aparcamiento en periferia, mucho que ver en 1-2h', contras:'Puede tentarte a quedarte más. ZBE en algunas zonas.'},
+    {id:'tarragona', name:'Tarragona', dist:'~2h desde Alicante', desc:'Ciudad romana con anfiteatro junto al mar. Más tranquila que Barcelona, ideal para una parada rápida con historia.', pros:'Poco concurrida, muy cerca del mar, ruinas romanas gratuitas', contras:'Menos opciones de restauración que Barcelona'}
+  ],
+  'montpellier|paris': [
+    {id:'clermont', name:'Clermont-Ferrand', dist:'~4h desde Montpellier', desc:'Ciudad bajo el volcán Puy de Dôme. Ideal para almorzar con vistas al paisaje volcánico único de Francia.', pros:'Paisaje espectacular, buena gastronomía, buen punto medio del trayecto', contras:'Requiere salir de la autopista ~20 min'},
+    {id:'lyon', name:'Lyon', dist:'~3h desde Montpellier', desc:'Capital gastronómica de Francia. Bouchons lyonnais para comer bien. Casco histórico Patrimonio UNESCO.', pros:'Excelente comida, muy bien ubicada en ruta, fácil aparcamiento', contras:'Puede tener tráfico en horas punta'},
+    {id:'vichy', name:'Vichy', dist:'~4.5h desde Montpellier', desc:'Ciudad balneario histórica a orillas del Allier. Arquitectura belle époque y parques para descansar.', pros:'Tranquila, buena parada de descanso, bonito paseo fluvial', contras:'Menos conocida, menor oferta gastronómica'}
+  ],
+  'paris|colmar': [
+    {id:'reims', name:'Reims', dist:'~1.5h desde París', desc:'Capital del champagne con catedral gótica impresionante. Las bodegas ofrecen visitas guiadas con degustación.', pros:'Catedral espectacular, champagne, muy cerca de París', contras:'Alarga el trayecto si se quiere visitar bodegas'},
+    {id:'nancy', name:'Nancy', dist:'~3h desde París', desc:'Joya del arte nouveau con la magnífica Place Stanislas (Patrimonio UNESCO). Perfecta parada cultural.', pros:'Place Stanislas es impresionante, buena gastronomía, poco masificada', contras:'Ligeramente fuera de la ruta directa'}
+  ],
+  'colmar|milan': [
+    {id:'zurich', name:'Zúrich', dist:'~2h desde Colmar', desc:'Ciudad suiza limpia y eficiente. Lago Zúrich, casco antiguo (Altstadt), Bahnhofstrasse. Cara pero vistosa.', pros:'Muy bonita, lago impresionante, bien comunicada', contras:'Cara, requiere vignette suiza (40€/año), puede tentar a parar demasiado'},
+    {id:'berna', name:'Berna', dist:'~2.5h desde Colmar', desc:'Capital suiza con arquitectura medieval y osos. Los famosos pórticos cubiertos (Lauben) son únicos.', pros:'Menos turística que Zúrich, auténtica, muy fotogénica', contras:'Requiere vignette suiza, desvío respecto a ruta directa'}
+  ],
+  'milan|venecia': [
+    {id:'brescia', name:'Brescia', dist:'~1.5h desde Milán', desc:'Ciudad romana con excelente museo y castillo. La más ignorada de Italia del Norte, perfecta parada rápida.', pros:'Sin colas, fácil aparcamiento, muy auténtica', contras:'Menos conocida, puede pasar desapercibida para el grupo'},
+    {id:'verona', name:'Verona', dist:'~1.5h desde Milán', desc:'Ciudad de Romeo y Julieta con arena romana impresionante. Centro histórico compacto y muy fotogénico.', pros:'Muy bonita, arena romana gratuita exterior, bien ubicada', contras:'Centro sin coches, aparcamiento en periferia'}
+  ],
+  'venecia|roma': [
+    {id:'bologna', name:'Bolonia', dist:'~2.5h desde Venecia', desc:'Capital gastronómica de Italia: tagliatelle al ragù, tortellini, mortadela. Universidad más antigua del mundo.', pros:'Mejor comida de Italia, torres medievales, muy auténtica', contras:'Nada malo, es imprescindible'},
+    {id:'florencia', name:'Florencia', dist:'~3h desde Venecia', desc:'Cuna del Renacimiento. Duomo, Ponte Vecchio, Uffizi (reservar). Una de las ciudades más bellas del mundo.', pros:'Absolutamente impresionante, muchos iconos en zona compacta', contras:'Muy masificada en julio, ZTL estricta, reservar museos con semanas de antelación'},
+    {id:'pisa', name:'Pisa', dist:'~3.5h desde Venecia', desc:'La Torre inclinada en 20 min. No hace falta más. Parada rápida efectiva antes de seguir a Roma.', pros:'Foto icónica, muy rápida la visita, no hay que entrar', contras:'Solo la torre, el resto de la ciudad es discreta'}
+  ],
+  'roma|niza': [
+    {id:'genova', name:'Génova', dist:'~5h desde Roma', desc:'Puerto histórico, pesto original, caruggi medievales. La ciudad más auténtica de la Riviera italiana.', pros:'Pesto y focaccia auténticos, puerto medieval, bien ubicada', contras:'Conducción por el puerto puede ser complicada'},
+    {id:'sanremo', name:'Sanremo', dist:'~6.5h desde Roma', desc:'Ciudad del Festival de la canción con casino Belle Époque y Riviera de Poniente. Frontera con Francia a 20 min.', pros:'Muy bonita, playa, casino, última parada antes de Francia', contras:'Muy cerca de Niza, puede no merecer la parada si se llega tarde'}
+  ],
+  'niza|alicante': [
+    {id:'marsella', name:'Marsella', dist:'~2.5h desde Niza', desc:'Puerto multicultural con el MuCEM y el Chateau d If (de El Conde de Montecristo). Bouillabaisse imprescindible.', pros:'Carácter único, puerto viejo impresionante, buena gastronomía', contras:'Ciudad grande, tráfico complejo'},
+    {id:'montpellier', name:'Montpellier', dist:'~3.5h desde Niza', desc:'Ya conocida de la ida. Perfecto punto de descanso para el tramo final. Llenar depósito aquí.', pros:'Ya se conoce, fácil de navegar, buen punto para repostar', contras:'Sin sorpresas nuevas'},
+    {id:'perpignan', name:'Perpiñán', dist:'~4h desde Niza', desc:'Última ciudad francesa antes de La Junquera. Carácter catalán-francés único, catedral, palacio de los Reyes de Mallorca.', pros:'Muy cerca de España, buena parada de descanso, carácter especial', contras:'Pequeña, menos oferta que Montpellier'}
+  ]
+};
+
+// Build key for PARADAS_DB (normalized)
+function paradasKey(from, to) {
+  var k1 = from+'|'+to, k2 = to+'|'+from;
+  return PARADAS_DB[k1] ? k1 : (PARADAS_DB[k2] ? k2 : null);
+}
+
+// Build the tramo alert element
+function simMakeTramoAlert(fromId, toId, insertIdx, hours, km) {
+  var key = paradasKey(fromId, toId);
+  var isCritical = hours > 7;
+  var hStr = Math.floor(hours)+'h'+(Math.round((hours%1)*60)>0?' '+Math.round((hours%1)*60)+'min':'');
+
+  var wrap = document.createElement('div');
+  wrap.className = 'tramo-alert' + (isCritical?' critical':'');
+
+  // Header — clickable to expand
+  var hdr = document.createElement('div');
+  hdr.className = 'tramo-alert-h';
+  hdr.innerHTML =
+    '<span style="font-size:0.9rem">'+(isCritical?'🔴':'🟠')+'</span>'+
+    '<span class="tramo-alert-title">Tramo largo: '+(SIM_NAMES[fromId]||fromId)+' → '+(SIM_NAMES[toId]||toId)+'</span>'+
+    '<span class="tramo-alert-meta">'+hStr+' · '+km+'km</span>'+
+    '<span style="font-size:0.65rem;color:#94a3b8;margin-left:0.3rem">▼</span>';
+  hdr.addEventListener('click', function() {
+    wrap.classList.toggle('open');
+  });
+  wrap.appendChild(hdr);
+
+  // Body
+  var body = document.createElement('div');
+  body.className = 'tramo-alert-body';
+
+  var intro = document.createElement('div');
+  intro.style.cssText = 'font-size:0.7rem;color:#92400e;margin-bottom:0.6rem;line-height:1.4';
+  intro.textContent = isCritical
+    ? 'Tramo crítico de más de 7h sin parada. Se recomienda añadir al menos una parada para descanso del conductor y el grupo.'
+    : 'Tramo de más de 4h. Considera añadir una parada intermedia para descanso y aprovechar el recorrido.';
+  body.appendChild(intro);
+
+  var paradas = key ? PARADAS_DB[key] : [];
+
+  if(!paradas.length) {
+    // No DB data — offer AI suggestions
+    var aiBtn = document.createElement('button');
+    aiBtn.className = 'parada-btn analizar';
+    aiBtn.style.cssText += ';width:100%;padding:0.5rem';
+    aiBtn.textContent = '✨ Sugerir paradas con IA';
+    aiBtn.addEventListener('click', function() {
+      simSuggestParadasIA(fromId, toId, insertIdx, body);
+    });
+    body.appendChild(aiBtn);
+  } else {
+    paradas.forEach(function(p) {
+      body.appendChild(simMakeParadaOpt(p, fromId, toId, insertIdx));
+    });
+
+    // Always offer AI for more options
+    var moreBtn = document.createElement('button');
+    moreBtn.style.cssText = 'width:100%;padding:0.4rem;background:none;border:1.5px dashed #e2e8f0;border-radius:8px;font-family:inherit;font-size:0.67rem;color:#94a3b8;cursor:pointer;margin-top:0.2rem';
+    moreBtn.textContent = '✨ Ver más opciones con IA';
+    moreBtn.addEventListener('click', function() {
+      simSuggestParadasIA(fromId, toId, insertIdx, body);
+    });
+    body.appendChild(moreBtn);
+  }
+
+  wrap.appendChild(body);
+  return wrap;
+}
+
+// Build individual parada option card
+function simMakeParadaOpt(p, fromId, toId, insertIdx) {
+  var card = document.createElement('div');
+  card.className = 'parada-opt';
+
+  card.innerHTML =
+    '<div class="parada-opt-h">'+
+      '<span class="parada-opt-name">📍 '+p.name+'</span>'+
+      '<span class="parada-opt-dist">'+p.dist+'</span>'+
+    '</div>'+
+    '<div class="parada-opt-desc">'+p.desc+'</div>';
+
+  var actions = document.createElement('div');
+  actions.className = 'parada-opt-actions';
+
+  // Analizar button
+  var analBtn = document.createElement('button');
+  analBtn.className = 'parada-btn analizar';
+  analBtn.textContent = '🔍 Analizar';
+  analBtn.addEventListener('click', function() {
+    simAnalizarParada(p, fromId, toId, insertIdx, card);
+  });
+  actions.appendChild(analBtn);
+
+  // Añadir button (adds to route)
+  if(p.id && SIM_NAMES[p.id]) {
+    var addBtn = document.createElement('button');
+    addBtn.className = 'parada-btn anadir';
+    addBtn.textContent = '+ Añadir a ruta';
+    addBtn.addEventListener('click', function() {
+      simInsertParada(p.id, insertIdx + 1);
+    });
+    actions.appendChild(addBtn);
+  }
+
+  card.appendChild(actions);
+
+  // Analysis result area
+  var analysisEl = document.createElement('div');
+  analysisEl.className = 'parada-analysis';
+  card.appendChild(analysisEl);
+
+  return card;
+}
+
+// Analyze a parada with AI
+function simAnalizarParada(p, fromId, toId, insertIdx, card) {
+  var analysisEl = card.querySelector('.parada-analysis');
+  if(!analysisEl) return;
+
+  analysisEl.className = 'parada-analysis show';
+  analysisEl.innerHTML = '<div class="parada-analysis-loading"><span class="sim-spinner"></span>Analizando '+p.name+'...</div>';
+
+  // Calculate impact
+  var kmWithStop = simGetKm(fromId, p.id || fromId) + simGetKm(p.id || fromId, toId);
+  var kmDirect   = simGetKm(fromId, toId);
+  var extraKm    = Math.round(kmWithStop - kmDirect);
+  var extraH     = (simGetHours(fromId, p.id||fromId) + simGetHours(p.id||fromId, toId) - simGetHours(fromId, toId));
+  var extraHStr  = extraH > 0 ? '+'+Math.round(extraH*60)+'min' : 'sin desvío';
+
+  var prompt = 'Somos 7 amigos en un roadtrip por Europa en coche. Vamos de '+
+    (SIM_NAMES[fromId]||fromId)+' a '+(SIM_NAMES[toId]||toId)+
+    ' ('+simGetKm(fromId,toId)+'km, '+Math.round(simGetHours(fromId,toId))+'h de conducción). '+
+    'Estamos evaluando hacer una parada en '+p.name+'. '+
+    'Impacto en ruta: '+extraHStr+', '+Math.abs(extraKm)+'km '+(extraKm>0?'extra':'menos')+'. '+
+    'Información base: '+p.desc+' | Pros: '+p.pros+' | Contras: '+p.contras+'. '+
+    'Es julio, somos 7 personas de 25-35 años, viaje en 2 coches. '+
+    'Dame un análisis directo y útil: '+
+    '1) ¿Qué hacer exactamente en '+p.name+' en 45-90 min? (con detalles prácticos: dónde aparcar, qué ver, qué comer) '+
+    '2) Impacto real en el itinerario del día '+
+    '3) Veredicto claro: CONVIENE / CONVIENE CON AJUSTES / NO CONVIENE, con justificación de 2 líneas. '+
+    'Responde en español, máximo 200 palabras, tono directo y práctico.';
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 400,
+      messages: [{role:'user', content:prompt}]
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    var text = (data.content||[]).map(function(b){return b.text||'';}).join('').trim();
+    if(!text) throw new Error('empty');
+
+    // Parse veredicto
+    var veredicto = 'CONVIENE CON AJUSTES';
+    var verColor = '#d97706';
+    if(text.indexOf('NO CONVIENE') !== -1) { veredicto='NO CONVIENE'; verColor='#dc2626'; }
+    else if(text.indexOf('CONVIENE CON AJUSTES') !== -1) { veredicto='CONVIENE CON AJUSTES'; verColor='#d97706'; }
+    else if(text.indexOf('CONVIENE') !== -1) { veredicto='CONVIENE'; verColor='#16a34a'; }
+
+    // Clean text from veredicto keywords for display
+    var cleanText = text
+      .replace(/VEREDICTO[:\s]*/gi,'')
+      .replace(/NO CONVIENE/g,'')
+      .replace(/CONVIENE CON AJUSTES/g,'')
+      .replace(/CONVIENE/g,'')
+      .trim();
+
+    analysisEl.innerHTML =
+      '<div style="font-size:0.72rem;font-weight:800;color:'+verColor+';margin-bottom:0.4rem;padding:0.25rem 0.5rem;background:'+verColor+'1a;border-radius:6px;display:inline-block">'+veredicto+'</div>'+
+      '<div style="font-size:0.7rem;color:#475569;line-height:1.5;margin-top:0.3rem">'+cleanText.replace(/\n/g,'<br>')+'</div>';
+
+    // Show "añadir" button if not conviene
+    if(veredicto !== 'NO CONVIENE' && p.id && SIM_NAMES[p.id]) {
+      var addBtn2 = document.createElement('button');
+      addBtn2.className = 'parada-btn anadir';
+      addBtn2.style.cssText = 'margin-top:0.5rem;width:100%';
+      addBtn2.textContent = '+ Añadir '+p.name+' a la ruta';
+      addBtn2.addEventListener('click', function() {
+        simInsertParada(p.id, insertIdx + 1);
+      });
+      analysisEl.appendChild(addBtn2);
+    }
+  })
+  .catch(function() {
+    // Fallback: show basic analysis without AI
+    var extraHStr2 = extraH > 0 ? '+'+Math.round(extraH*60)+' min' : 'sin desvío significativo';
+    analysisEl.innerHTML =
+      '<div style="font-size:0.72rem;font-weight:800;color:#d97706;margin-bottom:0.35rem">CONVIENE CON AJUSTES</div>'+
+      '<div style="font-size:0.7rem;color:#475569;line-height:1.5">'+
+        '<strong>'+p.name+'</strong> rompe el tramo largo en un punto natural. '+
+        'Impacto: '+extraHStr2+' en el día. '+
+        p.pros+'. Tener en cuenta: '+p.contras+
+      '</div>'+
+      (p.id && SIM_NAMES[p.id] ?
+        '<button class="parada-btn anadir" data-insertcity="'+p.id+'" data-insertpos="'+(insertIdx+1)+'" style="margin-top:0.5rem;width:100%">+ A\xf1adir '+p.name+' a la ruta</button>' : '');
+  });
+}
+
+// Insert parada into simRoute at position
+function simInsertParada(cityId, pos) {
+  if(simRoute.indexOf(cityId) !== -1) {
+    simShowMsg(SIM_NAMES[cityId]+' ya está en la ruta.');
+    return;
+  }
+  simRoute.splice(pos, 0, cityId);
+  simMarkModified();
+  simRenderUnified();
+  simDrawMap();
+  simShowMsg('✅ '+SIM_NAMES[cityId]+' añadida a la ruta como parada.');
+}
+
+// AI suggestions for tramos without DB data
+function simSuggestParadasIA(fromId, toId, insertIdx, body) {
+  var loadEl = document.createElement('div');
+  loadEl.className = 'parada-analysis-loading';
+  loadEl.innerHTML = '<span class="sim-spinner"></span>Buscando paradas entre '+(SIM_NAMES[fromId]||fromId)+' y '+(SIM_NAMES[toId]||toId)+'...';
+  body.appendChild(loadEl);
+
+  var prompt = 'Somos 7 amigos en roadtrip por Europa de '+
+    (SIM_NAMES[fromId]||fromId)+' a '+(SIM_NAMES[toId]||toId)+
+    ' en coche. Sugiere 3 paradas intermedias reales que queden bien en ruta. '+
+    'Para cada una: nombre, qué hacer en 1h máximo, y si conviene o no. '+
+    'Responde SOLO en JSON: [{"name":"Ciudad","desc":"qué hacer","pros":"ventaja","contras":"desventaja","dist":"tiempo desde origen"}]. '+
+    'Sin markdown, sin texto extra.';
+
+  fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:600,
+      messages:[{role:'user', content:prompt}]
+    })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data) {
+    var text = (data.content||[]).map(function(b){return b.text||'';}).join('').replace(/```json|```/g,'').trim();
+    var paradas = JSON.parse(text);
+    loadEl.remove();
+    paradas.forEach(function(p) {
+      body.appendChild(simMakeParadaOpt(p, fromId, toId, insertIdx));
+    });
+  })
+  .catch(function() {
+    loadEl.innerHTML = '⚠️ No se pudo conectar con la IA. Revisa tu conexión.';
+  });
+}
+
 // ===== INIT =====
 updateCountdown();
 setInterval(updateCountdown, 60000);
@@ -4830,6 +5160,12 @@ function simRenderUnified(){
     };
 
     el.appendChild(row);
+
+    // ── ALERTA DE TRAMO LARGO (>4h en coche) ──────────────────
+    if(!isLast && h > 4 && mode === 'coche') {
+      var alertEl = simMakeTramoAlert(cityId, simRoute[i+1], i, h, km);
+      if(alertEl) el.appendChild(alertEl);
+    }
   });
 
   // If candidate should go at end
