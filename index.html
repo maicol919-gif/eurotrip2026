@@ -1128,9 +1128,7 @@ function updateHeaderRoute() {
     return 'XX';
   }
 
-  // Recoger todas las ciudades en orden cronológico, sin repetir
-  var allCities = [];
-  var seenCity  = {};
+  var allCities = [], seenCity = {};
 
   function addCity(name) {
     var n = name.trim().replace(/\s+/g,' ');
@@ -1142,20 +1140,18 @@ function updateHeaderRoute() {
   }
 
   TL.forEach(function(entry) {
-    // Fuente 1: título del día dividido por " - "
     entry.city.split(' - ').forEach(function(part) {
       addCity(part.replace(/\(.*?\)/g,'').replace(/[—–].*/,'').trim());
     });
-    // Fuente 2: acts con "Salida desde X" o "Llegada X"
     (entry.acts || []).forEach(function(act) {
-      var mS = act.match(/Salida desde ([A-ZÁÉÍÓÚÑ][^\s—(]+(?:\s[A-ZÁÉÍÓÚÑ][^\s—(]+)*)/);
-      var mL = act.match(/Llegada ([A-ZÁÉÍÓÚÑ][^\s—(]+(?:\s[A-ZÁÉÍÓÚÑ][^\s—(]+)*)/);
+      var mS = act.match(/Salida desde ([A-Z][a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+?)(?:\s*—|\s*\(|$)/);
+      var mL = act.match(/Llegada ([A-Z][a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+?)(?:\s*—|\s*\(|$)/);
       if(mS) addCity(mS[1]);
       if(mL) addCity(mL[1]);
     });
   });
 
-  // Fila 1: países únicos en orden de aparición
+  // Fila 1: países — usando data-attr + listener delegado
   var cel = document.getElementById('header-countries');
   if(cel) {
     var countries = [], seenC = {};
@@ -1163,24 +1159,26 @@ function updateHeaderRoute() {
       if(!seenC[c.country]) { seenC[c.country]=true; countries.push(c.country); }
     });
     cel.innerHTML = countries.map(function(code, i) {
-      var span = document.createElement('span');
-      span.className = 'hcountry';
-      span.textContent = CNAMES[code];
-      span.onclick = (function(c){ return function(){ agOpenCountry(c); }; })(code);
-      return (i>0?'<span class="hcountry-arr">→</span>':'') + span.outerHTML;
+      return (i>0?'<span class="hcountry-arr">→</span>':'')+
+        '<span class="hcountry" data-country="'+code+'">'+CNAMES[code]+'</span>';
     }).join('');
+    // Attach listeners after innerHTML
+    cel.querySelectorAll('[data-country]').forEach(function(el) {
+      el.addEventListener('click', function(){ agOpenCountry(this.getAttribute('data-country')); });
+    });
   }
 
-  // Fila 2: todas las ciudades
+  // Fila 2: ciudades — usando data-attr + listener delegado
   var el = document.getElementById('header-route');
   if(el) {
     el.innerHTML = allCities.map(function(c, i) {
-      var span = document.createElement('span');
-      span.className = 'hcity';
-      span.textContent = c.name;
-      span.onclick = (function(n){ return function(){ openCity(n); }; })(c.name);
-      return (i>0?'<span class="harr">→</span>':'') + span.outerHTML;
+      return (i>0?'<span class="harr">→</span>':'')+
+        '<span class="hcity" data-cityname="'+c.name+'">'+c.name+'</span>';
     }).join('');
+    // Attach listeners after innerHTML
+    el.querySelectorAll('[data-cityname]').forEach(function(span) {
+      span.addEventListener('click', function(){ openCity(this.getAttribute('data-cityname')); });
+    });
   }
 }
 // Ir a la pestaña de ese país en Agenda
