@@ -1415,36 +1415,38 @@ var NOTAS = {
 };
 
 var CL_DATA = [
-  {s:'Urgente — reservar ya', items:[
-    {t:'Billetes tren Milan a Venecia a Roma (trenitalia.com)', own:'Alguien'},
-    {t:'Billetes tren Roma a Milan de vuelta', own:'Alguien'},
-    {t:'Entradas Coliseo — coopculture.it', own:'Marco'},
-    {t:'Entradas Vaticano — museivaticani.va', own:'Marco'},
-    {t:'Confirmar y reservar Airbnb Paris (2 noches)', own:'Todos'},
-    {t:'Confirmar y reservar Airbnb Roma (2 noches)', own:'Todos'},
-    {t:'Parking Milan para 2 coches', own:'Carlos'}
+  {s:'Urgente — hacer ya', items:[
+    {t:'Entradas Coliseo — coopculture.it (agotadas en verano)', own:'Marco', prio:'urgente'},
+    {t:'Entradas Vaticano — museivaticani.va (reservar con semanas)', own:'Marco', prio:'urgente'},
+    {t:'Confirmar y reservar Airbnb Paris (2 noches)', own:'Todos', prio:'urgente'},
+    {t:'Confirmar y reservar Airbnb Roma (2 noches, cumple el 19)', own:'Todos', prio:'urgente'},
+    {t:'Confirmar resto de Airbnbs del itinerario', own:'Todos', prio:'urgente'},
+    {t:'Reservar parking en Venecia — Piazzale Roma o Tronchetto', own:'Carlos', prio:'urgente'}
   ]},
   {s:'Antes del viaje', items:[
-    {t:'Confirmar numero final de viajeros', own:'Todos'},
-    {t:'Contratar seguro de viaje europeo', own:'Carlos'},
-    {t:'Revisar vigencia de DNI y pasaportes', own:'Todos'},
-    {t:'Descargar Google Maps offline de cada ciudad', own:'Todos'},
-    {t:'Crear fondo comun en Revolut o Bizum', own:'Lucia'},
-    {t:'Revisar seguro del coche para Europa', own:'Conductores'},
-    {t:'Chaleco y triangulo en ambos coches', own:'Conductores'},
-    {t:'Definir turnos de conduccion por etapa', own:'Grupo'}
+    {t:'Contratar seguro de viaje europeo (todos)', own:'Todos', prio:'importante'},
+    {t:'Revisar vigencia de DNI y pasaportes (minimo 6 meses)', own:'Todos', prio:'importante'},
+    {t:'Solicitar pegatina Crit Air para Paris — critair.fr (~4€, 2 semanas de antelacion)', own:'Conductores', prio:'importante'},
+    {t:'Descargar Google Maps offline: Alicante, Montpellier, Paris, Colmar, Milan, Venecia, Roma, Niza', own:'Todos', prio:'normal'},
+    {t:'Crear fondo comun en Revolut o Bizum para gastos grupales', own:'Lucia', prio:'importante'},
+    {t:'Revisar seguro del coche para cobertura en Francia e Italia', own:'Conductores', prio:'importante'},
+    {t:'Chaleco reflectante y triangulos en ambos coches (obligatorio FR e IT)', own:'Conductores', prio:'normal'},
+    {t:'Definir turnos de conduccion por etapa', own:'Todos', prio:'normal'},
+    {t:'Instalar Waze y Google Maps en todos los telefonos', own:'Todos', prio:'normal'},
+    {t:'Llevar tarjeta de credito para peajes (Francia e Italia tienen peajes)', own:'Todos', prio:'normal'}
   ]},
   {s:'Durante el viaje', items:[
-    {t:'Check-in en cada alojamiento al llegar', own:'Todos'},
-    {t:'Registrar gastos compartidos cada dia', own:'Sofia'},
-    {t:'Llenar deposito antes de entrar en Italia', own:'Conductor'},
-    {t:'Foto grupal en cada ciudad', own:'Diego'},
-    {t:'No entrar con coche al centro de Roma o Milan (ZTL)', own:'Conductor'}
+    {t:'Check-in en cada alojamiento al llegar', own:'Todos', prio:'normal'},
+    {t:'Registrar gastos compartidos cada dia', own:'Sofia', prio:'normal'},
+    {t:'Llenar deposito en Francia antes de cruzar a Espana (mas barato)', own:'Conductor', prio:'importante'},
+    {t:'Foto grupal en cada ciudad', own:'Diego', prio:'normal'},
+    {t:'No entrar con coche al centro de Roma ni Milan (ZTL — multa automatica)', own:'Conductor', prio:'urgente'},
+    {t:'Verificar parking antes de entrar a Roma — usar Parcheggio periférico', own:'Conductor', prio:'importante'}
   ]},
   {s:'De vuelta', items:[
-    {t:'Check-out de todos los alojamientos', own:'Todos'},
-    {t:'Balance final de gastos del grupo', own:'Sofia'},
-    {t:'Recuperar coches del parking de Milan', own:'Conductores'}
+    {t:'Check-out de todos los alojamientos', own:'Todos', prio:'normal'},
+    {t:'Balance final de gastos del grupo', own:'Sofia', prio:'normal'},
+    {t:'Compartir fotos y videos del viaje con el grupo', own:'Todos', prio:'normal'}
   ]}
 ];
 
