@@ -1336,7 +1336,7 @@ function renderRuta() {
     return (i>0?'<span style="font-size:0.6rem;color:#94a3b8;align-self:center">→</span>':'') +
       '<span style="display:inline-flex;align-items:center;gap:0.25rem;background:#f1f5f9;border-radius:6px;padding:0.2rem 0.45rem;font-size:0.68rem;font-weight:600;cursor:pointer" onclick="openCity(\'' + c + '\')">' +
       CITY_FLAGS[c]+' '+CITY_NAMES[c]+
-      '<span onclick="event.stopPropagation();removeRuta('+i+')" style="color:#94a3b8;margin-left:0.15rem;font-size:0.7rem;line-height:1">×</span></span>';
+      '<span data-removeruta="'+i+'" style="color:#94a3b8;margin-left:0.15rem;font-size:0.7rem;line-height:1">×</span></span>';
   }).join('');
   // Also update header route
   updateHeaderRoute();
@@ -1534,9 +1534,9 @@ function renderCities() {
     else    { html += '<div class="ldesc">Proximamente</div>'; }
     html += '</div>';
     html += '<div class="vrow">';
-    html += '<button class="vb '+vy+'" onclick="vote(\''+c.id+'\',\'y\')">👍 Me apunto</button>';
-    html += '<button class="vb '+vf+'" onclick="vote(\''+c.id+'\',\'f\')">⭐ Favorita</button>';
-    html += '<button class="vb '+vn+'" onclick="vote(\''+c.id+'\',\'n\')">👎 No</button>';
+    html += '<button class="vb '+vy+'" data-voteid="'+c.id+'" data-votetype="y">👍 Me apunto</button>';
+    html += '<button class="vb '+vf+'" data-voteid="'+c.id+'" data-votetype="f">⭐ Favorita</button>';
+    html += '<button class="vb '+vn+'" data-voteid="'+c.id+'" data-votetype="n">👎 No</button>';
     html += '</div></div></div>';
   });
   document.getElementById('city-blocks').innerHTML = html;
@@ -1641,8 +1641,8 @@ function renderTL(tlData, containerId) {
     var prefix = containerId ? 'sim-tl-' : 'tl';
     // Delete button always visible in TL (not in preview containers), PIN requested on click
     var delBtn = !containerId ?
-      '<button onclick="event.stopPropagation();tlDeleteDay('+i+')" style="background:none;border:1px solid #fecaca;color:#ef4444;border-radius:6px;padding:0.15rem 0.45rem;font-size:0.62rem;cursor:pointer;font-family:inherit;margin-left:4px;flex-shrink:0;opacity:0.6" title="Eliminar (requiere PIN admin)">✕</button>' : '';
-    return '<div class="tl-row" id="'+prefix+i+'" onclick="toggleTL(this)">'+
+      '<button data-tldel="'+i+'" style="background:none;border:1px solid #fecaca;color:#ef4444;border-radius:6px;padding:0.15rem 0.45rem;font-size:0.62rem;cursor:pointer;font-family:inherit;margin-left:4px;flex-shrink:0;opacity:0.6" title="Eliminar (requiere PIN admin)">✕</button>' : '';
+    return '<div class="tl-row" id="'+prefix+i+'" data-tltoggle="1">'+
       '<div class="tl-h"><div class="tl-date">'+d.date+'</div>'+
       '<div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>'+
       '<div class="tl-city" style="flex:1">'+d.city+'</div>'+
@@ -1974,7 +1974,7 @@ function renderGastos() {
 function renderNotas() {
   var cities = Object.keys(NOTAS);
   document.getElementById('ntabs').innerHTML = cities.map(function(c){
-    return '<button class="ntab'+(activeNota===c?' active':'')+'" onclick="setNota(\''+c+'\')">'+c+'</button>';
+    return '<button class="ntab'+(activeNota===c?' active':'')+' data-nota-key" data-notakey="'+c+'">'+c+'</button>';
   }).join('');
   var n = NOTAS[activeNota];
   var secs = [{t:'Restaurantes',k:'rest'},{t:'Lugares imprescindibles',k:'lug'},{t:'Consejos',k:'cons'}];
@@ -1996,7 +1996,7 @@ function renderCL() {
       ' <span style="margin-left:auto;font-size:0.6rem;background:#f1f5f9;padding:0.1rem 0.35rem;border-radius:4px;color:#64748b">'+d+'/'+sec.items.length+'</span></div>'+
       sec.items.map(function(item,ii){
         var dk=clDone[si+'_'+ii];
-        return '<div class="cl-i'+(dk?' done':'')+'" onclick="toggleCL('+si+','+ii+')">' +
+        return '<div class="cl-i'+(dk?' done':'')+'" data-clsi="'+si+'" data-clii="'+ii+'">' +
           '<div class="cl-box">'+(dk?'✓':'')+'</div>' +
           '<span class="cl-txt">'+item.t+'</span>' +
           '<span class="cl-own">'+item.own+'</span></div>';
@@ -2095,9 +2095,9 @@ var _openCity = function(cityId) {
     var vf = votes[cityId+'_f']?'vf':'';
     var vn = votes[cityId+'_n']?'vn':'';
     html += '<div class="vrow" style="margin-bottom:1rem">';
-    html += '<button class="vb '+vy+'" onclick="vote(\''+cityId+'\',\'y\')">👍 Me apunto</button>';
-    html += '<button class="vb '+vf+'" onclick="vote(\''+cityId+'\',\'f\')">⭐ Favorita</button>';
-    html += '<button class="vb '+vn+'" onclick="vote(\''+cityId+'\',\'n\')">👎 No</button>';
+    html += '<button class="vb '+vy+'" data-voteid="'+cityId+'" data-votetype="y">👍 Me apunto</button>';
+    html += '<button class="vb '+vf+'" data-voteid="'+cityId+'" data-votetype="f">⭐ Favorita</button>';
+    html += '<button class="vb '+vn+'" data-voteid="'+cityId+'" data-votetype="n">👎 No</button>';
     html += '</div>';
   }
 
@@ -2296,7 +2296,7 @@ function agBuildCityRow(tlIdx, tl) {
   if(tl.city.indexOf('Cumpleaños')!==-1||tl.city.indexOf('cumpleanos')!==-1) badge = '<span class="ag-city-badge" style="background:#fdf2f8;color:#db2777">🎂 Cumpleaños</span>';
 
   row.innerHTML =
-    '<div class="ag-city-h" onclick="agToggleCity('+tlIdx+')">' +
+    '<div class="ag-city-h" data-tlidx="'+tlIdx+'" data-agtoggle="1">' +
       '<div class="ag-city-flag">' + (AG_FLAGS[agGetCountryFromIdx(tlIdx)]||'🏳️') + '</div>' +
       '<div class="ag-city-info">' +
         '<div class="ag-city-name">' + tl.city + '</div>' +
@@ -2334,11 +2334,11 @@ function agRenderBody(tlIdx) {
   html += '<span class="ag-cal-title">Horario del día</span>';
   html += '<div class="ag-cal-actions">';
   if(AG_ADMIN) {
-    html += '<button class="ag-cal-btn" onclick="agAddSlot('+tlIdx+')">+ Hora</button>';
-    html += '<button class="ag-cal-btn ai-btn" onclick="agAISuggestLocal('+tlIdx+')">✨ IA</button>';
+    html += '<button class="ag-cal-btn" data-agaction="addSlot" data-tlidx="'+tlIdx+'">+ Hora</button>';
+    html += '<button class="ag-cal-btn ai-btn" data-agaction="aiSuggest" data-tlidx="'+tlIdx+'">✨ IA</button>';
   } else {
-    html += '<button class="ag-cal-btn" onclick="agRequestAdmin()" title="Requiere PIN admin">✏️ Editar</button>';
-    html += '<button class="ag-cal-btn ai-btn" onclick="agAISuggestLocal('+tlIdx+')">✨ IA</button>';
+    html += '<button class="ag-cal-btn" data-agaction="requestAdmin">✏️ Editar</button>';
+    html += '<button class="ag-cal-btn ai-btn" data-agaction="aiSuggest" data-tlidx="'+tlIdx+'">✨ IA</button>';
   }
   html += '</div></div>';
 
@@ -2363,7 +2363,7 @@ function agRenderSlots(tlIdx, slots) {
 
     var editable = AG_ADMIN && slot.type !== 'sleep' ? 'true' : 'false';
     var timeEditable = AG_ADMIN && slot.type !== 'sleep' ? 'true' : 'false';
-    var delBtn = AG_ADMIN && slot.type !== 'sleep' ? '<button class="ag-slot-del" onclick="agDelSlot('+tlIdx+','+si+')">✕</button>' : '';
+    var delBtn = AG_ADMIN && slot.type !== 'sleep' ? '<button class="ag-slot-del" data-agaction="delSlot" data-tlidx="'+tlIdx+'" data-si="'+si+'">✕</button>' : '';
     var placeholder = slot.type==='drive' ? 'Actividad de conducción...' : 'Qué haremos...';
 
     html += '<div class="'+cls+'" id="ag-slot-'+tlIdx+'-'+si+'">';
@@ -2378,7 +2378,7 @@ function agRenderSlots(tlIdx, slots) {
   });
 
   if(AG_ADMIN) {
-    html += '<button class="ag-add-slot" onclick="agAddSlot('+tlIdx+')">+ Añadir hora</button>';
+    html += '<button class="ag-add-slot" data-agaction="addSlot" data-tlidx="'+tlIdx+'">+ Añadir hora</button>';
   }
   return html;
 }
@@ -2923,20 +2923,61 @@ function navPickerClose() {
   document.getElementById('nav-picker-modal').classList.remove('open');
 }
 
-// Delegated listeners - avoids inline onclick in JS strings
+// ── MASTER DELEGATED EVENT LISTENER ──────────────────────────
+// All data-attr click handlers go here. Never inline onclick in JS strings.
 document.addEventListener('click', function(e) {
-  // Nav picker buttons
-  var navBtn = e.target.closest('.nav-open-btn');
-  if(navBtn) {
-    var url = navBtn.getAttribute('data-maps');
-    if(url) navPickerOpen(url);
-  }
+  var t = e.target;
+
+  // Nav picker
+  var navBtn = t.closest('.nav-open-btn');
+  if(navBtn) { navPickerOpen(navBtn.getAttribute('data-maps')); return; }
+
   // Enriched activity toggle
-  var eactBtn = e.target.closest('[data-eacttoggle]');
-  if(eactBtn) {
-    var wrap = eactBtn.parentElement;
-    if(wrap) wrap.classList.toggle('open');
+  var eactBtn = t.closest('[data-eacttoggle]');
+  if(eactBtn) { eactBtn.parentElement && eactBtn.parentElement.classList.toggle('open'); return; }
+
+  // Agenda: city toggle
+  var agCity = t.closest('[data-agtoggle]');
+  if(agCity) { agToggleCity(parseInt(agCity.getAttribute('data-tlidx'))); return; }
+
+  // Agenda: cal actions
+  var agAct = t.closest('[data-agaction]');
+  if(agAct) {
+    var action = agAct.getAttribute('data-agaction');
+    var idx = parseInt(agAct.getAttribute('data-tlidx'));
+    if(action === 'addSlot')    { agAddSlot(idx); return; }
+    if(action === 'aiSuggest')  { agAISuggestLocal(idx); return; }
+    if(action === 'requestAdmin'){ agRequestAdmin(); return; }
+    if(action === 'delSlot')    { agDelSlot(idx, parseInt(agAct.getAttribute('data-si'))); return; }
   }
+
+  // Vote buttons
+  var voteBtn = t.closest('[data-voteid]');
+  if(voteBtn) { vote(voteBtn.getAttribute('data-voteid'), voteBtn.getAttribute('data-votetype')); return; }
+
+  // Notas tabs
+  var notaTab = t.closest('[data-notakey]');
+  if(notaTab) { setNota(notaTab.getAttribute('data-notakey')); return; }
+
+  // Checklist items
+  var clItem = t.closest('[data-clsi]');
+  if(clItem) { toggleCL(parseInt(clItem.getAttribute('data-clsi')), parseInt(clItem.getAttribute('data-clii'))); return; }
+
+  // TL row toggle
+  var tlRow = t.closest('[data-tltoggle]');
+  if(tlRow && !t.closest('[data-tldel]')) { toggleTL(tlRow); return; }
+
+  // TL delete day
+  var tlDel = t.closest('[data-tldel]');
+  if(tlDel) { e.stopPropagation(); tlDeleteDay(parseInt(tlDel.getAttribute('data-tldel'))); return; }
+
+  // Sim remove conductor
+  var simRem = t.closest('[data-simremove]');
+  if(simRem) { simRemoveConductor(parseInt(simRem.getAttribute('data-simremove'))); return; }
+
+  // Remove ruta city
+  var remRuta = t.closest('[data-removeruta]');
+  if(remRuta) { e.stopPropagation(); removeRuta(parseInt(remRuta.getAttribute('data-removeruta'))); return; }
 });
 
 
@@ -4246,7 +4287,7 @@ function simRenderConductores(){
       '<span>'+(c.coche==1?'🚗':'🚙')+'</span>'+
       '<span style="flex:1;font-weight:500">'+c.nombre+'</span>'+
       '<span style="font-size:0.7rem;color:#94a3b8">Coche '+c.coche+'</span>'+
-      '<button onclick="simRemoveConductor('+i+')" style="background:none;border:none;color:#ef4444;cursor:pointer">×</button>'+
+      '<button data-simremove="'+i+'" style="background:none;border:none;color:#ef4444;cursor:pointer">×</button>'+
       '</div>';
   }).join('');
 }
