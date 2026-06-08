@@ -4667,7 +4667,7 @@ function simDrawMap(routeToShow, highlightId, highlightInsertAt){
     if(x>W*0.68){labelX=x-r-4;anchor='end';}
     var name=SIM_NAMES[c]||c;
     var short=name.length>8?name.substring(0,7)+'..':name;
-    var dayLabel=isCand?'+':'D'+(routeIdx+1);
+    var dayLabel=isCand?'+':''+(routeIdx+1);
 
     if(isCand){
       // Pulse ring for candidate
@@ -4749,8 +4749,12 @@ function simRenderUnified(){
     var mode=isLast?'':simGetMode(cityId,simRoute[i+1]);
     var color=DAY_COLORS[i%DAY_COLORS.length];
 
+    // Tramo label: Salida / Tramo N→M / Llegada
+    var tramoLabel = isLast ? 'Llegada' : (i===0 ? 'Salida' : 'Tramo '+(i)+'→'+(i+1));
+    var tramoIcon  = isLast ? '🏁' : (i===0 ? '🚀' : '→');
+
     row.innerHTML=
-      '<div style="width:24px;height:24px;border-radius:50%;background:'+color+';color:white;display:flex;align-items:center;justify-content:center;font-size:0.58rem;font-weight:800;flex-shrink:0">D'+(i+1)+'</div>'+
+      '<div style="width:24px;height:24px;border-radius:50%;background:'+color+';color:white;display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:800;flex-shrink:0">'+tramoIcon+'</div>'+
       '<div style="flex:1;min-width:0">'+
         '<div style="font-size:0.8rem;font-weight:600;color:#0f172a">'+(SIM_NAMES[cityId]||cityId)+'</div>'+
         (TL_DATES[i]?'<div style="font-size:0.58rem;color:#94a3b8">'+TL_DATES[i]+'</div>':'')+
