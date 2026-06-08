@@ -921,19 +921,20 @@ var TL = [
      '19:30 Llegada Milan — coches quedan aparcados aqui hasta el regreso'
    ],
    stay:'Airbnb o Hotel Milan (noche 1)', note:'Colmar imprescindible: casas medievales de colores. Parking Autosilos Sammartini en Milan, 5min de Centrale.'},
-  {date:'18 jul', city:'Milan - Venecia - Roma (tren AV)', drive:false, km:650, h:'5h tren AV', ztl:true, modo:'tren', vel:200,
-   maps:'https://www.trenitalia.com',
+  {date:'18 jul', city:'Milan - Venecia - Roma (coche)', drive:true, km:800, h:'10h', ztl:true,
+   maps:'https://www.google.com/maps/dir/Milan,+Italy/Venice,+Italy/Rome,+Italy',
    acts:[
-     '08:30 Salida desde Milano Centrale en tren AV',
-     '11:00 Llegada Venezia Santa Lucia — guardar maletas en consigna',
-     '11:00 Puente de Rialto y mercado (45 min)',
-     '12:00 Vaporetto linea 1 por el Canal Grande (45 min)',
-     '13:00 Plaza San Marcos — llegar antes del pico de calor (45 min)',
-     '14:00 Almuerzo cicchetti en bar local (45 min)',
-     '15:00 Tren AV Venezia a Roma Termini',
-     '18:30 Llegada Roma Termini — manana es el cumpleanos'
+     '07:00 Salida desde Milan — llenar deposito antes de la A4',
+     '10:30 Llegada Venecia (Mestre) — aparcar en Piazzale Roma o Tronchetto',
+     '10:30 Puente de Rialto y mercado (45 min)',
+     '11:30 Vaporetto linea 1 por el Canal Grande (45 min)',
+     '12:30 Plaza San Marcos — llegada antes del pico de calor (45 min)',
+     '13:30 Almuerzo cicchetti en bar local (45 min)',
+     '14:30 Salida desde Mestre hacia Roma — A4 → A13 → A1',
+     '17:00 Parada descanso en area de servicio — Ferrara o Bologna (30 min)',
+     '21:00 Llegada Roma — check-in. Manana es el cumpleanos'
    ],
-   stay:'Airbnb Roma (noche 1 de 2)', note:'Reservar trenes YA en trenitalia.com. Coches quedan en Milan. ZTL activa en Roma.'},
+   stay:'Airbnb Roma (noche 1 de 2)', note:'Etapa larga (10h). Salir a las 7h. Aparcar en Venecia-Mestre, no en la isla. ZTL activa en Roma — aparcar en periferia.'},
   {date:'19 jul', city:'Roma — Dia del Cumpleanos', drive:false, km:0, h:'', ztl:true,
    maps:'https://www.google.com/maps/search/Roma+centro+storico',
    acts:[
@@ -946,18 +947,18 @@ var TL = [
      '20:30 Cena especial de cumpleanos en Trastevere'
    ],
    stay:'Airbnb Roma (noche 2 de 2)', note:'Coliseo: coopculture.it. Vaticano: museivaticani.va. Reservar ambos con antelacion.'},
-  {date:'20 jul', city:'Roma - Milan (tren) - Niza (coche)', drive:true, km:640, h:'3h tren + 3h coche', ztl:false, modo:'mixto',
-   maps:'https://www.google.com/maps/dir/Milan,+Italy/Nice,+France',
+  {date:'20 jul', city:'Roma - Genova - Niza (coche)', drive:true, km:790, h:'9h 30min', ztl:false,
+   maps:'https://www.google.com/maps/dir/Rome,+Italy/Genoa,+Italy/Nice,+France',
    acts:[
-     '08:30 Tren AV Roma Termini a Milano Centrale (3h)',
-     '11:30 Llegada Milan — recuperar los 2 coches del parking',
-     '12:30 Parada almuerzo rapido en Navigli (1h)',
-     '13:30 Salida en coche hacia Niza por la A10',
-     '16:30 Llegada Niza — check-in',
-     '18:00 Paseo por la Promenade des Anglais al atardecer',
+     '07:30 Salida desde Roma — A1 Norte hacia Genova',
+     '11:30 Parada en Genova — almuerzo rapido puerto antiguo (1h)',
+     '12:30 Salida hacia Niza — A10 Riviera dei Fiori',
+     '14:00 Paso por Sanremo — opcional parada breve (30 min)',
+     '17:00 Llegada Niza — check-in',
+     '18:30 Paseo por la Promenade des Anglais al atardecer',
      '20:30 Cena de celebracion final en el Casco Antiguo'
    ],
-   stay:'Hotel o Airbnb Niza (noche 1)', note:'Reservar tren Roma-Milan YA en trenitalia.com. Milan a Niza 3h por la Riviera italiana.'},
+   stay:'Hotel o Airbnb Niza (noche 1)', note:'Ruta directa Roma-Niza sin pasar por Milan (790km vs 900km). Genova es parada perfecta a mitad. La Riviera italiana por la A10 es espectacular.'},
   {date:'21 jul', city:'Niza - Alicante', drive:true, km:640, h:'7h 30min', ztl:false,
    maps:'https://www.google.com/maps/dir/Nice,+France/Alicante,+Spain',
    acts:[
@@ -967,7 +968,7 @@ var TL = [
      '13:00 Cruce de los Pirineos por La Junquera',
      '17:00 Llegada Alicante — FIN DEL EUROTRIP 2026'
    ],
-   stay:'Casa', note:'Llenar deposito en Francia antes de cruzar a Espana, algo mas barato.'}
+   stay:'Casa', note:'Llenar deposito en Francia antes de cruzar a Espana, algo mas barato. Ruta alternativa: por Montpellier-Perpignan-Barcelona.'}
 ];
 
 // ===== VIAJEROS =====
@@ -1517,7 +1518,8 @@ var SIM_COORDS = {
   zurich:[8.55,47.37], ginebra:[6.14,46.20],
   amsterdam:[4.90,52.37], bruselas:[4.35,50.85],
   berlin:[13.40,52.52], munich:[11.58,48.14], frankfurt:[8.68,50.11],
-  colonia:[6.96,50.93]
+  colonia:[6.96,50.93],
+  genova:[8.93,44.41], sanremo:[7.78,43.82]
 };
 
 var SIM_KM = {
@@ -1536,9 +1538,7 @@ var SIM_KM = {
 };
 
 var SIM_MODES = {
-  'milan|venecia':'tren_av','venecia|milan':'tren_av',
-  'milan|roma':'tren_av','roma|milan':'tren_av',
-  'venecia|roma':'tren_av','roma|venecia':'tren_av'
+  // All car now — modes can be overridden when AI generates a city with a specific transport
 };
 var SIM_SPEEDS = {coche:80, tren_av:200, tren:120, ferry:40, bus:70};
 var SIM_NAMES = {
@@ -1549,7 +1549,8 @@ var SIM_NAMES = {
   pisa:'Pisa', genova:'Genova', bologna:'Bolonia', napoles:'Napoles',
   zurich:'Zurich', ginebra:'Ginebra',
   amsterdam:'Amsterdam', bruselas:'Bruselas',
-  berlin:'Berlin', munich:'Munich', frankfurt:'Frankfurt', colonia:'Colonia'
+  berlin:'Berlin', munich:'Munich', frankfurt:'Frankfurt', colonia:'Colonia',
+  genova:'Genova', sanremo:'Sanremo'
 };
 var SIM_FLAGS = {
   alicante:'ES', madrid:'ES', barcelona:'ES',
@@ -1559,7 +1560,8 @@ var SIM_FLAGS = {
   pisa:'IT', genova:'IT', bologna:'IT', napoles:'IT',
   zurich:'CH', ginebra:'CH',
   amsterdam:'NL', bruselas:'BE',
-  berlin:'DE', munich:'DE', frankfurt:'DE', colonia:'DE'
+  berlin:'DE', munich:'DE', frankfurt:'DE', colonia:'DE',
+  genova:'IT', sanremo:'IT'
 };
 
 // TL dates for date display
