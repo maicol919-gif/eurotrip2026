@@ -746,8 +746,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
         </button>
       </div>
       <!-- Admin actions (sim mode only) -->
-      <button id="ruta-save-btn" onclick="simSaveAsBase()" style="display:none;background:#10b981;color:white;border:none;border-radius:8px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">💾 Guardar para todos</button>
-      <button id="ruta-propose-btn" onclick="simProposeRoute()" style="display:none;background:#7c3aed;color:white;border:none;border-radius:8px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">📤 Proponer al admin</button>
+      <button id="ruta-save-btn" onclick="simSaveAsBase()" style="display:none;background:#10b981;color:white;border:none;border-radius:8px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">💾 Guardar</button>
       <button id="ruta-discard-btn" onclick="simDiscardAll()" style="display:none;background:#ef4444;color:white;border:none;border-radius:8px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:700;font-size:0.7rem;cursor:pointer">↩</button>
     </div>
   </div>
@@ -4674,8 +4673,7 @@ function simAnalizarParada(p, fromId, toId, insertIdx, card) {
 
 // Insert parada into simRoute at position
 function simSaveRoute() {
-  // Solo admin puede guardar cambios reales
-  if(!simIsAdmin) return;
+  // Called only after PIN verified via simSaveAsBase → simRequestAdmin
   var payload = {ciudad:'sim_route', notas: JSON.stringify(simRoute)};
   // Check if exists first — use PATCH if yes, POST if no
   supa('GET','alojamientos_estado','','?ciudad=eq.sim_route').then(function(rows) {
@@ -5625,21 +5623,10 @@ function simRemoveFromRoute(cityId){
 // ===== SAVE / DISCARD =====
 function simMarkModified(){
   simIsModified=true;
-  // Show save/discard only for admin (has real impact)
-  // Non-admin sees a "Proponer" button instead
   var s=document.getElementById('ruta-save-btn');
   var d=document.getElementById('ruta-discard-btn');
-  var p=document.getElementById('ruta-propose-btn');
-  if(simIsAdmin) {
-    if(s) s.style.display='block';
-    if(d) d.style.display='block';
-    if(p) p.style.display='none';
-    simSaveRoute(); // Admin: persist immediately
-  } else {
-    if(s) s.style.display='none';
-    if(d) d.style.display='block';
-    if(p) p.style.display='block';
-  }
+  if(s) s.style.display='block';
+  if(d) d.style.display='block';
   simCalcStats();
   rutaFullRefresh();
 }
@@ -5672,6 +5659,7 @@ function simConfirmOfficial(){
 }
 
 function simSaveAsBase(){
+  // Everyone sees this button — PIN required to actually save
   simRequestAdmin(function(){
     var DATES = TL_DATES;
     var MAX_DAY_H = 10; // horas máximas de conducción por jornada
