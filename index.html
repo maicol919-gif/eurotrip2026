@@ -2458,18 +2458,17 @@ function setNota(c){ activeNota=c; renderNotas(); }
 // ===== MÓDULO DE TAREAS =====
 // Tareas base desde CL_DATA + tareas dinámicas añadidas por el grupo
 var TAREAS_EXTRA = (function() {
-  try { var s = localStorage.getItem('et26_tareas'); return s ? JSON.parse(s) : []; }
+  try { var s = localStorage.getItem('et26_tareas_v2'); return s ? JSON.parse(s) : []; }
   catch(e) { return []; }
 })();
 
 var TAREAS_DONE = (function() {
-  try { var s = localStorage.getItem('et26_tareas_done'); return s ? JSON.parse(s) : {}; }
+  try { var s = localStorage.getItem('et26_tareas_done_v2'); return s ? JSON.parse(s) : {}; }
   catch(e) { return {}; }
 })();
 
 var TAREAS_PENDIENTE = (function() {
-  // Tareas marcadas como hechas por otro pero pendientes de aprobación
-  try { var s = localStorage.getItem('et26_tareas_pend'); return s ? JSON.parse(s) : {}; }
+  try { var s = localStorage.getItem('et26_tareas_pend_v2'); return s ? JSON.parse(s) : {}; }
   catch(e) { return {}; }
 })();
 
@@ -2504,13 +2503,13 @@ function tareasIsDone(id) { return !!TAREAS_DONE[id]; }
 function tareasPendiente(id) { return TAREAS_PENDIENTE[id]; }
 
 function tareasSaveDone() {
-  try { localStorage.setItem('et26_tareas_done', JSON.stringify(TAREAS_DONE)); } catch(e) {}
+  try { localStorage.setItem('et26_tareas_done_v2', JSON.stringify(TAREAS_DONE)); } catch(e) {}
 }
 function tareasSavePend() {
-  try { localStorage.setItem('et26_tareas_pend', JSON.stringify(TAREAS_PENDIENTE)); } catch(e) {}
+  try { localStorage.setItem('et26_tareas_pend_v2', JSON.stringify(TAREAS_PENDIENTE)); } catch(e) {}
 }
 function tareasSaveExtra() {
-  try { localStorage.setItem('et26_tareas', JSON.stringify(TAREAS_EXTRA)); } catch(e) {}
+  try { localStorage.setItem('et26_tareas_v2', JSON.stringify(TAREAS_EXTRA)); } catch(e) {}
 }
 
 function tareasToggle(id, ownedByMe) {
