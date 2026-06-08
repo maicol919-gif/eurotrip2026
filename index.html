@@ -727,7 +727,15 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
   <!-- ============ VER MODE ============ -->
   <div id="ruta-ver-mode" style="padding:0.75rem 1rem">
-    <div class="psub" style="margin-bottom:0.75rem">Toca cada dia para ver el detalle. Solo el admin puede editar.</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+      <div class="psub" style="margin-bottom:0">Tramos del viaje. Toca cada uno para ver el detalle.</div>
+      <div id="ruta-admin-btns" style="display:none;gap:0.4rem">
+        <button id="ruta-edit-btn" style="font-size:0.65rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:7px;background:#f1f5f9;border:1.5px solid #e2e8f0;cursor:pointer;font-family:inherit;color:#64748b">✏️ Editar ruta</button>
+      </div>
+    </div>
+    <!-- Resumen stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.4rem;margin-bottom:0.75rem" id="ruta-stats-bar"></div>
+    <!-- Tramos -->
     <div id="tl-container"></div>
   </div>
 
@@ -1694,6 +1702,7 @@ function showView(name, idx) {
   if(btns[idx]) btns[idx].classList.add('active');
   // Regenerar agenda cada vez que se abre (por si cambió el TL)
   if(name === 'agenda') renderAgenda();
+  if(name === 'timeline') { rutaRenderStats(); var ab=document.getElementById('ruta-admin-btns'); if(ab&&AG_ADMIN) ab.style.display='flex'; }
   if(name === 'emergencias') renderSOSDynamic();
   if(name === 'perfil') { initPerfil(); }
   if(name === 'gastos') gInitForm();
@@ -1922,6 +1931,11 @@ function pinRenderAdminList() {
 
 // Add viajero button
 document.addEventListener('DOMContentLoaded', function() {
+  var rutaEditBtn = document.getElementById('ruta-edit-btn');
+  if(rutaEditBtn) rutaEditBtn.addEventListener('click', function() {
+    rutaSetMode('sim');
+  });
+
   var btn = document.getElementById('new-viajero-btn');
   if(btn) btn.addEventListener('click', function() {
     var nombre = document.getElementById('new-viajero-nombre').value.trim();
@@ -4249,11 +4263,139 @@ function tareaInitView() {
   renderCL();
 }
 
+
+// ===== RUTA → ITINERARIO → AGENDA (cadena automática) =====
+// TL_DATES: fechas del viaje para asignar a cada jornada
+var TRIP_DATES = ['14 jul','15 jul','16 jul','17 jul','18 jul','19 jul','20 jul','21 jul'];
+
+// Genera el TL automáticamente desde simRoute
+// Agrupa ciudades en jornadas (máx 10h conducción)
+// No requiere intervención del admin — se actualiza al cambiar la ruta
+function rutaGenerateTL() {
+  var MAX_H = 10;
+  var jornadas = [];
+  var current = {cities:[simRoute[0]], totalKm:0, totalH:0};
+
+  for(var i = 0; i < simRoute.length - 1; i++) {
+    var from = simRoute[i], to = simRoute[i+1];
+    var km = simGetKm(from, to);
+    var h  = simGetHours(from, to);
+
+    if(current.totalH + h > MAX_H && current.cities.length > 1) {
+      jornadas.push(current);
+      current = {cities:[from], totalKm:0, totalH:0};
+    }
+    current.cities.push(to);
+    current.totalKm += km;
+    current.totalH  += h;
+  }
+  jornadas.push(current);
+
+  var newTL = jornadas.map(function(j, ji) {
+    var date   = TRIP_DATES[ji] || ('Día '+(ji+1));
+    var origin = j.cities[0];
+    var dest   = j.cities[j.cities.length-1];
+    var stops  = j.cities.slice(1,-1);
+    var isDrive = true; // all car trip
+    var totalKm = Math.round(j.totalKm);
+    var totalH  = j.totalH;
+    var hStr    = Math.floor(totalH)+'h'+(Math.round((totalH%1)*60)>0?' '+Math.round((totalH%1)*60)+'min':'');
+
+    // City label: all cities joined
+    var cityLabel = j.cities.map(function(c){ return SIM_NAMES[c]||c; }).join(' — ');
+
+    // Maps URL with all waypoints
+    var mapsUrl = 'https://www.google.com/maps/dir/' +
+      j.cities.map(function(c){ return encodeURIComponent(SIM_NAMES[c]||c); }).join('/');
+
+    // Check if there's existing TL data for this origin city to preserve acts/notes
+    var existing = null;
+    TL.forEach(function(d) {
+      if(!existing && d.city.indexOf(SIM_NAMES[origin]||origin) !== -1) existing = d;
+    });
+
+    // Build acts: salida + paradas + llegada
+    var acts = ['07:30 Salida desde '+(SIM_NAMES[origin]||origin)];
+    var timeAccum = 7.5;
+    j.cities.slice(1).forEach(function(c, ci) {
+      var prevC = j.cities[ci];
+      var segH  = simGetHours(prevC, c);
+      timeAccum += segH;
+      var hh = Math.floor(timeAccum), mm = Math.round((timeAccum%1)*60);
+      var tStr = (hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
+      var isStop = ci < j.cities.length - 2;
+      if(isStop) {
+        acts.push(tStr+' Parada en '+(SIM_NAMES[c]||c)+' (~'+Math.round(segH*60)+' min)');
+      } else {
+        acts.push(tStr+' Llegada a '+(SIM_NAMES[c]||c));
+      }
+    });
+    // DORMIR
+    acts.push('DORMIR — Fin de actividades del día');
+
+    return {
+      date:  date,
+      city:  cityLabel,
+      drive: isDrive,
+      km:    totalKm,
+      h:     hStr,
+      ztl:   existing ? existing.ztl : false,
+      maps:  mapsUrl,
+      acts:  existing ? existing.acts : acts,
+      stay:  existing ? existing.stay : 'Por confirmar en '+(SIM_NAMES[dest]||dest),
+      note:  stops.length
+        ? 'Paradas: '+stops.map(function(s){return SIM_NAMES[s]||s;}).join(', ')+'.'
+        : (existing ? existing.note : '')
+    };
+  });
+
+  return newTL;
+}
+
+// Apply generated TL to global TL array
+function rutaApplyTL(newTL) {
+  TL.length = 0;
+  newTL.forEach(function(d){ TL.push(d); });
+  simSaveTL();
+}
+
+// Render stats bar for VER mode
+function rutaRenderStats() {
+  var bar = document.getElementById('ruta-stats-bar');
+  if(!bar) return;
+  var totalKm = TL.reduce(function(s,d){return s+(d.km||0);},0);
+  var totalH  = TL.filter(function(d){return d.drive;}).length;
+  var totalDias = TL.length;
+  bar.innerHTML = [
+    {icon:'📍', val:totalKm.toLocaleString()+'km', label:'distancia total'},
+    {icon:'🚗', val:totalDias+' tramos', label:totalH+' de conducción'},
+    {icon:'📅', val:TRIP_DATES[0]+' → '+TRIP_DATES[TL.length-1], label:'fechas'}
+  ].map(function(s){
+    return '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:9px;padding:0.55rem;text-align:center">'+
+      '<div style="font-size:0.85rem">'+s.icon+'</div>'+
+      '<div style="font-size:0.78rem;font-weight:800;color:#0f172a">'+s.val+'</div>'+
+      '<div style="font-size:0.58rem;color:#94a3b8">'+s.label+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+// Full refresh: route → itinerary → agenda → header
+function rutaFullRefresh() {
+  var newTL = rutaGenerateTL();
+  rutaApplyTL(newTL);
+  renderTL();
+  rutaRenderStats();
+  renderAgenda();
+  updateHeaderRoute();
+  renderHomeTareas();
+  renderRiesgos('home-riesgos');
+}
+
 // ===== INIT =====
 updateCountdown();
 setInterval(updateCountdown, 60000);
 renderCities();
-renderTL();
+rutaFullRefresh(); // Genera TL desde simRoute y actualiza itinerario+agenda
 renderBudget();
 renderGastos();
 renderNotas();
@@ -4972,6 +5114,9 @@ function simMarkModified(){
   var d=document.getElementById('ruta-discard-btn');
   if(s) s.style.display='block';
   if(d) d.style.display='block';
+  simCalcStats();
+  // Live: regenerate TL & agenda from route changes
+  rutaFullRefresh();
 }
 
 function simConfirmOfficial(){
@@ -5119,10 +5264,7 @@ function simSaveAsBase(){
     newTL.forEach(function(d){ TL.push(d); });
     SIM_BASE_ROUTE = simRoute.slice();
     simIsModified = false;
-    simSaveTL();
-    renderTL();
-    renderAgenda();
-    updateHeaderRoute();
+    rutaFullRefresh();
     var s = document.getElementById('ruta-save-btn');
     var d = document.getElementById('ruta-discard-btn');
     if(s) s.style.display='none';
