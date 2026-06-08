@@ -4395,7 +4395,7 @@ function rutaFullRefresh() {
 updateCountdown();
 setInterval(updateCountdown, 60000);
 renderCities();
-rutaFullRefresh(); // Genera TL desde simRoute y actualiza itinerario+agenda
+renderTL(); // TL inicial
 renderBudget();
 renderGastos();
 renderNotas();
@@ -5490,6 +5490,9 @@ function rutaSetMode(mode){
   setTimeout(simLoadTL, 1200);
 })();
 
+
+// Final init
+rutaFullRefresh();
 </script>
 </body>
 </html>
