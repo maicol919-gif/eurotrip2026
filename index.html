@@ -919,14 +919,82 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <!-- CHECKLIST -->
 <div id="view-checklist" class="view">
-  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
-  <div class="ptitle">Checklist</div>
-  <div class="module-user">Hola, <strong class="user-name-display">—</strong></div>
-  <div class="psub">Tareas antes y durante el viaje. Cada una tiene responsable.</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+    <div>
+      <div class="ptitle">Tareas ✅</div>
+      <div class="psub" style="margin-bottom:0">Antes, durante y después del viaje.</div>
+    </div>
+    <button id="tarea-add-btn" style="background:#0f172a;color:white;border:none;border-radius:9px;padding:0.4rem 0.85rem;font-family:inherit;font-weight:700;font-size:0.75rem;cursor:pointer">+ Nueva</button>
+  </div>
+
+  <!-- Filtros -->
+  <div style="display:flex;gap:0.35rem;overflow-x:auto;margin-bottom:0.75rem;padding-bottom:0.1rem;scrollbar-width:none">
+    <button class="g-filter active" data-tfilter="todas" id="tf-todas">Todas</button>
+    <button class="g-filter" data-tfilter="mias" id="tf-mias">Mis tareas</button>
+    <button class="g-filter" data-tfilter="urgente" id="tf-urgente">🔴 Urgente</button>
+    <button class="g-filter" data-tfilter="pendiente" id="tf-pendiente">Pendientes</button>
+    <button class="g-filter" data-tfilter="hecha" id="tf-hecha">Hechas</button>
+  </div>
+
+  <!-- Progreso -->
+  <div style="background:white;border:1.5px solid #e2e8f0;border-radius:10px;padding:0.75rem;margin-bottom:0.75rem">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem">
+      <span style="font-size:0.65rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em">Progreso del grupo</span>
+      <span style="font-size:0.75rem;font-weight:800" id="cl-pct">0%</span>
+    </div>
+    <div style="background:#f1f5f9;border-radius:20px;height:6px;overflow:hidden">
+      <div id="cl-bar" style="height:100%;background:#22c55e;border-radius:20px;transition:width .4s;width:0%"></div>
+    </div>
+    <div style="font-size:0.62rem;color:#94a3b8;margin-top:0.3rem" id="cl-sub">0 de 0 tareas completadas</div>
+  </div>
+
+  <!-- Lista de tareas -->
   <div id="cl-cont"></div>
+
+  <!-- Modal nueva tarea -->
+  <div id="tarea-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:flex-end;justify-content:center" onclick="if(event.target===this)this.style.display='none'">
+    <div style="background:white;border-radius:20px 20px 0 0;padding:1.25rem 1rem 2rem;width:100%;max-width:480px">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#94a3b8;text-align:center;margin-bottom:1rem">Nueva tarea</div>
+
+      <div style="margin-bottom:0.5rem">
+        <label class="fl">Descripción</label>
+        <input id="t-desc" class="fi" placeholder="Qué hay que hacer..." style="width:100%">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.5rem">
+        <div>
+          <label class="fl">Responsable</label>
+          <select id="t-owner" class="fi" style="width:100%">
+            <option value="Todos">Todos</option>
+          </select>
+        </div>
+        <div>
+          <label class="fl">Prioridad</label>
+          <select id="t-prio" class="fi" style="width:100%">
+            <option value="normal">🟢 Normal</option>
+            <option value="importante">🟠 Importante</option>
+            <option value="urgente">🔴 Urgente</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-bottom:0.75rem">
+        <div>
+          <label class="fl">Fase</label>
+          <select id="t-fase" class="fi" style="width:100%">
+            <option value="antes">Antes del viaje</option>
+            <option value="durante">Durante el viaje</option>
+            <option value="despues">De vuelta</option>
+          </select>
+        </div>
+        <div>
+          <label class="fl">Fecha límite</label>
+          <input id="t-fecha" class="fi" type="date" style="width:100%">
+        </div>
+      </div>
+      <button id="t-save-btn" style="width:100%;background:#0f172a;color:white;border:none;border-radius:10px;padding:0.75rem;font-family:inherit;font-weight:700;font-size:0.85rem;cursor:pointer">Guardar tarea</button>
+    </div>
+  </div>
 </div>
 
-<!-- EMERGENCIAS -->
 <div id="view-emergencias" class="view">
   <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
   <div class="ptitle">Emergencias 🆘</div>
@@ -1627,6 +1695,7 @@ function showView(name, idx) {
   if(name === 'emergencias') renderSOSDynamic();
   if(name === 'perfil') { initPerfil(); }
   if(name === 'gastos') gInitForm();
+  if(name === 'checklist') tareaInitView();
 }
 
 // ===== COUNTDOWN =====
@@ -2384,34 +2453,316 @@ function renderNotas() {
 function setNota(c){ activeNota=c; renderNotas(); }
 
 // ===== CHECKLIST =====
-function renderCL() {
-  var total=0, done=0;
-  document.getElementById('cl-cont').innerHTML = CL_DATA.map(function(sec,si){
-    var d=sec.items.filter(function(_,ii){return clDone[si+'_'+ii];}).length;
-    total+=sec.items.length; done+=d;
-    return '<div class="cl-sec"><div class="cl-st">'+sec.s+
-      ' <span style="margin-left:auto;font-size:0.6rem;background:#f1f5f9;padding:0.1rem 0.35rem;border-radius:4px;color:#64748b">'+d+'/'+sec.items.length+'</span></div>'+
-      sec.items.map(function(item,ii){
-        var dk=clDone[si+'_'+ii];
-        return '<div class="cl-i'+(dk?' done':'')+'" data-clsi="'+si+'" data-clii="'+ii+'">' +
-          '<div class="cl-box">'+(dk?'✓':'')+'</div>' +
-          '<span class="cl-txt">'+item.t+'</span>' +
-          '<span class="cl-own">'+item.own+'</span></div>';
-      }).join('')+'</div>';
-  }).join('');
-  var pct=total?Math.round(done/total*100):0;
-  var e1=document.getElementById('dash-cl'); if(e1) e1.textContent=pct+'%';
-  var e2=document.getElementById('dash-cln'); if(e2) e2.textContent=done+' de '+total;
+// ===== MÓDULO DE TAREAS =====
+// Tareas base desde CL_DATA + tareas dinámicas añadidas por el grupo
+var TAREAS_EXTRA = (function() {
+  try { var s = localStorage.getItem('et26_tareas'); return s ? JSON.parse(s) : []; }
+  catch(e) { return []; }
+})();
+
+var TAREAS_DONE = (function() {
+  try { var s = localStorage.getItem('et26_tareas_done'); return s ? JSON.parse(s) : {}; }
+  catch(e) { return {}; }
+})();
+
+var TAREAS_PENDIENTE = (function() {
+  // Tareas marcadas como hechas por otro pero pendientes de aprobación
+  try { var s = localStorage.getItem('et26_tareas_pend'); return s ? JSON.parse(s) : {}; }
+  catch(e) { return {}; }
+})();
+
+var clFilter = 'todas';
+
+var PRIO_ORDER = {urgente:0, importante:1, normal:2};
+var PRIO_ICON  = {urgente:'🔴', importante:'🟠', normal:'🟢'};
+var FASE_LABEL = {antes:'Antes del viaje', durante:'Durante el viaje', despues:'De vuelta'};
+
+function tareasGetAll() {
+  // Convert CL_DATA to task format
+  var base = [];
+  CL_DATA.forEach(function(sec, si) {
+    var fase = si===0?'antes':si===1?'antes':si===2?'durante':'despues';
+    var prio = si===0?'urgente':'normal';
+    sec.items.forEach(function(item, ii) {
+      base.push({
+        id: 'cl_'+si+'_'+ii,
+        desc: item.t,
+        owner: item.own || 'Todos',
+        prio: prio,
+        fase: fase,
+        fecha: '',
+        isBase: true
+      });
+    });
+  });
+  return base.concat(TAREAS_EXTRA);
 }
-function toggleCL(si,ii){
-  var k=si+'_'+ii;
-  var newDone=!clDone[k];
-  supa('DELETE','checklist','','?id=eq.'+k)
-    .then(function(){ return supa('POST','checklist',{id:k,done:newDone},''); })
-    .then(function(){
-    clDone[k]=newDone; renderCL();
+
+function tareasIsDone(id) { return !!TAREAS_DONE[id]; }
+function tareasPendiente(id) { return TAREAS_PENDIENTE[id]; }
+
+function tareasSaveDone() {
+  try { localStorage.setItem('et26_tareas_done', JSON.stringify(TAREAS_DONE)); } catch(e) {}
+}
+function tareasSavePend() {
+  try { localStorage.setItem('et26_tareas_pend', JSON.stringify(TAREAS_PENDIENTE)); } catch(e) {}
+}
+function tareasSaveExtra() {
+  try { localStorage.setItem('et26_tareas', JSON.stringify(TAREAS_EXTRA)); } catch(e) {}
+}
+
+function tareasToggle(id, ownedByMe) {
+  if(tareasIsDone(id)) {
+    // Unmark
+    delete TAREAS_DONE[id];
+    delete TAREAS_PENDIENTE[id];
+  } else if(!ownedByMe) {
+    // Mark as done by someone else — needs approval
+    TAREAS_PENDIENTE[id] = NOMBRE || 'Alguien';
+  } else {
+    // Owner marks as done directly
+    TAREAS_DONE[id] = NOMBRE || 'Yo';
+    delete TAREAS_PENDIENTE[id];
+  }
+  tareasSaveDone();
+  tareasSavePend();
+  renderCL();
+  renderHomeTareas();
+}
+
+function tareasAprobar(id) {
+  TAREAS_DONE[id] = TAREAS_PENDIENTE[id] + ' (aprobado por ' + NOMBRE + ')';
+  delete TAREAS_PENDIENTE[id];
+  tareasSaveDone();
+  tareasSavePend();
+  renderCL();
+  renderHomeTareas();
+}
+
+function tareasDelete(id) {
+  TAREAS_EXTRA = TAREAS_EXTRA.filter(function(t){ return t.id !== id; });
+  tareasSaveExtra();
+  renderCL();
+  renderHomeTareas();
+}
+
+function renderCL() {
+  var cont = document.getElementById('cl-cont');
+  if(!cont) return;
+
+  var all = tareasGetAll();
+
+  // Filter
+  var filtered = all.filter(function(t) {
+    if(clFilter === 'mias') return t.owner === NOMBRE || t.owner === 'Todos';
+    if(clFilter === 'urgente') return t.prio === 'urgente';
+    if(clFilter === 'pendiente') return !tareasIsDone(t.id);
+    if(clFilter === 'hecha') return tareasIsDone(t.id);
+    return true;
+  });
+
+  // Update progress
+  var total = all.length, done = Object.keys(TAREAS_DONE).length;
+  var pct = total ? Math.round(done/total*100) : 0;
+  var pctEl = document.getElementById('cl-pct');
+  var barEl = document.getElementById('cl-bar');
+  var subEl = document.getElementById('cl-sub');
+  if(pctEl) pctEl.textContent = pct + '%';
+  if(barEl) barEl.style.width = pct + '%';
+  if(subEl) subEl.textContent = done + ' de ' + total + ' tareas completadas';
+  // Update home card
+  var dashCl = document.getElementById('dash-cl');
+  var dashCln = document.getElementById('dash-cln');
+  if(dashCl) dashCl.textContent = pct + '%';
+  if(dashCln) dashCln.textContent = done + ' de ' + total;
+
+  // Group by fase
+  var grupos = {};
+  var grupoOrder = ['antes','durante','despues'];
+  filtered.forEach(function(t) {
+    if(!grupos[t.fase]) grupos[t.fase] = [];
+    grupos[t.fase].push(t);
+  });
+
+  // Sort each grupo by priority
+  Object.keys(grupos).forEach(function(fase) {
+    grupos[fase].sort(function(a,b) {
+      return (PRIO_ORDER[a.prio]||2) - (PRIO_ORDER[b.prio]||2);
+    });
+  });
+
+  cont.innerHTML = '';
+  grupoOrder.forEach(function(fase) {
+    if(!grupos[fase] || !grupos[fase].length) return;
+
+    var secEl = document.createElement('div');
+    secEl.style.cssText = 'margin-bottom:1rem';
+
+    var hdr = document.createElement('div');
+    hdr.style.cssText = 'font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.4rem;padding-left:0.1rem';
+    hdr.textContent = FASE_LABEL[fase] || fase;
+    secEl.appendChild(hdr);
+
+    grupos[fase].forEach(function(t) {
+      var isDone = tareasIsDone(t.id);
+      var isPend = tareasPendiente(t.id);
+      var isMine = t.owner === NOMBRE || t.owner === 'Todos';
+      var isMyTask = t.owner === NOMBRE;
+
+      var card = document.createElement('div');
+      card.style.cssText = 'background:white;border:1.5px solid '+(isDone?'#bbf7d0':isPend?'#fde68a':'#e2e8f0')+';border-radius:10px;padding:0.65rem 0.75rem;margin-bottom:0.35rem;display:flex;align-items:flex-start;gap:0.6rem;transition:border-color .15s';
+
+      // Checkbox
+      var check = document.createElement('button');
+      check.style.cssText = 'width:22px;height:22px;border-radius:6px;border:2px solid '+(isDone?'#22c55e':isPend?'#f59e0b':'#e2e8f0')+';background:'+(isDone?'#22c55e':isPend?'#fef3c7':'white')+';flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.75rem;transition:all .15s;margin-top:0.05rem';
+      check.textContent = isDone ? '✓' : isPend ? '⏳' : '';
+      check.setAttribute('data-tid', t.id);
+      check.setAttribute('data-owned', isMine ? '1' : '0');
+      check.addEventListener('click', function() {
+        tareasToggle(this.getAttribute('data-tid'), this.getAttribute('data-owned')==='1');
+      });
+
+      var body = document.createElement('div');
+      body.style.cssText = 'flex:1;min-width:0';
+
+      var desc = document.createElement('div');
+      desc.style.cssText = 'font-size:0.78rem;font-weight:'+(isDone?'400':'600')+';color:'+(isDone?'#94a3b8':'#0f172a')+';text-decoration:'+(isDone?'line-through':'none')+';line-height:1.35;margin-bottom:0.2rem';
+      desc.textContent = t.desc;
+
+      var meta = document.createElement('div');
+      meta.style.cssText = 'display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap';
+
+      var prioSpan = document.createElement('span');
+      prioSpan.style.cssText = 'font-size:0.6rem';
+      prioSpan.textContent = PRIO_ICON[t.prio] || '🟢';
+
+      var ownerSpan = document.createElement('span');
+      ownerSpan.style.cssText = 'font-size:0.62rem;color:#64748b;font-weight:600';
+      ownerSpan.textContent = t.owner;
+
+      if(t.fecha) {
+        var fechaSpan = document.createElement('span');
+        var daysLeft = Math.ceil((new Date(t.fecha) - new Date()) / 86400000);
+        fechaSpan.style.cssText = 'font-size:0.6rem;font-weight:700;padding:0.08rem 0.35rem;border-radius:5px;background:'+(daysLeft<=2?'#fef2f2':daysLeft<=7?'#fff7ed':'#f0fdf4')+';color:'+(daysLeft<=2?'#dc2626':daysLeft<=7?'#ea580c':'#16a34a');
+        fechaSpan.textContent = daysLeft<=0?'Vencida':daysLeft===1?'Mañana':daysLeft+'d';
+        meta.appendChild(fechaSpan);
+      }
+
+      meta.appendChild(prioSpan);
+      meta.appendChild(ownerSpan);
+
+      // Pendiente de aprobación — mostrar botón aprobar si es el responsable
+      if(isPend && isMyTask) {
+        var aprobBtn = document.createElement('button');
+        aprobBtn.style.cssText = 'font-size:0.6rem;font-weight:700;padding:0.1rem 0.4rem;border-radius:5px;background:#fef3c7;border:1px solid #fde68a;color:#d97706;cursor:pointer;font-family:inherit';
+        aprobBtn.textContent = '✓ Aprobar';
+        aprobBtn.setAttribute('data-tid', t.id);
+        aprobBtn.addEventListener('click', function() { tareasAprobar(this.getAttribute('data-tid')); });
+        meta.appendChild(aprobBtn);
+      }
+
+      if(isPend) {
+        var pendSpan = document.createElement('span');
+        pendSpan.style.cssText = 'font-size:0.6rem;color:#d97706;font-style:italic';
+        pendSpan.textContent = 'Hecha por ' + isPend;
+        meta.appendChild(pendSpan);
+      }
+
+      if(isDone) {
+        var doneSpan = document.createElement('span');
+        doneSpan.style.cssText = 'font-size:0.6rem;color:#16a34a;font-weight:600';
+        doneSpan.textContent = '✓ Completada';
+        meta.appendChild(doneSpan);
+      }
+
+      body.appendChild(desc);
+      body.appendChild(meta);
+      card.appendChild(check);
+      card.appendChild(body);
+
+      // Delete button for non-base tasks (admin only)
+      if(!t.isBase && AG_ADMIN) {
+        var del = document.createElement('button');
+        del.style.cssText = 'background:none;border:none;color:#e2e8f0;cursor:pointer;font-size:0.8rem;flex-shrink:0;padding:0;margin-top:0.05rem;transition:color .15s';
+        del.textContent = '✕';
+        del.setAttribute('data-tid', t.id);
+        del.addEventListener('mouseenter', function(){ this.style.color='#ef4444'; });
+        del.addEventListener('mouseleave', function(){ this.style.color='#e2e8f0'; });
+        del.addEventListener('click', function() { tareasDelete(this.getAttribute('data-tid')); });
+        card.appendChild(del);
+      }
+
+      secEl.appendChild(card);
+    });
+
+    cont.appendChild(secEl);
+  });
+
+  if(!filtered.length) {
+    cont.innerHTML = '<div style="text-align:center;padding:2rem 0;font-size:0.8rem;color:#94a3b8">No hay tareas en esta vista ✅</div>';
+  }
+}
+
+// Render tareas urgentes en la home
+function renderHomeTareas() {
+  var container = document.getElementById('home-decidir');
+  if(!container) return;
+  var all = tareasGetAll();
+  var now = new Date();
+  var diff = Math.ceil((TRIP_START - now) / 86400000);
+
+  // Filter urgent/important pending tasks
+  var relevant = all.filter(function(t) {
+    if(tareasIsDone(t.id)) return false;
+    if(t.prio === 'urgente') return true;
+    if(t.prio === 'importante' && diff <= 14) return true;
+    if(t.fecha) {
+      var daysLeft = Math.ceil((new Date(t.fecha) - now) / 86400000);
+      return daysLeft <= 7;
+    }
+    return false;
+  }).slice(0, 6);
+
+  // Also add HOME_ALERTS
+  var alertas = HOME_ALERTS.filter(function(a){ return diff <= a.days; });
+
+  if(!relevant.length && !alertas.length) {
+    container.innerHTML = '<div style="font-size:0.75rem;color:#94a3b8;font-style:italic">Sin alertas urgentes ✅</div>';
+    return;
+  }
+
+  container.innerHTML = '';
+
+  relevant.forEach(function(t) {
+    var daysLeft = t.fecha ? Math.ceil((new Date(t.fecha) - now) / 86400000) : null;
+    var div = document.createElement('div');
+    div.className = 'home-alert ' + (t.prio==='urgente'?'red':t.prio==='importante'?'orange':'green');
+    div.innerHTML = '<span class="home-alert-icon">' + PRIO_ICON[t.prio] + '</span>' +
+      '<div><span style="font-size:0.72rem">' + t.desc + '</span>' +
+      '<div style="font-size:0.62rem;opacity:0.75;margin-top:0.1rem">Responsable: ' + t.owner +
+      (daysLeft!==null?' · '+(daysLeft<=0?'Vencida':daysLeft+'d'):'')+
+      '</div></div>';
+    container.appendChild(div);
+  });
+
+  alertas.forEach(function(a) {
+    var icon = a.level==='red'?'🔴':a.level==='orange'?'🟠':'🟢';
+    var div = document.createElement('div');
+    div.className = 'home-alert ' + a.level;
+    div.innerHTML = '<span class="home-alert-icon">'+icon+'</span><span style="font-size:0.72rem">'+a.text+'</span>';
+    container.appendChild(div);
   });
 }
+
+// Filter tab handler
+function tareasSetFilter(f) {
+  clFilter = f;
+  document.querySelectorAll('[data-tfilter]').forEach(function(btn) {
+    btn.classList.toggle('active', btn.getAttribute('data-tfilter') === f);
+  });
+  renderCL();
+}
+
 
 // ===== GOOGLE SHEETS =====
 function loadSheet() {
@@ -3118,18 +3469,8 @@ function initHomeBefore() {
 
 gInitForm();
 
-  // Alertas decidir hoy
-  var container = document.getElementById('home-decidir');
-  if(!container) return;
-  var relevant = HOME_ALERTS.filter(function(a){ return diff <= a.days; });
-  if(!relevant.length) {
-    container.innerHTML = '<div style="font-size:0.75rem;color:#94a3b8;font-style:italic">Sin alertas urgentes de momento ✅</div>';
-    return;
-  }
-  container.innerHTML = relevant.map(function(a){
-    var icon = a.level==='red'?'🔴':a.level==='orange'?'🟠':'🟢';
-    return '<div class="home-alert '+a.level+'"><span class="home-alert-icon">'+icon+'</span><span>'+a.text+'</span></div>';
-  }).join('');
+  // Decidir hoy — tareas urgentes + alertas
+  renderHomeTareas();
 }
 
 function initHomeDuring() {
@@ -3850,6 +4191,61 @@ function renderPerfilTurnos() {
 
     list.appendChild(card);
   });
+}
+
+
+function tareaInitView() {
+  // Filter buttons
+  document.querySelectorAll('[data-tfilter]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      tareasSetFilter(this.getAttribute('data-tfilter'));
+    });
+  });
+
+  // Owner select in modal
+  var ownerSel = document.getElementById('t-owner');
+  if(ownerSel && ownerSel.options.length <= 1) {
+    PEOPLE.forEach(function(p) {
+      var opt = document.createElement('option');
+      opt.value = p; opt.textContent = p;
+      ownerSel.appendChild(opt);
+    });
+  }
+
+  // Nueva tarea button
+  var addBtn = document.getElementById('tarea-add-btn');
+  if(addBtn && !addBtn._hooked) {
+    addBtn._hooked = true;
+    addBtn.addEventListener('click', function() {
+      document.getElementById('tarea-modal').style.display = 'flex';
+    });
+  }
+
+  // Save tarea button
+  var saveBtn = document.getElementById('t-save-btn');
+  if(saveBtn && !saveBtn._hooked) {
+    saveBtn._hooked = true;
+    saveBtn.addEventListener('click', function() {
+      var desc = document.getElementById('t-desc').value.trim();
+      var owner = document.getElementById('t-owner').value;
+      var prio = document.getElementById('t-prio').value;
+      var fase = document.getElementById('t-fase').value;
+      var fecha = document.getElementById('t-fecha').value;
+      if(!desc) return;
+      TAREAS_EXTRA.push({
+        id: 'tx_' + Date.now(),
+        desc: desc, owner: owner, prio: prio,
+        fase: fase, fecha: fecha, isBase: false
+      });
+      tareasSaveExtra();
+      document.getElementById('t-desc').value = '';
+      document.getElementById('tarea-modal').style.display = 'none';
+      renderCL();
+      renderHomeTareas();
+    });
+  }
+
+  renderCL();
 }
 
 // ===== INIT =====
