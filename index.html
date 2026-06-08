@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bottom:64px}
+body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bottom:70px}
 .header{background:#0f172a;padding:0.9rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;position:sticky;top:0;z-index:100}
 .hlogo{color:white;font-size:0.95rem;font-weight:700}
 .hbadge{font-size:0.65rem;font-weight:700;padding:0.25rem 0.7rem;border-radius:20px;background:rgba(255,255,255,0.1);color:#94a3b8;white-space:nowrap}
@@ -21,7 +21,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .hroute-cities{display:flex;align-items:center;gap:0.22rem;flex-wrap:wrap}
 .hbadge.live{background:rgba(16,185,129,0.2);color:#34d399}
 .bnav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #e2e8f0;display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.bnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.15rem;background:none;border:none;cursor:pointer;padding:0.5rem 0.1rem;font-family:inherit}
+.bnb{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.15rem;background:none;border:none;cursor:pointer;padding:0.5rem 0.1rem;font-family:inherit;min-height:44px;touch-action:manipulation}
 .bnb-i{font-size:1.05rem}
 .bnb-l{font-size:0.55rem;font-weight:600;color:#94a3b8}
 .bnb.active .bnb-l{color:#3b82f6}
@@ -343,11 +343,98 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 .perfil-stat-val{font-size:1.2rem;font-weight:900;color:#0f172a}
 .perfil-stat-label{font-size:0.6rem;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;margin-top:0.1rem}
 
-@media(max-width:600px){
-  .dgrid{grid-template-columns:repeat(2,1fr)}
+/* ============================================================
+   MOBILE FIRST — todo optimizado para uso real en carretera
+   Pantalla estrecha, una mano, sol encima, presión de tiempo
+   ============================================================ */
+@media(max-width:640px){
+  /* Base */
+  body{font-size:15px}
+  .main{padding:0.75rem}
+
+  /* Header compacto */
+  .header{padding:0.65rem 0.88rem;gap:0.5rem}
+  .hlogo{font-size:0.88rem}
+  .hcountry{font-size:0.62rem;padding:0.08rem 0.25rem}
+  .hcity{font-size:0.58rem}
+  .harr,.hcountry-arr{font-size:0.48rem}
+
+  /* Bnav — 9 botones en móvil: scroll horizontal */
+  .bnav{overflow-x:auto;scrollbar-width:none;justify-content:flex-start;padding:0 0.25rem}
+  .bnav::-webkit-scrollbar{display:none}
+  .bnb{flex-shrink:0;min-width:56px;padding:0.55rem 0.3rem 0.45rem;flex-direction:column;align-items:center}
+  .bnb-i{font-size:1.1rem;line-height:1}
+  .bnb-l{font-size:0.52rem;margin-top:0.12rem;white-space:nowrap}
+
+  /* Dashboard grids */
+  .dgrid{grid-template-columns:1fr 1fr;gap:0.5rem}
+  .dcard{padding:0.75rem 0.6rem}
+  .dv{font-size:1.4rem}
+  .dl{font-size:0.6rem}
+
+  /* TL itinerario */
   .tl-row.open .tl-body{grid-template-columns:1fr}
+  .tl-h{gap:0.4rem;padding:0.6rem 0.75rem}
+  .tl-city{font-size:0.82rem}
+  .tl-date{font-size:0.6rem;min-width:34px}
+
+  /* Gastos form */
   .gf-row{grid-template-columns:1fr}
-  .main{padding:0.88rem}
+  #g-applies-grid{gap:0.28rem}
+  .g-applies-chip{font-size:0.64rem;padding:0.18rem 0.5rem}
+
+  /* Agenda tabs */
+  .ag-country-tabs{gap:0}
+  .ag-ctab{padding:0.5rem 0.75rem;font-size:0.7rem}
+  .ag-city-name{font-size:0.82rem}
+  .ag-slot-time{min-width:38px;font-size:0.58rem}
+  .ag-slot-text{font-size:0.71rem}
+
+  /* Perfil turnos */
+  .perfil-resumen{grid-template-columns:repeat(3,1fr);gap:0.4rem}
+  .perfil-stat-val{font-size:1rem}
+  .perfil-selector{gap:0.28rem}
+  .perfil-chip{font-size:0.68rem;padding:0.22rem 0.6rem}
+
+  /* Cards genéricas */
+  .turno-día{padding:0.7rem}
+  .home-alert{font-size:0.71rem}
+  .home-act-text{font-size:0.72rem}
+
+  /* Nav picker sheet */
+  .nav-picker-sheet{padding:1rem 0.85rem 1.5rem}
+  .nav-picker-btn{padding:0.75rem 0.85rem;gap:0.7rem}
+
+  /* Riesgos */
+  .eact-rich{border-radius:8px}
+  .eact-header{padding:0.4rem 0.55rem}
+  .eact-text{font-size:0.72rem}
+
+  /* Simulador — stack vertical en móvil */
+  #ruta-sim-mode > div{
+    grid-template-columns:1fr !important;
+    grid-template-rows:220px 1fr !important;
+    height:auto !important;
+  }
+  #ruta-sim-mode > div > div:first-child{order:2;border-right:none !important;border-top:1px solid #e2e8f0}
+  #ruta-sim-mode > div > div:last-child{order:1}
+
+  /* SOS buttons grid */
+  #sos-dynamic .grid-2{grid-template-columns:1fr 1fr}
+
+  /* Gastos tabs */
+  .g-tab{padding:0.45rem 0.65rem;font-size:0.7rem}
+
+  /* Modales — full width en móvil */
+  .nav-picker-sheet,.nav-picker-modal .box{max-width:100%}
+}
+
+/* Extra pequeño (iPhone SE, etc) */
+@media(max-width:375px){
+  .bnb-l{font-size:0.48rem}
+  .bnb{min-width:50px}
+  .dv{font-size:1.2rem}
+  .hlogo{font-size:0.82rem}
 }
 
 /* ===== SIMULADOR ===== */
@@ -409,37 +496,22 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
   <!-- ===== ANTES DEL VIAJE ===== -->
   <div id="home-before">
-    <div style="text-align:center;padding:0.5rem 0 1rem">
-      <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:0.3rem">Cuenta regresiva</div>
-      <div style="font-size:3.5rem;font-weight:900;letter-spacing:-0.04em;color:#0f172a;line-height:1" id="days-left-big">—</div>
-      <div style="font-size:0.85rem;color:#64748b;margin-top:0.2rem">días para el EuroTrip 2026 🚗</div>
+    <!-- Cuenta regresiva -->
+    <div style="text-align:center;padding:0.5rem 0 0.9rem">
+      <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:0.25rem">Faltan</div>
+      <div style="font-size:3.2rem;font-weight:900;letter-spacing:-0.04em;color:#0f172a;line-height:1" id="days-left-big">—</div>
+      <div style="font-size:0.82rem;color:#64748b;margin-top:0.15rem">días para el EuroTrip 2026 🚗</div>
     </div>
 
-    <!-- Mapa visual de ciudades -->
-    <div style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);border-radius:14px;padding:1rem;margin-bottom:0.75rem;overflow:hidden;position:relative">
-      <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#64748b;margin-bottom:0.6rem">Tu ruta</div>
-      <div style="display:flex;align-items:center;gap:0.3rem;flex-wrap:wrap">
-        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇪🇸 Alicante</span>
-        <span style="color:#475569;font-size:0.6rem">→</span>
-        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇫🇷 Montpellier</span>
-        <span style="color:#475569;font-size:0.6rem">→</span>
-        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇫🇷 París</span>
-        <span style="color:#475569;font-size:0.6rem">→</span>
-        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇩🇪 Colmar</span>
-        <span style="color:#475569;font-size:0.6rem">→</span>
-        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇮🇹 Milán</span>
-        <span style="color:#475569;font-size:0.6rem">→</span>
-        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇮🇹 Venecia</span>
-        <span style="color:#475569;font-size:0.6rem">→</span>
-        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇮🇹 Roma 🎂</span>
-        <span style="color:#475569;font-size:0.6rem">→</span>
-        <span style="font-size:0.75rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.25rem 0.6rem;border-radius:20px">🇫🇷 Niza</span>
-      </div>
-      <div style="margin-top:0.7rem;font-size:0.65rem;color:#64748b">7 viajeros · 2 coches · ~4.800 km · 8 días</div>
+    <!-- Banner ruta dinámica desde TL -->
+    <div id="home-ruta-banner" style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);border-radius:14px;padding:1rem;margin-bottom:0.75rem;overflow:hidden">
+      <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:0.55rem">🗺️ Tu ruta</div>
+      <div id="home-ruta-chips" style="display:flex;align-items:center;gap:0.28rem;flex-wrap:wrap"></div>
+      <div style="margin-top:0.65rem;font-size:0.63rem;color:#475569">7 viajeros · 2 coches · ~4.800 km · 8 días · 14–21 jul</div>
     </div>
 
-    <!-- Cards rápidas -->
-    <div class="dgrid" style="margin-bottom:0.75rem">
+    <!-- Cards rápidas 2x2 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.55rem;margin-bottom:0.75rem">
       <div class="dcard" onclick="showView('timeline',2)">
         <div class="di">📅</div><div class="dv" id="days-left">—</div>
         <div class="dl">Días restantes</div><span class="dt tb">14 jul 2026</span>
@@ -461,34 +533,32 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
     <!-- Decidir hoy -->
     <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;margin-bottom:0.75rem">
       <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.65rem">⚡ Decidir hoy</div>
-      <div id="home-decidir">
-        <div style="font-size:0.75rem;color:#94a3b8;font-style:italic">Cargando alertas...</div>
-      </div>
+      <div id="home-decidir"><div style="font-size:0.75rem;color:#94a3b8;font-style:italic">Cargando alertas...</div></div>
     </div>
 
     <!-- Riesgos próximos -->
     <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;margin-bottom:0.75rem">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.65rem">
         <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8">⚠️ Riesgos del viaje</div>
-        <span style="font-size:0.6rem;color:#94a3b8">Detectados desde el itinerario</span>
+        <span style="font-size:0.6rem;color:#94a3b8">Auto desde el itinerario</span>
       </div>
       <div id="home-riesgos"></div>
     </div>
 
-    <!-- Gastos y checklist -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem;margin-bottom:0.75rem">
-      <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;cursor:pointer" onclick="showView('gastos',4)">
-        <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem">Gastos</div>
-        <div style="font-size:1.6rem;font-weight:800" id="dash-g">0€</div>
-        <div style="font-size:0.65rem;color:#94a3b8" id="dash-gn">0 registros</div>
+    <!-- Gastos y SOS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.55rem;margin-bottom:0.75rem">
+      <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.85rem;cursor:pointer" onclick="showView('gastos',4)">
+        <div style="font-size:0.6rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.35rem">Gastos</div>
+        <div style="font-size:1.5rem;font-weight:800" id="dash-g">0€</div>
+        <div style="font-size:0.63rem;color:#94a3b8" id="dash-gn">0 registros</div>
       </div>
-      <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;cursor:pointer" onclick="showView('emergencias',7)">
-        <div style="font-size:0.63rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.4rem">SOS</div>
-        <div style="font-size:1.6rem;font-weight:800">🆘</div>
-        <div style="font-size:0.65rem;color:#ef4444;font-weight:600">Emergencias</div>
+      <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.85rem;cursor:pointer" onclick="showView('emergencias',8)">
+        <div style="font-size:0.6rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.35rem">SOS</div>
+        <div style="font-size:1.5rem;font-weight:800">🆘</div>
+        <div style="font-size:0.63rem;color:#ef4444;font-weight:600">Emergencias</div>
       </div>
     </div>
-  </div>
+</div>
 
   <!-- ===== DURANTE EL VIAJE ===== -->
   <div id="home-during" style="display:none">
@@ -2750,7 +2820,24 @@ function initHomeBefore() {
   if(el) el.textContent = diff > 0 ? diff : '¡Ya!';
 
   // Riesgos próximos
+  // Ruta banner dinámica desde TL
+  var rutaChips = document.getElementById('home-ruta-chips');
+  if(rutaChips) {
+    var seen2 = {}, chips2 = [];
+    TL.forEach(function(entry) {
+      entry.city.split(' - ').forEach(function(part) {
+        var c = part.replace(/\(.*?\)/g,'').trim().split('\u2014')[0].trim().split('\u2013')[0].trim();
+        if(c && !seen2[c]) { seen2[c]=true; chips2.push(c); }
+      });
+    });
+    rutaChips.innerHTML = chips2.map(function(c, i) {
+      return (i>0?'<span style="color:#475569;font-size:0.55rem">&#8594;</span>':'')+
+        '<span style="font-size:0.7rem;font-weight:700;color:white;background:rgba(255,255,255,0.12);padding:0.2rem 0.5rem;border-radius:20px">'+c+'</span>';
+    }).join('');
+  }
+
   renderRiesgos('home-riesgos');
+
 gInitForm();
 
   // Alertas decidir hoy
