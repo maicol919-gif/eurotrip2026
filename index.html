@@ -3242,9 +3242,9 @@ function agAISuggestLocal(tlIdx) {
     '[{"time":"08:00","text":"Descripcion","type":"normal"},{"time":"DORMIR","text":"Fin de actividades del día","type":"sleep"}]. ' +
     'Tipos permitidos: normal, drive (si es traslado en coche). Genera entre 6 y 10 entradas.';
 
-  fetch('https://api.anthropic.com/v1/messages', {
+  fetch('https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy', {
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU'},
     body:JSON.stringify({
       model:'claude-sonnet-4-20250514',
       max_tokens:1000,
@@ -4611,9 +4611,9 @@ function simAnalizarParada(p, fromId, toId, insertIdx, card) {
     '3) Veredicto claro: CONVIENE / CONVIENE CON AJUSTES / NO CONVIENE, con justificación de 2 líneas. '+
     'Responde en español, máximo 200 palabras, tono directo y práctico.';
 
-  fetch('https://api.anthropic.com/v1/messages', {
+  fetch('https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: {'Content-Type': 'application/json', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU'},
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 400,
@@ -4759,9 +4759,9 @@ function simSuggestParadasIA(fromId, toId, insertIdx, body) {
     'Responde SOLO en JSON: [{"name":"Ciudad","desc":"qué hacer","pros":"ventaja","contras":"desventaja","dist":"tiempo desde origen"}]. '+
     'Sin markdown, sin texto extra.';
 
-  fetch('https://api.anthropic.com/v1/messages', {
+  fetch('https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy', {
     method:'POST',
-    headers:{'Content-Type':'application/json'},
+    headers:{'Content-Type':'application/json','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU'},
     body: JSON.stringify({
       model:'claude-sonnet-4-20250514',
       max_tokens:600,
@@ -6004,9 +6004,13 @@ function rutaSetMode(mode){
 
 
 // Final init — all vars defined, safe to run full refresh
+// Restore admin flags from session
+if(PIN_SESSION && (PIN_SESSION.isAdmin || PIN_SESSION.pin === ADMIN_PIN)) {
+  simIsAdmin = true;
+  AG_ADMIN = true;
+}
 // Always load route from Supabase (shared across all users)
 simLoadRoute(function() {
-  // Called after route is loaded from Supabase
   console.log('Route loaded from Supabase');
 });
 // Run initial refresh with hardcoded route while Supabase loads
