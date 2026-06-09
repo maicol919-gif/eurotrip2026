@@ -727,16 +727,27 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
   <div id="tl-container" style="padding:0.75rem 1rem 5rem"></div>
 
   <div id="tl-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999;align-items:center;justify-content:center;padding:1rem">
-    <div style="background:white;border-radius:16px;padding:20px;width:100%;max-width:420px;max-height:85vh;display:flex;flex-direction:column">
-      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px">
+    <div style="background:white;border-radius:16px;padding:20px;width:100%;max-width:420px;max-height:90vh;display:flex;flex-direction:column;gap:0">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px">
         <div style="font-weight:800;font-size:0.95rem" id="tl-edit-title"></div>
         <div style="font-size:0.65rem;color:#94a3b8" id="tl-edit-date"></div>
       </div>
-      <div style="font-size:0.65rem;color:#94a3b8;margin-bottom:12px">Todos pueden editar — se requiere PIN admin para guardar</div>
-      <div id="tl-edit-slots" style="overflow-y:auto;flex:1;margin-bottom:10px"></div>
-      <button onclick="tlAddSlot()" style="width:100%;background:#f1f5f9;border:1.5px dashed #cbd5e1;border-radius:8px;padding:0.45rem;font-family:inherit;font-size:0.72rem;color:#64748b;cursor:pointer;margin-bottom:10px">+ Añadir actividad</button>
-      <div style="display:flex;gap:8px">
-        <button onclick="tlSaveEdit()" style="flex:1;background:#0f172a;color:white;border:none;border-radius:8px;padding:10px;font-family:inherit;font-weight:700;cursor:pointer;font-size:0.8rem">💾 Guardar</button>
+      <div style="overflow-y:auto;flex:1;display:flex;flex-direction:column;gap:12px">
+        <div>
+          <div style="font-size:0.65rem;font-weight:700;color:#0f172a;margin-bottom:4px">🎯 Imprescindibles <span style="font-weight:400;color:#94a3b8">(admin)</span></div>
+          <textarea id="tl-edit-must" rows="3" placeholder="Una por línea..." style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px;font-family:inherit;font-size:0.76rem;resize:vertical;outline:none;box-sizing:border-box"></textarea>
+        </div>
+        <div>
+          <div style="font-size:0.65rem;font-weight:700;color:#0f172a;margin-bottom:4px">💡 Ideas <span style="font-weight:400;color:#94a3b8">(todos pueden añadir)</span></div>
+          <textarea id="tl-edit-ideas" rows="4" placeholder="Lugares, restaurantes, actividades..." style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px;font-family:inherit;font-size:0.76rem;resize:vertical;outline:none;box-sizing:border-box"></textarea>
+        </div>
+        <div>
+          <div style="font-size:0.65rem;font-weight:700;color:#0f172a;margin-bottom:4px">⚠️ Alertas <span style="font-weight:400;color:#94a3b8">(admin)</span></div>
+          <textarea id="tl-edit-alerts" rows="3" placeholder="ZTL, parking, reservas..." style="width:100%;border:1.5px solid #e2e8f0;border-radius:8px;padding:8px;font-family:inherit;font-size:0.76rem;resize:vertical;outline:none;box-sizing:border-box"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button onclick="tlDaySave()" style="flex:1;background:#0f172a;color:white;border:none;border-radius:8px;padding:10px;font-family:inherit;font-weight:700;cursor:pointer;font-size:0.8rem">💾 Guardar</button>
         <button onclick="document.getElementById('tl-edit-modal').style.display='none'" style="background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px;font-family:inherit;cursor:pointer;flex:1;font-size:0.8rem">Cancelar</button>
       </div>
     </div>
@@ -1695,7 +1706,7 @@ function showView(name, idx) {
   if(btns[idx]) btns[idx].classList.add('active');
   // Regenerar agenda cada vez que se abre (por si cambió el TL)
   if(name === 'agenda') renderAgenda();
-  if(name === 'timeline') { rutaRenderStats(); renderTL(); var ab=document.getElementById('ruta-admin-btns'); if(ab&&AG_ADMIN) ab.style.display='flex'; }
+  if(name === 'timeline') { rutaRenderStats(); dayDataLoad(); var ab=document.getElementById('ruta-admin-btns'); if(ab&&AG_ADMIN) ab.style.display='flex'; }
   if(name === 'simulador') { simLoadCandidatas(); simRenderUnified(); simDrawMap(); var sb=document.getElementById('ruta-save-btn'); var db=document.getElementById('ruta-discard-btn'); if(sb) sb.style.display=simIsModified?'block':'none'; if(db) db.style.display=simIsModified?'block':'none'; }
   if(name === 'emergencias') renderSOSDynamic();
   if(name === 'perfil') { initPerfil(); }
@@ -1959,6 +1970,7 @@ function loadData() {
     votes = {};
     data.forEach(function(v){ votes[v.ciudad+'_'+v.tipo] = v.usuario; });
     renderCities();
+dayDataLoad();
     setBadge(true);
   }).catch(function(){ setBadge(false); });
 
@@ -2081,67 +2093,33 @@ function renderTL(tlData, containerId) {
   if(!el) return;
 
   el.innerHTML = data.map(function(d, i) {
-    // Parse route cities for color assignment
-    var routeCities = d.city.split(/\s*[\-–—→]\s*/).map(function(s){
-      return s.replace(/\(.*?\)/g,'').replace(/Dia.*$/i,'').trim();
-    }).filter(function(s){ return s.length > 1; });
+    var cityId = tlGetCityId(d.city);
+    var saved = DAY_DATA[cityId] || {};
+    var must = saved.must || [];
+    var ideas = saved.ideas || [];
+    var alerts = saved.alerts || [];
 
-    // Build event list (only timed activities)
-    var currentCity = routeCities[0] || '';
-    var eventRows = '';
-    d.acts.forEach(function(a) {
-      if(/^DORMIR/i.test(a.trim())) {
-        eventRows += '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0;border-top:1px solid #f0fdf4;margin-top:0.3rem">'+
-          '<span style="font-size:0.7rem">🌙</span>'+
-          '<span style="font-size:0.72rem;color:#15803d;font-weight:600">'+a+'</span>'+
-        '</div>';
-        return;
-      }
-      var m = a.match(/^(\d{1,2}:\d{2})\s+(.*)/);
-      if(!m) return;
-
-      var time = m[1];
-      var text = m[2];
-      var isDrive = /^(A\d+|AP-\d|Salida|Cruce|Autopista|Paso\s)/i.test(text);
-
-      // Detect city change
-      var llegada = a.match(/Llegada\s+([A-Z\u00C0-\u024F][a-zA-Z\u00C0-\u024F\s\-]+?)(?:\s*—|\s*\(|$)/);
-      if(llegada) currentCity = llegada[1].trim();
-
-      var color = isDrive ? '#94a3b8' : agCityColor(currentCity);
-
-      eventRows += '<div style="display:flex;gap:0.5rem;align-items:baseline;padding:0.28rem 0;border-bottom:1px solid #f8fafc">'+
-        '<span style="font-family:monospace;font-size:0.63rem;font-weight:700;color:'+color+';flex-shrink:0;min-width:36px">'+time+'</span>'+
-        '<span style="font-size:0.74rem;color:'+(isDrive?'#94a3b8':'#1e293b')+';line-height:1.4;font-weight:'+(isDrive?'400':'500')+'">'+text+'</span>'+
-      '</div>';
-    });
-
-    // City legend
-    var citiesSeen = [];
-    var cur = routeCities[0] || '';
-    d.acts.forEach(function(a){
-      var ll = a.match(/Llegada\s+([A-Z\u00C0-\u024F][a-zA-Z\u00C0-\u024F\s\-]+?)(?:\s*—|\s*\(|$)/);
-      if(ll) cur = ll[1].trim();
-      if(citiesSeen.indexOf(cur) === -1) citiesSeen.push(cur);
-    });
-    var legend = citiesSeen.map(function(c){
-      return '<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.6rem;color:'+agCityColor(c)+'">'+
-        '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+agCityColor(c)+';flex-shrink:0"></span>'+c+'</span>';
-    }).join('');
-
-    // Header badges
     var kmBadge = d.km > 0 ? '<span style="background:#f0f9ff;color:#0284c7;border-radius:5px;padding:0.1rem 0.3rem;font-size:0.58rem;font-weight:700">🚗 '+d.km+'km</span> ' : '';
     var ztlBadge = d.ztl ? '<span style="background:#fef2f2;color:#ef4444;border-radius:5px;padding:0.1rem 0.3rem;font-size:0.58rem;font-weight:700">⚠️ ZTL</span>' : '';
     var freeBadge = !d.drive ? '<span style="background:#f0fdf4;color:#15803d;border-radius:5px;padding:0.1rem 0.3rem;font-size:0.58rem;font-weight:700">📍 Día libre</span>' : '';
 
-    // Note + maps inside body
-    var noteBlock = d.note ? '<div style="font-size:0.65rem;color:#64748b;background:#f8fafc;border-radius:6px;padding:0.3rem 0.5rem;margin:0.5rem 0;border-left:2px solid #e2e8f0">📌 '+d.note+'</div>' : '';
-    var mapsLink = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.25rem;background:#2563eb;color:white;border-radius:7px;padding:0.28rem 0.6rem;font-size:0.63rem;font-weight:700;text-decoration:none;margin-top:0.4rem">🗺️ Google Maps</a>' : '';
+    var mustHtml = must.length ? '<div style="margin-bottom:0.55rem"><div style="font-size:0.6rem;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem">🎯 Imprescindibles</div>'+
+      must.map(function(x){ return '<div style="font-size:0.74rem;color:#1e293b;padding:0.12rem 0;display:flex;gap:0.35rem"><span style="color:#94a3b8;flex-shrink:0">·</span>'+x+'</div>'; }).join('')+'</div>' : '';
+
+    var ideasHtml = ideas.length ? '<div style="margin-bottom:0.55rem"><div style="font-size:0.6rem;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem">💡 Ideas</div>'+
+      ideas.map(function(x){ return '<div style="font-size:0.74rem;color:#475569;padding:0.12rem 0;display:flex;gap:0.35rem"><span style="color:#94a3b8;flex-shrink:0">·</span>'+x+'</div>'; }).join('')+'</div>' : '';
+
+    var alertsHtml = alerts.length ? '<div style="margin-bottom:0.55rem"><div style="font-size:0.6rem;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem">⚠️ Alertas</div>'+
+      alerts.map(function(x){ return '<div style="font-size:0.74rem;color:#b45309;padding:0.12rem 0;display:flex;gap:0.35rem"><span style="flex-shrink:0">·</span>'+x+'</div>'; }).join('')+'</div>' : '';
+
+    var emptyHtml = (!must.length && !ideas.length && !alerts.length) ?
+      '<div style="font-size:0.72rem;color:#cbd5e1;padding:0.4rem 0;text-align:center">Sin información todavía — pulsa ✏️ para añadir</div>' : '';
+
+    var mapsLink = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.25rem;background:#2563eb;color:white;border-radius:7px;padding:0.28rem 0.6rem;font-size:0.63rem;font-weight:700;text-decoration:none;margin-top:0.25rem">🗺️ Google Maps</a>' : '';
 
     return '<div style="border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:0.5rem;overflow:hidden">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.75rem;background:white;gap:0.5rem">'+
         '<div data-accordion="'+i+'" style="display:flex;align-items:center;gap:0.5rem;flex:1;min-width:0;cursor:pointer">'+
-        '<div style="display:flex;align-items:center;gap:0.5rem;flex:1;min-width:0">'+
           '<span style="font-family:monospace;font-size:0.72rem;font-weight:800;color:#0f172a;flex-shrink:0">'+d.date+'</span>'+
           '<span style="font-size:0.72rem;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+d.city+'</span>'+
         '</div>'+
@@ -2151,12 +2129,8 @@ function renderTL(tlData, containerId) {
         '</div>'+
         '<button data-tledit="'+i+'" style="background:none;border:1.5px solid #e2e8f0;border-radius:6px;padding:0.2rem 0.45rem;font-size:0.65rem;cursor:pointer;flex-shrink:0;color:#64748b">✏️</button>'+
       '</div>'+
-      '</div>'+
       '<div id="tl-body-'+i+'" style="display:none;padding:0.5rem 0.75rem 0.65rem;border-top:1px solid #f1f5f9;background:#fafafa">'+
-        '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.4rem">'+legend+'</div>'+
-        eventRows+
-        noteBlock+
-        mapsLink+
+        mustHtml+ideasHtml+alertsHtml+emptyHtml+mapsLink+
       '</div>'+
     '</div>';
   }).join('');
@@ -2178,7 +2152,7 @@ function tlDeleteDay(idx){
     if(!day) return;
     if(!confirm('Eliminar "'+day.city+'" del itinerario oficial?')) return;
     TL.splice(idx, 1);
-    simSaveTL();
+    // simSaveTL removed
     renderTL();
     simShowMsg('Dia eliminado del itinerario.');
   });
@@ -3764,8 +3738,7 @@ document.addEventListener('click', function(e) {
   if(clItem) { toggleCL(parseInt(clItem.getAttribute('data-clsi')), parseInt(clItem.getAttribute('data-clii'))); return; }
 
   // TL Edit button — must be before tltoggle (it's inside the row)
-  var tlEdit = t.closest('.tl-edit-btn');
-  if(tlEdit) { tlOpenEdit(parseInt(tlEdit.getAttribute('data-dayidx'))); return; }
+
 
   // TL IA button — must be before tltoggle
   var tlIa = t.closest('.tl-ia-btn');
@@ -3781,7 +3754,7 @@ document.addEventListener('click', function(e) {
 
   // TL edit button (before accordion)
   var tlEditBtn = t.closest('[data-tledit]');
-  if(tlEditBtn) { tlOpenEdit(parseInt(tlEditBtn.getAttribute('data-tledit'))); return; }
+  if(tlEditBtn) { tlDayOpen(parseInt(tlEditBtn.getAttribute('data-tledit'))); return; }
 
   // Accordion (ruta view)
   var accRow = t.closest('[data-accordion]');
@@ -4423,7 +4396,7 @@ function rutaGenerateTL() {
 function rutaApplyTL(newTL) {
   TL.length = 0;
   newTL.forEach(function(d){ TL.push(d); });
-  simSaveTL();
+  // simSaveTL removed
 }
 
 // Render stats bar for VER mode
@@ -4938,341 +4911,88 @@ function simProposeRoute() {
 window._tlEditIdx = 0;
 window._tlEditSlots = [];
 
-function tlOpenEdit(dayIdx) {
+function tlGetCityId(cityStr) {
+  // Extract primary city_id from a day's city string (e.g. "Alicante — Barcelona — Montpellier" → "alicante")
+  var first = cityStr.split(/\s*[\-–—→]\s*/)[0]
+    .replace(/\(.*?\)/g,'').replace(/día libre/i,'').replace(/Día libre/i,'').trim()
+    .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]/g,'');
+  return first || 'day';
+}
+
+// In-memory cache of day data keyed by city_id
+var DAY_DATA = {};
+
+function dayDataLoad() {
+  supa('GET','alojamientos_estado',null,'?ciudad=like.day_%').then(function(rows){
+    if(!rows) return;
+    rows.forEach(function(row){
+      try {
+        var key = row.ciudad.replace(/^day_/,'');
+        DAY_DATA[key] = JSON.parse(row.notas||'{}');
+      } catch(e){}
+    });
+    renderTL();
+  }).catch(function(){});
+}
+
+function tlDayOpen(dayIdx) {
   var d = TL[dayIdx];
   if(!d) return;
-  window._tlEditIdx = dayIdx;
-
+  var cityId = tlGetCityId(d.city);
+  var saved = DAY_DATA[cityId] || {};
   document.getElementById('tl-edit-title').textContent = d.city;
   document.getElementById('tl-edit-date').textContent = d.date;
-
-  // Load slots from localStorage or from TL acts
-  var saved = null;
-  try { saved = JSON.parse(localStorage.getItem('et26_tlslots_'+dayIdx)); } catch(e) {}
-  window._tlEditSlots = saved || d.acts.map(function(a) {
-    if(/^DORMIR/i.test(a.trim())) return {time:'DORMIR', text:a.replace(/^DORMIR\s*[—-]?\s*/i,'').trim()};
-    var m = a.match(/^(\d{1,2}:\d{2})\s*(.*)/);
-    return {time: m ? m[1] : '—', text: m ? m[2] : a};
-  });
-  // Ensure DORMIR at end
-  var lastSlot = window._tlEditSlots[window._tlEditSlots.length-1];
-  if(!lastSlot || lastSlot.time !== 'DORMIR') {
-    window._tlEditSlots.push({time:'DORMIR', text:'Fin de actividades del día'});
-  }
-
-  tlRenderSlots();
+  document.getElementById('tl-edit-must').value = (saved.must||[]).join('\n');
+  document.getElementById('tl-edit-ideas').value = (saved.ideas||[]).join('\n');
+  document.getElementById('tl-edit-alerts').value = (saved.alerts||[]).join('\n');
+  window._tlEditCityId = cityId;
+  window._tlEditIsAdmin = false; // will be set after PIN if needed
   document.getElementById('tl-edit-modal').style.display = 'flex';
 }
 
-function tlRenderSlots() {
-  var cont = document.getElementById('tl-edit-slots');
-  if(!cont) return;
-  cont.innerHTML = '';
-  window._tlEditSlots.forEach(function(slot, si) {
-    var isSleep = slot.time === 'DORMIR';
-    var wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;gap:0.4rem;align-items:flex-start;margin-bottom:0.35rem;background:'+(isSleep?'#f0fdf4':'white')+';border:1.5px solid '+(isSleep?'#86efac':'#e2e8f0')+';border-radius:8px;overflow:hidden';
+function tlDaySave() {
+  var cityId = window._tlEditCityId;
+  if(!cityId) return;
 
-    var timeEl = document.createElement('div');
-    timeEl.contentEditable = isSleep ? 'false' : 'true';
-    timeEl.style.cssText = 'font-size:0.62rem;font-weight:700;color:'+(isSleep?'#15803d':'#94a3b8')+';padding:0.4rem 0.5rem;background:#f8fafc;min-width:46px;border-right:1px solid #e2e8f0;outline:none';
-    timeEl.textContent = slot.time;
-    timeEl.addEventListener('blur', function() { window._tlEditSlots[si].time = this.textContent.trim(); });
+  var ideasVal = document.getElementById('tl-edit-ideas').value;
+  var mustVal  = document.getElementById('tl-edit-must').value;
+  var alertsVal= document.getElementById('tl-edit-alerts').value;
 
-    var textEl = document.createElement('div');
-    textEl.contentEditable = isSleep ? 'false' : 'true';
-    textEl.style.cssText = 'flex:1;font-size:0.74rem;color:'+(isSleep?'#15803d':'#475569')+';padding:0.4rem 0.5rem;outline:none;font-weight:'+(isSleep?'600':'400');
-    textEl.textContent = slot.text;
-    textEl.addEventListener('blur', function() { window._tlEditSlots[si].text = this.textContent.trim(); });
+  function parseLines(str){ return str.split('\n').map(function(s){return s.trim();}).filter(Boolean); }
 
-    wrap.appendChild(timeEl);
-    wrap.appendChild(textEl);
+  var existing = DAY_DATA[cityId] || {};
+  var mustNew   = parseLines(mustVal);
+  var alertsNew = parseLines(alertsVal);
+  var ideasNew  = parseLines(ideasVal);
 
-    if(!isSleep) {
-      var del = document.createElement('button');
-      del.style.cssText = 'background:none;border:none;color:#e2e8f0;cursor:pointer;padding:0.4rem 0.5rem;font-size:0.8rem;transition:color .15s';
-      del.textContent = '✕';
-      del.addEventListener('mouseenter', function(){ this.style.color='#ef4444'; });
-      del.addEventListener('mouseleave', function(){ this.style.color='#e2e8f0'; });
-      del.addEventListener('click', function() {
-        window._tlEditSlots.splice(si, 1);
-        tlRenderSlots();
-      });
-      wrap.appendChild(del);
-    }
+  // Ideas: anyone can save
+  // Must + alerts: require admin PIN
+  var adminChanged = (mustNew.join('|') !== (existing.must||[]).join('|')) ||
+                     (alertsNew.join('|') !== (existing.alerts||[]).join('|'));
 
-    cont.appendChild(wrap);
-  });
-}
-
-function tlAddSlot() {
-  var sleepIdx = window._tlEditSlots.length - 1;
-  window._tlEditSlots.splice(sleepIdx, 0, {time:'—', text:''});
-  tlRenderSlots();
-  // Focus last added
-  setTimeout(function() {
-    var slots = document.querySelectorAll('#tl-edit-slots [contenteditable=true]');
-    if(slots.length >= 2) slots[slots.length-2].focus();
-  }, 50);
-}
-
-function tlSaveEdit() {
-  simRequestAdmin(function() {
-    var dayIdx = window._tlEditIdx;
-    if(TL[dayIdx]) {
-      TL[dayIdx].acts = window._tlEditSlots.map(function(s) {
-        return s.time === 'DORMIR' ? 'DORMIR — Fin de actividades del día' : s.time + ' ' + s.text;
-      });
-    }
-    simSaveTL();
+  function doSave(must, alerts) {
+    var payload_data = { must: must, ideas: ideasNew, alerts: alerts };
+    DAY_DATA[cityId] = payload_data;
+    var supaKey = 'day_' + cityId;
+    supa('GET','alojamientos_estado',null,'?ciudad=eq.'+supaKey).then(function(rows){
+      var payload = {ciudad: supaKey, estado:'active', notas: JSON.stringify(payload_data)};
+      if(rows&&rows.length>0) supa('PATCH','alojamientos_estado',payload,'?ciudad=eq.'+supaKey).catch(function(){});
+      else supa('POST','alojamientos_estado',payload).catch(function(){});
+    }).catch(function(){});
     document.getElementById('tl-edit-modal').style.display = 'none';
     renderTL();
-  });
-}
+  }
 
-function tlIaSuggest(dayIdx) {
-  var d = TL[dayIdx];
-  if(!d) return;
-
-  // Open modal
-  window._tlEditIdx = dayIdx;
-  document.getElementById('tl-edit-title').textContent = d.city;
-  document.getElementById('tl-edit-date').textContent = d.date;
-  document.getElementById('tl-edit-modal').style.display = 'flex';
-
-  var cont = document.getElementById('tl-edit-slots');
-  var now = new Date();
-  var hora = now.getHours() + ':' + (now.getMinutes()<10?'0':'') + now.getMinutes();
-  var diaSemana = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][now.getDay()];
-
-  cont.innerHTML = '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem;color:#7c3aed;font-size:0.73rem;background:#faf5ff;border-radius:8px">' +
-    '<span class="sim-spinner"></span>La IA está analizando la situación actual para ' + d.city + '...</div>';
-
-  var EDGE = 'https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy';
-  var KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU';
-
-  // Build context-rich prompt
-  var ciudades = d.city.split(/\s*[\-–—→]\s*/).filter(function(s){return s.trim().length>1;});
-  var esDiaViaje = dayIdx >= 0 && dayIdx < TL.length;
-  var isDrive = d.drive;
-
-  var prompt = 'Eres el copiloto inteligente de un grupo de 7 amigos en roadtrip por Europa. ' +
-    'CONTEXTO REAL AHORA MISMO: Son las ' + hora + 'h de un ' + diaSemana + ', ' + now.toLocaleDateString('es-ES') + '. ' +
-    'TRAMO DEL DÍA: ' + d.date + ' — ' + d.city + '. ' +
-    (isDrive ? 'Es un día de conducción: ' + d.h + ' / ' + d.km + 'km en coche. ' : 'Es un día libre para explorar. ') +
-    'CIUDADES DEL DÍA: ' + ciudades.join(', ') + '. ' +
-    'PLAN BASE: ' + d.acts.join(' | ') + '. ' +
-    '\n\nTu misión: Genera un horario COMPLETO y DETALLADO hora a hora para este día, teniendo en cuenta:' +
-    '\n1. La hora actual (' + hora + 'h) — si ya es tarde, ajusta el plan al tiempo restante' +
-    '\n2. Que es julio (verano europeo) — calor, masificación turística en horario 12-17h' +
-    '\n3. Para cada actividad turística: dónde exactamente ir, mejor foto, cuánto tiempo, coste estimado' +
-    '\n4. Para tramos de conducción: rotación de conductores cada 2h, paradas recomendadas, dónde repostar' +
-    '\n5. Factores prácticos: aparcamiento, colas en atracciones, restaurantes locales vs turísticos' +
-    '\n6. La última entrada DEBE ser {"time":"DORMIR","text":"Fin de actividades — hora de descansar"}' +
-    '\n\nResponde SOLO en JSON válido, sin markdown: ' +
-    '[{"time":"HH:MM","text":"descripción práctica y concreta"},...]' +
-    '\nEntre 8 y 14 entradas. Sé específico, útil y directo. Piensa como un local experto.';
-
-  fetch(EDGE, {
-    method:'POST',
-    headers:{'Content-Type':'application/json','apikey':KEY},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:1200,
-      messages:[{role:'user', content:prompt}]
-    })
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    var text = (data.content||[]).map(function(b){return b.text||'';}).join('').replace(/```json|```/g,'').trim();
-    var slots = JSON.parse(text);
-    window._tlEditSlots = slots;
-    window._tlEditIdx = dayIdx;
-
-    // Save to TL immediately
-    if(TL[dayIdx]) {
-      TL[dayIdx].acts = slots.map(function(s){
-        return s.time === 'DORMIR' ? 'DORMIR — Fin de actividades del día' : s.time + ' ' + s.text;
-      });
-    }
-    try { localStorage.setItem('et26_tlslots_'+dayIdx, JSON.stringify(slots)); } catch(e) {}
-
-    tlRenderSlots();
-
-    // Also refresh the TL view so colors update
-    renderTL();
-  })
-  .catch(function(err) {
-    cont.innerHTML = '<div style="color:#dc2626;font-size:0.72rem;padding:0.5rem;background:#fef2f2;border-radius:8px">No se pudo conectar con la IA. Comprueba la conexión e inténtalo de nuevo.</div>';
-  });
-}
-
-
-
-// ===== IA COPILOTO EN HOME =====
-function iaHomeInit() {
-  var btn = document.getElementById('ia-home-btn');
-  var input = document.getElementById('ia-donde');
-  if(!btn || !input || input._hooked) return;
-  input._hooked = true;
-
-  function askIA() {
-    var donde = input.value.trim();
-    if(!donde) return;
-    var result = document.getElementById('ia-home-result');
-    result.style.display = 'block';
-    result.innerHTML = '<span class="sim-spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:white"></span> Consultando...';
-
-    var now = new Date();
-    var hora = now.getHours() + ':' + (now.getMinutes()<10?'0':'') + now.getMinutes();
-    var diaSemana = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][now.getDay()];
-
-    // Find today's TL entry
-    var dayIdx = Math.floor((now - TRIP_START) / 86400000);
-    var todayTL = (dayIdx >= 0 && dayIdx < TL.length) ? TL[dayIdx] : null;
-
-    var EDGE = 'https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy';
-    var KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU';
-
-    var prompt = 'Eres el copiloto experto de 7 amigos en roadtrip por Europa en julio 2026. ' +
-      'AHORA MISMO: Son las ' + hora + 'h de un ' + diaSemana + '. ' +
-      'ESTÁN EN: ' + donde + '. ' +
-      (todayTL ? 'PLAN DE HOY: ' + todayTL.city + ' — ' + todayTL.acts.slice(0,5).join(' | ') + '. ' : '') +
-      'VIAJE: Alicante → Montpellier → París → Colmar → Milán → Venecia → Roma → Niza → Alicante. 7 personas, 2 coches. ' +
-      '\n\nDada la hora actual (' + hora + 'h) y que están en ' + donde + ', dime:' +
-      '\n1. Las 3 mejores opciones de qué hacer AHORA mismo (específicas, prácticas, con duración y coste estimado)' +
-      '\n2. Qué considerar: ¿hay algo importante que no se estén perdiendo cerca?' +
-      '\n3. Un consejo práctico urgente (aparcamiento, colas, restaurante, etc.)' +
-      '\nSé conciso, directo y útil. Máximo 150 palabras. En español.';
-
-    fetch(EDGE, {
-      method:'POST',
-      headers:{'Content-Type':'application/json','apikey':KEY},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:400,
-        messages:[{role:'user', content:prompt}]
-      })
-    })
-    .then(function(r){return r.json();})
-    .then(function(data){
-      var text = (data.content||[]).map(function(b){return b.text||'';}).join('').trim();
-      result.innerHTML = text.replace(/\n/g,'<br>');
-    })
-    .catch(function(){
-      result.innerHTML = '⚠️ Sin conexión. Comprueba el WiFi o datos.';
+  if(adminChanged) {
+    simRequestAdmin(function(){
+      doSave(mustNew, alertsNew);
     });
+  } else {
+    // Only ideas changed — save without PIN
+    doSave(existing.must||[], existing.alerts||[]);
   }
-
-  btn.addEventListener('click', askIA);
-  input.addEventListener('keydown', function(e){ if(e.key==='Enter') askIA(); });
 }
 
-// ===== INIT =====
-updateCountdown();
-setInterval(updateCountdown, 60000);
-renderCities();
-renderTL(); // TL inicial
-renderBudget();
-renderGastos();
-renderNotas();
-renderCL();
-renderRuta();
-renderAgenda();
-updateHeaderRoute();
-initHome();
-renderSOSDynamic();
-renderRiesgos('home-riesgos');
-
-// Load sheet links immediately (Google Sheets for Airbnb links)
-loadSheet();
-
-// Try Supabase in background — don't block UI
-setTimeout(function() {
-  loadData();
-  // Connect to Supabase Realtime for instant route updates
-  supaRealtimeConnect();
-  // Keep polling as fallback every 30s (less frequent now that we have realtime)
-  setInterval(loadData, 30000);
-}, 500);
-
-// PIN Login — check session
-pinInit();
-if(PIN_SESSION) {
-  // Restore session
-  NOMBRE = PIN_SESSION.nombre;
-  localStorage.setItem('et_nombre', NOMBRE);
-  if(PIN_SESSION.isAdmin || PIN_SESSION.pin === ADMIN_PIN) {
-    AG_ADMIN = true;
-    simIsAdmin = true;
-  }
-  document.querySelectorAll('.user-name-display').forEach(function(el){ el.textContent = NOMBRE; });
-  pinUpdateAdminBtn();
-} else {
-  // Show login
-  document.getElementById('nmodal').classList.add('open');
-}
-
-
-// ===== SIMULADOR v2 — UNIFIED =====
-var ADMIN_PIN = '2026';
-var simIsAdmin = false;
-var simPendingAction = null;
-var simIsModified = false;
-var simRouteInited = false;
-var dragSrc = null;
-
-// City data
-var SIM_BASE_ROUTE = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza','alicante'];
-var simRoute = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza','alicante'];
-var simCandidatas = []; // from Supabase
-var simCityCache = {}; // AI-generated city data
-var simSelected = null; // currently selected candidate city id
-var simSelectedInsertAt = null; // where user placed the selected city
-
-var SIM_COORDS = {
-  alicante:[-0.48,38.35], madrid:[-3.70,40.42], barcelona:[2.15,41.39],
-  montpellier:[3.88,43.61], paris:[2.35,48.85], colmar:[7.36,48.08],
-  lyon:[4.83,45.75], marsella:[5.37,43.30], niza:[7.27,43.71],
-  monaco:[7.42,43.74], burdeos:[-0.58,44.84],
-  milan:[9.19,45.46], venecia:[12.33,45.44], roma:[12.50,41.90],
-  florencia:[11.25,43.77], pisa:[10.40,43.72], genova:[8.93,44.41],
-  bologna:[11.34,44.49], napoles:[14.27,40.85],
-  zurich:[8.55,47.37], ginebra:[6.14,46.20],
-  amsterdam:[4.90,52.37], bruselas:[4.35,50.85],
-  berlin:[13.40,52.52], munich:[11.58,48.14], frankfurt:[8.68,50.11],
-  colonia:[6.96,50.93],
-  genova:[8.93,44.41], sanremo:[7.78,43.82]
-};
-
-var SIM_KM = {
-  'alicante|montpellier':620,'montpellier|paris':750,'paris|colmar':490,
-  'colmar|milan':510,'milan|venecia':270,'venecia|roma':530,'roma|niza':790,
-  'alicante|barcelona':310,'barcelona|montpellier':310,
-  'paris|milan':850,'milan|roma':580,'milan|pisa':270,
-  'venecia|pisa':310,'pisa|roma':340,
-  'roma|florencia':280,'florencia|milan':300,'florencia|venecia':200,
-  'niza|monaco':20,'monaco|milan':200,'niza|milan':320,
-  'niza|alicante':650,'montpellier|marsella':170,'marsella|niza':200,
-  'marsella|milan':650,'madrid|alicante':420,'madrid|barcelona':620,
-  'paris|barcelona':1040,'zurich|milan':330,'zurich|paris':620,
-  'amsterdam|paris':500,'bruselas|paris':310,'berlin|amsterdam':650,
-  'munich|milan':380,'munich|zurich':320,'frankfurt|paris':580,
-  'tarragona|montpellier':280,'alicante|tarragona':290,
-  'reims|paris':150,'reims|colmar':330,'nancy|paris':310,'nancy|colmar':200,
-  'vichy|paris':350,'vichy|montpellier':370,'clermont|paris':420,'clermont|montpellier':340,
-  'lyon|paris':470,'lyon|montpellier':310,'lyon|milan':460,
-  'perpignan|niza':420,'perpignan|montpellier':160,'perpignan|barcelona':190,
-  'verona|milan':160,'verona|venecia':120,'brescia|milan':100,'brescia|venecia':180,
-  'berna|colmar':180,'berna|milan':330,'sanremo|niza':55,'sanremo|genova':160,
-  'marsella|niza':200,'marsella|montpellier':170,'marsella|alicante':540
-};
-
-var SIM_MODES = {
-  // Overridden by user via transport selector
-};
-// User transport overrides: key = 'cityA|cityB', value = 'coche'|'tren'|'avion'
-var SIM_TRANSPORT_OVERRIDE = {};
 
 function simGetEffectiveMode(a, b){
   var key = a+'|'+b;
@@ -5943,7 +5663,7 @@ function simConfirmOfficial(){
     TL.forEach(function(d,i){if(d.city.toLowerCase().indexOf((SIM_NAMES[afterCity]||afterCity).toLowerCase().split(' ')[0])!==-1) tlIdx=i;});
     if(tlIdx>=0) TL.splice(tlIdx+1,0,newDay); else TL.push(newDay);
     supa('PATCH','candidatas?city_id=eq.'+cityId,{en_oficial:true}).catch(function(){});
-    simSaveTL();
+    // simSaveTL removed
     simDeselectCandidate();
     simShowMsg('✓ '+(SIM_NAMES[cityId]||cityId)+' añadida. Ve a Ver para revisar.');
   });
@@ -6089,47 +5809,6 @@ function simDiscardAll(){
   simShowMsg('Restaurado.');
 }
 
-// ===== PERSIST TL =====
-function simSaveTL(){
-  // Save new days (simulator additions) + edited acts for all days
-  var extra=TL.filter(function(d){return d.date==='? jul'||d.note==='Añadido desde simulador'||d.note==='Desde simulador';});
-  // Save acts edits as a separate map: city -> acts
-  var actsEdits={};
-  TL.forEach(function(d){ actsEdits[d.city]=d.acts; });
-  var payload_data={extra:extra,actsEdits:actsEdits};
-  try{localStorage.setItem('et26_tl_extra',JSON.stringify(payload_data));}catch(e){}
-  supa('GET','alojamientos_estado',null,'?ciudad=eq.tl_changes').then(function(rows){
-    var payload={ciudad:'tl_changes',estado:'custom',notas:JSON.stringify(payload_data)};
-    if(rows&&rows.length>0) supa('PATCH','alojamientos_estado',payload,'?ciudad=eq.tl_changes').catch(function(){});
-    else supa('POST','alojamientos_estado',payload).catch(function(){});
-  }).catch(function(){});
-}
-
-function simLoadTL(){
-  function applyTLData(data){
-    // Support both old format (array) and new format ({extra, actsEdits})
-    var extra=Array.isArray(data)?data:(data.extra||[]);
-    var actsEdits=(!Array.isArray(data)&&data.actsEdits)||{};
-    // Apply acts edits to existing days
-    TL.forEach(function(d){ if(actsEdits[d.city]) d.acts=actsEdits[d.city]; });
-    // Push new days
-    extra.forEach(function(day){
-      if(!TL.some(function(d){return d.city===day.city;})) TL.push(day);
-    });
-    renderTL();
-  }
-  supa('GET','alojamientos_estado',null,'?ciudad=eq.tl_changes').then(function(rows){
-    if(rows&&rows.length>0&&rows[0].notas){
-      try{ var data=JSON.parse(rows[0].notas); applyTLData(data); }catch(e){}
-    }
-  }).catch(function(){
-    try{
-      var saved=localStorage.getItem('et26_tl_extra');
-      if(saved){ applyTLData(JSON.parse(saved)); }
-    }catch(e){}
-  });
-}
-
 // ===== SEARCH + GENERATE =====
 function simFilterSearch(val){
   var clear=document.getElementById('sim-search-clear');
@@ -6249,7 +5928,7 @@ function tlDeleteDay(idx){
     var day=TL[idx]; if(!day) return;
     if(!confirm('Eliminar "'+day.city+'" del itinerario?')) return;
     TL.splice(idx,1);
-    simSaveTL();
+    // simSaveTL removed
     renderTL();
     simShowMsg('Dia eliminado.');
   });
@@ -6272,7 +5951,7 @@ function rutaSetMode(mode){
 (function(){
   var n=localStorage.getItem('et_nombre')||'';
   if(n) document.querySelectorAll('.user-name-display').forEach(function(el){el.textContent=n;});
-  setTimeout(simLoadTL, 1200);
+  // simLoadTL removed — dayDataLoad handles persistence
 })();
 
 
