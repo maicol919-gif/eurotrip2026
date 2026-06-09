@@ -2069,6 +2069,1141 @@ function agCityColor(cityName) {
   return agCityColorMap[key];
 }
 
+function tlGetCityId(cityStr) {
+  // Extract primary city_id from a day's city string (e.g. "Alicante — Barcelona — Montpellier" → "alicante")
+  var first = cityStr.split(/\s*[\-–—→]\s*/)[0]
+    .replace(/\(.*?\)/g,'').replace(/día libre/i,'').replace(/Día libre/i,'').trim()
+    .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]/g,'');
+  return first || 'day';
+}
+
+// In-memory cache of day data keyed by city_id
+var DAY_DATA = {};
+
+function dayDataLoad() {
+  supa('GET','alojamientos_estado',null,'?ciudad=like.day_%').then(function(rows){
+    if(!rows) return;
+    rows.forEach(function(row){
+      try {
+        var key = row.ciudad.replace(/^day_/,'');
+        DAY_DATA[key] = JSON.parse(row.notas||'{}');
+      } catch(e){}
+    });
+    renderTL();
+  }).catch(function(){});
+}
+
+function tlDayOpen(dayIdx) {
+  var d = TL[dayIdx];
+  if(!d) return;
+  var cityId = tlGetCityId(d.city);
+  var saved = DAY_DATA[cityId] || {};
+  document.getElementById('tl-edit-title').textContent = d.city;
+  document.getElementById('tl-edit-date').textContent = d.date;
+  document.getElementById('tl-edit-must').value = (saved.must||[]).join('\n');
+  document.getElementById('tl-edit-ideas').value = (saved.ideas||[]).join('\n');
+  document.getElementById('tl-edit-alerts').value = (saved.alerts||[]).join('\n');
+  window._tlEditCityId = cityId;
+  window._tlEditIsAdmin = false; // will be set after PIN if needed
+  document.getElementById('tl-edit-modal').style.display = 'flex';
+}
+
+function tlDaySave() {
+  var cityId = window._tlEditCityId;
+  if(!cityId) return;
+
+  var ideasVal = document.getElementById('tl-edit-ideas').value;
+  var mustVal  = document.getElementById('tl-edit-must').value;
+  var alertsVal= document.getElementById('tl-edit-alerts').value;
+
+  function parseLines(str){ return str.split('\n').map(function(s){return s.trim();}).filter(Boolean); }
+
+  var existing = DAY_DATA[cityId] || {};
+  var mustNew   = parseLines(mustVal);
+  var alertsNew = parseLines(alertsVal);
+  var ideasNew  = parseLines(ideasVal);
+
+  // Ideas: anyone can save
+  // Must + alerts: require admin PIN
+  var adminChanged = (mustNew.join('|') !== (existing.must||[]).join('|')) ||
+                     (alertsNew.join('|') !== (existing.alerts||[]).join('|'));
+
+  function doSave(must, alerts) {
+    var payload_data = { must: must, ideas: ideasNew, alerts: alerts };
+    DAY_DATA[cityId] = payload_data;
+    var supaKey = 'day_' + cityId;
+    supa('GET','alojamientos_estado',null,'?ciudad=eq.'+supaKey).then(function(rows){
+      var payload = {ciudad: supaKey, estado:'active', notas: JSON.stringify(payload_data)};
+      if(rows&&rows.length>0) supa('PATCH','alojamientos_estado',payload,'?ciudad=eq.'+supaKey).catch(function(){});
+      else supa('POST','alojamientos_estado',payload).catch(function(){});
+    }).catch(function(){});
+    document.getElementById('tl-edit-modal').style.display = 'none';
+    renderTL();
+  }
+
+  if(adminChanged) {
+    simRequestAdmin(function(){
+      doSave(mustNew, alertsNew);
+    });
+  } else {
+    // Only ideas changed — save without PIN
+    doSave(existing.must||[], existing.alerts||[]);
+  }
+}
+
+
+var simIsAdmin = false;
+var simPendingAction = null;
+var simIsModified = false;
+var simRouteInited = false;
+var dragSrc = null;
+
+// City data
+var SIM_BASE_ROUTE = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza','alicante'];
+var simRoute = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza','alicante'];
+var simCandidatas = []; // from Supabase
+var simCityCache = {}; // AI-generated city data
+var simSelected = null; // currently selected candidate city id
+var simSelectedInsertAt = null; // where user placed the selected city
+
+var SIM_COORDS = {
+  alicante:[-0.48,38.35], madrid:[-3.70,40.42], barcelona:[2.15,41.39],
+  montpellier:[3.88,43.61], paris:[2.35,48.85], colmar:[7.36,48.08],
+  lyon:[4.83,45.75], marsella:[5.37,43.30], niza:[7.27,43.71],
+  monaco:[7.42,43.74], burdeos:[-0.58,44.84],
+  milan:[9.19,45.46], venecia:[12.33,45.44], roma:[12.50,41.90],
+  florencia:[11.25,43.77], pisa:[10.40,43.72], genova:[8.93,44.41],
+  bologna:[11.34,44.49], napoles:[14.27,40.85],
+  zurich:[8.55,47.37], ginebra:[6.14,46.20],
+  amsterdam:[4.90,52.37], bruselas:[4.35,50.85],
+  berlin:[13.40,52.52], munich:[11.58,48.14], frankfurt:[8.68,50.11],
+  colonia:[6.96,50.93],
+  genova:[8.93,44.41], sanremo:[7.78,43.82]
+};
+
+var SIM_KM = {
+  'alicante|montpellier':620,'montpellier|paris':750,'paris|colmar':490,
+  'colmar|milan':510,'milan|venecia':270,'venecia|roma':530,'roma|niza':790,
+  'alicante|barcelona':310,'barcelona|montpellier':310,
+  'paris|milan':850,'milan|roma':580,'milan|pisa':270,
+  'venecia|pisa':310,'pisa|roma':340,
+  'roma|florencia':280,'florencia|milan':300,'florencia|venecia':200,
+  'niza|monaco':20,'monaco|milan':200,'niza|milan':320,
+  'niza|alicante':650,'montpellier|marsella':170,'marsella|niza':200,
+  'marsella|milan':650,'madrid|alicante':420,'madrid|barcelona':620,
+  'paris|barcelona':1040,'zurich|milan':330,'zurich|paris':620,
+  'amsterdam|paris':500,'bruselas|paris':310,'berlin|amsterdam':650,
+  'munich|milan':380,'munich|zurich':320,'frankfurt|paris':580,
+  'tarragona|montpellier':280,'alicante|tarragona':290,
+  'reims|paris':150,'reims|colmar':330,'nancy|paris':310,'nancy|colmar':200,
+  'vichy|paris':350,'vichy|montpellier':370,'clermont|paris':420,'clermont|montpellier':340,
+  'lyon|paris':470,'lyon|montpellier':310,'lyon|milan':460,
+  'perpignan|niza':420,'perpignan|montpellier':160,'perpignan|barcelona':190,
+  'verona|milan':160,'verona|venecia':120,'brescia|milan':100,'brescia|venecia':180,
+  'berna|colmar':180,'berna|milan':330,'sanremo|niza':55,'sanremo|genova':160,
+  'marsella|niza':200,'marsella|montpellier':170,'marsella|alicante':540
+};
+
+var SIM_MODES = {
+  // Overridden by user via transport selector
+};
+// User transport overrides: key = 'cityA|cityB', value = 'coche'|'tren'|'avion'
+var SIM_TRANSPORT_OVERRIDE = {};
+
+function simGetEffectiveMode(a, b){
+  var key = a+'|'+b;
+  var rkey = b+'|'+a;
+  return SIM_TRANSPORT_OVERRIDE[key] || SIM_TRANSPORT_OVERRIDE[rkey] ||
+         SIM_MODES[key] || SIM_MODES[rkey] || 'coche';
+}
+var SIM_SPEEDS = {coche:80, tren_av:200, tren:120, avion:600, ferry:40, bus:70};
+// Cost per person estimates (€) for non-car segments
+var SIM_TRANSPORT_COST = {
+  coche: function(km){ return Math.round((km/100)*7.5*1.75/3.5); }, // fuel per person (7 pax, 2 cars)
+  tren: function(km){ return Math.round(km * 0.12); }, // ~12c/km
+  tren_av: function(km){ return Math.round(km * 0.18); }, // ~18c/km AV
+  avion: function(km){ return Math.round(30 + km * 0.08); }, // base + per km
+  ferry: function(km){ return Math.round(km * 0.15); }
+};
+function simSegmentCost(a, b){
+  var km = simGetKm(a,b);
+  var mode = simGetMode(a,b);
+  var fn = SIM_TRANSPORT_COST[mode] || SIM_TRANSPORT_COST.coche;
+  return fn(km);
+}
+function simTotalCost(){
+  var total = 0;
+  for(var i=0;i<simRoute.length-1;i++) total += simSegmentCost(simRoute[i],simRoute[i+1]);
+  return total * 7; // total for group of 7
+}
+var SIM_NAMES = {
+  alicante:'Alicante', madrid:'Madrid', barcelona:'Barcelona', tarragona:'Tarragona',
+  montpellier:'Montpellier', paris:'Paris', colmar:'Colmar',
+  lyon:'Lyon', marsella:'Marsella', niza:'Niza', monaco:'Monaco', burdeos:'Burdeos',
+  reims:'Reims', nancy:'Nancy', vichy:'Vichy', perpignan:'Perpiñán',
+  milan:'Milan', venecia:'Venecia', roma:'Roma', florencia:'Florencia',
+  pisa:'Pisa', genova:'Genova', bologna:'Bolonia', napoles:'Napoles',
+  verona:'Verona', brescia:'Brescia', berna:'Berna',
+  zurich:'Zurich', ginebra:'Ginebra',
+  amsterdam:'Amsterdam', bruselas:'Bruselas',
+  berlin:'Berlin', munich:'Munich', frankfurt:'Frankfurt', colonia:'Colonia',
+  sanremo:'Sanremo', clermont:'Clermont-Ferrand'
+};
+var SIM_FLAGS = {
+  alicante:'ES', madrid:'ES', barcelona:'ES',
+  montpellier:'FR', paris:'FR', colmar:'FR', lyon:'FR',
+  marsella:'FR', niza:'FR', monaco:'MC', burdeos:'FR',
+  milan:'IT', venecia:'IT', roma:'IT', florencia:'IT',
+  pisa:'IT', genova:'IT', bologna:'IT', napoles:'IT',
+  zurich:'CH', ginebra:'CH',
+  amsterdam:'NL', bruselas:'BE',
+  berlin:'DE', munich:'DE', frankfurt:'DE', colonia:'DE',
+  genova:'IT', sanremo:'IT'
+};
+
+// TL dates for date display
+var TL_DATES = ['14 jul','15 jul','16 jul','17 jul','18 jul','19 jul','20 jul','21 jul','22 jul','23 jul'];
+
+// ===== PIN =====
+function simRequestAdmin(action){
+  if(simIsAdmin){action();return;}
+  simPendingAction=action;
+  var m=document.getElementById('sim-pin-modal');
+  m.style.display='flex';
+  document.getElementById('sim-pin-input').value='';
+  document.getElementById('sim-pin-error').style.display='none';
+  setTimeout(function(){document.getElementById('sim-pin-input').focus();},100);
+}
+function simCheckPIN(){
+  var pin=document.getElementById('sim-pin-input').value;
+  if(pin===ADMIN_PIN){
+    simIsAdmin=true;
+    document.getElementById('sim-pin-modal').style.display='none';
+    simShowMsg('Admin activo.');
+    simRenderUnified();
+    if(simPendingAction){simPendingAction();simPendingAction=null;}
+  } else {
+    document.getElementById('sim-pin-error').style.display='block';
+    document.getElementById('sim-pin-input').value='';
+    document.getElementById('sim-pin-input').focus();
+  }
+}
+
+// ===== CORE CALC =====
+function simGetKm(a,b){return SIM_KM[a+'|'+b]||SIM_KM[b+'|'+a]||400;}
+function simGetMode(a,b){return simGetEffectiveMode(a,b);}
+function simGetHours(a,b){return simGetKm(a,b)/(SIM_SPEEDS[simGetMode(a,b)]||80);}
+function simGetModeIcon(mode){return {coche:'🚗',tren_av:'🚄',tren:'🚂',ferry:'⛴️',bus:'🚌'}[mode]||'🚗';}
+
+function simFindBestInsert(id){
+  var best=simRoute.length-1, bestExtra=999999;
+  for(var i=0;i<simRoute.length-1;i++){
+    var extra=simGetKm(simRoute[i],id)+simGetKm(id,simRoute[i+1])-simGetKm(simRoute[i],simRoute[i+1]);
+    if(extra<bestExtra){bestExtra=extra;best=i+1;}
+  }
+  return best;
+}
+
+function simCalcStats(){
+  var km=0, maxH=0, maxSeg='';
+  for(var i=0;i<simRoute.length-1;i++){
+    var d=simGetKm(simRoute[i],simRoute[i+1]);
+    var h=simGetHours(simRoute[i],simRoute[i+1]);
+    km+=d;
+    if(simGetMode(simRoute[i],simRoute[i+1])==='coche'&&h>maxH){
+      maxH=h; maxSeg=(SIM_NAMES[simRoute[i]]||simRoute[i]);
+    }
+  }
+  var totalH=0;
+  for(var si=0;si<simRoute.length-1;si++) totalH+=simGetHours(simRoute[si],simRoute[si+1]);
+  var totalCost=simTotalCost();
+  document.getElementById('sim-total-km').textContent=km.toLocaleString();
+  document.getElementById('sim-total-h').textContent='~'+Math.round(totalH)+'h';
+  document.getElementById('sim-total-fuel').textContent='~'+totalCost+'€';
+  var mx=document.getElementById('sim-max-day');
+  mx.textContent=maxH.toFixed(1)+'h';
+  mx.style.color=maxH>9?'#ef4444':maxH>7?'#f59e0b':'#4ade80';
+  document.getElementById('sim-warnings').innerHTML='';
+  return {km:km, maxH:maxH};
+}
+
+// ===== MAP =====
+var DAY_COLORS=['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f59e0b'];
+
+function simDrawMap(routeToShow, highlightId, highlightInsertAt){
+  var W=400, H=320;
+  var cities = routeToShow || simRoute;
+
+  // Get all coords
+  var allCoords = cities.map(function(c){return SIM_COORDS[c]||[5,44];});
+  if(highlightId && SIM_COORDS[highlightId] && highlightInsertAt!==undefined){
+    allCoords.splice(highlightInsertAt,0,SIM_COORDS[highlightId]||[5,44]);
+  }
+
+  var lons=allCoords.map(function(c){return c[0];});
+  var lats=allCoords.map(function(c){return c[1];});
+  var minLon=Math.min.apply(null,lons)-2.5, maxLon=Math.max.apply(null,lons)+2.5;
+  var minLat=Math.min.apply(null,lats)-1.8, maxLat=Math.max.apply(null,lats)+1.8;
+  function toX(lon){return ((lon-minLon)/(maxLon-minLon||1))*W;}
+  function toY(lat){return H-((lat-minLat)/(maxLat-minLat||1))*H;}
+
+  // Build display route (with candidate inserted if selected)
+  var displayRoute = cities.slice();
+  if(highlightId && highlightInsertAt!==undefined){
+    displayRoute.splice(highlightInsertAt,0,highlightId);
+  }
+
+  // Segments
+  var segs='';
+  for(var i=0;i<displayRoute.length-1;i++){
+    var c1=displayRoute[i], c2=displayRoute[i+1];
+    var p1=SIM_COORDS[c1]||[5,44], p2=SIM_COORDS[c2]||[5,44];
+    var x1=toX(p1[0]),y1=toY(p1[1]),x2=toX(p2[0]),y2=toY(p2[1]);
+    var isNewSeg=highlightId&&(c1===highlightId||c2===highlightId);
+    var col=isNewSeg?'#10b981':DAY_COLORS[i%DAY_COLORS.length];
+    var opacity=isNewSeg?'1':'0.7';
+    var sw=isNewSeg?'3.5':'2.5';
+    var segMode=simGetMode(c1,c2);
+    var isDashed=(segMode==='tren'||segMode==='tren_av'||segMode==='avion');
+    // Shadow line
+    segs+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+
+      '" stroke="rgba(0,0,0,0.15)" stroke-width="'+(parseFloat(sw)+2)+'" stroke-linecap="round"/>';
+    segs+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+
+      '" stroke="'+col+'" stroke-width="'+sw+'" stroke-opacity="'+opacity+'" stroke-linecap="round"'+
+      (isDashed?' stroke-dasharray="8 4"':'')+'/>';
+    // Mode icon at midpoint (only for non-car)
+    if(segMode!=='coche'){
+      var mx=((x1+x2)/2).toFixed(1), my=((y1+y2)/2).toFixed(1);
+      var modeEmoji={tren:'🚂',tren_av:'🚄',avion:'✈',ferry:'⛴'}[segMode]||'';
+      segs+='<circle cx="'+mx+'" cy="'+my+'" r="8" fill="white" stroke="'+col+'" stroke-width="1.5"/>'+
+            '<text x="'+mx+'" y="'+(parseFloat(my)+1)+'" font-size="9" text-anchor="middle" dominant-baseline="middle">'+modeEmoji+'</text>';
+    }
+  }
+
+  // Dots
+  var dots='';
+  var routeIdx=0;
+  displayRoute.forEach(function(c,i){
+    var pos=SIM_COORDS[c]||[5,44];
+    var x=toX(pos[0]), y=toY(pos[1]);
+    var isCand=c===highlightId;
+    var color=isCand?'#10b981':DAY_COLORS[routeIdx%DAY_COLORS.length];
+    var r=isCand?15:12;
+    var labelX=x+r+4, anchor='start';
+    if(x>W*0.68){labelX=x-r-4;anchor='end';}
+    var name=SIM_NAMES[c]||c;
+    var short=name.length>8?name.substring(0,7)+'..':name;
+    var dayLabel=isCand?'+':''+(routeIdx+1);
+
+    if(isCand){
+      // Pulse ring for candidate
+      dots+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="20" fill="#10b981" fill-opacity="0.1"><animate attributeName="r" values="15;22;15" dur="2s" repeatCount="indefinite"/></circle>';
+    }
+    // Shadow for dot
+    dots+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+2)+'" fill="rgba(0,0,0,0.18)"/>';
+    dots+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" fill="'+color+'" stroke="white" stroke-width="2.5"/>';
+    dots+='<text x="'+x.toFixed(1)+'" y="'+(y+1).toFixed(1)+'" font-size="'+(isCand?'8.5':'8')+'" fill="white" font-family="system-ui,sans-serif" text-anchor="middle" dominant-baseline="middle" font-weight="900" letter-spacing="-0.5">'+dayLabel+'</text>';
+    // Label pill background
+    var labelW=short.length*5.2+8;
+    var pillX=anchor==='start'?labelX-4:labelX-labelW+4;
+    dots+='<rect x="'+pillX.toFixed(1)+'" y="'+(y-13).toFixed(1)+'" width="'+labelW.toFixed(1)+'" height="13" rx="3" fill="white" fill-opacity="0.88"/>';
+    dots+='<text x="'+labelX.toFixed(1)+'" y="'+(y-3.5).toFixed(1)+'" font-size="9" fill="'+color+'" font-family="system-ui,sans-serif" text-anchor="'+anchor+'" font-weight="800" letter-spacing="-0.3">'+short+'</text>';
+    if(!isCand&&routeIdx<TL_DATES.length){
+      dots+='<text x="'+labelX.toFixed(1)+'" y="'+(y+r+8).toFixed(1)+'" font-size="7.5" fill="#1e293b" font-family="system-ui,sans-serif" text-anchor="'+anchor+'" font-weight="600" opacity="0.75">'+TL_DATES[routeIdx]+'</text>';
+    } else if(isCand){
+      dots+='<rect x="'+(labelX-(anchor==='start'?4:36)).toFixed(1)+'" y="'+(y+r+1).toFixed(1)+'" width="36" height="11" rx="3" fill="#10b981"/>'+
+             '<text x="'+labelX.toFixed(1)+'" y="'+(y+r+9).toFixed(1)+'" font-size="7.5" fill="white" font-family="system-ui,sans-serif" text-anchor="'+anchor+'" font-weight="800">NUEVA</text>';
+    }
+    if(!isCand) routeIdx++;
+  });
+
+  var totalKm=0;
+  for(var j=0;j<simRoute.length-1;j++) totalKm+=simGetKm(simRoute[j],simRoute[j+1]);
+  if(highlightId&&highlightInsertAt!==undefined){
+    var after=simRoute[highlightInsertAt-1]||simRoute[0];
+    var next=simRoute[highlightInsertAt]||simRoute[simRoute.length-1];
+    totalKm+=simGetKm(after,highlightId)+simGetKm(highlightId,next)-simGetKm(after,next);
+  }
+
+  var gmCoords=displayRoute.map(function(c){var co=SIM_COORDS[c];return co?co[1]+','+co[0]:(SIM_NAMES[c]||c)+',Europe';});
+  var gmUrl='https://www.google.com/maps/dir/'+gmCoords.map(encodeURIComponent).join('/');
+
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;height:100%">'+
+    '<defs><linearGradient id="mapbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#dbeafe"/><stop offset="100%" stop-color="#e0f2fe"/></linearGradient></defs>'+
+    '<rect width="'+W+'" height="'+H+'" fill="url(#mapbg)"/>'+
+    '<path d="'+displayRoute.map(function(c,i){var p=SIM_COORDS[c]||[5,44];return (i?'L':'M')+toX(p[0]).toFixed(1)+','+toY(p[1]).toFixed(1);}).join(' ')+'" fill="none" stroke="#0f172a" stroke-width="5" stroke-opacity="0.06"/>'+
+    segs+dots+
+    '<rect x="3" y="'+(H-22)+'" width="'+(highlightId?170:130)+'" height="19" rx="5" fill="#0f172a" fill-opacity="0.82"/>'+
+    '<text x="9" y="'+(H-8)+'" font-size="9.5" fill="white" font-family="system-ui,sans-serif" font-weight="700">'+totalKm.toLocaleString()+' km'+(highlightId?' + '+(SIM_NAMES[highlightId]||highlightId):'')+' </text>'+
+    '</svg>';
+
+  var svg_el=document.getElementById('sim-map-svg');
+  if(svg_el) svg_el.innerHTML=svg;
+  var lbl=document.getElementById('sim-map-label-text');
+  if(lbl) lbl.textContent=displayRoute.length+' ciudades · '+totalKm.toLocaleString()+' km'+(highlightId?' (preview)':'');
+  var link=document.getElementById('sim-maps-link');
+  if(link) link.href=gmUrl;
+}
+
+// ===== UNIFIED LIST RENDERER =====
+function simRenderUnified(){
+  var el=document.getElementById('sim-unified-list');
+  if(!el) return;
+  el.innerHTML='';
+
+  var bestInsert=simSelected?simFindBestInsert(simSelected):-1;
+
+  simRoute.forEach(function(cityId, i){
+    var isLast=i===simRoute.length-1;
+
+    // Check if selected candidate should appear before this city
+    if(simSelected && simSelectedInsertAt===i){
+      el.appendChild(simMakeCandidateRow(simSelected, i, bestInsert));
+    }
+
+    // Route city row
+    var row=document.createElement('div');
+    var isOver=!isLast&&simGetHours(cityId,simRoute[i+1])>9&&simGetMode(cityId,simRoute[i+1])==='coche';
+    var isWarn=!isLast&&simGetHours(cityId,simRoute[i+1])>4.5&&simGetMode(cityId,simRoute[i+1])==='coche'&&!isOver;
+    row.style.cssText='display:flex;align-items:center;gap:6px;padding:0.42rem 0.5rem;border-radius:8px;background:white;border:1px solid #f1f5f9;margin-bottom:3px;cursor:grab;user-select:none';
+    row.draggable=true;
+    row.dataset.i=i;
+    row.dataset.type='route';
+
+    var km=isLast?0:simGetKm(cityId,simRoute[i+1]);
+    var h=isLast?0:simGetHours(cityId,simRoute[i+1]);
+    var mode=isLast?'':simGetMode(cityId,simRoute[i+1]);
+    var color=DAY_COLORS[i%DAY_COLORS.length];
+
+    // Tramo label: Salida / Tramo N→M / Llegada
+    var tramoLabel = isLast ? 'Llegada' : (i===0 ? 'Salida' : 'Tramo '+(i)+'→'+(i+1));
+    var tramoIcon  = isLast ? '🏁' : (i===0 ? '🚀' : '→');
+
+    row.innerHTML=
+      '<div style="width:24px;height:24px;border-radius:50%;background:'+color+';color:white;display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:800;flex-shrink:0">'+tramoIcon+'</div>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="font-size:0.8rem;font-weight:600;color:#0f172a">'+(SIM_NAMES[cityId]||cityId)+'</div>'+
+        (TL_DATES[i]?'<div style="font-size:0.58rem;color:#94a3b8">'+TL_DATES[i]+'</div>':'')+
+        (isOver?'<div style="font-size:0.56rem;color:#ef4444">🔴 '+h.toFixed(1)+'h — muy larga</div>':'')+ 
+        (isWarn?'<div style="font-size:0.56rem;color:#f59e0b">⚠️ '+h.toFixed(1)+'h — planificar parada</div>':'')+ 
+      '</div>'+
+      (!isLast?'<div style="text-align:right;flex-shrink:0">'+
+        '<div style="font-size:0.68rem;font-weight:700;color:'+(isOver?'#ef4444':'#374151')+'">'+simGetModeIcon(mode)+' '+km+'km</div>'+
+        '<div style="font-size:0.6rem;color:#94a3b8">'+h.toFixed(1)+'h</div>'+
+      '</div>':'<div style="font-size:0.62rem;color:#10b981;font-weight:700">FIN</div>')+
+      '<span style="color:#cbd5e1;cursor:grab;font-size:0.75rem;padding:0 2px">&#9776;</span>';
+
+    // Transport selector (between this city and next)
+    if(!isLast){
+      var transSel=document.createElement('select');
+      transSel.style.cssText='border:1px solid #e2e8f0;border-radius:5px;padding:0.15rem 0.25rem;font-family:inherit;font-size:0.6rem;color:#374151;background:white;cursor:pointer;margin-left:2px;flex-shrink:0';
+      transSel.title='Modo de transporte hasta la siguiente ciudad';
+      var currentMode=simGetMode(cityId,simRoute[i+1]);
+      var modeOpts=[
+        {val:'coche',label:'🚗 Coche'},
+        {val:'tren',label:'🚂 Tren'},
+        {val:'tren_av',label:'🚄 Tren AV'},
+        {val:'avion',label:'✈️ Avion'},
+        {val:'ferry',label:'⛴️ Ferry'}
+      ];
+      modeOpts.forEach(function(opt){
+        var o=document.createElement('option');
+        o.value=opt.val; o.textContent=opt.label;
+        if(opt.val===currentMode) o.selected=true;
+        transSel.appendChild(o);
+      });
+      (function(from,to){
+        transSel.onchange=function(e){
+          e.stopPropagation();
+          var newMode=transSel.value;
+          SIM_TRANSPORT_OVERRIDE[from+'|'+to]=newMode;
+          SIM_TRANSPORT_OVERRIDE[to+'|'+from]=newMode;
+          simMarkModified();
+          simRenderUnified();
+          simDrawMap();
+          simCalcStats();
+        };
+      })(cityId, simRoute[i+1]);
+      row.appendChild(transSel);
+    }
+
+    // Remove button — admin can remove any stop except first and last
+    var isBase=SIM_BASE_ROUTE.indexOf(cityId)!==-1;
+    var isFirstOrLast = (i === 0 || i === simRoute.length - 1);
+    if(!isFirstOrLast){
+      var rm=document.createElement('button');
+      rm.style.cssText='background:none;border:none;color:#94a3b8;cursor:pointer;font-size:0.9rem;padding:0 2px;flex-shrink:0';
+      rm.textContent='×';
+      (function(id){rm.onclick=function(e){e.stopPropagation();simRemoveFromRoute(id);};})(cityId);
+      row.appendChild(rm);
+    }
+
+    // Drag events
+    row.ondragstart=function(e){dragSrc=parseInt(e.currentTarget.dataset.i);e.currentTarget.style.opacity='0.4';};
+    row.ondragend=function(e){e.currentTarget.style.opacity='1';};
+    row.ondragover=function(e){e.preventDefault();e.currentTarget.style.background='#eff6ff';};
+    row.ondragleave=function(e){e.currentTarget.style.background='white';};
+    row.ondrop=function(e){
+      e.preventDefault();e.currentTarget.style.background='white';
+      var target=parseInt(e.currentTarget.dataset.i);
+      if(dragSrc===null||dragSrc===target||dragSrc===undefined){dragSrc=null;return;}
+      var moved=simRoute.splice(dragSrc,1)[0];
+      simRoute.splice(target,0,moved);
+      dragSrc=null;
+      simMarkModified();
+      simRenderUnified();
+      simDrawMap();
+      simCalcStats();
+    };
+
+    el.appendChild(row);
+
+    // ── ALERTA DE TRAMO LARGO (>4h en coche) ──────────────────
+    if(!isLast && h > 4 && mode === 'coche') {
+      var alertEl = simMakeTramoAlert(cityId, simRoute[i+1], i, h, km);
+      if(alertEl) el.appendChild(alertEl);
+    }
+  });
+
+  // If candidate should go at end
+  if(simSelected && simSelectedInsertAt===simRoute.length){
+    el.appendChild(simMakeCandidateRow(simSelected, simRoute.length, bestInsert));
+  }
+
+  // Unplaced candidates (not yet positioned by user)
+  var unplaced=simCandidatas.filter(function(r){
+    return r.city_id!==simSelected&&simRoute.indexOf(r.city_id)===-1;
+  });
+  if(unplaced.length){
+    var hdr=document.createElement('div');
+    hdr.style.cssText='font-size:0.58rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin:0.5rem 0 0.3rem;padding-left:2px';
+    hdr.textContent='Guardadas por el grupo';
+    el.appendChild(hdr);
+    unplaced.forEach(function(row){
+      var cityId=row.city_id;
+      var candRow=document.createElement('div');
+      candRow.style.cssText='display:flex;align-items:center;gap:6px;padding:0.38rem 0.5rem;border-radius:8px;background:#f8fafc;border:1.5px dashed #e2e8f0;margin-bottom:3px;cursor:pointer';
+      candRow.innerHTML=
+        '<div style="width:24px;height:24px;border-radius:50%;background:#e2e8f0;color:#64748b;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;flex-shrink:0">?</div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:0.78rem;font-weight:600;color:#374151">'+(SIM_NAMES[cityId]||row.name)+'</div>'+
+          '<div style="font-size:0.58rem;color:#94a3b8">por '+row.propuesta_por+' · toca para explorar</div>'+
+        '</div>';
+      (function(id){candRow.onclick=function(){simSelectCandidate(id);};})(cityId);
+      if(simIsAdmin){
+        var del=document.createElement('button');
+        del.style.cssText='background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.78rem;padding:0 3px';
+        del.textContent='✕';
+        (function(id){del.onclick=function(e){e.stopPropagation();simDeleteCandidate(id);};})(cityId);
+        candRow.appendChild(del);
+      }
+      el.appendChild(candRow);
+    });
+  }
+
+  // Update count
+  var cnt=document.getElementById('sim-cand-count');
+  if(cnt) cnt.textContent=simCandidatas.length?'('+simCandidatas.length+' candidatas)':'';
+
+  simCalcStats();
+  if(!simSelected) simDrawMap();
+}
+
+function simMakeCandidateRow(cityId, insertAt, bestInsertAt){
+  var c=simCityCache[cityId]||{};
+  var isOptimal=(insertAt===bestInsertAt);
+
+  // Calculate impact at this position
+  var after=simRoute[insertAt-1]||simRoute[0];
+  var next=simRoute[insertAt]||simRoute[simRoute.length-1];
+  var segKm=simGetKm(after,cityId)+simGetKm(cityId,next);
+  var directKm=simGetKm(after,next);
+  var extraKm=segKm-directKm;
+  var segH=simGetHours(after,cityId)+simGetHours(cityId,next);
+  var overLimit=segH>9;
+
+  var row=document.createElement('div');
+  row.style.cssText='border-radius:8px;background:white;border:2px solid #10b981;margin-bottom:3px;overflow:hidden;box-shadow:0 2px 8px rgba(16,185,129,0.15)';
+  row.dataset.type='candidate';
+  row.dataset.insertAt=insertAt;
+
+  // Header
+  var header=document.createElement('div');
+  header.style.cssText='display:flex;align-items:center;gap:6px;padding:0.42rem 0.5rem';
+  header.draggable=true;
+
+  var badge=isOptimal
+    ?'<span style="font-size:0.55rem;background:#10b981;color:white;padding:0.1rem 0.35rem;border-radius:4px">✓ Posicion optima</span>'
+    :'<span style="font-size:0.55rem;background:#f59e0b;color:white;padding:0.1rem 0.35rem;border-radius:4px">⚠️ No es la optima</span>';
+
+  var extraInfo=isOptimal
+    ?'<div style="font-size:0.56rem;color:#10b981">Mejor posicion · +'+extraKm+'km</div>'
+    :'<div style="font-size:0.56rem;color:#f59e0b">+'+extraKm+'km aqui vs '+(simGetKm(simRoute[bestInsertAt-1]||simRoute[0],cityId)+simGetKm(cityId,simRoute[bestInsertAt]||simRoute[simRoute.length-1])-simGetKm(simRoute[bestInsertAt-1]||simRoute[0],simRoute[bestInsertAt]||simRoute[simRoute.length-1]))+' en posicion optima</div>';
+
+  header.innerHTML=
+    '<div style="width:24px;height:24px;border-radius:50%;background:#10b981;color:white;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0">+</div>'+
+    '<div style="flex:1;min-width:0">'+
+      '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+
+        '<span style="font-size:0.8rem;font-weight:700;color:#0f172a">'+(SIM_NAMES[cityId]||cityId)+'</span>'+badge+
+      '</div>'+
+      extraInfo+
+    '</div>'+
+    '<div style="text-align:right;flex-shrink:0">'+
+      '<div style="font-size:0.66rem;font-weight:700;color:'+(overLimit?'#ef4444':'#10b981')+'">'+segH.toFixed(1)+'h</div>'+
+      '<div style="font-size:0.58rem;color:#94a3b8">'+segKm+'km</div>'+
+    '</div>';
+
+  // Action buttons
+  var actions=document.createElement('div');
+  actions.style.cssText='display:flex;gap:4px;padding:0 0.5rem 0.4rem';
+
+  var addBtn=document.createElement('button');
+  addBtn.style.cssText='flex:1;background:#10b981;color:white;border:none;border-radius:6px;padding:0.32rem;font-family:inherit;font-weight:700;font-size:0.68rem;cursor:pointer';
+  addBtn.textContent='✓ Añadir al itinerario';
+  addBtn.onclick=function(){simConfirmOfficial();};
+
+  var saveBtn=document.createElement('button');
+  saveBtn.style.cssText='background:#3b82f6;color:white;border:none;border-radius:6px;padding:0.32rem 0.6rem;font-family:inherit;font-weight:700;font-size:0.68rem;cursor:pointer';
+  saveBtn.textContent='📌';
+  saveBtn.title='Guardar para el grupo';
+  saveBtn.onclick=function(){simSaveCandidate();};
+
+  var cancelBtn=document.createElement('button');
+  cancelBtn.style.cssText='background:none;border:1px solid #e2e8f0;color:#94a3b8;border-radius:6px;padding:0.32rem 0.6rem;font-family:inherit;font-size:0.68rem;cursor:pointer';
+  cancelBtn.textContent='✕';
+  cancelBtn.onclick=function(){simDeselectCandidate();};
+
+  actions.appendChild(addBtn);
+  actions.appendChild(saveBtn);
+  actions.appendChild(cancelBtn);
+
+  // Drag to reposition
+  header.ondragstart=function(e){
+    e.dataTransfer.setData('candidateDrag',cityId);
+    e.dataTransfer.setData('fromInsert',insertAt);
+  };
+  header.ondragover=function(e){e.preventDefault();};
+
+  // Allow dropping ON a route city to insert before it
+  row.ondragover=function(e){e.preventDefault();row.style.borderColor='#f59e0b';};
+  row.ondragleave=function(){row.style.borderColor='#10b981';};
+
+  row.appendChild(header);
+  row.appendChild(actions);
+  return row;
+}
+
+// ===== CANDIDATE SELECTION =====
+function simSelectCandidate(cityId, insertAt){
+  var c=simCityCache[cityId];
+  if(!c){ simShowMsg('Cargando datos...'); return; }
+  simSelected=cityId;
+  simSelectedInsertAt=insertAt!==undefined?insertAt:simFindBestInsert(cityId);
+  simRenderUnified();
+  simDrawMap(simRoute, cityId, simSelectedInsertAt);
+  simShowImpactPanel(cityId, simSelectedInsertAt);
+}
+
+function simDeselectCandidate(){
+  simSelected=null;
+  simSelectedInsertAt=null;
+  simRenderUnified();
+  simDrawMap();
+  var panel=document.getElementById('sim-impact-panel');
+  var hint=document.getElementById('sim-hint-panel');
+  if(panel) panel.style.display='none';
+  if(hint) hint.style.display='block';
+}
+
+function simShowImpactPanel(cityId, insertAt){
+  var c=simCityCache[cityId]||{};
+  var panel=document.getElementById('sim-impact-panel');
+  var hint=document.getElementById('sim-hint-panel');
+  if(!panel) return;
+
+  var bestInsert=simFindBestInsert(cityId);
+  var isOptimal=(insertAt===bestInsert);
+
+  var after=simRoute[insertAt-1]||simRoute[0];
+  var next=simRoute[insertAt]||simRoute[simRoute.length-1];
+
+  // km impact
+  var kmBefore=0, kmAfter=0;
+  for(var i=0;i<simRoute.length-1;i++) kmBefore+=simGetKm(simRoute[i],simRoute[i+1]);
+  var newRoute=simRoute.slice(); newRoute.splice(insertAt,0,cityId);
+  for(var j=0;j<newRoute.length-1;j++) kmAfter+=simGetKm(newRoute[j],newRoute[j+1]);
+  var extraKm=kmAfter-kmBefore;
+  var extraFuel=Math.round((extraKm/100)*7.5*1.75*2);
+  var segH=simGetHours(after,cityId)+simGetHours(cityId,next);
+  var totalHBefore=Math.round(kmBefore/80);
+  var totalHAfter=Math.round(kmAfter/80);
+
+  // Position badge
+  var posBadge=isOptimal
+    ?'<div style="background:#dcfce7;border:1px solid #86efac;border-radius:6px;padding:0.35rem 0.6rem;font-size:0.72rem;color:#15803d;margin-bottom:0.5rem">✓ <strong>Posicion optima</strong> — minimo desvio posible (+'+extraKm+'km)</div>'
+    :'<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:6px;padding:0.35rem 0.6rem;font-size:0.72rem;color:#92400e;margin-bottom:0.5rem">⚠️ <strong>Posicion no optima</strong> — la posicion sugerida por IA ahorraría km. Arrastra para moverla.</div>';
+
+  // Verdict
+  var verdict=c.verdict||'';
+  var pros=c.pros||[]; var cons=c.cons||[];
+  var vHtml='';
+  if(verdict){
+    var vBg=verdict==='conviene'?'#f0fdf4':verdict==='no_conviene'?'#fef2f2':'#fefce8';
+    var vBorder=verdict==='conviene'?'#86efac':verdict==='no_conviene'?'#fca5a5':'#fde68a';
+    var vTitle=verdict==='conviene'?'✅ Conviene':verdict==='no_conviene'?'🚨 No conviene':'⚠️ Depende';
+    vHtml='<div style="background:'+vBg+';border:1px solid '+vBorder+';border-radius:8px;padding:0.5rem;margin-bottom:0.5rem;font-size:0.72rem">'+
+      '<strong>'+vTitle+'</strong> · ⏱️ Tramo: '+segH.toFixed(1)+'h · 🗓️ Total: ~'+totalHBefore+'h→~'+totalHAfter+'h (+' +(totalHAfter-totalHBefore)+'h)<br>'+
+      (pros.length?'<div style="margin-top:0.3rem">'+pros.map(function(p){return '✅ '+p;}).join(' · ')+'</div>':'')+
+      (cons.length?'<div style="margin-top:0.2rem">'+cons.map(function(con){return '⚠️ '+con;}).join(' · ')+'</div>':'')+
+    '</div>';
+  }
+
+  // Stats row
+  var statsRow='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.3rem;margin-bottom:0.5rem;text-align:center">'+
+    '<div style="background:#fff7ed;border-radius:6px;padding:0.3rem">'+
+      '<div style="font-size:0.9rem;font-weight:800;color:#ea580c">+'+extraKm+'km</div>'+
+      '<div style="font-size:0.55rem;color:#94a3b8;text-transform:uppercase">km extra</div>'+
+    '</div>'+
+    '<div style="background:'+(segH>9?'#fef2f2':'#f0fdf4')+';border-radius:6px;padding:0.3rem">'+
+      '<div style="font-size:0.9rem;font-weight:800;color:'+(segH>9?'#ef4444':'#16a34a')+'">'+segH.toFixed(1)+'h</div>'+
+      '<div style="font-size:0.55rem;color:#94a3b8;text-transform:uppercase">ese tramo</div>'+
+    '</div>'+
+    '<div style="background:#faf5ff;border-radius:6px;padding:0.3rem">'+
+      '<div style="font-size:0.9rem;font-weight:800;color:#7c3aed">+'+extraFuel+'€</div>'+
+      '<div style="font-size:0.55rem;color:#94a3b8;text-transform:uppercase">gasolina</div>'+
+    '</div>'+
+  '</div>';
+
+  // Acts
+  var acts=(c.acts||[]).slice(0,5).map(function(a){
+    var m=a.match(/^(\d{2}:\d{2})\s+(.*)/);
+    return m?'<div style="display:flex;gap:6px;padding:0.22rem 0;border-bottom:1px solid #f8fafc;font-size:0.68rem"><span style="font-family:monospace;color:#3b82f6;font-weight:700;flex-shrink:0;width:34px">'+m[1]+'</span><span>'+m[2]+'</span></div>':
+    '<div style="padding:0.22rem 0;font-size:0.68rem;border-bottom:1px solid #f8fafc">'+a+'</div>';
+  }).join('');
+
+  var note=c.note?'<div style="margin-top:0.35rem;font-size:0.65rem;color:#64748b">📌 '+c.note+'</div>':'';
+
+  document.getElementById('sim-impact-content').innerHTML=
+    '<div style="font-size:0.62rem;font-weight:700;color:#0f172a;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em">'+(SIM_NAMES[cityId]||cityId)+' · entre '+(SIM_NAMES[after]||after)+' y '+(SIM_NAMES[next]||next)+'</div>'+
+    posBadge+statsRow+vHtml+
+    (acts?'<div style="font-size:0.58rem;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:0.3rem">Horario del dia</div>'+acts+note:'');
+
+  panel.style.display='block';
+  if(hint) hint.style.display='none';
+}
+
+// ===== DROP ZONES for repositioning candidate =====
+// When dragging candidate, route cities become drop zones
+// Handled via ondrop on route rows — resets simSelectedInsertAt
+
+// ===== SUPABASE =====
+function simLoadCandidatas(){
+  supa('GET','candidatas?order=created_at.desc').then(function(rows){
+    simCandidatas=rows||[];
+    simCandidatas.forEach(function(row){
+      if(!simCityCache[row.city_id]){
+        simCityCache[row.city_id]=row.datos;
+        SIM_NAMES[row.city_id]=row.name;
+        if(row.flag) SIM_FLAGS[row.city_id]=row.flag;
+        if(row.datos&&row.datos.coords) SIM_COORDS[row.city_id]=row.datos.coords;
+      }
+    });
+    simRenderUnified();
+  }).catch(function(){simRenderUnified();});
+}
+
+function simSaveCandidate(){
+  if(!simSelected) return;
+  var c=simCityCache[simSelected]; if(!c) return;
+  var cityId=simSelected;
+  var userName=localStorage.getItem('et_nombre')||'Alguien';
+  var exists=simCandidatas.find(function(r){return r.city_id===cityId;});
+  if(exists){simShowMsg((SIM_NAMES[cityId]||cityId)+' ya guardada.');return;}
+  supa('POST','candidatas',{city_id:cityId,name:SIM_NAMES[cityId]||c.name||cityId,
+    flag:SIM_FLAGS[cityId]||c.flag||'',datos:c,propuesta_por:userName})
+  .then(function(){simLoadCandidatas();simShowMsg('📌 Guardada para el grupo.');})
+  .catch(function(){simShowMsg('Error al guardar.');});
+}
+
+function simDeleteCandidate(cityId){
+  simRequestAdmin(function(){
+    supa('DELETE','candidatas?city_id=eq.'+cityId).then(function(){
+      simCandidatas=simCandidatas.filter(function(r){return r.city_id!==cityId;});
+      if(simSelected===cityId) simDeselectCandidate();
+      else simRenderUnified();
+      simShowMsg('Candidata eliminada.');
+    });
+  });
+}
+
+function simRemoveFromRoute(cityId){
+  simRoute=simRoute.filter(function(c){return c!==cityId;});
+  SIM_BASE_ROUTE=simRoute.slice();
+  if(simIsAdmin) simSaveRoute(); // Solo admin persiste
+  simMarkModified();
+  simRenderUnified();
+  simDrawMap();
+  simCalcStats();
+  simShowMsg('\u2705 '+(SIM_NAMES[cityId]||cityId)+' eliminada de la ruta.');
+}
+
+// ===== SAVE / DISCARD =====
+function simMarkModified(){
+  simIsModified=true;
+  var s=document.getElementById('ruta-save-btn');
+  var d=document.getElementById('ruta-discard-btn');
+  if(s) s.style.display='block';
+  if(d) d.style.display='block';
+  simCalcStats();
+  rutaFullRefresh();
+}
+
+function simConfirmOfficial(){
+  simRequestAdmin(function(){
+    if(!simSelected) return;
+    var c=simCityCache[simSelected];
+    var cityId=simSelected;
+    var insertAt=simSelectedInsertAt!==null?simSelectedInsertAt:simFindBestInsert(cityId);
+    simRoute.splice(insertAt,0,cityId);
+    simMarkModified();
+    // Add to TL
+    var afterCity=simRoute[Math.max(0,insertAt-1)];
+    var nextCity=simRoute[Math.min(simRoute.length-1,insertAt+1)];
+    var newDay={date:TL_DATES[insertAt]||'? jul',
+      city:(SIM_NAMES[afterCity]||afterCity)+' → '+(SIM_NAMES[cityId]||cityId)+' → '+(SIM_NAMES[nextCity]||nextCity),
+      drive:true,km:simGetKm(afterCity,cityId)+simGetKm(cityId,nextCity),
+      h:((simGetKm(afterCity,cityId)+simGetKm(cityId,nextCity))/80).toFixed(1)+'h',
+      ztl:c?c.ztl||false:false,maps:'',acts:c?c.acts||[]:[],
+      stay:c?c.stay||'Por confirmar':'Por confirmar',note:c?c.note||'':'Desde simulador'};
+    var tlIdx=-1;
+    TL.forEach(function(d,i){if(d.city.toLowerCase().indexOf((SIM_NAMES[afterCity]||afterCity).toLowerCase().split(' ')[0])!==-1) tlIdx=i;});
+    if(tlIdx>=0) TL.splice(tlIdx+1,0,newDay); else TL.push(newDay);
+    supa('PATCH','candidatas?city_id=eq.'+cityId,{en_oficial:true}).catch(function(){});
+    // simSaveTL removed
+    simDeselectCandidate();
+    simShowMsg('✓ '+(SIM_NAMES[cityId]||cityId)+' añadida. Ve a Ver para revisar.');
+  });
+}
+
+function simSaveAsBase(){
+  // Everyone sees this button — PIN required to actually save
+  simRequestAdmin(function(){
+    var DATES = TL_DATES;
+    var MAX_DAY_H = 10; // horas máximas de conducción por jornada
+    var newTL = [];
+
+    // PASO 1: agrupar ciudades de simRoute en JORNADAS
+    // Una jornada = varios segmentos consecutivos que juntos no superan MAX_DAY_H
+    var jornadas = []; // [{cities:['alicante','barcelona','montpellier'], totalKm, totalH, mode}]
+    var currentJornada = { cities: [simRoute[0]], totalKm: 0, totalH: 0 };
+
+    for(var i = 0; i < simRoute.length - 1; i++) {
+      var from = simRoute[i];
+      var to   = simRoute[i+1];
+      var km   = simGetKm(from, to);
+      var mode = simGetMode(from, to);
+      var h    = km / (SIM_SPEEDS[mode] || 80);
+
+      // Si añadir este segmento supera el máximo diario → nueva jornada
+      if(currentJornada.totalH + h > MAX_DAY_H && currentJornada.cities.length > 1) {
+        jornadas.push(currentJornada);
+        currentJornada = { cities: [from], totalKm: 0, totalH: 0 };
+      }
+
+      currentJornada.cities.push(to);
+      currentJornada.totalKm += km;
+      currentJornada.totalH  += h;
+    }
+    jornadas.push(currentJornada);
+
+    // PASO 2: convertir cada jornada en una entrada del TL
+    jornadas.forEach(function(j, ji) {
+      var dateStr = DATES[ji] || ('? jul');
+      var cities  = j.cities;
+      var origin  = cities[0];
+      var dest    = cities[cities.length - 1];
+      var stops   = cities.slice(1, -1); // paradas intermedias
+      var mode    = simGetMode(origin, dest);
+      var modeLabel = {coche:'coche',tren:'tren',tren_av:'tren AV',avion:'avion',ferry:'ferry'}[mode]||mode;
+      var isDrive = (mode === 'coche' || mode === 'ferry');
+      var totalH  = j.totalH.toFixed(1);
+      var totalKm = Math.round(j.totalKm);
+
+      // Nombre de la ciudad: "Origen - Parada1 - Destino"
+      var cityLabel = cities.map(function(c){ return SIM_NAMES[c] || c; }).join(' - ');
+      if(mode !== 'coche') cityLabel += ' (' + modeLabel + ')';
+
+      // Google Maps con waypoints
+      var mapsUrl = '';
+      if(isDrive) {
+        var encoded = cities.map(function(c){ return encodeURIComponent(SIM_NAMES[c]||c); });
+        mapsUrl = 'https://www.google.com/maps/dir/' + encoded.join('/');
+      }
+
+      // Actividades del día con paradas
+      var acts = ['08:00 Salida desde ' + (SIM_NAMES[origin]||origin)];
+      var hoursAccum = 8;
+      cities.slice(1).forEach(function(c, ci) {
+        var prevC = cities[ci];
+        var segKm = simGetKm(prevC, c);
+        var segH  = segKm / (SIM_SPEEDS[mode]||80);
+        hoursAccum += segH;
+        var hh = Math.floor(hoursAccum);
+        var mm = Math.round((hoursAccum - hh) * 60);
+        var timeStr = (hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
+        var isStop = ci < cities.length - 2; // intermedia
+        if(isStop) {
+          acts.push(timeStr + ' Parada en ' + (SIM_NAMES[c]||c) + ' (~' + Math.round(segH*60) + ' min)');
+        } else {
+          acts.push(timeStr + ' Llegada a ' + (SIM_NAMES[c]||c));
+        }
+      });
+
+      // Buscar si existe una entrada en el TL original para reutilizar datos
+      var existing = null;
+      TL.forEach(function(d){
+        var dl = d.city.toLowerCase();
+        var originName = (SIM_NAMES[origin]||origin).toLowerCase().split(' ')[0];
+        if(dl.indexOf(originName) !== -1) existing = d;
+      });
+
+      var segCost = 0;
+      for(var si=0; si<cities.length-1; si++) segCost += simSegmentCost(cities[si], cities[si+1]) * 7;
+
+      if(existing && cities.length === 2) {
+        // Ruta directa sin paradas — preservar datos existentes
+        var upd = JSON.parse(JSON.stringify(existing));
+        upd.date  = dateStr;
+        upd.drive = isDrive;
+        upd.h     = totalH + 'h';
+        upd.km    = totalKm;
+        upd.modo  = mode;
+        upd.city  = cityLabel;
+        upd.maps  = mapsUrl || upd.maps;
+        newTL.push(upd);
+      } else {
+        newTL.push({
+          date:  dateStr,
+          city:  cityLabel,
+          drive: isDrive,
+          km:    totalKm,
+          h:     totalH + 'h',
+          modo:  mode,
+          ztl:   false,
+          maps:  mapsUrl,
+          acts:  acts,
+          stay:  'Por confirmar en ' + (SIM_NAMES[dest]||dest),
+          note:  stops.length
+            ? 'Paradas: ' + stops.map(function(s){return SIM_NAMES[s]||s;}).join(', ') + '. Coste estimado grupo: ~' + Math.round(segCost) + '€.'
+            : 'Coste estimado grupo: ~' + Math.round(segCost) + '€. Actualizar detalles.'
+        });
+      }
+    });
+
+    TL.length = 0;
+    newTL.forEach(function(d){ TL.push(d); });
+    SIM_BASE_ROUTE = simRoute.slice();
+    simIsModified = false;
+    rutaFullRefresh();
+    var s = document.getElementById('ruta-save-btn');
+    var d = document.getElementById('ruta-discard-btn');
+    if(s) s.style.display='none';
+    if(d) d.style.display='none';
+    simShowMsg('Itinerario guardado: ' + jornadas.length + ' jornadas, ' + simRoute.length + ' ciudades.');
+  });
+}
+
+function simDiscardAll(){
+  if(!confirm('Descartar todos los cambios?')) return;
+  simRoute=SIM_BASE_ROUTE.slice();
+  simIsModified=false;
+  simDeselectCandidate();
+  var s=document.getElementById('ruta-save-btn');
+  var d=document.getElementById('ruta-discard-btn');
+  if(s) s.style.display='none';
+  if(d) d.style.display='none';
+  simShowMsg('Restaurado.');
+}
+
+// ===== SEARCH + GENERATE =====
+function simFilterSearch(val){
+  var clear=document.getElementById('sim-search-clear');
+  if(clear) clear.style.display=val?'block':'none';
+}
+function simClearSearch(){
+  var inp=document.getElementById('sim-new-city');
+  if(inp) inp.value='';
+  var clear=document.getElementById('sim-search-clear');
+  if(clear) clear.style.display='none';
+}
+
+function simGenerateCity(){
+  var input=document.getElementById('sim-new-city');
+  var cityName=input.value.trim(); if(!cityName) return;
+  var btn=document.getElementById('sim-gen-btn');
+  btn.textContent='...'; btn.disabled=true; input.disabled=true;
+
+  var cityId=cityName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]/g,'');
+
+  // Check if already known
+  var existing=simCandidatas.find(function(r){return r.city_id===cityId||r.name.toLowerCase()===cityName.toLowerCase();});
+  if(existing||simCityCache[cityId]){
+    input.value=''; simClearSearch(); btn.textContent='✨ Analizar'; btn.disabled=false; input.disabled=false;
+    simSelectCandidate(existing?existing.city_id:cityId);
+    return;
+  }
+
+  var routeNames=simRoute.map(function(r){return SIM_NAMES[r]||r;}).join(' → ');
+  fetch('https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU'},
+    body:JSON.stringify({messages:[{role:'user',content:
+      'Eres experto en road trips Europa. Analiza anadir "'+cityName+'" al itinerario: '+routeNames+'.\n'+
+      'Grupo: 7 personas, 2 coches, julio. Limite: 4.5h continuas, 9h/dia.\n'+
+      'Responde SOLO JSON sin markdown:\n'+
+      '{"name":"nombre","flag":"ES/FR/IT/DE","after":"ciudad_anterior_minusculas_sin_tildes","ztl":false,'+
+      '"modo":"coche/tren_av/tren/ferry","vel_media_kmh":80,'+
+      '"acts":["HH:MM actividad (Xh)"],"stay":"descripcion","note":"consejo clave",'+
+      '"km_from_prev":0,"km_to_next":0,'+
+      '"verdict":"conviene/no_conviene/depende",'+
+      '"pros":["pro"],"cons":["con"]}'
+    }]})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var text=(data.content&&data.content[0]&&data.content[0].text)||'';
+    text=text.replace(/```json|```/g,'').trim();
+    var city=JSON.parse(text);
+    simCityCache[cityId]=city;
+    SIM_NAMES[cityId]=city.name||cityName;
+    SIM_FLAGS[cityId]=city.flag||'';
+    if(city.km_from_prev&&city.after){SIM_KM[city.after+'|'+cityId]=city.km_from_prev;SIM_KM[cityId+'|'+city.after]=city.km_from_prev;}
+    if(city.km_to_next&&city.after){var nxt=simRoute[simRoute.indexOf(city.after)+1];if(nxt){SIM_KM[cityId+'|'+nxt]=city.km_to_next;SIM_KM[nxt+'|'+cityId]=city.km_to_next;}}
+    if(city.after&&city.km_from_prev){
+      // estimate coords from neighbor
+      var aC=SIM_COORDS[city.after];
+      if(aC) SIM_COORDS[cityId]=[aC[0]+0.5,aC[1]+0.3];
+    }
+    input.value=''; simClearSearch(); btn.textContent='✨ Analizar'; btn.disabled=false; input.disabled=false;
+    // Add as temp candidate and select it
+    simCandidatas.push({city_id:cityId,name:SIM_NAMES[cityId],flag:SIM_FLAGS[cityId]||'',datos:city,propuesta_por:localStorage.getItem('et_nombre')||'Tu'});
+    simSelectCandidate(cityId);
+  })
+  .catch(function(err){
+    console.error(err);
+    btn.textContent='✨ Analizar'; btn.disabled=false; input.disabled=false;
+    simShowMsg('Error al analizar. Intentalo de nuevo.');
+  });
+}
+
+// ===== CONDUCTORES =====
+var simConductores=[];
+function simRenderConductores(){
+  var el=document.getElementById('sim-cond-list'); if(!el) return;
+  if(!simConductores.length){el.innerHTML='<div style="font-size:0.78rem;color:#94a3b8;padding:0.5rem 0">Sin conductores.</div>';return;}
+  el.innerHTML=simConductores.map(function(c,i){
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f1f5f9">'+
+      '<span>'+(c.coche==1?'🚗':'🚙')+'</span>'+
+      '<span style="flex:1;font-weight:500">'+c.nombre+'</span>'+
+      '<span style="font-size:0.7rem;color:#94a3b8">Coche '+c.coche+'</span>'+
+      '<button data-simremove="'+i+'" style="background:none;border:none;color:#ef4444;cursor:pointer">×</button>'+
+      '</div>';
+  }).join('');
+}
+function simAddConductor(){
+  var n=document.getElementById('sim-cond-new').value.trim();
+  var c=parseInt(document.getElementById('sim-cond-coche').value);
+  if(!n) return;
+  simConductores.push({nombre:n,coche:c,limiteH:4.5});
+  document.getElementById('sim-cond-new').value='';
+  simRenderConductores();
+}
+function simRemoveConductor(i){simConductores.splice(i,1);simRenderConductores();}
+
+// ===== HELPERS =====
+function simReset(){
+  simRoute=SIM_BASE_ROUTE.slice();
+  simIsModified=false;
+  simDeselectCandidate();
+  var s=document.getElementById('ruta-save-btn');
+  var d=document.getElementById('ruta-discard-btn');
+  if(s) s.style.display='none';
+  if(d) d.style.display='none';
+  simShowMsg('Ruta restaurada.');
+}
+
+function simShowMsg(msg){
+  var el=document.getElementById('sim-alert');
+  if(!el) return;
+  el.textContent=msg; el.style.display='block';
+  setTimeout(function(){el.style.display='none';},4000);
+}
+
+function tlDeleteDay(idx){
+  simRequestAdmin(function(){
+    var day=TL[idx]; if(!day) return;
+    if(!confirm('Eliminar "'+day.city+'" del itinerario?')) return;
+    TL.splice(idx,1);
+    // simSaveTL removed
+    renderTL();
+    simShowMsg('Dia eliminado.');
+  });
+}
+
+var _origSV=showView;
+showView=function(name,idx){
+  _origSV(name,idx);
+  if(name==='timeline'){ dayDataLoad(); }
+  // simulador is now its own view
+};
+
+
+function rutaSetMode(mode){
+  // Legacy compatibility — ahora son vistas independientes
+  if(mode === 'sim') showView('simulador', 8);
+  else showView('timeline', 2);
+}
+// Broadcast name on load + init TL
+(function(){
+  var n=localStorage.getItem('et_nombre')||'';
+  if(n) document.querySelectorAll('.user-name-display').forEach(function(el){el.textContent=n;});
+  // simLoadTL removed — dayDataLoad handles persistence
+})();
+
+
+// ===== INIT =====
+updateCountdown();
+setInterval(updateCountdown, 60000);
+renderCities();
+dayDataLoad(); // loads Supabase day data then calls renderTL
+renderBudget();
+renderGastos();
+renderNotas();
+renderCL();
+renderRuta();
+renderAgenda();
+updateHeaderRoute();
+initHome();
+renderSOSDynamic();
+renderRiesgos('home-riesgos');
+
+// Final init — all vars defined, safe to run full refresh
+// Restore admin flags from session
+if(PIN_SESSION && (PIN_SESSION.isAdmin || PIN_SESSION.pin === ADMIN_PIN)) {
+  simIsAdmin = true;
+  AG_ADMIN = true;
+}
+// Always load route from Supabase (shared across all users)
+simLoadRoute(function() {
+  console.log('Route loaded from Supabase');
+});
+// Run initial refresh with hardcoded route while Supabase loads
+rutaFullRefresh();
+</script>
+</body>
+</html>
+
+
 function renderTL(tlData, containerId) {
   // Sim mode preview: simple list
   if(containerId) {
@@ -4910,1079 +6045,4 @@ function simProposeRoute() {
 window._tlEditIdx = 0;
 window._tlEditSlots = [];
 
-function tlGetCityId(cityStr) {
-  // Extract primary city_id from a day's city string (e.g. "Alicante — Barcelona — Montpellier" → "alicante")
-  var first = cityStr.split(/\s*[\-–—→]\s*/)[0]
-    .replace(/\(.*?\)/g,'').replace(/día libre/i,'').replace(/Día libre/i,'').trim()
-    .toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]/g,'');
-  return first || 'day';
-}
-
-// In-memory cache of day data keyed by city_id
-var DAY_DATA = {};
-
-function dayDataLoad() {
-  supa('GET','alojamientos_estado',null,'?ciudad=like.day_%').then(function(rows){
-    if(!rows) return;
-    rows.forEach(function(row){
-      try {
-        var key = row.ciudad.replace(/^day_/,'');
-        DAY_DATA[key] = JSON.parse(row.notas||'{}');
-      } catch(e){}
-    });
-    renderTL();
-  }).catch(function(){});
-}
-
-function tlDayOpen(dayIdx) {
-  var d = TL[dayIdx];
-  if(!d) return;
-  var cityId = tlGetCityId(d.city);
-  var saved = DAY_DATA[cityId] || {};
-  document.getElementById('tl-edit-title').textContent = d.city;
-  document.getElementById('tl-edit-date').textContent = d.date;
-  document.getElementById('tl-edit-must').value = (saved.must||[]).join('\n');
-  document.getElementById('tl-edit-ideas').value = (saved.ideas||[]).join('\n');
-  document.getElementById('tl-edit-alerts').value = (saved.alerts||[]).join('\n');
-  window._tlEditCityId = cityId;
-  window._tlEditIsAdmin = false; // will be set after PIN if needed
-  document.getElementById('tl-edit-modal').style.display = 'flex';
-}
-
-function tlDaySave() {
-  var cityId = window._tlEditCityId;
-  if(!cityId) return;
-
-  var ideasVal = document.getElementById('tl-edit-ideas').value;
-  var mustVal  = document.getElementById('tl-edit-must').value;
-  var alertsVal= document.getElementById('tl-edit-alerts').value;
-
-  function parseLines(str){ return str.split('\n').map(function(s){return s.trim();}).filter(Boolean); }
-
-  var existing = DAY_DATA[cityId] || {};
-  var mustNew   = parseLines(mustVal);
-  var alertsNew = parseLines(alertsVal);
-  var ideasNew  = parseLines(ideasVal);
-
-  // Ideas: anyone can save
-  // Must + alerts: require admin PIN
-  var adminChanged = (mustNew.join('|') !== (existing.must||[]).join('|')) ||
-                     (alertsNew.join('|') !== (existing.alerts||[]).join('|'));
-
-  function doSave(must, alerts) {
-    var payload_data = { must: must, ideas: ideasNew, alerts: alerts };
-    DAY_DATA[cityId] = payload_data;
-    var supaKey = 'day_' + cityId;
-    supa('GET','alojamientos_estado',null,'?ciudad=eq.'+supaKey).then(function(rows){
-      var payload = {ciudad: supaKey, estado:'active', notas: JSON.stringify(payload_data)};
-      if(rows&&rows.length>0) supa('PATCH','alojamientos_estado',payload,'?ciudad=eq.'+supaKey).catch(function(){});
-      else supa('POST','alojamientos_estado',payload).catch(function(){});
-    }).catch(function(){});
-    document.getElementById('tl-edit-modal').style.display = 'none';
-    renderTL();
-  }
-
-  if(adminChanged) {
-    simRequestAdmin(function(){
-      doSave(mustNew, alertsNew);
-    });
-  } else {
-    // Only ideas changed — save without PIN
-    doSave(existing.must||[], existing.alerts||[]);
-  }
-}
-
-
-function simGetEffectiveMode(a, b){
-  var key = a+'|'+b;
-  var rkey = b+'|'+a;
-  return SIM_TRANSPORT_OVERRIDE[key] || SIM_TRANSPORT_OVERRIDE[rkey] ||
-         SIM_MODES[key] || SIM_MODES[rkey] || 'coche';
-}
-var SIM_SPEEDS = {coche:80, tren_av:200, tren:120, avion:600, ferry:40, bus:70};
-// Cost per person estimates (€) for non-car segments
-var SIM_TRANSPORT_COST = {
-  coche: function(km){ return Math.round((km/100)*7.5*1.75/3.5); }, // fuel per person (7 pax, 2 cars)
-  tren: function(km){ return Math.round(km * 0.12); }, // ~12c/km
-  tren_av: function(km){ return Math.round(km * 0.18); }, // ~18c/km AV
-  avion: function(km){ return Math.round(30 + km * 0.08); }, // base + per km
-  ferry: function(km){ return Math.round(km * 0.15); }
-};
-function simSegmentCost(a, b){
-  var km = simGetKm(a,b);
-  var mode = simGetMode(a,b);
-  var fn = SIM_TRANSPORT_COST[mode] || SIM_TRANSPORT_COST.coche;
-  return fn(km);
-}
-function simTotalCost(){
-  var total = 0;
-  for(var i=0;i<simRoute.length-1;i++) total += simSegmentCost(simRoute[i],simRoute[i+1]);
-  return total * 7; // total for group of 7
-}
-var SIM_NAMES = {
-  alicante:'Alicante', madrid:'Madrid', barcelona:'Barcelona', tarragona:'Tarragona',
-  montpellier:'Montpellier', paris:'Paris', colmar:'Colmar',
-  lyon:'Lyon', marsella:'Marsella', niza:'Niza', monaco:'Monaco', burdeos:'Burdeos',
-  reims:'Reims', nancy:'Nancy', vichy:'Vichy', perpignan:'Perpiñán',
-  milan:'Milan', venecia:'Venecia', roma:'Roma', florencia:'Florencia',
-  pisa:'Pisa', genova:'Genova', bologna:'Bolonia', napoles:'Napoles',
-  verona:'Verona', brescia:'Brescia', berna:'Berna',
-  zurich:'Zurich', ginebra:'Ginebra',
-  amsterdam:'Amsterdam', bruselas:'Bruselas',
-  berlin:'Berlin', munich:'Munich', frankfurt:'Frankfurt', colonia:'Colonia',
-  sanremo:'Sanremo', clermont:'Clermont-Ferrand'
-};
-var SIM_FLAGS = {
-  alicante:'ES', madrid:'ES', barcelona:'ES',
-  montpellier:'FR', paris:'FR', colmar:'FR', lyon:'FR',
-  marsella:'FR', niza:'FR', monaco:'MC', burdeos:'FR',
-  milan:'IT', venecia:'IT', roma:'IT', florencia:'IT',
-  pisa:'IT', genova:'IT', bologna:'IT', napoles:'IT',
-  zurich:'CH', ginebra:'CH',
-  amsterdam:'NL', bruselas:'BE',
-  berlin:'DE', munich:'DE', frankfurt:'DE', colonia:'DE',
-  genova:'IT', sanremo:'IT'
-};
-
-// TL dates for date display
-var TL_DATES = ['14 jul','15 jul','16 jul','17 jul','18 jul','19 jul','20 jul','21 jul','22 jul','23 jul'];
-
-// ===== PIN =====
-function simRequestAdmin(action){
-  if(simIsAdmin){action();return;}
-  simPendingAction=action;
-  var m=document.getElementById('sim-pin-modal');
-  m.style.display='flex';
-  document.getElementById('sim-pin-input').value='';
-  document.getElementById('sim-pin-error').style.display='none';
-  setTimeout(function(){document.getElementById('sim-pin-input').focus();},100);
-}
-function simCheckPIN(){
-  var pin=document.getElementById('sim-pin-input').value;
-  if(pin===ADMIN_PIN){
-    simIsAdmin=true;
-    document.getElementById('sim-pin-modal').style.display='none';
-    simShowMsg('Admin activo.');
-    simRenderUnified();
-    if(simPendingAction){simPendingAction();simPendingAction=null;}
-  } else {
-    document.getElementById('sim-pin-error').style.display='block';
-    document.getElementById('sim-pin-input').value='';
-    document.getElementById('sim-pin-input').focus();
-  }
-}
-
-// ===== CORE CALC =====
-function simGetKm(a,b){return SIM_KM[a+'|'+b]||SIM_KM[b+'|'+a]||400;}
-function simGetMode(a,b){return simGetEffectiveMode(a,b);}
-function simGetHours(a,b){return simGetKm(a,b)/(SIM_SPEEDS[simGetMode(a,b)]||80);}
-function simGetModeIcon(mode){return {coche:'🚗',tren_av:'🚄',tren:'🚂',ferry:'⛴️',bus:'🚌'}[mode]||'🚗';}
-
-function simFindBestInsert(id){
-  var best=simRoute.length-1, bestExtra=999999;
-  for(var i=0;i<simRoute.length-1;i++){
-    var extra=simGetKm(simRoute[i],id)+simGetKm(id,simRoute[i+1])-simGetKm(simRoute[i],simRoute[i+1]);
-    if(extra<bestExtra){bestExtra=extra;best=i+1;}
-  }
-  return best;
-}
-
-function simCalcStats(){
-  var km=0, maxH=0, maxSeg='';
-  for(var i=0;i<simRoute.length-1;i++){
-    var d=simGetKm(simRoute[i],simRoute[i+1]);
-    var h=simGetHours(simRoute[i],simRoute[i+1]);
-    km+=d;
-    if(simGetMode(simRoute[i],simRoute[i+1])==='coche'&&h>maxH){
-      maxH=h; maxSeg=(SIM_NAMES[simRoute[i]]||simRoute[i]);
-    }
-  }
-  var totalH=0;
-  for(var si=0;si<simRoute.length-1;si++) totalH+=simGetHours(simRoute[si],simRoute[si+1]);
-  var totalCost=simTotalCost();
-  document.getElementById('sim-total-km').textContent=km.toLocaleString();
-  document.getElementById('sim-total-h').textContent='~'+Math.round(totalH)+'h';
-  document.getElementById('sim-total-fuel').textContent='~'+totalCost+'€';
-  var mx=document.getElementById('sim-max-day');
-  mx.textContent=maxH.toFixed(1)+'h';
-  mx.style.color=maxH>9?'#ef4444':maxH>7?'#f59e0b':'#4ade80';
-  document.getElementById('sim-warnings').innerHTML='';
-  return {km:km, maxH:maxH};
-}
-
-// ===== MAP =====
-var DAY_COLORS=['#ef4444','#f97316','#eab308','#22c55e','#3b82f6','#8b5cf6','#ec4899','#06b6d4','#84cc16','#f59e0b'];
-
-function simDrawMap(routeToShow, highlightId, highlightInsertAt){
-  var W=400, H=320;
-  var cities = routeToShow || simRoute;
-
-  // Get all coords
-  var allCoords = cities.map(function(c){return SIM_COORDS[c]||[5,44];});
-  if(highlightId && SIM_COORDS[highlightId] && highlightInsertAt!==undefined){
-    allCoords.splice(highlightInsertAt,0,SIM_COORDS[highlightId]||[5,44]);
-  }
-
-  var lons=allCoords.map(function(c){return c[0];});
-  var lats=allCoords.map(function(c){return c[1];});
-  var minLon=Math.min.apply(null,lons)-2.5, maxLon=Math.max.apply(null,lons)+2.5;
-  var minLat=Math.min.apply(null,lats)-1.8, maxLat=Math.max.apply(null,lats)+1.8;
-  function toX(lon){return ((lon-minLon)/(maxLon-minLon||1))*W;}
-  function toY(lat){return H-((lat-minLat)/(maxLat-minLat||1))*H;}
-
-  // Build display route (with candidate inserted if selected)
-  var displayRoute = cities.slice();
-  if(highlightId && highlightInsertAt!==undefined){
-    displayRoute.splice(highlightInsertAt,0,highlightId);
-  }
-
-  // Segments
-  var segs='';
-  for(var i=0;i<displayRoute.length-1;i++){
-    var c1=displayRoute[i], c2=displayRoute[i+1];
-    var p1=SIM_COORDS[c1]||[5,44], p2=SIM_COORDS[c2]||[5,44];
-    var x1=toX(p1[0]),y1=toY(p1[1]),x2=toX(p2[0]),y2=toY(p2[1]);
-    var isNewSeg=highlightId&&(c1===highlightId||c2===highlightId);
-    var col=isNewSeg?'#10b981':DAY_COLORS[i%DAY_COLORS.length];
-    var opacity=isNewSeg?'1':'0.7';
-    var sw=isNewSeg?'3.5':'2.5';
-    var segMode=simGetMode(c1,c2);
-    var isDashed=(segMode==='tren'||segMode==='tren_av'||segMode==='avion');
-    // Shadow line
-    segs+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+
-      '" stroke="rgba(0,0,0,0.15)" stroke-width="'+(parseFloat(sw)+2)+'" stroke-linecap="round"/>';
-    segs+='<line x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+
-      '" stroke="'+col+'" stroke-width="'+sw+'" stroke-opacity="'+opacity+'" stroke-linecap="round"'+
-      (isDashed?' stroke-dasharray="8 4"':'')+'/>';
-    // Mode icon at midpoint (only for non-car)
-    if(segMode!=='coche'){
-      var mx=((x1+x2)/2).toFixed(1), my=((y1+y2)/2).toFixed(1);
-      var modeEmoji={tren:'🚂',tren_av:'🚄',avion:'✈',ferry:'⛴'}[segMode]||'';
-      segs+='<circle cx="'+mx+'" cy="'+my+'" r="8" fill="white" stroke="'+col+'" stroke-width="1.5"/>'+
-            '<text x="'+mx+'" y="'+(parseFloat(my)+1)+'" font-size="9" text-anchor="middle" dominant-baseline="middle">'+modeEmoji+'</text>';
-    }
-  }
-
-  // Dots
-  var dots='';
-  var routeIdx=0;
-  displayRoute.forEach(function(c,i){
-    var pos=SIM_COORDS[c]||[5,44];
-    var x=toX(pos[0]), y=toY(pos[1]);
-    var isCand=c===highlightId;
-    var color=isCand?'#10b981':DAY_COLORS[routeIdx%DAY_COLORS.length];
-    var r=isCand?15:12;
-    var labelX=x+r+4, anchor='start';
-    if(x>W*0.68){labelX=x-r-4;anchor='end';}
-    var name=SIM_NAMES[c]||c;
-    var short=name.length>8?name.substring(0,7)+'..':name;
-    var dayLabel=isCand?'+':''+(routeIdx+1);
-
-    if(isCand){
-      // Pulse ring for candidate
-      dots+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="20" fill="#10b981" fill-opacity="0.1"><animate attributeName="r" values="15;22;15" dur="2s" repeatCount="indefinite"/></circle>';
-    }
-    // Shadow for dot
-    dots+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+(r+2)+'" fill="rgba(0,0,0,0.18)"/>';
-    dots+='<circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="'+r+'" fill="'+color+'" stroke="white" stroke-width="2.5"/>';
-    dots+='<text x="'+x.toFixed(1)+'" y="'+(y+1).toFixed(1)+'" font-size="'+(isCand?'8.5':'8')+'" fill="white" font-family="system-ui,sans-serif" text-anchor="middle" dominant-baseline="middle" font-weight="900" letter-spacing="-0.5">'+dayLabel+'</text>';
-    // Label pill background
-    var labelW=short.length*5.2+8;
-    var pillX=anchor==='start'?labelX-4:labelX-labelW+4;
-    dots+='<rect x="'+pillX.toFixed(1)+'" y="'+(y-13).toFixed(1)+'" width="'+labelW.toFixed(1)+'" height="13" rx="3" fill="white" fill-opacity="0.88"/>';
-    dots+='<text x="'+labelX.toFixed(1)+'" y="'+(y-3.5).toFixed(1)+'" font-size="9" fill="'+color+'" font-family="system-ui,sans-serif" text-anchor="'+anchor+'" font-weight="800" letter-spacing="-0.3">'+short+'</text>';
-    if(!isCand&&routeIdx<TL_DATES.length){
-      dots+='<text x="'+labelX.toFixed(1)+'" y="'+(y+r+8).toFixed(1)+'" font-size="7.5" fill="#1e293b" font-family="system-ui,sans-serif" text-anchor="'+anchor+'" font-weight="600" opacity="0.75">'+TL_DATES[routeIdx]+'</text>';
-    } else if(isCand){
-      dots+='<rect x="'+(labelX-(anchor==='start'?4:36)).toFixed(1)+'" y="'+(y+r+1).toFixed(1)+'" width="36" height="11" rx="3" fill="#10b981"/>'+
-             '<text x="'+labelX.toFixed(1)+'" y="'+(y+r+9).toFixed(1)+'" font-size="7.5" fill="white" font-family="system-ui,sans-serif" text-anchor="'+anchor+'" font-weight="800">NUEVA</text>';
-    }
-    if(!isCand) routeIdx++;
-  });
-
-  var totalKm=0;
-  for(var j=0;j<simRoute.length-1;j++) totalKm+=simGetKm(simRoute[j],simRoute[j+1]);
-  if(highlightId&&highlightInsertAt!==undefined){
-    var after=simRoute[highlightInsertAt-1]||simRoute[0];
-    var next=simRoute[highlightInsertAt]||simRoute[simRoute.length-1];
-    totalKm+=simGetKm(after,highlightId)+simGetKm(highlightId,next)-simGetKm(after,next);
-  }
-
-  var gmCoords=displayRoute.map(function(c){var co=SIM_COORDS[c];return co?co[1]+','+co[0]:(SIM_NAMES[c]||c)+',Europe';});
-  var gmUrl='https://www.google.com/maps/dir/'+gmCoords.map(encodeURIComponent).join('/');
-
-  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;height:100%">'+
-    '<defs><linearGradient id="mapbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#dbeafe"/><stop offset="100%" stop-color="#e0f2fe"/></linearGradient></defs>'+
-    '<rect width="'+W+'" height="'+H+'" fill="url(#mapbg)"/>'+
-    '<path d="'+displayRoute.map(function(c,i){var p=SIM_COORDS[c]||[5,44];return (i?'L':'M')+toX(p[0]).toFixed(1)+','+toY(p[1]).toFixed(1);}).join(' ')+'" fill="none" stroke="#0f172a" stroke-width="5" stroke-opacity="0.06"/>'+
-    segs+dots+
-    '<rect x="3" y="'+(H-22)+'" width="'+(highlightId?170:130)+'" height="19" rx="5" fill="#0f172a" fill-opacity="0.82"/>'+
-    '<text x="9" y="'+(H-8)+'" font-size="9.5" fill="white" font-family="system-ui,sans-serif" font-weight="700">'+totalKm.toLocaleString()+' km'+(highlightId?' + '+(SIM_NAMES[highlightId]||highlightId):'')+' </text>'+
-    '</svg>';
-
-  var svg_el=document.getElementById('sim-map-svg');
-  if(svg_el) svg_el.innerHTML=svg;
-  var lbl=document.getElementById('sim-map-label-text');
-  if(lbl) lbl.textContent=displayRoute.length+' ciudades · '+totalKm.toLocaleString()+' km'+(highlightId?' (preview)':'');
-  var link=document.getElementById('sim-maps-link');
-  if(link) link.href=gmUrl;
-}
-
-// ===== UNIFIED LIST RENDERER =====
-function simRenderUnified(){
-  var el=document.getElementById('sim-unified-list');
-  if(!el) return;
-  el.innerHTML='';
-
-  var bestInsert=simSelected?simFindBestInsert(simSelected):-1;
-
-  simRoute.forEach(function(cityId, i){
-    var isLast=i===simRoute.length-1;
-
-    // Check if selected candidate should appear before this city
-    if(simSelected && simSelectedInsertAt===i){
-      el.appendChild(simMakeCandidateRow(simSelected, i, bestInsert));
-    }
-
-    // Route city row
-    var row=document.createElement('div');
-    var isOver=!isLast&&simGetHours(cityId,simRoute[i+1])>9&&simGetMode(cityId,simRoute[i+1])==='coche';
-    var isWarn=!isLast&&simGetHours(cityId,simRoute[i+1])>4.5&&simGetMode(cityId,simRoute[i+1])==='coche'&&!isOver;
-    row.style.cssText='display:flex;align-items:center;gap:6px;padding:0.42rem 0.5rem;border-radius:8px;background:white;border:1px solid #f1f5f9;margin-bottom:3px;cursor:grab;user-select:none';
-    row.draggable=true;
-    row.dataset.i=i;
-    row.dataset.type='route';
-
-    var km=isLast?0:simGetKm(cityId,simRoute[i+1]);
-    var h=isLast?0:simGetHours(cityId,simRoute[i+1]);
-    var mode=isLast?'':simGetMode(cityId,simRoute[i+1]);
-    var color=DAY_COLORS[i%DAY_COLORS.length];
-
-    // Tramo label: Salida / Tramo N→M / Llegada
-    var tramoLabel = isLast ? 'Llegada' : (i===0 ? 'Salida' : 'Tramo '+(i)+'→'+(i+1));
-    var tramoIcon  = isLast ? '🏁' : (i===0 ? '🚀' : '→');
-
-    row.innerHTML=
-      '<div style="width:24px;height:24px;border-radius:50%;background:'+color+';color:white;display:flex;align-items:center;justify-content:center;font-size:0.62rem;font-weight:800;flex-shrink:0">'+tramoIcon+'</div>'+
-      '<div style="flex:1;min-width:0">'+
-        '<div style="font-size:0.8rem;font-weight:600;color:#0f172a">'+(SIM_NAMES[cityId]||cityId)+'</div>'+
-        (TL_DATES[i]?'<div style="font-size:0.58rem;color:#94a3b8">'+TL_DATES[i]+'</div>':'')+
-        (isOver?'<div style="font-size:0.56rem;color:#ef4444">🔴 '+h.toFixed(1)+'h — muy larga</div>':'')+ 
-        (isWarn?'<div style="font-size:0.56rem;color:#f59e0b">⚠️ '+h.toFixed(1)+'h — planificar parada</div>':'')+ 
-      '</div>'+
-      (!isLast?'<div style="text-align:right;flex-shrink:0">'+
-        '<div style="font-size:0.68rem;font-weight:700;color:'+(isOver?'#ef4444':'#374151')+'">'+simGetModeIcon(mode)+' '+km+'km</div>'+
-        '<div style="font-size:0.6rem;color:#94a3b8">'+h.toFixed(1)+'h</div>'+
-      '</div>':'<div style="font-size:0.62rem;color:#10b981;font-weight:700">FIN</div>')+
-      '<span style="color:#cbd5e1;cursor:grab;font-size:0.75rem;padding:0 2px">&#9776;</span>';
-
-    // Transport selector (between this city and next)
-    if(!isLast){
-      var transSel=document.createElement('select');
-      transSel.style.cssText='border:1px solid #e2e8f0;border-radius:5px;padding:0.15rem 0.25rem;font-family:inherit;font-size:0.6rem;color:#374151;background:white;cursor:pointer;margin-left:2px;flex-shrink:0';
-      transSel.title='Modo de transporte hasta la siguiente ciudad';
-      var currentMode=simGetMode(cityId,simRoute[i+1]);
-      var modeOpts=[
-        {val:'coche',label:'🚗 Coche'},
-        {val:'tren',label:'🚂 Tren'},
-        {val:'tren_av',label:'🚄 Tren AV'},
-        {val:'avion',label:'✈️ Avion'},
-        {val:'ferry',label:'⛴️ Ferry'}
-      ];
-      modeOpts.forEach(function(opt){
-        var o=document.createElement('option');
-        o.value=opt.val; o.textContent=opt.label;
-        if(opt.val===currentMode) o.selected=true;
-        transSel.appendChild(o);
-      });
-      (function(from,to){
-        transSel.onchange=function(e){
-          e.stopPropagation();
-          var newMode=transSel.value;
-          SIM_TRANSPORT_OVERRIDE[from+'|'+to]=newMode;
-          SIM_TRANSPORT_OVERRIDE[to+'|'+from]=newMode;
-          simMarkModified();
-          simRenderUnified();
-          simDrawMap();
-          simCalcStats();
-        };
-      })(cityId, simRoute[i+1]);
-      row.appendChild(transSel);
-    }
-
-    // Remove button — admin can remove any stop except first and last
-    var isBase=SIM_BASE_ROUTE.indexOf(cityId)!==-1;
-    var isFirstOrLast = (i === 0 || i === simRoute.length - 1);
-    if(!isFirstOrLast){
-      var rm=document.createElement('button');
-      rm.style.cssText='background:none;border:none;color:#94a3b8;cursor:pointer;font-size:0.9rem;padding:0 2px;flex-shrink:0';
-      rm.textContent='×';
-      (function(id){rm.onclick=function(e){e.stopPropagation();simRemoveFromRoute(id);};})(cityId);
-      row.appendChild(rm);
-    }
-
-    // Drag events
-    row.ondragstart=function(e){dragSrc=parseInt(e.currentTarget.dataset.i);e.currentTarget.style.opacity='0.4';};
-    row.ondragend=function(e){e.currentTarget.style.opacity='1';};
-    row.ondragover=function(e){e.preventDefault();e.currentTarget.style.background='#eff6ff';};
-    row.ondragleave=function(e){e.currentTarget.style.background='white';};
-    row.ondrop=function(e){
-      e.preventDefault();e.currentTarget.style.background='white';
-      var target=parseInt(e.currentTarget.dataset.i);
-      if(dragSrc===null||dragSrc===target||dragSrc===undefined){dragSrc=null;return;}
-      var moved=simRoute.splice(dragSrc,1)[0];
-      simRoute.splice(target,0,moved);
-      dragSrc=null;
-      simMarkModified();
-      simRenderUnified();
-      simDrawMap();
-      simCalcStats();
-    };
-
-    el.appendChild(row);
-
-    // ── ALERTA DE TRAMO LARGO (>4h en coche) ──────────────────
-    if(!isLast && h > 4 && mode === 'coche') {
-      var alertEl = simMakeTramoAlert(cityId, simRoute[i+1], i, h, km);
-      if(alertEl) el.appendChild(alertEl);
-    }
-  });
-
-  // If candidate should go at end
-  if(simSelected && simSelectedInsertAt===simRoute.length){
-    el.appendChild(simMakeCandidateRow(simSelected, simRoute.length, bestInsert));
-  }
-
-  // Unplaced candidates (not yet positioned by user)
-  var unplaced=simCandidatas.filter(function(r){
-    return r.city_id!==simSelected&&simRoute.indexOf(r.city_id)===-1;
-  });
-  if(unplaced.length){
-    var hdr=document.createElement('div');
-    hdr.style.cssText='font-size:0.58rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin:0.5rem 0 0.3rem;padding-left:2px';
-    hdr.textContent='Guardadas por el grupo';
-    el.appendChild(hdr);
-    unplaced.forEach(function(row){
-      var cityId=row.city_id;
-      var candRow=document.createElement('div');
-      candRow.style.cssText='display:flex;align-items:center;gap:6px;padding:0.38rem 0.5rem;border-radius:8px;background:#f8fafc;border:1.5px dashed #e2e8f0;margin-bottom:3px;cursor:pointer';
-      candRow.innerHTML=
-        '<div style="width:24px;height:24px;border-radius:50%;background:#e2e8f0;color:#64748b;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:800;flex-shrink:0">?</div>'+
-        '<div style="flex:1;min-width:0">'+
-          '<div style="font-size:0.78rem;font-weight:600;color:#374151">'+(SIM_NAMES[cityId]||row.name)+'</div>'+
-          '<div style="font-size:0.58rem;color:#94a3b8">por '+row.propuesta_por+' · toca para explorar</div>'+
-        '</div>';
-      (function(id){candRow.onclick=function(){simSelectCandidate(id);};})(cityId);
-      if(simIsAdmin){
-        var del=document.createElement('button');
-        del.style.cssText='background:none;border:none;color:#ef4444;cursor:pointer;font-size:0.78rem;padding:0 3px';
-        del.textContent='✕';
-        (function(id){del.onclick=function(e){e.stopPropagation();simDeleteCandidate(id);};})(cityId);
-        candRow.appendChild(del);
-      }
-      el.appendChild(candRow);
-    });
-  }
-
-  // Update count
-  var cnt=document.getElementById('sim-cand-count');
-  if(cnt) cnt.textContent=simCandidatas.length?'('+simCandidatas.length+' candidatas)':'';
-
-  simCalcStats();
-  if(!simSelected) simDrawMap();
-}
-
-function simMakeCandidateRow(cityId, insertAt, bestInsertAt){
-  var c=simCityCache[cityId]||{};
-  var isOptimal=(insertAt===bestInsertAt);
-
-  // Calculate impact at this position
-  var after=simRoute[insertAt-1]||simRoute[0];
-  var next=simRoute[insertAt]||simRoute[simRoute.length-1];
-  var segKm=simGetKm(after,cityId)+simGetKm(cityId,next);
-  var directKm=simGetKm(after,next);
-  var extraKm=segKm-directKm;
-  var segH=simGetHours(after,cityId)+simGetHours(cityId,next);
-  var overLimit=segH>9;
-
-  var row=document.createElement('div');
-  row.style.cssText='border-radius:8px;background:white;border:2px solid #10b981;margin-bottom:3px;overflow:hidden;box-shadow:0 2px 8px rgba(16,185,129,0.15)';
-  row.dataset.type='candidate';
-  row.dataset.insertAt=insertAt;
-
-  // Header
-  var header=document.createElement('div');
-  header.style.cssText='display:flex;align-items:center;gap:6px;padding:0.42rem 0.5rem';
-  header.draggable=true;
-
-  var badge=isOptimal
-    ?'<span style="font-size:0.55rem;background:#10b981;color:white;padding:0.1rem 0.35rem;border-radius:4px">✓ Posicion optima</span>'
-    :'<span style="font-size:0.55rem;background:#f59e0b;color:white;padding:0.1rem 0.35rem;border-radius:4px">⚠️ No es la optima</span>';
-
-  var extraInfo=isOptimal
-    ?'<div style="font-size:0.56rem;color:#10b981">Mejor posicion · +'+extraKm+'km</div>'
-    :'<div style="font-size:0.56rem;color:#f59e0b">+'+extraKm+'km aqui vs '+(simGetKm(simRoute[bestInsertAt-1]||simRoute[0],cityId)+simGetKm(cityId,simRoute[bestInsertAt]||simRoute[simRoute.length-1])-simGetKm(simRoute[bestInsertAt-1]||simRoute[0],simRoute[bestInsertAt]||simRoute[simRoute.length-1]))+' en posicion optima</div>';
-
-  header.innerHTML=
-    '<div style="width:24px;height:24px;border-radius:50%;background:#10b981;color:white;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0">+</div>'+
-    '<div style="flex:1;min-width:0">'+
-      '<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap">'+
-        '<span style="font-size:0.8rem;font-weight:700;color:#0f172a">'+(SIM_NAMES[cityId]||cityId)+'</span>'+badge+
-      '</div>'+
-      extraInfo+
-    '</div>'+
-    '<div style="text-align:right;flex-shrink:0">'+
-      '<div style="font-size:0.66rem;font-weight:700;color:'+(overLimit?'#ef4444':'#10b981')+'">'+segH.toFixed(1)+'h</div>'+
-      '<div style="font-size:0.58rem;color:#94a3b8">'+segKm+'km</div>'+
-    '</div>';
-
-  // Action buttons
-  var actions=document.createElement('div');
-  actions.style.cssText='display:flex;gap:4px;padding:0 0.5rem 0.4rem';
-
-  var addBtn=document.createElement('button');
-  addBtn.style.cssText='flex:1;background:#10b981;color:white;border:none;border-radius:6px;padding:0.32rem;font-family:inherit;font-weight:700;font-size:0.68rem;cursor:pointer';
-  addBtn.textContent='✓ Añadir al itinerario';
-  addBtn.onclick=function(){simConfirmOfficial();};
-
-  var saveBtn=document.createElement('button');
-  saveBtn.style.cssText='background:#3b82f6;color:white;border:none;border-radius:6px;padding:0.32rem 0.6rem;font-family:inherit;font-weight:700;font-size:0.68rem;cursor:pointer';
-  saveBtn.textContent='📌';
-  saveBtn.title='Guardar para el grupo';
-  saveBtn.onclick=function(){simSaveCandidate();};
-
-  var cancelBtn=document.createElement('button');
-  cancelBtn.style.cssText='background:none;border:1px solid #e2e8f0;color:#94a3b8;border-radius:6px;padding:0.32rem 0.6rem;font-family:inherit;font-size:0.68rem;cursor:pointer';
-  cancelBtn.textContent='✕';
-  cancelBtn.onclick=function(){simDeselectCandidate();};
-
-  actions.appendChild(addBtn);
-  actions.appendChild(saveBtn);
-  actions.appendChild(cancelBtn);
-
-  // Drag to reposition
-  header.ondragstart=function(e){
-    e.dataTransfer.setData('candidateDrag',cityId);
-    e.dataTransfer.setData('fromInsert',insertAt);
-  };
-  header.ondragover=function(e){e.preventDefault();};
-
-  // Allow dropping ON a route city to insert before it
-  row.ondragover=function(e){e.preventDefault();row.style.borderColor='#f59e0b';};
-  row.ondragleave=function(){row.style.borderColor='#10b981';};
-
-  row.appendChild(header);
-  row.appendChild(actions);
-  return row;
-}
-
-// ===== CANDIDATE SELECTION =====
-function simSelectCandidate(cityId, insertAt){
-  var c=simCityCache[cityId];
-  if(!c){ simShowMsg('Cargando datos...'); return; }
-  simSelected=cityId;
-  simSelectedInsertAt=insertAt!==undefined?insertAt:simFindBestInsert(cityId);
-  simRenderUnified();
-  simDrawMap(simRoute, cityId, simSelectedInsertAt);
-  simShowImpactPanel(cityId, simSelectedInsertAt);
-}
-
-function simDeselectCandidate(){
-  simSelected=null;
-  simSelectedInsertAt=null;
-  simRenderUnified();
-  simDrawMap();
-  var panel=document.getElementById('sim-impact-panel');
-  var hint=document.getElementById('sim-hint-panel');
-  if(panel) panel.style.display='none';
-  if(hint) hint.style.display='block';
-}
-
-function simShowImpactPanel(cityId, insertAt){
-  var c=simCityCache[cityId]||{};
-  var panel=document.getElementById('sim-impact-panel');
-  var hint=document.getElementById('sim-hint-panel');
-  if(!panel) return;
-
-  var bestInsert=simFindBestInsert(cityId);
-  var isOptimal=(insertAt===bestInsert);
-
-  var after=simRoute[insertAt-1]||simRoute[0];
-  var next=simRoute[insertAt]||simRoute[simRoute.length-1];
-
-  // km impact
-  var kmBefore=0, kmAfter=0;
-  for(var i=0;i<simRoute.length-1;i++) kmBefore+=simGetKm(simRoute[i],simRoute[i+1]);
-  var newRoute=simRoute.slice(); newRoute.splice(insertAt,0,cityId);
-  for(var j=0;j<newRoute.length-1;j++) kmAfter+=simGetKm(newRoute[j],newRoute[j+1]);
-  var extraKm=kmAfter-kmBefore;
-  var extraFuel=Math.round((extraKm/100)*7.5*1.75*2);
-  var segH=simGetHours(after,cityId)+simGetHours(cityId,next);
-  var totalHBefore=Math.round(kmBefore/80);
-  var totalHAfter=Math.round(kmAfter/80);
-
-  // Position badge
-  var posBadge=isOptimal
-    ?'<div style="background:#dcfce7;border:1px solid #86efac;border-radius:6px;padding:0.35rem 0.6rem;font-size:0.72rem;color:#15803d;margin-bottom:0.5rem">✓ <strong>Posicion optima</strong> — minimo desvio posible (+'+extraKm+'km)</div>'
-    :'<div style="background:#fef3c7;border:1px solid #fde68a;border-radius:6px;padding:0.35rem 0.6rem;font-size:0.72rem;color:#92400e;margin-bottom:0.5rem">⚠️ <strong>Posicion no optima</strong> — la posicion sugerida por IA ahorraría km. Arrastra para moverla.</div>';
-
-  // Verdict
-  var verdict=c.verdict||'';
-  var pros=c.pros||[]; var cons=c.cons||[];
-  var vHtml='';
-  if(verdict){
-    var vBg=verdict==='conviene'?'#f0fdf4':verdict==='no_conviene'?'#fef2f2':'#fefce8';
-    var vBorder=verdict==='conviene'?'#86efac':verdict==='no_conviene'?'#fca5a5':'#fde68a';
-    var vTitle=verdict==='conviene'?'✅ Conviene':verdict==='no_conviene'?'🚨 No conviene':'⚠️ Depende';
-    vHtml='<div style="background:'+vBg+';border:1px solid '+vBorder+';border-radius:8px;padding:0.5rem;margin-bottom:0.5rem;font-size:0.72rem">'+
-      '<strong>'+vTitle+'</strong> · ⏱️ Tramo: '+segH.toFixed(1)+'h · 🗓️ Total: ~'+totalHBefore+'h→~'+totalHAfter+'h (+' +(totalHAfter-totalHBefore)+'h)<br>'+
-      (pros.length?'<div style="margin-top:0.3rem">'+pros.map(function(p){return '✅ '+p;}).join(' · ')+'</div>':'')+
-      (cons.length?'<div style="margin-top:0.2rem">'+cons.map(function(con){return '⚠️ '+con;}).join(' · ')+'</div>':'')+
-    '</div>';
-  }
-
-  // Stats row
-  var statsRow='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.3rem;margin-bottom:0.5rem;text-align:center">'+
-    '<div style="background:#fff7ed;border-radius:6px;padding:0.3rem">'+
-      '<div style="font-size:0.9rem;font-weight:800;color:#ea580c">+'+extraKm+'km</div>'+
-      '<div style="font-size:0.55rem;color:#94a3b8;text-transform:uppercase">km extra</div>'+
-    '</div>'+
-    '<div style="background:'+(segH>9?'#fef2f2':'#f0fdf4')+';border-radius:6px;padding:0.3rem">'+
-      '<div style="font-size:0.9rem;font-weight:800;color:'+(segH>9?'#ef4444':'#16a34a')+'">'+segH.toFixed(1)+'h</div>'+
-      '<div style="font-size:0.55rem;color:#94a3b8;text-transform:uppercase">ese tramo</div>'+
-    '</div>'+
-    '<div style="background:#faf5ff;border-radius:6px;padding:0.3rem">'+
-      '<div style="font-size:0.9rem;font-weight:800;color:#7c3aed">+'+extraFuel+'€</div>'+
-      '<div style="font-size:0.55rem;color:#94a3b8;text-transform:uppercase">gasolina</div>'+
-    '</div>'+
-  '</div>';
-
-  // Acts
-  var acts=(c.acts||[]).slice(0,5).map(function(a){
-    var m=a.match(/^(\d{2}:\d{2})\s+(.*)/);
-    return m?'<div style="display:flex;gap:6px;padding:0.22rem 0;border-bottom:1px solid #f8fafc;font-size:0.68rem"><span style="font-family:monospace;color:#3b82f6;font-weight:700;flex-shrink:0;width:34px">'+m[1]+'</span><span>'+m[2]+'</span></div>':
-    '<div style="padding:0.22rem 0;font-size:0.68rem;border-bottom:1px solid #f8fafc">'+a+'</div>';
-  }).join('');
-
-  var note=c.note?'<div style="margin-top:0.35rem;font-size:0.65rem;color:#64748b">📌 '+c.note+'</div>':'';
-
-  document.getElementById('sim-impact-content').innerHTML=
-    '<div style="font-size:0.62rem;font-weight:700;color:#0f172a;margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em">'+(SIM_NAMES[cityId]||cityId)+' · entre '+(SIM_NAMES[after]||after)+' y '+(SIM_NAMES[next]||next)+'</div>'+
-    posBadge+statsRow+vHtml+
-    (acts?'<div style="font-size:0.58rem;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:0.3rem">Horario del dia</div>'+acts+note:'');
-
-  panel.style.display='block';
-  if(hint) hint.style.display='none';
-}
-
-// ===== DROP ZONES for repositioning candidate =====
-// When dragging candidate, route cities become drop zones
-// Handled via ondrop on route rows — resets simSelectedInsertAt
-
-// ===== SUPABASE =====
-function simLoadCandidatas(){
-  supa('GET','candidatas?order=created_at.desc').then(function(rows){
-    simCandidatas=rows||[];
-    simCandidatas.forEach(function(row){
-      if(!simCityCache[row.city_id]){
-        simCityCache[row.city_id]=row.datos;
-        SIM_NAMES[row.city_id]=row.name;
-        if(row.flag) SIM_FLAGS[row.city_id]=row.flag;
-        if(row.datos&&row.datos.coords) SIM_COORDS[row.city_id]=row.datos.coords;
-      }
-    });
-    simRenderUnified();
-  }).catch(function(){simRenderUnified();});
-}
-
-function simSaveCandidate(){
-  if(!simSelected) return;
-  var c=simCityCache[simSelected]; if(!c) return;
-  var cityId=simSelected;
-  var userName=localStorage.getItem('et_nombre')||'Alguien';
-  var exists=simCandidatas.find(function(r){return r.city_id===cityId;});
-  if(exists){simShowMsg((SIM_NAMES[cityId]||cityId)+' ya guardada.');return;}
-  supa('POST','candidatas',{city_id:cityId,name:SIM_NAMES[cityId]||c.name||cityId,
-    flag:SIM_FLAGS[cityId]||c.flag||'',datos:c,propuesta_por:userName})
-  .then(function(){simLoadCandidatas();simShowMsg('📌 Guardada para el grupo.');})
-  .catch(function(){simShowMsg('Error al guardar.');});
-}
-
-function simDeleteCandidate(cityId){
-  simRequestAdmin(function(){
-    supa('DELETE','candidatas?city_id=eq.'+cityId).then(function(){
-      simCandidatas=simCandidatas.filter(function(r){return r.city_id!==cityId;});
-      if(simSelected===cityId) simDeselectCandidate();
-      else simRenderUnified();
-      simShowMsg('Candidata eliminada.');
-    });
-  });
-}
-
-function simRemoveFromRoute(cityId){
-  simRoute=simRoute.filter(function(c){return c!==cityId;});
-  SIM_BASE_ROUTE=simRoute.slice();
-  if(simIsAdmin) simSaveRoute(); // Solo admin persiste
-  simMarkModified();
-  simRenderUnified();
-  simDrawMap();
-  simCalcStats();
-  simShowMsg('\u2705 '+(SIM_NAMES[cityId]||cityId)+' eliminada de la ruta.');
-}
-
-// ===== SAVE / DISCARD =====
-function simMarkModified(){
-  simIsModified=true;
-  var s=document.getElementById('ruta-save-btn');
-  var d=document.getElementById('ruta-discard-btn');
-  if(s) s.style.display='block';
-  if(d) d.style.display='block';
-  simCalcStats();
-  rutaFullRefresh();
-}
-
-function simConfirmOfficial(){
-  simRequestAdmin(function(){
-    if(!simSelected) return;
-    var c=simCityCache[simSelected];
-    var cityId=simSelected;
-    var insertAt=simSelectedInsertAt!==null?simSelectedInsertAt:simFindBestInsert(cityId);
-    simRoute.splice(insertAt,0,cityId);
-    simMarkModified();
-    // Add to TL
-    var afterCity=simRoute[Math.max(0,insertAt-1)];
-    var nextCity=simRoute[Math.min(simRoute.length-1,insertAt+1)];
-    var newDay={date:TL_DATES[insertAt]||'? jul',
-      city:(SIM_NAMES[afterCity]||afterCity)+' → '+(SIM_NAMES[cityId]||cityId)+' → '+(SIM_NAMES[nextCity]||nextCity),
-      drive:true,km:simGetKm(afterCity,cityId)+simGetKm(cityId,nextCity),
-      h:((simGetKm(afterCity,cityId)+simGetKm(cityId,nextCity))/80).toFixed(1)+'h',
-      ztl:c?c.ztl||false:false,maps:'',acts:c?c.acts||[]:[],
-      stay:c?c.stay||'Por confirmar':'Por confirmar',note:c?c.note||'':'Desde simulador'};
-    var tlIdx=-1;
-    TL.forEach(function(d,i){if(d.city.toLowerCase().indexOf((SIM_NAMES[afterCity]||afterCity).toLowerCase().split(' ')[0])!==-1) tlIdx=i;});
-    if(tlIdx>=0) TL.splice(tlIdx+1,0,newDay); else TL.push(newDay);
-    supa('PATCH','candidatas?city_id=eq.'+cityId,{en_oficial:true}).catch(function(){});
-    // simSaveTL removed
-    simDeselectCandidate();
-    simShowMsg('✓ '+(SIM_NAMES[cityId]||cityId)+' añadida. Ve a Ver para revisar.');
-  });
-}
-
-function simSaveAsBase(){
-  // Everyone sees this button — PIN required to actually save
-  simRequestAdmin(function(){
-    var DATES = TL_DATES;
-    var MAX_DAY_H = 10; // horas máximas de conducción por jornada
-    var newTL = [];
-
-    // PASO 1: agrupar ciudades de simRoute en JORNADAS
-    // Una jornada = varios segmentos consecutivos que juntos no superan MAX_DAY_H
-    var jornadas = []; // [{cities:['alicante','barcelona','montpellier'], totalKm, totalH, mode}]
-    var currentJornada = { cities: [simRoute[0]], totalKm: 0, totalH: 0 };
-
-    for(var i = 0; i < simRoute.length - 1; i++) {
-      var from = simRoute[i];
-      var to   = simRoute[i+1];
-      var km   = simGetKm(from, to);
-      var mode = simGetMode(from, to);
-      var h    = km / (SIM_SPEEDS[mode] || 80);
-
-      // Si añadir este segmento supera el máximo diario → nueva jornada
-      if(currentJornada.totalH + h > MAX_DAY_H && currentJornada.cities.length > 1) {
-        jornadas.push(currentJornada);
-        currentJornada = { cities: [from], totalKm: 0, totalH: 0 };
-      }
-
-      currentJornada.cities.push(to);
-      currentJornada.totalKm += km;
-      currentJornada.totalH  += h;
-    }
-    jornadas.push(currentJornada);
-
-    // PASO 2: convertir cada jornada en una entrada del TL
-    jornadas.forEach(function(j, ji) {
-      var dateStr = DATES[ji] || ('? jul');
-      var cities  = j.cities;
-      var origin  = cities[0];
-      var dest    = cities[cities.length - 1];
-      var stops   = cities.slice(1, -1); // paradas intermedias
-      var mode    = simGetMode(origin, dest);
-      var modeLabel = {coche:'coche',tren:'tren',tren_av:'tren AV',avion:'avion',ferry:'ferry'}[mode]||mode;
-      var isDrive = (mode === 'coche' || mode === 'ferry');
-      var totalH  = j.totalH.toFixed(1);
-      var totalKm = Math.round(j.totalKm);
-
-      // Nombre de la ciudad: "Origen - Parada1 - Destino"
-      var cityLabel = cities.map(function(c){ return SIM_NAMES[c] || c; }).join(' - ');
-      if(mode !== 'coche') cityLabel += ' (' + modeLabel + ')';
-
-      // Google Maps con waypoints
-      var mapsUrl = '';
-      if(isDrive) {
-        var encoded = cities.map(function(c){ return encodeURIComponent(SIM_NAMES[c]||c); });
-        mapsUrl = 'https://www.google.com/maps/dir/' + encoded.join('/');
-      }
-
-      // Actividades del día con paradas
-      var acts = ['08:00 Salida desde ' + (SIM_NAMES[origin]||origin)];
-      var hoursAccum = 8;
-      cities.slice(1).forEach(function(c, ci) {
-        var prevC = cities[ci];
-        var segKm = simGetKm(prevC, c);
-        var segH  = segKm / (SIM_SPEEDS[mode]||80);
-        hoursAccum += segH;
-        var hh = Math.floor(hoursAccum);
-        var mm = Math.round((hoursAccum - hh) * 60);
-        var timeStr = (hh<10?'0':'')+hh+':'+(mm<10?'0':'')+mm;
-        var isStop = ci < cities.length - 2; // intermedia
-        if(isStop) {
-          acts.push(timeStr + ' Parada en ' + (SIM_NAMES[c]||c) + ' (~' + Math.round(segH*60) + ' min)');
-        } else {
-          acts.push(timeStr + ' Llegada a ' + (SIM_NAMES[c]||c));
-        }
-      });
-
-      // Buscar si existe una entrada en el TL original para reutilizar datos
-      var existing = null;
-      TL.forEach(function(d){
-        var dl = d.city.toLowerCase();
-        var originName = (SIM_NAMES[origin]||origin).toLowerCase().split(' ')[0];
-        if(dl.indexOf(originName) !== -1) existing = d;
-      });
-
-      var segCost = 0;
-      for(var si=0; si<cities.length-1; si++) segCost += simSegmentCost(cities[si], cities[si+1]) * 7;
-
-      if(existing && cities.length === 2) {
-        // Ruta directa sin paradas — preservar datos existentes
-        var upd = JSON.parse(JSON.stringify(existing));
-        upd.date  = dateStr;
-        upd.drive = isDrive;
-        upd.h     = totalH + 'h';
-        upd.km    = totalKm;
-        upd.modo  = mode;
-        upd.city  = cityLabel;
-        upd.maps  = mapsUrl || upd.maps;
-        newTL.push(upd);
-      } else {
-        newTL.push({
-          date:  dateStr,
-          city:  cityLabel,
-          drive: isDrive,
-          km:    totalKm,
-          h:     totalH + 'h',
-          modo:  mode,
-          ztl:   false,
-          maps:  mapsUrl,
-          acts:  acts,
-          stay:  'Por confirmar en ' + (SIM_NAMES[dest]||dest),
-          note:  stops.length
-            ? 'Paradas: ' + stops.map(function(s){return SIM_NAMES[s]||s;}).join(', ') + '. Coste estimado grupo: ~' + Math.round(segCost) + '€.'
-            : 'Coste estimado grupo: ~' + Math.round(segCost) + '€. Actualizar detalles.'
-        });
-      }
-    });
-
-    TL.length = 0;
-    newTL.forEach(function(d){ TL.push(d); });
-    SIM_BASE_ROUTE = simRoute.slice();
-    simIsModified = false;
-    rutaFullRefresh();
-    var s = document.getElementById('ruta-save-btn');
-    var d = document.getElementById('ruta-discard-btn');
-    if(s) s.style.display='none';
-    if(d) d.style.display='none';
-    simShowMsg('Itinerario guardado: ' + jornadas.length + ' jornadas, ' + simRoute.length + ' ciudades.');
-  });
-}
-
-function simDiscardAll(){
-  if(!confirm('Descartar todos los cambios?')) return;
-  simRoute=SIM_BASE_ROUTE.slice();
-  simIsModified=false;
-  simDeselectCandidate();
-  var s=document.getElementById('ruta-save-btn');
-  var d=document.getElementById('ruta-discard-btn');
-  if(s) s.style.display='none';
-  if(d) d.style.display='none';
-  simShowMsg('Restaurado.');
-}
-
-// ===== SEARCH + GENERATE =====
-function simFilterSearch(val){
-  var clear=document.getElementById('sim-search-clear');
-  if(clear) clear.style.display=val?'block':'none';
-}
-function simClearSearch(){
-  var inp=document.getElementById('sim-new-city');
-  if(inp) inp.value='';
-  var clear=document.getElementById('sim-search-clear');
-  if(clear) clear.style.display='none';
-}
-
-function simGenerateCity(){
-  var input=document.getElementById('sim-new-city');
-  var cityName=input.value.trim(); if(!cityName) return;
-  var btn=document.getElementById('sim-gen-btn');
-  btn.textContent='...'; btn.disabled=true; input.disabled=true;
-
-  var cityId=cityName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z]/g,'');
-
-  // Check if already known
-  var existing=simCandidatas.find(function(r){return r.city_id===cityId||r.name.toLowerCase()===cityName.toLowerCase();});
-  if(existing||simCityCache[cityId]){
-    input.value=''; simClearSearch(); btn.textContent='✨ Analizar'; btn.disabled=false; input.disabled=false;
-    simSelectCandidate(existing?existing.city_id:cityId);
-    return;
-  }
-
-  var routeNames=simRoute.map(function(r){return SIM_NAMES[r]||r;}).join(' → ');
-  fetch('https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU'},
-    body:JSON.stringify({messages:[{role:'user',content:
-      'Eres experto en road trips Europa. Analiza anadir "'+cityName+'" al itinerario: '+routeNames+'.\n'+
-      'Grupo: 7 personas, 2 coches, julio. Limite: 4.5h continuas, 9h/dia.\n'+
-      'Responde SOLO JSON sin markdown:\n'+
-      '{"name":"nombre","flag":"ES/FR/IT/DE","after":"ciudad_anterior_minusculas_sin_tildes","ztl":false,'+
-      '"modo":"coche/tren_av/tren/ferry","vel_media_kmh":80,'+
-      '"acts":["HH:MM actividad (Xh)"],"stay":"descripcion","note":"consejo clave",'+
-      '"km_from_prev":0,"km_to_next":0,'+
-      '"verdict":"conviene/no_conviene/depende",'+
-      '"pros":["pro"],"cons":["con"]}'
-    }]})
-  })
-  .then(function(r){return r.json();})
-  .then(function(data){
-    var text=(data.content&&data.content[0]&&data.content[0].text)||'';
-    text=text.replace(/```json|```/g,'').trim();
-    var city=JSON.parse(text);
-    simCityCache[cityId]=city;
-    SIM_NAMES[cityId]=city.name||cityName;
-    SIM_FLAGS[cityId]=city.flag||'';
-    if(city.km_from_prev&&city.after){SIM_KM[city.after+'|'+cityId]=city.km_from_prev;SIM_KM[cityId+'|'+city.after]=city.km_from_prev;}
-    if(city.km_to_next&&city.after){var nxt=simRoute[simRoute.indexOf(city.after)+1];if(nxt){SIM_KM[cityId+'|'+nxt]=city.km_to_next;SIM_KM[nxt+'|'+cityId]=city.km_to_next;}}
-    if(city.after&&city.km_from_prev){
-      // estimate coords from neighbor
-      var aC=SIM_COORDS[city.after];
-      if(aC) SIM_COORDS[cityId]=[aC[0]+0.5,aC[1]+0.3];
-    }
-    input.value=''; simClearSearch(); btn.textContent='✨ Analizar'; btn.disabled=false; input.disabled=false;
-    // Add as temp candidate and select it
-    simCandidatas.push({city_id:cityId,name:SIM_NAMES[cityId],flag:SIM_FLAGS[cityId]||'',datos:city,propuesta_por:localStorage.getItem('et_nombre')||'Tu'});
-    simSelectCandidate(cityId);
-  })
-  .catch(function(err){
-    console.error(err);
-    btn.textContent='✨ Analizar'; btn.disabled=false; input.disabled=false;
-    simShowMsg('Error al analizar. Intentalo de nuevo.');
-  });
-}
-
-// ===== CONDUCTORES =====
-var simConductores=[];
-function simRenderConductores(){
-  var el=document.getElementById('sim-cond-list'); if(!el) return;
-  if(!simConductores.length){el.innerHTML='<div style="font-size:0.78rem;color:#94a3b8;padding:0.5rem 0">Sin conductores.</div>';return;}
-  el.innerHTML=simConductores.map(function(c,i){
-    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f1f5f9">'+
-      '<span>'+(c.coche==1?'🚗':'🚙')+'</span>'+
-      '<span style="flex:1;font-weight:500">'+c.nombre+'</span>'+
-      '<span style="font-size:0.7rem;color:#94a3b8">Coche '+c.coche+'</span>'+
-      '<button data-simremove="'+i+'" style="background:none;border:none;color:#ef4444;cursor:pointer">×</button>'+
-      '</div>';
-  }).join('');
-}
-function simAddConductor(){
-  var n=document.getElementById('sim-cond-new').value.trim();
-  var c=parseInt(document.getElementById('sim-cond-coche').value);
-  if(!n) return;
-  simConductores.push({nombre:n,coche:c,limiteH:4.5});
-  document.getElementById('sim-cond-new').value='';
-  simRenderConductores();
-}
-function simRemoveConductor(i){simConductores.splice(i,1);simRenderConductores();}
-
-// ===== HELPERS =====
-function simReset(){
-  simRoute=SIM_BASE_ROUTE.slice();
-  simIsModified=false;
-  simDeselectCandidate();
-  var s=document.getElementById('ruta-save-btn');
-  var d=document.getElementById('ruta-discard-btn');
-  if(s) s.style.display='none';
-  if(d) d.style.display='none';
-  simShowMsg('Ruta restaurada.');
-}
-
-function simShowMsg(msg){
-  var el=document.getElementById('sim-alert');
-  if(!el) return;
-  el.textContent=msg; el.style.display='block';
-  setTimeout(function(){el.style.display='none';},4000);
-}
-
-function tlDeleteDay(idx){
-  simRequestAdmin(function(){
-    var day=TL[idx]; if(!day) return;
-    if(!confirm('Eliminar "'+day.city+'" del itinerario?')) return;
-    TL.splice(idx,1);
-    // simSaveTL removed
-    renderTL();
-    simShowMsg('Dia eliminado.');
-  });
-}
-
-var _origSV=showView;
-showView=function(name,idx){
-  _origSV(name,idx);
-  if(name==='timeline'){ dayDataLoad(); }
-  // simulador is now its own view
-};
-
-
-function rutaSetMode(mode){
-  // Legacy compatibility — ahora son vistas independientes
-  if(mode === 'sim') showView('simulador', 8);
-  else showView('timeline', 2);
-}
-// Broadcast name on load + init TL
-(function(){
-  var n=localStorage.getItem('et_nombre')||'';
-  if(n) document.querySelectorAll('.user-name-display').forEach(function(el){el.textContent=n;});
-  // simLoadTL removed — dayDataLoad handles persistence
-})();
-
-
-// ===== INIT =====
-updateCountdown();
-setInterval(updateCountdown, 60000);
-renderCities();
-dayDataLoad(); // loads Supabase day data then calls renderTL
-renderBudget();
-renderGastos();
-renderNotas();
-renderCL();
-renderRuta();
-renderAgenda();
-updateHeaderRoute();
-initHome();
-renderSOSDynamic();
-renderRiesgos('home-riesgos');
-
-// Final init — all vars defined, safe to run full refresh
-// Restore admin flags from session
-if(PIN_SESSION && (PIN_SESSION.isAdmin || PIN_SESSION.pin === ADMIN_PIN)) {
-  simIsAdmin = true;
-  AG_ADMIN = true;
-}
-// Always load route from Supabase (shared across all users)
-simLoadRoute(function() {
-  console.log('Route loaded from Supabase');
-});
-// Run initial refresh with hardcoded route while Supabase loads
-rutaFullRefresh();
-</script>
-</body>
-</html>
 
