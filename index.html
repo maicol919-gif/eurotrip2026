@@ -2028,6 +2028,20 @@ function renderRanking() {
 }
 
 // ===== TIMELINE =====
+// City color palette — must be defined before renderTL
+var AG_CITY_COLORS = ['#3b82f6','#f97316','#8b5cf6','#10b981','#ef4444','#06b6d4','#eab308','#ec4899'];
+var agCityColorMap = {};
+var agCityColorIdx = 0;
+function agCityColor(cityName) {
+  var key = (cityName||'').toLowerCase().replace(/\s+/g,'');
+  if(!key) return '#64748b';
+  if(!agCityColorMap[key]) {
+    agCityColorMap[key] = AG_CITY_COLORS[agCityColorIdx % AG_CITY_COLORS.length];
+    agCityColorIdx++;
+  }
+  return agCityColorMap[key];
+}
+
 function renderTL(tlData, containerId) {
   // Sim mode preview: simple list
   if(containerId) {
@@ -2119,7 +2133,7 @@ function renderTL(tlData, containerId) {
           '<span class="ag-chevron-'+i+'" style="font-size:0.7rem;color:#94a3b8;margin-left:0.2rem">▾</span>'+
         '</div>'+
       '</div>'+
-      '<div id="ag-body-'+i+'" style="display:none;padding:0.5rem 0.75rem 0.65rem;border-top:1px solid #f1f5f9;background:#fafafa">'+
+      '<div id="tl-body-'+i+'" style="display:none;padding:0.5rem 0.75rem 0.65rem;border-top:1px solid #f1f5f9;background:#fafafa">'+
         '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.4rem">'+legend+'</div>'+
         eventRows+
         noteBlock+
@@ -2127,20 +2141,6 @@ function renderTL(tlData, containerId) {
       '</div>'+
     '</div>';
   }).join('');
-}
-
-// City color palette
-var AG_CITY_COLORS = ['#3b82f6','#f97316','#8b5cf6','#10b981','#ef4444','#06b6d4','#eab308','#ec4899'];
-var agCityColorMap = {};
-var agCityColorIdx = 0;
-function agCityColor(cityName) {
-  var key = (cityName||'').toLowerCase().replace(/\s+/g,'');
-  if(!key) return '#64748b';
-  if(!agCityColorMap[key]) {
-    agCityColorMap[key] = AG_CITY_COLORS[agCityColorIdx % AG_CITY_COLORS.length];
-    agCityColorIdx++;
-  }
-  return agCityColorMap[key];
 }
 
 // Accordion handled in main delegated listener
@@ -3764,7 +3764,7 @@ document.addEventListener('click', function(e) {
   var accRow = t.closest('[data-accordion]');
   if(accRow) {
     var ai = accRow.getAttribute('data-accordion');
-    var abody = document.getElementById('ag-body-'+ai);
+    var abody = document.getElementById('tl-body-'+ai);
     var achev = document.querySelector('.ag-chevron-'+ai);
     if(abody) {
       var aopen = abody.style.display !== 'none';
