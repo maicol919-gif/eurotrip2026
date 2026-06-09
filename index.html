@@ -6108,9 +6108,9 @@ function simSaveTL(){
   TL.forEach(function(d){ actsEdits[d.city]=d.acts; });
   var payload_data={extra:extra,actsEdits:actsEdits};
   try{localStorage.setItem('et26_tl_extra',JSON.stringify(payload_data));}catch(e){}
-  supa('GET','alojamientos_estado?ciudad=eq.tl_changes').then(function(rows){
+  supa('GET','alojamientos_estado',null,'?ciudad=eq.tl_changes').then(function(rows){
     var payload={ciudad:'tl_changes',estado:'custom',notas:JSON.stringify(payload_data)};
-    if(rows&&rows.length>0) supa('PATCH','alojamientos_estado?ciudad=eq.tl_changes',payload).catch(function(){});
+    if(rows&&rows.length>0) supa('PATCH','alojamientos_estado',payload,'?ciudad=eq.tl_changes').catch(function(){});
     else supa('POST','alojamientos_estado',payload).catch(function(){});
   }).catch(function(){});
 }
@@ -6128,7 +6128,7 @@ function simLoadTL(){
     });
     renderTL();
   }
-  supa('GET','alojamientos_estado?ciudad=eq.tl_changes').then(function(rows){
+  supa('GET','alojamientos_estado',null,'?ciudad=eq.tl_changes').then(function(rows){
     if(rows&&rows.length>0&&rows[0].notas){
       try{ var data=JSON.parse(rows[0].notas); applyTLData(data); }catch(e){}
     }
