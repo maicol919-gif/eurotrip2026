@@ -2102,27 +2102,34 @@ function renderTL(tlData, containerId) {
       return s.replace(/\(.*\)/g,'').trim();
     }).filter(Boolean);
 
-    d.acts.forEach(function(a){
-      var lower = a.toLowerCase();
-      // Detect segment changes: "Salida desde X" or "Llegada X"
-      var llegadaMatch = a.match(/Llegada\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñA-Z\s]+?)(?:\s*—|\s*\(|$)/);
-      var salidaMatch  = a.match(/Salida\s+(?:desde|hacia)\s+([A-ZÁÉÍÓÚÑ][a-záéíóúñA-Z\s]+?)(?:\s*—|\s*\(|$)/);
+    // Initialize first segment with origin city
+    var firstCity = routeCities[0] || '';
+    curSeg = {city: firstCity, color: segColors[0], acts:[]};
 
-      if(llegadaMatch){
+    d.acts.forEach(function(a){
+      // DORMIR always closes the day
+      if(/^DORMIR/i.test(a.trim())) {
+        if(curSeg.acts.length > 0) actSegments.push(curSeg);
+        actSegments.push({city:'', color:'#22c55e', acts:[a], isSleep:true});
+        curSeg = {city:'', color:'#3b82f6', acts:[]};
+        return;
+      }
+      // New segment on "Llegada X"
+      var llegadaMatch = a.match(/Llegada\s+([A-Z\u00C0-\u024F][a-zA-Z\u00C0-\u024F\s\-]+?)(?:\s*—|\s*\(|$)/);
+      if(llegadaMatch) {
         var cityName = llegadaMatch[1].trim();
-        // New segment starting at this city
-        if(curSeg.acts.length>0) actSegments.push(curSeg);
+        if(curSeg.acts.length > 0) actSegments.push(curSeg);
         segIdx++;
         curSeg = {city: cityName, color: segColors[segIdx % segColors.length], acts:[a]};
       } else {
         curSeg.acts.push(a);
       }
     });
-    if(curSeg.acts.length>0) actSegments.push(curSeg);
+    if(curSeg.acts.length > 0) actSegments.push(curSeg);
 
-    // If no segments detected (no "Llegada"), just show all as one block
-    if(actSegments.length <= 1){
-      actSegments = [{city:'', color:'#3b82f6', acts: d.acts}];
+    // Fallback: no segments → one block with day city
+    if(actSegments.length === 0) {
+      actSegments = [{city: routeCities[0]||'', color:'#3b82f6', acts: d.acts}];
     }
 
     var acts = actSegments.map(function(seg, si){
@@ -3768,13 +3775,25 @@ document.addEventListener('click', function(e) {
   var clItem = t.closest('[data-clsi]');
   if(clItem) { toggleCL(parseInt(clItem.getAttribute('data-clsi')), parseInt(clItem.getAttribute('data-clii'))); return; }
 
-  // TL row toggle
-  var tlRow = t.closest('[data-tltoggle]');
-  if(tlRow && !t.closest('[data-tldel]')) { toggleTL(tlRow); return; }
+  // TL Edit button — must be before tltoggle (it's inside the row)
+  var tlEdit = t.closest('.tl-edit-btn');
+  if(tlEdit) { tlOpenEdit(parseInt(tlEdit.getAttribute('data-dayidx'))); return; }
 
-  // TL delete day
+  // TL IA button — must be before tltoggle
+  var tlIa = t.closest('.tl-ia-btn');
+  if(tlIa) { tlIaSuggest(parseInt(tlIa.getAttribute('data-dayidx'))); return; }
+
+  // TL delete day — before tltoggle
   var tlDel = t.closest('[data-tldel]');
   if(tlDel) { e.stopPropagation(); tlDeleteDay(parseInt(tlDel.getAttribute('data-tldel'))); return; }
+
+  // Nav open btn — before tltoggle
+  var navOpenInner = t.closest('.nav-open-btn');
+  if(navOpenInner) { navPickerOpen(navOpenInner.getAttribute('data-maps')); return; }
+
+  // TL row toggle — last, catches everything else inside the row
+  var tlRow = t.closest('[data-tltoggle]');
+  if(tlRow) { toggleTL(tlRow); return; }
 
   // Sim remove conductor
   var simRem = t.closest('[data-simremove]');
@@ -3784,24 +3803,10 @@ document.addEventListener('click', function(e) {
   var remRuta = t.closest('[data-removeruta]');
   if(remRuta) { e.stopPropagation(); removeRuta(parseInt(remRuta.getAttribute('data-removeruta'))); return; }
 
-  // Insert parada into route (from fallback analysis card)
+  // Insert parada into route
   var insertParada = t.closest('[data-insertcity]');
   if(insertParada) {
     simInsertParada(insertParada.getAttribute('data-insertcity'), parseInt(insertParada.getAttribute('data-insertpos')));
-    return;
-  }
-
-  // TL Edit button — open agenda edit modal
-  var tlEdit = t.closest('.tl-edit-btn');
-  if(tlEdit) {
-    tlOpenEdit(parseInt(tlEdit.getAttribute('data-dayidx')));
-    return;
-  }
-
-  // TL IA button — generate AI schedule
-  var tlIa = t.closest('.tl-ia-btn');
-  if(tlIa) {
-    tlIaSuggest(parseInt(tlIa.getAttribute('data-dayidx')));
     return;
   }
 });
