@@ -573,7 +573,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
         <div class="di">🏠</div><div class="dv">6</div>
         <div class="dl">Alojamientos</div><span class="dt tr">0 reservados</span>
       </div>
-      <div class="dcard" onclick="showView('checklist',6)">
+      <div class="dcard" onclick="showView('checklist',5)">
         <div class="di">✅</div><div class="dv" id="dash-cl">0%</div>
         <div class="dl">Checklist</div><span class="dt tg" id="dash-cln">0 de 17</span>
       </div>
@@ -596,12 +596,12 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
     <!-- Gastos y SOS -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.55rem;margin-bottom:0.75rem">
-      <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.85rem;cursor:pointer" onclick="showView('gastos',4)">
+      <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.85rem;cursor:pointer" onclick="showView('gastos',3)">
         <div style="font-size:0.6rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.35rem">Gastos</div>
         <div style="font-size:1.5rem;font-weight:800" id="dash-g">0€</div>
         <div style="font-size:0.63rem;color:#94a3b8" id="dash-gn">0 registros</div>
       </div>
-      <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.85rem;cursor:pointer" onclick="showView('emergencias',8)">
+      <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.85rem;cursor:pointer" onclick="showView('emergencias',7)">
         <div style="font-size:0.6rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.35rem">SOS</div>
         <div style="font-size:1.5rem;font-weight:800">🆘</div>
         <div style="font-size:0.63rem;color:#ef4444;font-weight:600">Emergencias</div>
@@ -666,11 +666,11 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
       <div style="font-size:0.8rem;color:#64748b">14 — 21 julio · 4.800 km · 7 viajeros</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem">
-      <div class="dcard" onclick="showView('gastos',4)">
+      <div class="dcard" onclick="showView('gastos',3)">
         <div class="di">🧾</div><div class="dv" id="dash-g-after">0€</div>
         <div class="dl">Gastos totales</div>
       </div>
-      <div class="dcard" onclick="showView('notas',5)">
+      <div class="dcard" onclick="showView('notas',4)">
         <div class="di">📝</div><div class="dv">Ver</div>
         <div class="dl">Recuerdos</div>
       </div>
@@ -1259,12 +1259,11 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
   <button class="bnb active" onclick="showView('dashboard',0)"><span class="bnb-i">🏠</span><span class="bnb-l">Inicio</span></button>
   <button class="bnb" onclick="showView('alojamientos',1)"><span class="bnb-i">🛏</span><span class="bnb-l">Alojam.</span></button>
   <button class="bnb" onclick="showView('timeline',2)"><span class="bnb-i">🗺️</span><span class="bnb-l">Ruta</span></button>
-  <button class="bnb" onclick="showView('agenda',3)"><span class="bnb-i">📆</span><span class="bnb-l">Agenda</span></button>
-  <button class="bnb" onclick="showView('gastos',4)"><span class="bnb-i">🧾</span><span class="bnb-l">Gastos</span></button>
-  <button class="bnb" onclick="showView('notas',5)"><span class="bnb-i">📝</span><span class="bnb-l">Notas</span></button>
-  <button class="bnb" onclick="showView('checklist',6)"><span class="bnb-i">✅</span><span class="bnb-l">Check</span></button>
-  <button class="bnb" onclick="showView('perfil',7)"><span class="bnb-i">🚗</span><span class="bnb-l">Turnos</span></button>
-  <button class="bnb" onclick="showView('emergencias',8)"><span class="bnb-i">🆘</span><span class="bnb-l">SOS</span></button>
+  <button class="bnb" onclick="showView('gastos',3)"><span class="bnb-i">🧾</span><span class="bnb-l">Gastos</span></button>
+  <button class="bnb" onclick="showView('notas',4)"><span class="bnb-i">📝</span><span class="bnb-l">Notas</span></button>
+  <button class="bnb" onclick="showView('checklist',5)"><span class="bnb-i">✅</span><span class="bnb-l">Check</span></button>
+  <button class="bnb" onclick="showView('perfil',6)"><span class="bnb-i">🚗</span><span class="bnb-l">Turnos</span></button>
+  <button class="bnb" onclick="showView('emergencias',7)"><span class="bnb-i">🆘</span><span class="bnb-l">SOS</span></button>
 </div>
 
 
@@ -2128,9 +2127,9 @@ function renderTL(tlData, containerId) {
 
     var acts = actSegments.map(function(seg, si){
       var header = seg.city ?
-        '<div style="display:flex;align-items:center;gap:6px;margin:'+(si>0?'0.6rem':' 0.1rem')+' 0 0.25rem;padding-bottom:0.2rem;border-bottom:2px solid '+seg.color+'">'+
-          '<div style="width:8px;height:8px;border-radius:50%;background:'+seg.color+';flex-shrink:0"></div>'+
-          '<span style="font-size:0.62rem;font-weight:800;color:'+seg.color+';text-transform:uppercase;letter-spacing:0.06em">'+seg.city+'</span>'+
+        '<div style="display:flex;align-items:center;gap:6px;margin:'+(si>0?'1rem':' 0.1rem')+' 0 0.4rem;padding:0.35rem 0.6rem;border-radius:8px;background:'+seg.color+'1a;border-left:3px solid '+seg.color+'">'+
+          '<div style="width:9px;height:9px;border-radius:50%;background:'+seg.color+';flex-shrink:0"></div>'+
+          '<span style="font-size:0.68rem;font-weight:800;color:'+seg.color+';text-transform:uppercase;letter-spacing:0.07em">'+seg.city+'</span>'+
         '</div>' : '';
 
       var rows = seg.acts.map(function(a){
@@ -2165,7 +2164,8 @@ function renderTL(tlData, containerId) {
       '<span class="tl-ch">▾</span></div>'+
       '<div class="tl-body">'+
         '<div><div class="tsub">Horario del dia</div>'+acts+ztl+
-        '<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div>'+mapsBtn+'</div>'+(d.drive?renderTurnoCard(i):'')+'</div>'+
+        '<div class="tnote"><div class="tnote-l">Nota</div><div class="tnote-t">'+d.note+'</div></div>'+
+        '<div style="display:flex;gap:0.4rem;flex-wrap:wrap">'+mapsBtn+editBtn+iaBtn+'</div></div>'+(d.drive?renderTurnoCard(i):'')+'</div>'+
         '<div><div class="tsub">Alojamiento</div><div class="tstay">'+d.stay+'</div>'+tray+'</div>'+
       '</div></div>';
   }).join('');
@@ -3788,6 +3788,20 @@ document.addEventListener('click', function(e) {
     simInsertParada(insertParada.getAttribute('data-insertcity'), parseInt(insertParada.getAttribute('data-insertpos')));
     return;
   }
+
+  // TL Edit button — open agenda edit modal
+  var tlEdit = t.closest('.tl-edit-btn');
+  if(tlEdit) {
+    tlOpenEdit(parseInt(tlEdit.getAttribute('data-dayidx')));
+    return;
+  }
+
+  // TL IA button — generate AI schedule
+  var tlIa = t.closest('.tl-ia-btn');
+  if(tlIa) {
+    tlIaSuggest(parseInt(tlIa.getAttribute('data-dayidx')));
+    return;
+  }
 });
 
 
@@ -4899,6 +4913,163 @@ function simProposeRoute() {
     simShowMsg('\uD83D\uDCE4 Propuesta enviada al admin. Revisará los cambios.');
   }).catch(function() {
     simShowMsg('\u26A0\uFE0F No se pudo enviar la propuesta.');
+  });
+}
+
+
+// ===== EDICIÓN DE HORARIO EN ITINERARIO (reemplaza Agenda) =====
+window._tlEditIdx = 0;
+window._tlEditSlots = [];
+
+function tlOpenEdit(dayIdx) {
+  if(!AG_ADMIN) {
+    agRequestAdmin();
+    return;
+  }
+  var d = TL[dayIdx];
+  if(!d) return;
+  window._tlEditIdx = dayIdx;
+
+  document.getElementById('tl-edit-title').textContent = d.city;
+  document.getElementById('tl-edit-date').textContent = d.date;
+
+  // Load slots from localStorage or from TL acts
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem('et26_tlslots_'+dayIdx)); } catch(e) {}
+  window._tlEditSlots = saved || d.acts.map(function(a, i) {
+    var m = a.match(/^(\d{1,2}:\d{2})\s*(.*)/);
+    return {time: m ? m[1] : '—', text: m ? m[2] : a};
+  });
+  // Ensure DORMIR at end
+  var lastSlot = window._tlEditSlots[window._tlEditSlots.length-1];
+  if(!lastSlot || lastSlot.time !== 'DORMIR') {
+    window._tlEditSlots.push({time:'DORMIR', text:'Fin de actividades del día'});
+  }
+
+  tlRenderSlots();
+  document.getElementById('tl-edit-modal').style.display = 'flex';
+}
+
+function tlRenderSlots() {
+  var cont = document.getElementById('tl-edit-slots');
+  if(!cont) return;
+  cont.innerHTML = '';
+  window._tlEditSlots.forEach(function(slot, si) {
+    var isSleep = slot.time === 'DORMIR';
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;gap:0.4rem;align-items:flex-start;margin-bottom:0.35rem;background:'+(isSleep?'#f0fdf4':'white')+';border:1.5px solid '+(isSleep?'#86efac':'#e2e8f0')+';border-radius:8px;overflow:hidden';
+
+    var timeEl = document.createElement('div');
+    timeEl.contentEditable = isSleep ? 'false' : 'true';
+    timeEl.style.cssText = 'font-size:0.62rem;font-weight:700;color:'+(isSleep?'#15803d':'#94a3b8')+';padding:0.4rem 0.5rem;background:#f8fafc;min-width:46px;border-right:1px solid #e2e8f0;outline:none';
+    timeEl.textContent = slot.time;
+    timeEl.addEventListener('blur', function() { window._tlEditSlots[si].time = this.textContent.trim(); });
+
+    var textEl = document.createElement('div');
+    textEl.contentEditable = isSleep ? 'false' : 'true';
+    textEl.style.cssText = 'flex:1;font-size:0.74rem;color:'+(isSleep?'#15803d':'#475569')+';padding:0.4rem 0.5rem;outline:none;font-weight:'+(isSleep?'600':'400');
+    textEl.textContent = slot.text;
+    textEl.addEventListener('blur', function() { window._tlEditSlots[si].text = this.textContent.trim(); });
+
+    wrap.appendChild(timeEl);
+    wrap.appendChild(textEl);
+
+    if(!isSleep) {
+      var del = document.createElement('button');
+      del.style.cssText = 'background:none;border:none;color:#e2e8f0;cursor:pointer;padding:0.4rem 0.5rem;font-size:0.8rem;transition:color .15s';
+      del.textContent = '✕';
+      del.addEventListener('mouseenter', function(){ this.style.color='#ef4444'; });
+      del.addEventListener('mouseleave', function(){ this.style.color='#e2e8f0'; });
+      del.addEventListener('click', function() {
+        window._tlEditSlots.splice(si, 1);
+        tlRenderSlots();
+      });
+      wrap.appendChild(del);
+    }
+
+    cont.appendChild(wrap);
+  });
+}
+
+function tlAddSlot() {
+  var sleepIdx = window._tlEditSlots.length - 1;
+  window._tlEditSlots.splice(sleepIdx, 0, {time:'—', text:''});
+  tlRenderSlots();
+  // Focus last added
+  setTimeout(function() {
+    var slots = document.querySelectorAll('#tl-edit-slots [contenteditable=true]');
+    if(slots.length >= 2) slots[slots.length-2].focus();
+  }, 50);
+}
+
+function tlSaveEdit() {
+  var dayIdx = window._tlEditIdx;
+  // Save to localStorage
+  try { localStorage.setItem('et26_tlslots_'+dayIdx, JSON.stringify(window._tlEditSlots)); } catch(e) {}
+  // Update TL acts
+  if(TL[dayIdx]) {
+    TL[dayIdx].acts = window._tlEditSlots.map(function(s) {
+      return s.time === 'DORMIR' ? 'DORMIR — Fin de actividades del día' : s.time + ' ' + s.text;
+    });
+  }
+  document.getElementById('tl-edit-modal').style.display = 'none';
+  renderTL();
+}
+
+function tlIaSuggest(dayIdx) {
+  var d = TL[dayIdx];
+  if(!d) return;
+
+  // Show loading in modal if open, otherwise show in tl body
+  var cont = document.getElementById('tl-edit-slots');
+  var modalOpen = document.getElementById('tl-edit-modal').style.display === 'flex';
+
+  if(!modalOpen) {
+    // Open modal first
+    window._tlEditIdx = dayIdx;
+    document.getElementById('tl-edit-title').textContent = d.city;
+    document.getElementById('tl-edit-date').textContent = d.date;
+    document.getElementById('tl-edit-modal').style.display = 'flex';
+    cont = document.getElementById('tl-edit-slots');
+  }
+
+  cont.innerHTML = '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem;color:#7c3aed;font-size:0.73rem"><span class="sim-spinner"></span>Generando horario para '+d.city+'...</div>';
+
+  var EDGE = 'https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy';
+  var KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU';
+
+  var prompt = 'Somos 7 amigos en roadtrip europeo. Día '+d.date+' en '+d.city+'. '+
+    (d.drive?'Día de conducción '+d.h+' / '+d.km+'km. ':'Día libre para explorar. ')+
+    'Actividades ya planificadas: '+d.acts.join(' | ')+'. '+
+    'Genera horario hora a hora desde la mañana hasta DORMIR. '+
+    'La última entrada DEBE ser: time="DORMIR", text="Fin de actividades del día". '+
+    'Responde SOLO JSON: [{"time":"08:00","text":"descripción corta"},...,{"time":"DORMIR","text":"Fin de actividades del día"}]. '+
+    'Sin markdown. 6-10 entradas.';
+
+  fetch(EDGE, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':KEY},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var text = (data.content||[]).map(function(b){return b.text||'';}).join('').replace(/```json|```/g,'').trim();
+    var slots = JSON.parse(text);
+    window._tlEditSlots = slots;
+    window._tlEditIdx = dayIdx;
+    tlRenderSlots();
+  })
+  .catch(function() {
+    // Fallback
+    window._tlEditSlots = d.acts.map(function(a) {
+      var m = a.match(/^(\d{1,2}:\d{2})\s*(.*)/);
+      return {time: m?m[1]:'—', text: m?m[2]:a};
+    });
+    if(window._tlEditSlots[window._tlEditSlots.length-1].time !== 'DORMIR') {
+      window._tlEditSlots.push({time:'DORMIR', text:'Fin de actividades del día'});
+    }
+    tlRenderSlots();
+    cont.insertAdjacentHTML('afterbegin','<div style="color:#ef4444;font-size:0.7rem;padding:0.3rem 0.5rem;margin-bottom:0.3rem">Sin conexión IA — mostrando horario base.</div>');
   });
 }
 
