@@ -1970,7 +1970,6 @@ function loadData() {
     votes = {};
     data.forEach(function(v){ votes[v.ciudad+'_'+v.tipo] = v.usuario; });
     renderCities();
-dayDataLoad();
     setBadge(true);
   }).catch(function(){ setBadge(false); });
 
@@ -5937,7 +5936,7 @@ function tlDeleteDay(idx){
 var _origSV=showView;
 showView=function(name,idx){
   _origSV(name,idx);
-  if(name==='timeline'){ renderTL(); }
+  if(name==='timeline'){ dayDataLoad(); }
   // simulador is now its own view
 };
 
@@ -5954,6 +5953,22 @@ function rutaSetMode(mode){
   // simLoadTL removed — dayDataLoad handles persistence
 })();
 
+
+// ===== INIT =====
+updateCountdown();
+setInterval(updateCountdown, 60000);
+renderCities();
+dayDataLoad(); // loads Supabase day data then calls renderTL
+renderBudget();
+renderGastos();
+renderNotas();
+renderCL();
+renderRuta();
+renderAgenda();
+updateHeaderRoute();
+initHome();
+renderSOSDynamic();
+renderRiesgos('home-riesgos');
 
 // Final init — all vars defined, safe to run full refresh
 // Restore admin flags from session
