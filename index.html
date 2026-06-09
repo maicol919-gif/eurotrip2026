@@ -4475,6 +4475,16 @@ function rutaFullRefresh() {
     TL_ORIGINAL.forEach(function(d){ TL.push(JSON.parse(JSON.stringify(d))); });
   }
 
+  // Re-apply any saved acts edits immediately (sync, before renderTL)
+  try {
+    var _saved = localStorage.getItem('et26_tl_extra');
+    if(_saved) {
+      var _data = JSON.parse(_saved);
+      var _edits = (!Array.isArray(_data) && _data.actsEdits) || {};
+      TL.forEach(function(d){ if(_edits[d.city]) d.acts = _edits[d.city]; });
+    }
+  } catch(e) {}
+
   renderTL();
   rutaRenderStats();
   renderAgenda();
