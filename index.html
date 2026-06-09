@@ -4949,7 +4949,8 @@ function tlOpenEdit(dayIdx) {
   // Load slots from localStorage or from TL acts
   var saved = null;
   try { saved = JSON.parse(localStorage.getItem('et26_tlslots_'+dayIdx)); } catch(e) {}
-  window._tlEditSlots = saved || d.acts.map(function(a, i) {
+  window._tlEditSlots = saved || d.acts.map(function(a) {
+    if(/^DORMIR/i.test(a.trim())) return {time:'DORMIR', text:a.replace(/^DORMIR\s*[—-]?\s*/i,'').trim()};
     var m = a.match(/^(\d{1,2}:\d{2})\s*(.*)/);
     return {time: m ? m[1] : '—', text: m ? m[2] : a};
   });
@@ -6090,33 +6091,41 @@ function simDiscardAll(){
 
 // ===== PERSIST TL =====
 function simSaveTL(){
+  // Save new days (simulator additions) + edited acts for all days
   var extra=TL.filter(function(d){return d.date==='? jul'||d.note==='Añadido desde simulador'||d.note==='Desde simulador';});
-  try{localStorage.setItem('et26_tl_extra',JSON.stringify(extra));}catch(e){}
+  // Save acts edits as a separate map: city -> acts
+  var actsEdits={};
+  TL.forEach(function(d){ actsEdits[d.city]=d.acts; });
+  var payload_data={extra:extra,actsEdits:actsEdits};
+  try{localStorage.setItem('et26_tl_extra',JSON.stringify(payload_data));}catch(e){}
   supa('GET','alojamientos_estado?ciudad=eq.tl_changes').then(function(rows){
-    var payload={ciudad:'tl_changes',estado:'custom',notas:JSON.stringify(extra)};
+    var payload={ciudad:'tl_changes',estado:'custom',notas:JSON.stringify(payload_data)};
     if(rows&&rows.length>0) supa('PATCH','alojamientos_estado?ciudad=eq.tl_changes',payload).catch(function(){});
     else supa('POST','alojamientos_estado',payload).catch(function(){});
   }).catch(function(){});
 }
 
 function simLoadTL(){
+  function applyTLData(data){
+    // Support both old format (array) and new format ({extra, actsEdits})
+    var extra=Array.isArray(data)?data:(data.extra||[]);
+    var actsEdits=(!Array.isArray(data)&&data.actsEdits)||{};
+    // Apply acts edits to existing days
+    TL.forEach(function(d){ if(actsEdits[d.city]) d.acts=actsEdits[d.city]; });
+    // Push new days
+    extra.forEach(function(day){
+      if(!TL.some(function(d){return d.city===day.city;})) TL.push(day);
+    });
+    renderTL();
+  }
   supa('GET','alojamientos_estado?ciudad=eq.tl_changes').then(function(rows){
     if(rows&&rows.length>0&&rows[0].notas){
-      try{
-        var extra=JSON.parse(rows[0].notas);
-        if(extra&&extra.length>0){
-          extra.forEach(function(day){
-            var exists=TL.some(function(d){return d.city===day.city;});
-            if(!exists) TL.push(day);
-          });
-          renderTL();
-        }
-      }catch(e){}
+      try{ var data=JSON.parse(rows[0].notas); applyTLData(data); }catch(e){}
     }
   }).catch(function(){
     try{
       var saved=localStorage.getItem('et26_tl_extra');
-      if(saved){var ex=JSON.parse(saved);ex.forEach(function(d){if(!TL.some(function(t){return t.city===d.city;})) TL.push(d);});renderTL();}
+      if(saved){ applyTLData(JSON.parse(saved)); }
     }catch(e){}
   });
 }
