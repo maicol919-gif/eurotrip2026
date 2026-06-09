@@ -2079,161 +2079,7 @@ function tlGetCityId(cityStr) {
 }
 
 // In-memory cache of day data keyed by city_id
-var DAY_DATA = {
-  // ── MONTPELLIER ──────────────────────────────────────────────────────────
-  'montpellier': {
-    must: [
-      'Place de la Comedie — corazon de la ciudad, cafes con terraza',
-      'Barrio Ecusson — callejuelas medievales a pie desde el centro'
-    ],
-    ideas: [
-      'Mercado Les Halles Laissac — productos locales del Languedoc',
-      'Promenade du Peyrou — jardin con acueducto romano y vistas',
-      'Barrio Antigone — arquitectura neoclasica de Ricardo Bofill',
-      'Cena: brasserie en Rue de la Loge — moules marinières o magret'
-    ],
-    alerts: [
-      'Aparcamiento: Parking Comédie o Antigone — evitar centro historico',
-      'Tram gratuito en el centro historico (zona azul)'
-    ]
-  },
-  // ── PARIS ────────────────────────────────────────────────────────────────
-  'paris': {
-    must: [
-      'Torre Eiffel al amanecer desde Trocadero — sin colas, luz perfecta',
-      'Louvre: ir directo a sala 711 (Mona Lisa), Venus de Milo, Victoria de Samotracia',
-      'Montmartre al atardecer — Sacre-Coeur y vistas de Paris'
-    ],
-    ideas: [
-      'Le Marais — galerías, tiendas vintage, Place des Vosges',
-      'Bateaux Mouches por el Sena — ver Notre-Dame y Pont Neuf desde el agua',
-      'Centre Pompidou — exterior futurista imprescindible',
-      'Picnic junto al Sena con queso, baguette y vino local',
-      'Cena: brasserie en République — moules-frites o steak-frites',
-      'Podcast recomendado en el coche hacia Paris: "The History of Rome"'
-    ],
-    alerts: [
-      'Navigo día: 8 EUR/persona — cubre metro y RER ilimitado',
-      'Louvre: reservar online en louvre.fr (colas de 2h sin reserva)',
-      'Aparcamiento: P+R periferia o parking subterraneo en Bercy',
-      'Verano: calor intenso 12-17h — museos al mediodia, exterior mañana/tarde'
-    ]
-  },
-  // ── COLMAR ───────────────────────────────────────────────────────────────
-  'colmar': {
-    must: [
-      'La Petite Venise — canal con casas medievales de colores, foto iconica',
-      'Rue des Marchands — casco mas bonito de Alsacia, 45 min maxime'
-    ],
-    ideas: [
-      'Tarte flambée (flammekueche) en Winstub local — plato tipico alsaciano',
-      'Mercado cubierto Marché Couvert — charcutería y quesos locales',
-      'Musée Unterlinden — Retablo de Isenheim (obra maestra del arte medieval)',
-      'Riesling o Gewurztraminer de Alsacia — region vinicola imprescindible'
-    ],
-    alerts: [
-      'Maximo 1.5h — parada estratégica, no noche',
-      'Parking: P+R periférico gratuito en Champ de Mars',
-      'Turismo masivo en verano — llegar antes de las 11h'
-    ]
-  },
-  // ── MILAN ────────────────────────────────────────────────────────────────
-  'milan': {
-    must: [
-      'Aperitivo en Navigli (~21h) — bebida + buffet por ~10 EUR, ambiente local',
-      'Duomo desde la piazza — entrada a la terraza con vistas a los Alpes'
-    ],
-    ideas: [
-      'Brera — barrio artistico, galerias, libreria Ulrico Hoepli',
-      'Mercato Metropolitano — street food de calidad cerca de Porta Romana',
-      'Pinacoteca di Brera — Raphael, Caravaggio, Mantegna (1.5h)',
-      'Aperitivo alternativo: Isola o Porta Romana — menos turistico que Navigli',
-      'Risotto alla Milanese o cotoletta — platos imprescindibles del norte'
-    ],
-    alerts: [
-      'Area C: peaje ~5 EUR para entrar al centro L-V 7:30-19:30',
-      'Aparcar en Autosilos Sammartini (junto a Centrale) — 5 min a pie',
-      'Coches quedan en Milan mientras el grupo va en tren a Roma y Venecia'
-    ]
-  },
-  // ── VENECIA ──────────────────────────────────────────────────────────────
-  'venecia': {
-    must: [
-      'Vaporetto linea 1 por el Canal Grande — sentarse en la proa (45 min)',
-      'Puente de Rialto — mercado y vistas del canal antes del mediodia'
-    ],
-    ideas: [
-      'Cicchetti y Spritz en bar de Cannaregio — almuerzo veneciano autentico (~12 EUR)',
-      'Plaza San Marcos antes de las 10h — sin multitudes',
-      'Barrio de Dorsoduro — menos turistico, mejor ambiente local',
-      'Gelato en Gelateria Nico frente al canal Giudecca'
-    ],
-    alerts: [
-      'Aparcamiento: Piazzale Roma o Tronchetto (25-35 EUR/dia) — reservar',
-      'ZTL en toda la isla — unicamente a pie o vaporetto',
-      'Parada maxima 3-4h antes de continuar hacia Roma'
-    ]
-  },
-  // ── ROMA ─────────────────────────────────────────────────────────────────
-  'roma': {
-    must: [
-      'Vaticano — Museos y Capilla Sixtina (reservar en museivaticani.va)',
-      'Coliseo y Foro Romano — reservar en coopculture.it imprescindible',
-      'Fontana di Trevi a las 17h — menos gente, mejor luz, moneda de espaldas'
-    ],
-    ideas: [
-      'Trastevere — aperitivo con terraza, mejor barrio para cenar',
-      'Panteón — entrada gratuita, uno de los edificios mejor conservados del mundo',
-      'Piazza Navona y Campo de Fiori — paseo nocturno',
-      'Gelato en Fatamorgana (sabores creativos) o Giolitti (clasico desde 1900)',
-      'Passeggiata nocturna — los monumentos de Roma iluminados son espectaculares',
-      'Nasoni: fuentes de agua potable gratis por toda la ciudad'
-    ],
-    alerts: [
-      'ZTL activa — NO entrar al centro con el coche. Multa automatica 100-300 EUR',
-      'Aparcar en periferia: Ostiense o Villa Borghese',
-      'Reservar Coliseo y Vaticano con semanas de antelacion — julio se agota',
-      'Metro sin aire acondicionado en verano — usar taxi o a pie'
-    ]
-  },
-  // ── NIZA ─────────────────────────────────────────────────────────────────
-  'niza': {
-    must: [
-      'Promenade des Anglais al atardecer — el paseo maritimo mas famoso de la Costa Azul',
-      'Vieux-Nice — casco antiguo con socca (crepe de garbanzo) y helado'
-    ],
-    ideas: [
-      'Colina del Castillo — vistas panoramicas de la bahia y el Mediterraneo',
-      'Mercado del Cours Saleya — flores y productos locales (mananas)',
-      'Puerto de Niza — frutos del mar y vistas de las colinas',
-      'Day trip opcional: Monaco (20 min en tren) o Eze (pueblo medieval)',
-      'Rosé de Provence — el vino de la region, pedir en cualquier bar'
-    ],
-    alerts: [
-      'Aparcamiento: Parking Saleya o Parking Acropolis — evitar centro',
-      'Playa de guijarros — traer chanclas, no es arena',
-      'Ultimo dia: llenar deposito en Francia antes de cruzar a Espana'
-    ]
-  },
-  // ── DIAS DE CONDUCCION ───────────────────────────────────────────────────
-  'alicante': {
-    must: [
-      'Llenar el deposito completo antes de salir — ultimas estaciones baratas',
-      'Reparto de turnos de conduccion acordado antes de arrancar'
-    ],
-    ideas: [
-      'Playlist del viaje lista antes de salir — quien conduce elige',
-      'Podcast recomendado para el trayecto: "Historia de Espana en podcast"',
-      'Snacks para el coche: frutos secos, fruta, bocadillos caseros',
-      'App Waze configurada con avisos de radar y trafico'
-    ],
-    alerts: [
-      'AP-7 Norte: autopista de pago — llevar tarjeta o efectivo para peajes',
-      'Frontera La Junquera: sin parada habitual pero puede haber control',
-      'Repostar en Francia siempre mas barato que en Espana'
-    ]
-  }
-};
+var DAY_DATA = {};
 
 function dayDataLoad() {
   var dayKeys = simRoute.slice(0,-1).map(function(c){return 'day_'+c;});
@@ -3354,29 +3200,51 @@ function renderTL(tlData, containerId) {
   if(!el) return;
 
   el.innerHTML = data.map(function(d, i) {
-    var cityId = tlGetCityId(d.city);
-    var saved = DAY_DATA[cityId] || {};
-    var must = saved.must || [];
-    var ideas = saved.ideas || [];
-    var alerts = saved.alerts || [];
-
     var kmBadge = d.km > 0 ? '<span style="background:#f0f9ff;color:#0284c7;border-radius:5px;padding:0.1rem 0.3rem;font-size:0.58rem;font-weight:700">🚗 '+d.km+'km</span> ' : '';
     var ztlBadge = d.ztl ? '<span style="background:#fef2f2;color:#ef4444;border-radius:5px;padding:0.1rem 0.3rem;font-size:0.58rem;font-weight:700">⚠️ ZTL</span>' : '';
     var freeBadge = !d.drive ? '<span style="background:#f0fdf4;color:#15803d;border-radius:5px;padding:0.1rem 0.3rem;font-size:0.58rem;font-weight:700">📍 Día libre</span>' : '';
 
-    var mustHtml = must.length ? '<div style="margin-bottom:0.55rem"><div style="font-size:0.6rem;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem">🎯 Imprescindibles</div>'+
-      must.map(function(x){ return '<div style="font-size:0.74rem;color:#1e293b;padding:0.12rem 0;display:flex;gap:0.35rem"><span style="color:#94a3b8;flex-shrink:0">·</span>'+x+'</div>'; }).join('')+'</div>' : '';
+    // Parse city colors
+    var routeCities = d.city.split(/\s*[\-–—→]\s*/).map(function(s){
+      return s.replace(/\(.*?\)/g,'').replace(/[Dd]ía libre.*$/,'').trim();
+    }).filter(function(s){ return s.length > 1; });
+    var currentCity = routeCities[0] || '';
 
-    var ideasHtml = ideas.length ? '<div style="margin-bottom:0.55rem"><div style="font-size:0.6rem;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem">💡 Ideas</div>'+
-      ideas.map(function(x){ return '<div style="font-size:0.74rem;color:#475569;padding:0.12rem 0;display:flex;gap:0.35rem"><span style="color:#94a3b8;flex-shrink:0">·</span>'+x+'</div>'; }).join('')+'</div>' : '';
+    // Render acts[] as hourly agenda
+    var actsHtml = d.acts.map(function(a) {
+      if(/^DORMIR/i.test(a.trim())) {
+        return '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0;border-top:1px solid #f0fdf4;margin-top:0.3rem">'+
+          '<span style="font-size:0.7rem">🌙</span>'+
+          '<span style="font-size:0.72rem;color:#15803d;font-weight:600">'+a+'</span>'+
+        '</div>';
+      }
+      var llegada = a.match(/Llegada\s+([A-Z\u00C0-\u024F][a-zA-Z\u00C0-\u024F\s\-]+?)(?:\s*—|\s*\(|$)/);
+      if(llegada) currentCity = llegada[1].trim();
+      var m = a.match(/^(\d{1,2}:\d{2})\s+(.*)/);
+      if(!m) return '';
+      var time = m[1], text = m[2];
+      var isDrive = /^(A\d+|AP-\d|Salida|Cruce|Autopista|Paso\s)/i.test(text);
+      var color = isDrive ? '#94a3b8' : agCityColor(currentCity);
+      return '<div style="display:flex;gap:0.5rem;align-items:baseline;padding:0.25rem 0;border-bottom:1px solid #f8fafc">'+
+        '<span style="font-family:monospace;font-size:0.63rem;font-weight:700;color:'+color+';flex-shrink:0;min-width:36px">'+time+'</span>'+
+        '<span style="font-size:0.74rem;color:'+(isDrive?'#94a3b8':'#1e293b')+';line-height:1.4">'+text+'</span>'+
+      '</div>';
+    }).join('');
 
-    var alertsHtml = alerts.length ? '<div style="margin-bottom:0.55rem"><div style="font-size:0.6rem;font-weight:700;color:#0f172a;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.2rem">⚠️ Alertas</div>'+
-      alerts.map(function(x){ return '<div style="font-size:0.74rem;color:#b45309;padding:0.12rem 0;display:flex;gap:0.35rem"><span style="flex-shrink:0">·</span>'+x+'</div>'; }).join('')+'</div>' : '';
+    // City color legend
+    var citiesSeen = [], cur = routeCities[0]||'';
+    d.acts.forEach(function(a){
+      var ll = a.match(/Llegada\s+([A-Z\u00C0-\u024F][a-zA-Z\u00C0-\u024F\s\-]+?)(?:\s*—|\s*\(|$)/);
+      if(ll) cur = ll[1].trim();
+      if(citiesSeen.indexOf(cur)===-1) citiesSeen.push(cur);
+    });
+    var legend = citiesSeen.map(function(c){
+      return '<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.6rem;color:'+agCityColor(c)+'">'+
+        '<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:'+agCityColor(c)+'"></span>'+c+'</span>';
+    }).join('');
 
-    var emptyHtml = (!must.length && !ideas.length && !alerts.length) ?
-      '<div style="font-size:0.72rem;color:#cbd5e1;padding:0.4rem 0;text-align:center">Sin información todavía — pulsa ✏️ para añadir</div>' : '';
-
-    var mapsLink = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.25rem;background:#2563eb;color:white;border-radius:7px;padding:0.28rem 0.6rem;font-size:0.63rem;font-weight:700;text-decoration:none;margin-top:0.25rem">🗺️ Google Maps</a>' : '';
+    var noteBlock = d.note ? '<div style="font-size:0.65rem;color:#64748b;background:#f8fafc;border-radius:6px;padding:0.3rem 0.5rem;margin-top:0.5rem;border-left:2px solid #e2e8f0">📌 '+d.note+'</div>' : '';
+    var mapsLink = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.25rem;background:#2563eb;color:white;border-radius:7px;padding:0.28rem 0.6rem;font-size:0.63rem;font-weight:700;text-decoration:none;margin-top:0.4rem">🗺️ Google Maps</a>' : '';
 
     return '<div style="border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:0.5rem;overflow:hidden">'+
       '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.75rem;background:white;gap:0.5rem">'+
@@ -3388,10 +3256,10 @@ function renderTL(tlData, containerId) {
           kmBadge+ztlBadge+freeBadge+
           '<span class="ag-chevron-'+i+'" style="font-size:0.7rem;color:#94a3b8;margin-left:0.2rem">▾</span>'+
         '</div>'+
-        '<button data-tledit="'+i+'" style="background:none;border:1.5px solid #e2e8f0;border-radius:6px;padding:0.2rem 0.45rem;font-size:0.65rem;cursor:pointer;flex-shrink:0;color:#64748b">✏️</button>'+
       '</div>'+
       '<div id="tl-body-'+i+'" style="display:none;padding:0.5rem 0.75rem 0.65rem;border-top:1px solid #f1f5f9;background:#fafafa">'+
-        mustHtml+ideasHtml+alertsHtml+emptyHtml+mapsLink+
+        '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.4rem">'+legend+'</div>'+
+        actsHtml+noteBlock+mapsLink+
       '</div>'+
     '</div>';
   }).join('');
