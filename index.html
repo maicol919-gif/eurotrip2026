@@ -1581,6 +1581,10 @@ var TL = [
    stay:'Casa', note:'Llenar deposito en Francia antes de cruzar a Espana, algo mas barato. Ruta alternativa: por Montpellier-Perpignan-Barcelona.'}
 ];
 
+// TL_ORIGINAL: copia inmutable del itinerario artesanal
+// Se usa como fuente de verdad para actividades y días libres
+var TL_ORIGINAL = TL.map(function(d){ return JSON.parse(JSON.stringify(d)); });
+
 // ===== VIAJEROS =====
 var nViajeros = 7;
 var BUDGET_TOTAL = 4900;
@@ -4425,20 +4429,17 @@ function rutaRoutesMatch(routeA, routeB) {
 }
 
 function rutaFullRefresh() {
-  // Save TL_ORIGINAL the first time (the handcrafted TL)
-  if(!TL_ORIGINAL && TL.length > 0) {
-    TL_ORIGINAL = TL.map(function(d){ return JSON.parse(JSON.stringify(d)); });
-  }
-
-  // Only regenerate TL if route has diverged from original
+  // Restore TL_ORIGINAL as base (has free days, birthday, proper acts)
+  // Then let rutaGenerateTL override ONLY if route has extra/removed cities
   var originalRoute = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza','alicante'];
   var routeChanged = !rutaRoutesMatch(simRoute, originalRoute);
 
   if(routeChanged) {
+    // Route modified: generate new TL structure but try to preserve original acts
     var newTL = rutaGenerateTL();
     rutaApplyTL(newTL);
-  } else if(TL_ORIGINAL) {
-    // Restore original handcrafted TL (has free days, birthday, proper acts)
+  } else {
+    // Route is original: always use the handcrafted TL
     TL.length = 0;
     TL_ORIGINAL.forEach(function(d){ TL.push(JSON.parse(JSON.stringify(d))); });
   }
