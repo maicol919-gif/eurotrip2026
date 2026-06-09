@@ -4416,9 +4416,33 @@ function rutaRenderStats() {
 }
 
 // Full refresh: route → itinerary → agenda → header
+var TL_ORIGINAL = null; // Set after TL is defined
+
+function rutaRoutesMatch(routeA, routeB) {
+  if(routeA.length !== routeB.length) return false;
+  for(var i=0; i<routeA.length; i++) if(routeA[i] !== routeB[i]) return false;
+  return true;
+}
+
 function rutaFullRefresh() {
-  var newTL = rutaGenerateTL();
-  rutaApplyTL(newTL);
+  // Save TL_ORIGINAL the first time (the handcrafted TL)
+  if(!TL_ORIGINAL && TL.length > 0) {
+    TL_ORIGINAL = TL.map(function(d){ return JSON.parse(JSON.stringify(d)); });
+  }
+
+  // Only regenerate TL if route has diverged from original
+  var originalRoute = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza','alicante'];
+  var routeChanged = !rutaRoutesMatch(simRoute, originalRoute);
+
+  if(routeChanged) {
+    var newTL = rutaGenerateTL();
+    rutaApplyTL(newTL);
+  } else if(TL_ORIGINAL) {
+    // Restore original handcrafted TL (has free days, birthday, proper acts)
+    TL.length = 0;
+    TL_ORIGINAL.forEach(function(d){ TL.push(JSON.parse(JSON.stringify(d))); });
+  }
+
   renderTL();
   rutaRenderStats();
   renderAgenda();
