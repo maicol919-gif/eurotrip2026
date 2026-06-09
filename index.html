@@ -2174,8 +2174,8 @@ function renderTL(tlData, containerId) {
       '<div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>'+
       '<div class="tl-city" style="flex:1">'+d.city+'</div>'+
       '<div style="display:flex;gap:0.28rem;align-items:center;flex-wrap:wrap">'+tags+
-      '<button class="tl-ia-btn" data-dayidx="'+i+'" style="background:#7c3aed;color:white;border:none;border-radius:6px;padding:0.18rem 0.5rem;font-size:0.62rem;font-weight:700;cursor:pointer;font-family:inherit">✨</button>'+
-      '<button class="tl-edit-btn" data-dayidx="'+i+'" style="background:white;border:1.5px solid #e2e8f0;border-radius:6px;padding:0.18rem 0.5rem;font-size:0.62rem;font-weight:700;cursor:pointer;font-family:inherit;color:#64748b">✏️</button>'+
+      '<button class="tl-ia-btn" data-dayidx="'+i+'" style="background:#7c3aed;color:white;border:none;border-radius:6px;padding:0.22rem 0.6rem;font-size:0.65rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">✨ IA</button>'+
+      '<button class="tl-edit-btn" data-dayidx="'+i+'" style="background:white;border:1.5px solid #e2e8f0;border-radius:6px;padding:0.22rem 0.55rem;font-size:0.65rem;font-weight:700;cursor:pointer;font-family:inherit;color:#64748b">✏️</button>'+
       delBtn+'</div>'+
       '<span class="tl-ch">▾</span></div>'+
       '<div class="tl-body">'+
@@ -5034,36 +5034,53 @@ function tlIaSuggest(dayIdx) {
   var d = TL[dayIdx];
   if(!d) return;
 
-  // Show loading in modal if open, otherwise show in tl body
+  // Open modal
+  window._tlEditIdx = dayIdx;
+  document.getElementById('tl-edit-title').textContent = d.city;
+  document.getElementById('tl-edit-date').textContent = d.date;
+  document.getElementById('tl-edit-modal').style.display = 'flex';
+
   var cont = document.getElementById('tl-edit-slots');
-  var modalOpen = document.getElementById('tl-edit-modal').style.display === 'flex';
+  var now = new Date();
+  var hora = now.getHours() + ':' + (now.getMinutes()<10?'0':'') + now.getMinutes();
+  var diaSemana = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][now.getDay()];
 
-  if(!modalOpen) {
-    // Open modal first
-    window._tlEditIdx = dayIdx;
-    document.getElementById('tl-edit-title').textContent = d.city;
-    document.getElementById('tl-edit-date').textContent = d.date;
-    document.getElementById('tl-edit-modal').style.display = 'flex';
-    cont = document.getElementById('tl-edit-slots');
-  }
-
-  cont.innerHTML = '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem;color:#7c3aed;font-size:0.73rem"><span class="sim-spinner"></span>Generando horario para '+d.city+'...</div>';
+  cont.innerHTML = '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem;color:#7c3aed;font-size:0.73rem;background:#faf5ff;border-radius:8px">' +
+    '<span class="sim-spinner"></span>La IA está analizando la situación actual para ' + d.city + '...</div>';
 
   var EDGE = 'https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy';
   var KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU';
 
-  var prompt = 'Somos 7 amigos en roadtrip europeo. Día '+d.date+' en '+d.city+'. '+
-    (d.drive?'Día de conducción '+d.h+' / '+d.km+'km. ':'Día libre para explorar. ')+
-    'Actividades ya planificadas: '+d.acts.join(' | ')+'. '+
-    'Genera horario hora a hora desde la mañana hasta DORMIR. '+
-    'La última entrada DEBE ser: time="DORMIR", text="Fin de actividades del día". '+
-    'Responde SOLO JSON: [{"time":"08:00","text":"descripción corta"},...,{"time":"DORMIR","text":"Fin de actividades del día"}]. '+
-    'Sin markdown. 6-10 entradas.';
+  // Build context-rich prompt
+  var ciudades = d.city.split(/\s*[\-–—→]\s*/).filter(function(s){return s.trim().length>1;});
+  var esDiaViaje = dayIdx >= 0 && dayIdx < TL.length;
+  var isDrive = d.drive;
+
+  var prompt = 'Eres el copiloto inteligente de un grupo de 7 amigos en roadtrip por Europa. ' +
+    'CONTEXTO REAL AHORA MISMO: Son las ' + hora + 'h de un ' + diaSemana + ', ' + now.toLocaleDateString('es-ES') + '. ' +
+    'TRAMO DEL DÍA: ' + d.date + ' — ' + d.city + '. ' +
+    (isDrive ? 'Es un día de conducción: ' + d.h + ' / ' + d.km + 'km en coche. ' : 'Es un día libre para explorar. ') +
+    'CIUDADES DEL DÍA: ' + ciudades.join(', ') + '. ' +
+    'PLAN BASE: ' + d.acts.join(' | ') + '. ' +
+    '\n\nTu misión: Genera un horario COMPLETO y DETALLADO hora a hora para este día, teniendo en cuenta:' +
+    '\n1. La hora actual (' + hora + 'h) — si ya es tarde, ajusta el plan al tiempo restante' +
+    '\n2. Que es julio (verano europeo) — calor, masificación turística en horario 12-17h' +
+    '\n3. Para cada actividad turística: dónde exactamente ir, mejor foto, cuánto tiempo, coste estimado' +
+    '\n4. Para tramos de conducción: rotación de conductores cada 2h, paradas recomendadas, dónde repostar' +
+    '\n5. Factores prácticos: aparcamiento, colas en atracciones, restaurantes locales vs turísticos' +
+    '\n6. La última entrada DEBE ser {"time":"DORMIR","text":"Fin de actividades — hora de descansar"}' +
+    '\n\nResponde SOLO en JSON válido, sin markdown: ' +
+    '[{"time":"HH:MM","text":"descripción práctica y concreta"},...]' +
+    '\nEntre 8 y 14 entradas. Sé específico, útil y directo. Piensa como un local experto.';
 
   fetch(EDGE, {
     method:'POST',
     headers:{'Content-Type':'application/json','apikey':KEY},
-    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1200,
+      messages:[{role:'user', content:prompt}]
+    })
   })
   .then(function(r){return r.json();})
   .then(function(data){
@@ -5071,21 +5088,25 @@ function tlIaSuggest(dayIdx) {
     var slots = JSON.parse(text);
     window._tlEditSlots = slots;
     window._tlEditIdx = dayIdx;
-    tlRenderSlots();
-  })
-  .catch(function() {
-    // Fallback
-    window._tlEditSlots = d.acts.map(function(a) {
-      var m = a.match(/^(\d{1,2}:\d{2})\s*(.*)/);
-      return {time: m?m[1]:'—', text: m?m[2]:a};
-    });
-    if(window._tlEditSlots[window._tlEditSlots.length-1].time !== 'DORMIR') {
-      window._tlEditSlots.push({time:'DORMIR', text:'Fin de actividades del día'});
+
+    // Save to TL immediately
+    if(TL[dayIdx]) {
+      TL[dayIdx].acts = slots.map(function(s){
+        return s.time === 'DORMIR' ? 'DORMIR — Fin de actividades del día' : s.time + ' ' + s.text;
+      });
     }
+    try { localStorage.setItem('et26_tlslots_'+dayIdx, JSON.stringify(slots)); } catch(e) {}
+
     tlRenderSlots();
-    cont.insertAdjacentHTML('afterbegin','<div style="color:#ef4444;font-size:0.7rem;padding:0.3rem 0.5rem;margin-bottom:0.3rem">Sin conexión IA — mostrando horario base.</div>');
+
+    // Also refresh the TL view so colors update
+    renderTL();
+  })
+  .catch(function(err) {
+    cont.innerHTML = '<div style="color:#dc2626;font-size:0.72rem;padding:0.5rem;background:#fef2f2;border-radius:8px">No se pudo conectar con la IA. Comprueba la conexión e inténtalo de nuevo.</div>';
   });
 }
+
 
 // ===== INIT =====
 updateCountdown();
