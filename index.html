@@ -2082,7 +2082,8 @@ function tlGetCityId(cityStr) {
 var DAY_DATA = {};
 
 function dayDataLoad() {
-  supa('GET','alojamientos_estado',null,'?ciudad=like.day_%').then(function(rows){
+  var dayKeys = simRoute.slice(0,-1).map(function(c){return 'day_'+c;});
+  supa('GET','alojamientos_estado',null,'?ciudad=in.('+dayKeys.join(',')+')').then(function(rows){
     if(!rows) return;
     rows.forEach(function(row){
       try {
@@ -3009,7 +3010,6 @@ function simSaveAsBase(){
     SIM_BASE_ROUTE = simRoute.slice();
     simIsModified = false;
     rutaFullRefresh();
-    simSaveRoute();
     var s = document.getElementById('ruta-save-btn');
     var d = document.getElementById('ruta-discard-btn');
     if(s) s.style.display='none';
@@ -4571,9 +4571,6 @@ function initHomeBefore() {
   if(el) el.textContent = diff > 0 ? diff : '¡Ya!';
 
   // Riesgos próximos
-  // IA home init
-  iaHomeInit();
-
   // Ruta banner dinámica desde TL
   var rutaChips = document.getElementById('home-ruta-chips');
   if(rutaChips) {
