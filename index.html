@@ -3009,6 +3009,7 @@ function simSaveAsBase(){
     SIM_BASE_ROUTE = simRoute.slice();
     simIsModified = false;
     rutaFullRefresh();
+    simSaveRoute();
     var s = document.getElementById('ruta-save-btn');
     var d = document.getElementById('ruta-discard-btn');
     if(s) s.style.display='none';
