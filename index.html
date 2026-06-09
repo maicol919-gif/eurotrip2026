@@ -2133,25 +2133,30 @@ function renderTL(tlData, containerId) {
     }
 
     var acts = actSegments.map(function(seg, si){
-      var header = seg.city ?
-        '<div style="display:flex;align-items:center;gap:6px;margin:'+(si>0?'1rem':' 0.1rem')+' 0 0.4rem;padding:0.35rem 0.6rem;border-radius:8px;background:'+seg.color+'1a;border-left:3px solid '+seg.color+'">'+
-          '<div style="width:9px;height:9px;border-radius:50%;background:'+seg.color+';flex-shrink:0"></div>'+
-          '<span style="font-size:0.68rem;font-weight:800;color:'+seg.color+';text-transform:uppercase;letter-spacing:0.07em">'+seg.city+'</span>'+
-        '</div>' : '';
+      // City header — matches style in screenshot: dot + name + color border-bottom
+      var header = '';
+      if(seg.isSleep) {
+        header = '<div style="display:flex;align-items:center;gap:6px;margin:0.75rem 0 0.25rem;padding:0.3rem 0.5rem;background:#f0fdf4;border-radius:6px">'+
+          '<span style="font-size:0.75rem">🌙</span>'+
+          '<span style="font-size:0.65rem;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:0.07em">Fin del día</span>'+
+        '</div>';
+      } else if(seg.city) {
+        header = '<div style="display:flex;align-items:center;gap:8px;margin:'+(si>0?'1.1rem':'-0.1rem')+' 0 0.3rem 0;padding-bottom:0.3rem;border-bottom:2px solid '+seg.color+'">'+
+          '<div style="width:8px;height:8px;border-radius:50%;background:'+seg.color+'"></div>'+
+          '<span style="font-size:0.65rem;font-weight:800;color:'+seg.color+';text-transform:uppercase;letter-spacing:0.08em">'+seg.city+'</span>'+
+        '</div>';
+      }
 
       var rows = seg.acts.map(function(a){
-        var timeMatch = a.match(/^(\d{2}:\d{2})\s+(.*)/);
+        if(/^DORMIR/i.test(a.trim())) return ''; // handled by isSleep header
+        var timeMatch = a.match(/^(\d{1,2}:\d{2})\s+(.*)/);
         if(timeMatch){
-          var isArrival = /^Llegada/i.test(timeMatch[2]);
-          var isDeparture = /^Salida/i.test(timeMatch[2]);
-          var rowBg = isArrival ? 'background:rgba('+hexToRgb(seg.color)+',0.06);border-radius:4px;' :
-                      isDeparture ? 'background:#f8fafc;border-radius:4px;' : '';
-          return '<div class="tact" style="display:flex;gap:0.5rem;align-items:baseline;'+rowBg+'padding:0.1rem 0.25rem">'+
-            '<span style="font-family:monospace;font-size:0.65rem;color:'+seg.color+';font-weight:700;flex-shrink:0;min-width:36px">'+timeMatch[1]+'</span>'+
-            '<span style="font-size:0.78rem">'+timeMatch[2]+'</span>'+
+          return '<div style="display:flex;gap:0.55rem;align-items:baseline;padding:0.22rem 0.1rem">'+
+            '<span style="font-family:monospace;font-size:0.65rem;color:'+seg.color+';font-weight:700;flex-shrink:0;min-width:38px">'+timeMatch[1]+'</span>'+
+            '<span style="font-size:0.76rem;color:#374151;line-height:1.4">'+timeMatch[2]+'</span>'+
           '</div>';
         }
-        return '<div class="tact" style="padding:0.1rem 0.25rem">'+a+'</div>';
+        return '<div style="font-size:0.76rem;color:#374151;padding:0.15rem 0.1rem">'+a+'</div>';
       }).join('');
 
       return header + rows;
