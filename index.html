@@ -2246,7 +2246,6 @@ function renderTL(tlData, containerId) {
       '<div class="tl-dot '+(d.drive?'dd':'ds')+'"></div>'+
       '<div class="tl-city" style="flex:1">'+d.city+'</div>'+
       '<div style="display:flex;gap:0.28rem;align-items:center;flex-wrap:wrap">'+tags+
-      '<button class="tl-ia-btn" data-dayidx="'+i+'" style="background:#7c3aed;color:white;border:none;border-radius:6px;padding:0.22rem 0.6rem;font-size:0.65rem;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">✨ IA</button>'+
       '<button class="tl-edit-btn" data-dayidx="'+i+'" style="background:white;border:1.5px solid #e2e8f0;border-radius:6px;padding:0.22rem 0.55rem;font-size:0.65rem;font-weight:700;cursor:pointer;font-family:inherit;color:#64748b">✏️</button>'+
       delBtn+'</div>'+
       '<span class="tl-ch">▾</span></div>'+
@@ -4532,17 +4531,19 @@ function rutaRoutesMatch(routeA, routeB) {
 }
 
 function rutaFullRefresh() {
-  // Restore TL_ORIGINAL as base (has free days, birthday, proper acts)
-  // Then let rutaGenerateTL override ONLY if route has extra/removed cities
-  var originalRoute = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza','alicante'];
-  var routeChanged = !rutaRoutesMatch(simRoute, originalRoute);
+  // Always start from TL_ORIGINAL (the handcrafted itinerary with full activities)
+  // Only regenerate structure if route has cities NOT in the original route
+  var originalCities = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
+  var hasNewCities = simRoute.some(function(c) {
+    return c !== 'alicante' && originalCities.indexOf(c) === -1;
+  });
 
-  if(routeChanged) {
-    // Route modified: generate new TL structure but try to preserve original acts
+  if(hasNewCities) {
+    // Truly new city added — generate new structure
     var newTL = rutaGenerateTL();
     rutaApplyTL(newTL);
   } else {
-    // Route is original: always use the handcrafted TL
+    // Use the handcrafted TL with full activities always
     TL.length = 0;
     TL_ORIGINAL.forEach(function(d){ TL.push(JSON.parse(JSON.stringify(d))); });
   }
