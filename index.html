@@ -725,6 +725,22 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
   <!-- Itinerario accordion -->
   <div id="tl-container" style="padding:0.75rem 1rem 5rem"></div>
+
+  <div id="tl-edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:999;align-items:center;justify-content:center;padding:1rem">
+    <div style="background:white;border-radius:16px;padding:20px;width:100%;max-width:420px;max-height:85vh;display:flex;flex-direction:column">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:4px">
+        <div style="font-weight:800;font-size:0.95rem" id="tl-edit-title"></div>
+        <div style="font-size:0.65rem;color:#94a3b8" id="tl-edit-date"></div>
+      </div>
+      <div style="font-size:0.65rem;color:#94a3b8;margin-bottom:12px">Todos pueden editar — se requiere PIN admin para guardar</div>
+      <div id="tl-edit-slots" style="overflow-y:auto;flex:1;margin-bottom:10px"></div>
+      <button onclick="tlAddSlot()" style="width:100%;background:#f1f5f9;border:1.5px dashed #cbd5e1;border-radius:8px;padding:0.45rem;font-family:inherit;font-size:0.72rem;color:#64748b;cursor:pointer;margin-bottom:10px">+ Añadir actividad</button>
+      <div style="display:flex;gap:8px">
+        <button onclick="tlSaveEdit()" style="flex:1;background:#0f172a;color:white;border:none;border-radius:8px;padding:10px;font-family:inherit;font-weight:700;cursor:pointer;font-size:0.8rem">💾 Guardar</button>
+        <button onclick="document.getElementById('tl-edit-modal').style.display='none'" style="background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:10px;font-family:inherit;cursor:pointer;flex:1;font-size:0.8rem">Cancelar</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- PIN modal — global, outside any view so it works from anywhere -->
@@ -2123,7 +2139,8 @@ function renderTL(tlData, containerId) {
     var mapsLink = d.maps ? '<a href="'+d.maps+'" target="_blank" style="display:inline-flex;align-items:center;gap:0.25rem;background:#2563eb;color:white;border-radius:7px;padding:0.28rem 0.6rem;font-size:0.63rem;font-weight:700;text-decoration:none;margin-top:0.4rem">🗺️ Google Maps</a>' : '';
 
     return '<div style="border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:0.5rem;overflow:hidden">'+
-      '<div data-accordion="'+i+'" style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.75rem;cursor:pointer;background:white;gap:0.5rem">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.75rem;background:white;gap:0.5rem">'+
+        '<div data-accordion="'+i+'" style="display:flex;align-items:center;gap:0.5rem;flex:1;min-width:0;cursor:pointer">'+
         '<div style="display:flex;align-items:center;gap:0.5rem;flex:1;min-width:0">'+
           '<span style="font-family:monospace;font-size:0.72rem;font-weight:800;color:#0f172a;flex-shrink:0">'+d.date+'</span>'+
           '<span style="font-size:0.72rem;color:#475569;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+d.city+'</span>'+
@@ -2132,6 +2149,8 @@ function renderTL(tlData, containerId) {
           kmBadge+ztlBadge+freeBadge+
           '<span class="ag-chevron-'+i+'" style="font-size:0.7rem;color:#94a3b8;margin-left:0.2rem">▾</span>'+
         '</div>'+
+        '<button data-tledit="'+i+'" style="background:none;border:1.5px solid #e2e8f0;border-radius:6px;padding:0.2rem 0.45rem;font-size:0.65rem;cursor:pointer;flex-shrink:0;color:#64748b">✏️</button>'+
+      '</div>'+
       '</div>'+
       '<div id="tl-body-'+i+'" style="display:none;padding:0.5rem 0.75rem 0.65rem;border-top:1px solid #f1f5f9;background:#fafafa">'+
         '<div style="display:flex;gap:0.4rem;flex-wrap:wrap;margin-bottom:0.4rem">'+legend+'</div>'+
@@ -3760,6 +3779,10 @@ document.addEventListener('click', function(e) {
   var navOpenInner = t.closest('.nav-open-btn');
   if(navOpenInner) { navPickerOpen(navOpenInner.getAttribute('data-maps')); return; }
 
+  // TL edit button (before accordion)
+  var tlEditBtn = t.closest('[data-tledit]');
+  if(tlEditBtn) { tlOpenEdit(parseInt(tlEditBtn.getAttribute('data-tledit'))); return; }
+
   // Accordion (ruta view)
   var accRow = t.closest('[data-accordion]');
   if(accRow) {
@@ -4916,10 +4939,6 @@ window._tlEditIdx = 0;
 window._tlEditSlots = [];
 
 function tlOpenEdit(dayIdx) {
-  if(!AG_ADMIN) {
-    agRequestAdmin();
-    return;
-  }
   var d = TL[dayIdx];
   if(!d) return;
   window._tlEditIdx = dayIdx;
@@ -4997,17 +5016,17 @@ function tlAddSlot() {
 }
 
 function tlSaveEdit() {
-  var dayIdx = window._tlEditIdx;
-  // Save to localStorage
-  try { localStorage.setItem('et26_tlslots_'+dayIdx, JSON.stringify(window._tlEditSlots)); } catch(e) {}
-  // Update TL acts
-  if(TL[dayIdx]) {
-    TL[dayIdx].acts = window._tlEditSlots.map(function(s) {
-      return s.time === 'DORMIR' ? 'DORMIR — Fin de actividades del día' : s.time + ' ' + s.text;
-    });
-  }
-  document.getElementById('tl-edit-modal').style.display = 'none';
-  renderTL();
+  simRequestAdmin(function() {
+    var dayIdx = window._tlEditIdx;
+    if(TL[dayIdx]) {
+      TL[dayIdx].acts = window._tlEditSlots.map(function(s) {
+        return s.time === 'DORMIR' ? 'DORMIR — Fin de actividades del día' : s.time + ' ' + s.text;
+      });
+    }
+    simSaveTL();
+    document.getElementById('tl-edit-modal').style.display = 'none';
+    renderTL();
+  });
 }
 
 function tlIaSuggest(dayIdx) {
