@@ -2264,18 +2264,7 @@ function agCityColor(cityName) {
   return agCityColorMap[key];
 }
 
-// Accordion click handler
-document.addEventListener('click', function(e) {
-  var t = e.target.closest('[data-accordion]');
-  if(!t) return;
-  var i = t.getAttribute('data-accordion');
-  var body = document.getElementById('ag-body-'+i);
-  var chev = document.querySelector('.ag-chevron-'+i);
-  if(!body) return;
-  var open = body.style.display !== 'none';
-  body.style.display = open ? 'none' : 'block';
-  if(chev) chev.textContent = open ? '▾' : '▴';
-});
+// Accordion handled in main delegated listener
 
 function hexToRgb(hex){
   var r=parseInt(hex.slice(1,3),16);
@@ -3891,6 +3880,20 @@ document.addEventListener('click', function(e) {
   // Nav open btn — before tltoggle
   var navOpenInner = t.closest('.nav-open-btn');
   if(navOpenInner) { navPickerOpen(navOpenInner.getAttribute('data-maps')); return; }
+
+  // Accordion (ruta view)
+  var accRow = t.closest('[data-accordion]');
+  if(accRow) {
+    var ai = accRow.getAttribute('data-accordion');
+    var abody = document.getElementById('ag-body-'+ai);
+    var achev = document.querySelector('.ag-chevron-'+ai);
+    if(abody) {
+      var aopen = abody.style.display !== 'none';
+      abody.style.display = aopen ? 'none' : 'block';
+      if(achev) achev.textContent = aopen ? '▾' : '▴';
+    }
+    return;
+  }
 
   // TL row toggle — last, catches everything else inside the row
   var tlRow = t.closest('[data-tltoggle]');
