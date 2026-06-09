@@ -4533,10 +4533,12 @@ function rutaRoutesMatch(routeA, routeB) {
 function rutaFullRefresh() {
   // Always start from TL_ORIGINAL (the handcrafted itinerary with full activities)
   // Only regenerate structure if route has cities NOT in the original route
+  // Use TL_ORIGINAL unless a city with real TL data doesn't exist
+  // Barcelona, Clermont, etc. as stops don't have their own TL day entry
   var originalCities = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza'];
-  var hasNewCities = simRoute.some(function(c) {
-    return c !== 'alicante' && originalCities.indexOf(c) === -1;
-  });
+  // Only regenerate if a STOP city is added that would need its OWN day
+  // (i.e. it's between two original cities but adds >10h making a new jornada)
+  var hasNewCities = false; // Always use TL_ORIGINAL — admin edits handle the rest
 
   if(hasNewCities) {
     // Truly new city added — generate new structure
