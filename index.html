@@ -2152,6 +2152,9 @@ function tlDaySave() {
 }
 
 
+// ===== SIMULADOR v2 — UNIFIED =====
+var ADMIN_PIN = '2026';
+var AG_ADMIN = false;
 var simIsAdmin = false;
 var simPendingAction = null;
 var simIsModified = false;
@@ -4045,7 +4048,6 @@ var _openCity = function(cityId) {
 
 // ===== AGENDA POR PAÍSES =====
 // Detecta el país de cada etapa del TL leyendo la ciudad
-var AG_ADMIN = false;
 var AG_SLOTS = {}; // { 'dayIndex_slotId': text }
 
 // Mapa ciudad keyword → país
