@@ -3175,37 +3175,6 @@ function rutaSetMode(mode){
 })();
 
 
-var TRIP_START = new Date(2026,6,14); // 14 julio 2026
-var TRIP_END   = new Date(2026,6,21); // 21 julio 2026
-
-// ===== INIT =====
-updateCountdown();
-setInterval(updateCountdown, 60000);
-renderCities();
-dayDataLoad(); // loads Supabase day data then calls renderTL
-renderBudget();
-renderGastos();
-renderNotas();
-renderCL();
-renderRuta();
-renderAgenda();
-updateHeaderRoute();
-initHome();
-renderSOSDynamic();
-renderRiesgos('home-riesgos');
-
-// Final init — all vars defined, safe to run full refresh
-// Restore admin flags from session
-if(PIN_SESSION && (PIN_SESSION.isAdmin || PIN_SESSION.pin === ADMIN_PIN)) {
-  simIsAdmin = true;
-  AG_ADMIN = true;
-}
-// Always load route from Supabase (shared across all users)
-simLoadRoute(function() {
-  console.log('Route loaded from Supabase');
-});
-// Run initial refresh with hardcoded route while Supabase loads
-rutaFullRefresh();
 
 function renderTL(tlData, containerId) {
   // Sim mode preview: simple list
@@ -4418,6 +4387,8 @@ var _origSimSaveAsBase = typeof simSaveAsBase === 'function' ? simSaveAsBase : n
 
 
 // ===== HOME DINÁMICA =====
+var TRIP_START = new Date(2026,6,14); // 14 julio 2026
+var TRIP_END   = new Date(2026,6,21); // 21 julio 2026
 var homeOffset = 0; // para navegar días durante el viaje
 
 // Alertas estáticas por proximidad
@@ -6044,6 +6015,35 @@ function simProposeRoute() {
 // ===== EDICIÓN DE HORARIO EN ITINERARIO (reemplaza Agenda) =====
 window._tlEditIdx = 0;
 window._tlEditSlots = [];
+
+// ===== INIT =====
+updateCountdown();
+setInterval(updateCountdown, 60000);
+renderCities();
+dayDataLoad(); // loads Supabase day data then calls renderTL
+renderBudget();
+renderGastos();
+renderNotas();
+renderCL();
+renderRuta();
+renderAgenda();
+updateHeaderRoute();
+initHome();
+renderSOSDynamic();
+renderRiesgos('home-riesgos');
+
+// Final init — all vars defined, safe to run full refresh
+// Restore admin flags from session
+if(PIN_SESSION && (PIN_SESSION.isAdmin || PIN_SESSION.pin === ADMIN_PIN)) {
+  simIsAdmin = true;
+  AG_ADMIN = true;
+}
+// Always load route from Supabase (shared across all users)
+simLoadRoute(function() {
+  console.log('Route loaded from Supabase');
+});
+// Run initial refresh with hardcoded route while Supabase loads
+rutaFullRefresh();
 </script>
 </body>
 </html>
