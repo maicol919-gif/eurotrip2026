@@ -2082,8 +2082,7 @@ function tlGetCityId(cityStr) {
 var DAY_DATA = {};
 
 function dayDataLoad() {
-  var dayKeys = simRoute.slice(0,-1).map(function(c){return 'day_'+c;});
-  supa('GET','alojamientos_estado',null,'?ciudad=in.('+dayKeys.join(',')+')').then(function(rows){
+  supa('GET','alojamientos_estado',null,'?ciudad=like.day_%').then(function(rows){
     if(!rows) return;
     rows.forEach(function(row){
       try {
@@ -2135,7 +2134,7 @@ function tlDaySave() {
     DAY_DATA[cityId] = payload_data;
     var supaKey = 'day_' + cityId;
     supa('GET','alojamientos_estado',null,'?ciudad=eq.'+supaKey).then(function(rows){
-      var payload = {ciudad: supaKey, estado:'active', notas: JSON.stringify(payload_data)};
+      var payload = {ciudad: supaKey, notas: JSON.stringify(payload_data)};
       if(rows&&rows.length>0) supa('PATCH','alojamientos_estado',payload,'?ciudad=eq.'+supaKey).catch(function(){});
       else supa('POST','alojamientos_estado',payload).catch(function(){});
     }).catch(function(){});
@@ -4571,6 +4570,9 @@ function initHomeBefore() {
   if(el) el.textContent = diff > 0 ? diff : '¡Ya!';
 
   // Riesgos próximos
+  // IA home init
+  iaHomeInit();
+
   // Ruta banner dinámica desde TL
   var rutaChips = document.getElementById('home-ruta-chips');
   if(rutaChips) {
