@@ -5191,7 +5191,7 @@ function tlIaSuggest(dayIdx) {
 function iaHomeInit() {
   var btn = document.getElementById('ia-home-btn');
   var input = document.getElementById('ia-donde');
-  if(!btn || input._hooked) return;
+  if(!btn || !input || input._hooked) return;
   input._hooked = true;
 
   function askIA() {
