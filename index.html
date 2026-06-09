@@ -585,6 +585,18 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
       <div id="home-decidir"><div style="font-size:0.75rem;color:#94a3b8;font-style:italic">Cargando alertas...</div></div>
     </div>
 
+    <!-- IA Copiloto — card en home -->
+    <div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:14px;padding:1rem;margin-bottom:0.75rem;color:white">
+      <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.6);margin-bottom:0.5rem">✨ Copiloto IA</div>
+      <div style="font-size:0.82rem;font-weight:600;margin-bottom:0.65rem">¿Qué hacemos ahora?</div>
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem">
+        <input id="ia-donde" placeholder="¿Dónde estáis ahora? (ej: Roma, Fontana di Trevi...)" 
+          style="flex:1;border:none;border-radius:8px;padding:0.5rem 0.7rem;font-family:inherit;font-size:0.75rem;outline:none;color:#0f172a">
+        <button id="ia-home-btn" style="background:white;color:#7c3aed;border:none;border-radius:8px;padding:0.5rem 0.9rem;font-family:inherit;font-weight:700;font-size:0.75rem;cursor:pointer;white-space:nowrap">Preguntar</button>
+      </div>
+      <div id="ia-home-result" style="display:none;background:rgba(255,255,255,0.12);border-radius:8px;padding:0.65rem;font-size:0.73rem;line-height:1.5;margin-top:0.35rem"></div>
+    </div>
+
     <!-- Riesgos próximos -->
     <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;margin-bottom:0.75rem">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.65rem">
@@ -1487,97 +1499,157 @@ var CL_DATA = [
 ];
 
 var TL = [
-  {date:'14 jul', city:'Alicante - Barcelona - Montpellier', drive:true, km:830, h:'9h 30min', ztl:false,
+  {date:'14 jul', city:'Alicante — Barcelona — Montpellier', drive:true, km:830, h:'9h 30min', ztl:false,
    maps:'https://www.google.com/maps/dir/Alicante,+Spain/Barcelona,+Spain/Montpellier,+France',
    acts:[
-     '07:00 Salida desde Alicante — llenar tanques (15 min)',
-     '10:30 Llegada Barcelona — parada almuerzo en el Born o Barceloneta (1h 30min)',
-     '12:00 Salida hacia Montpellier',
-     '15:30 Parada descanso en autopista AP-7 (20 min)',
-     '19:00 Llegada Montpellier — check-in y cena cerca del centre historique'
+     '07:00 Salida desde Alicante — llenar tanque completo antes de la autopista',
+     '07:30 AP-7 Norte dirección Barcelona — primer turno de conducción',
+     '09:30 Parada descanso área de servicio — café y estirar piernas (20 min)',
+     '10:30 Llegada Barcelona — aparcar en P+R periferia (Zona Franca o Glòries)',
+     '11:00 Paseo rápido por el Barrio Gótico — Catedral y callejuelas medievales (45 min)',
+     '12:00 Almuerzo en el Born o Barceloneta — bocadillos o menú del día (1h)',
+     '13:00 Salida hacia Montpellier — A7 por Tarragona y Girona',
+     '14:30 Cruce frontera La Junquera — sin parada, autopista directa',
+     '15:30 Parada descanso Perpignan o área AP-7 — repostar en Francia (más barato) (30 min)',
+     '19:00 Llegada Montpellier — check-in Airbnb y dejar equipaje',
+     '20:00 Paseo por Place de la Comédie — centro histórico de Montpellier',
+     '21:00 Cena en el barrio Écusson — cocina francesa informal',
+     'DORMIR — Noche 1 en Montpellier'
    ],
-   stay:'Hotel o Airbnb Montpellier (noche 1)', note:'Primera etapa larga. Turnos de conduccion desde Alicante. Llevar nevera con snacks.'},
-  {date:'15 jul', city:'Montpellier - Clermont-Ferrand - Paris', drive:true, km:780, h:'8h 45min', ztl:false,
+   stay:'Airbnb Montpellier (noche 1)', note:'Primera etapa larga. Llevar nevera con snacks. Repostar en Francia siempre más barato que en España.'},
+
+  {date:'15 jul', city:'Montpellier — Clermont-Ferrand — Paris', drive:true, km:780, h:'8h 45min', ztl:false,
    maps:'https://www.google.com/maps/dir/Montpellier,+France/Clermont-Ferrand,+France/Paris,+France',
    acts:[
-     '08:00 Salida desde Montpellier',
-     '11:30 Llegada Clermont-Ferrand — almuerzo bajo el Puy de Dome (1h 30min)',
-     '13:00 Salida hacia Paris — A71 directo',
-     '16:00 Parada descanso en area de servicio (20 min)',
-     '19:00 Llegada Paris — check-in y primera impresion de la ciudad'
+     '08:00 Salida desde Montpellier — desayuno croissant antes de arrancar',
+     '08:30 A75 Norte hacia Clermont-Ferrand — paisaje volcánico del Macizo Central',
+     '10:30 Parada descanso en ruta (20 min)',
+     '11:30 Llegada Clermont-Ferrand — aparcar cerca del centro',
+     '11:45 Vista del Puy de Dôme desde la ciudad — foto del volcán (gratis desde abajo)',
+     '12:15 Almuerzo en brasserie local — probar la truffade auvergnate (1h)',
+     '13:15 Salida hacia París — A71 directo',
+     '15:30 Parada descanso área de servicio (20 min)',
+     '17:00 Entrada en Île-de-France — tráfico posible, paciencia',
+     '19:00 Llegada París — check-in Airbnb y dejar maletas',
+     '20:30 Primera vista nocturna de la Torre Eiffel iluminada — desde Trocadéro (gratis)',
+     '21:30 Cena en brasserie del barrio — moules-frites o steak-frites',
+     'DORMIR — Noche 1 en París'
    ],
-   stay:'Airbnb Paris (noche 1 de 2)', note:'Clermont-Ferrand es perfecta parada a mitad. El Puy de Dome se ve desde la ciudad.'},
-  {date:'16 jul', city:'Paris — dia libre', drive:false, km:0, h:'', ztl:false,
+   stay:'Airbnb París (noche 1 de 2)', note:'Clermont-Ferrand perfecta parada. El Puy de Dôme visible desde la ciudad sin subir.'},
+
+  {date:'16 jul', city:'París — día libre', drive:false, km:0, h:'', ztl:false,
    maps:'https://www.google.com/maps/search/Paris+France',
    acts:[
-     '07:30 Torre Eiffel al amanecer — sin colas, luz perfecta (1h)',
-     '09:00 Desayuno en boulangerie del barrio (30 min)',
-     '10:00 Louvre — llegar al abrir, evitar colas (3h)',
-     '13:30 Almuerzo en Le Marais — As du Falafel o picnic en el Sena (1h 30min)',
-     '15:00 Paseo por Le Marais y Centre Pompidou (2h)',
-     '17:30 Montmartre y Sacre-Coeur al atardecer (1h 30min)',
-     '20:00 Cena en Montmartre o Republique'
+     '07:00 Torre Eiffel al amanecer — sin colas, luz dorada perfecta. Foto desde Trocadéro (1h)',
+     '08:30 Desayuno en boulangerie del barrio — croissant au beurre y café (30 min)',
+     '09:30 Musée du Louvre — llegar al abrir, ir directo a Mona Lisa (sala 711), Venus de Milo y Victoria de Samotracia (3h)',
+     '12:30 Almuerzo en Le Marais — L As du Falafel en Rue des Rosiers o picnic junto al Sena (1h 30min)',
+     '14:00 Paseo por Le Marais — galerías, tiendas vintage, Place des Vosges (1h 30min)',
+     '15:30 Centre Pompidou — exterior futurista imprescindible, subir si apetece (1h)',
+     '17:00 Paseo en bateaux por el Sena — ver Notre-Dame, Pont Neuf, Île de la Cité (1h)',
+     '18:30 Montmartre — subir a pie o en funicular, Sacré-Cœur al atardecer (1h 30min)',
+     '20:30 Aperitivo en terraza de Montmartre — vista de París al anochecer',
+     '21:30 Cena en Montmartre o République — evitar restaurantes con foto en el menú',
+     'DORMIR — Noche 2 en París'
    ],
-   stay:'Airbnb Paris (noche 2 de 2)', note:'Navigo semana: 30 euros por persona, cubre todo el metro y RER.'},
-  {date:'17 jul', city:'Paris - Colmar - Milan', drive:true, km:890, h:'10h 00min', ztl:false,
+   stay:'Airbnb París (noche 2 de 2)', note:'Navigo día: 8€ por persona, cubre metro y RER ilimitado. Reservar Louvre online: louvre.fr'},
+
+  {date:'17 jul', city:'París — Colmar — Milán', drive:true, km:890, h:'10h 00min', ztl:false,
    maps:'https://www.google.com/maps/dir/Paris,+France/Colmar,+France/Milan,+Italy',
    acts:[
-     '07:30 Salida desde Paris — desayuno rapido',
-     '11:30 Llegada Colmar, Alsacia — aparcar en P+R periferia (4h de ruta)',
-     '11:30 Paseo por La Petite Venise y Rue des Marchands (1h 30min)',
-     '13:00 Almuerzo alsaciano en Winstub del centro (1h)',
-     '14:00 Salida hacia Milan',
-     '19:30 Llegada Milan — coches quedan aparcados aqui hasta el regreso'
+     '07:00 Salida desde París — desayuno rápido en ruta',
+     '07:30 A4 Este hacia Alsacia — paisaje de la Champagne',
+     '09:30 Parada descanso área de servicio Reims (20 min)',
+     '11:30 Llegada Colmar — aparcar en P+R periférico (gratis)',
+     '11:45 La Petite Venise — canal y casas medievales de colores (foto imprescindible)',
+     '12:15 Rue des Marchands y centro histórico — paseo por el casco más bonito de Alsacia (45 min)',
+     '13:00 Almuerzo alsaciano — tarte flambée (flammekueche) en Winstub local (1h)',
+     '14:00 Salida hacia Milán — A35 por Mulhouse y túnel del Mont Blanc o A2 por Suiza',
+     '16:00 Cruce frontera Suiza o Italia — sin parada',
+     '17:30 Parada descanso área autopista italiana (20 min)',
+     '19:30 Llegada Milán — aparcar en Autosilos Sammartini (junto a Centrale)',
+     '20:00 Check-in y dejar maletas',
+     '21:00 Aperitivo milanés en Navigli — bebida + buffet incluido (~10€) (1h 30min)',
+     'DORMIR — Noche 1 en Milán'
    ],
-   stay:'Airbnb o Hotel Milan (noche 1)', note:'Colmar imprescindible: casas medievales de colores. Parking Autosilos Sammartini en Milan, 5min de Centrale.'},
-  {date:'18 jul', city:'Milan - Venecia - Roma (coche)', drive:true, km:800, h:'10h', ztl:true,
+   stay:'Airbnb Milán (noche 1)', note:'Colmar imprescindible: 1h 30min es suficiente. Parking Autosilos Sammartini en Milán, 5min a pie de Centrale.'},
+
+  {date:'18 jul', city:'Milán — Venecia — Roma', drive:true, km:800, h:'10h', ztl:true,
    maps:'https://www.google.com/maps/dir/Milan,+Italy/Venice,+Italy/Rome,+Italy',
    acts:[
-     '07:00 Salida desde Milan — llenar deposito antes de la A4',
-     '10:30 Llegada Venecia (Mestre) — aparcar en Piazzale Roma o Tronchetto',
-     '10:30 Puente de Rialto y mercado (45 min)',
-     '11:30 Vaporetto linea 1 por el Canal Grande (45 min)',
-     '12:30 Plaza San Marcos — llegada antes del pico de calor (45 min)',
-     '13:30 Almuerzo cicchetti en bar local (45 min)',
-     '14:30 Salida desde Mestre hacia Roma — A4 → A13 → A1',
-     '17:00 Parada descanso en area de servicio — Ferrara o Bologna (30 min)',
-     '21:00 Llegada Roma — check-in. Manana es el cumpleanos'
+     '07:00 Salida desde Milán — llenar depósito antes de la A4',
+     '07:30 A4 Este hacia Venecia — Po Valley',
+     '09:00 Parada descanso área Brescia (20 min)',
+     '10:30 Llegada Venecia-Mestre — aparcar en Piazzale Roma o Tronchetto (25-35€/día, reservar)',
+     '11:00 Vaporetto línea 1 por el Canal Grande — sentarse en la proa (45 min)',
+     '11:45 Puente de Rialto — mercado y vistas del canal (30 min)',
+     '12:30 Llegada Plaza San Marcos — antes del pico de calor',
+     '12:45 Cicchetti y Spritz en bar local de Cannaregio — almuerzo veneciano auténtico (1h)',
+     '14:00 Salida desde Mestre hacia Roma — A4 → A13 → A1',
+     '15:30 Parada descanso área de servicio Bologna (30 min)',
+     '17:30 Parada breve Florencia — visible la cúpula del Brunelleschi desde la autopista (10 min)',
+     '19:00 Parada descanso área de servicio (20 min)',
+     '21:00 Llegada Roma — check-in Airbnb. Mañana es el cumpleaños',
+     'DORMIR — Noche 1 en Roma'
    ],
-   stay:'Airbnb Roma (noche 1 de 2)', note:'Etapa larga (10h). Salir a las 7h. Aparcar en Venecia-Mestre, no en la isla. ZTL activa en Roma — aparcar en periferia.'},
-  {date:'19 jul', city:'Roma — Dia del Cumpleanos', drive:false, km:0, h:'', ztl:true,
+   stay:'Airbnb Roma (noche 1 de 2)', note:'Etapa larga (10h). ZTL activa en Roma — NO entrar al centro con coches. Aparcar en periferia (Ostiense, Villa Borghese).'},
+
+  {date:'19 jul', city:'Roma — Día del Cumpleaños 🎂', drive:false, km:0, h:'', ztl:true,
    maps:'https://www.google.com/maps/search/Roma+centro+storico',
    acts:[
-     '08:00 Vaticano y Capilla Sixtina — madrugar evita las colas (3h)',
-     '11:30 Castel Sant Angelo — exterior y vistas (30 min)',
-     '12:30 Almuerzo en Prati, el barrio del Vaticano (1h)',
-     '14:00 Coliseo y Foro Romano — entradas reservadas (2h)',
-     '16:30 Fontana di Trevi y Panteon — a pie por el centro (1h 30min)',
-     '19:00 Aperitivo en Trastevere',
-     '20:30 Cena especial de cumpleanos en Trastevere'
+     '08:00 Vaticano — Museos y Capilla Sixtina (reserva obligatoria: museivaticani.va) (3h)',
+     '11:00 Castel Sant Angelo — exterior y Ponte Sant Angelo con ángeles barrocos (30 min)',
+     '11:30 Paseo desde el Vaticano hasta el centro — cruzar el Tíber a pie',
+     '12:30 Almuerzo en Prati — barrio del Vaticano, auténtico y sin turistas masivos (1h)',
+     '14:00 Coliseo y Foro Romano — reserva en coopculture.it imprescindible (2h)',
+     '16:30 Fontana di Trevi — ir a las 17h (menos gente, mejor luz). Moneda de espaldas (30 min)',
+     '17:15 Panteón — entrada gratuita, uno de los edificios mejor conservados del mundo (30 min)',
+     '18:00 Paseo por el centro histórico — Piazza Navona, Campo de Fiori (1h)',
+     '19:00 Aperitivo especial de cumpleaños en Trastevere — bar con terraza',
+     '20:30 Cena especial cumpleaños en Trastevere — reservar mesa con antelación',
+     '23:00 Passeggiata nocturna — los monumentos de Roma iluminados son espectaculares',
+     'DORMIR — Noche 2 en Roma'
    ],
-   stay:'Airbnb Roma (noche 2 de 2)', note:'Coliseo: coopculture.it. Vaticano: museivaticani.va. Reservar ambos con antelacion.'},
-  {date:'20 jul', city:'Roma - Genova - Niza (coche)', drive:true, km:790, h:'9h 30min', ztl:false,
+   stay:'Airbnb Roma (noche 2 de 2)', note:'Reservar Coliseo y Vaticano con semanas de antelación. En julio las colas sin reserva superan 3h.'},
+
+  {date:'20 jul', city:'Roma — Génova — Niza', drive:true, km:790, h:'9h 30min', ztl:false,
    maps:'https://www.google.com/maps/dir/Rome,+Italy/Genoa,+Italy/Nice,+France',
    acts:[
-     '07:30 Salida desde Roma — A1 Norte hacia Genova',
-     '11:30 Parada en Genova — almuerzo rapido puerto antiguo (1h)',
-     '12:30 Salida hacia Niza — A10 Riviera dei Fiori',
-     '14:00 Paso por Sanremo — opcional parada breve (30 min)',
-     '17:00 Llegada Niza — check-in',
-     '18:30 Paseo por la Promenade des Anglais al atardecer',
-     '20:30 Cena de celebracion final en el Casco Antiguo'
+     '07:30 Salida desde Roma — A1 Norte hacia Génova',
+     '08:00 Autostrada del Sole hacia el Norte — paisaje de la Toscana',
+     '10:00 Parada descanso área de servicio (20 min)',
+     '11:30 Llegada Génova — aparcar en el puerto antiguo',
+     '11:45 Porto Antico y caruggi medievales — callejuelas más estrechas de Europa (45 min)',
+     '12:30 Almuerzo en Génova — focaccia genovesa y pesto auténtico (45 min)',
+     '13:15 Salida hacia Niza — A10 Riviera dei Fiori',
+     '14:00 Costa de Liguria — la A10 costera es espectacular: túneles y mar',
+     '14:30 Paso por Sanremo — opcional parada de 20 min si se quiere ver el casino',
+     '15:00 Cruce frontera Italia-Francia (Ventimiglia) — sin parada habitual',
+     '17:00 Llegada Niza — check-in hotel o Airbnb',
+     '18:00 Promenade des Anglais al atardecer — el paseo marítimo más famoso de la Costa Azul (1h)',
+     '19:30 Vieux-Nice — casco antiguo, socca y helado (1h)',
+     '21:00 Cena de penúltima noche en el puerto de Niza — frutos del mar',
+     'DORMIR — Noche en Niza'
    ],
-   stay:'Hotel o Airbnb Niza (noche 1)', note:'Ruta directa Roma-Niza sin pasar por Milan (790km vs 900km). Genova es parada perfecta a mitad. La Riviera italiana por la A10 es espectacular.'},
-  {date:'21 jul', city:'Niza - Alicante', drive:true, km:640, h:'7h 30min', ztl:false,
+   stay:'Airbnb Niza (noche 1)', note:'Ruta Roma-Niza directa sin pasar por Milán (790km vs 900km). La A10 costera por Liguria es una de las más bonitas de Europa.'},
+
+  {date:'21 jul', city:'Niza — Alicante', drive:true, km:640, h:'7h 30min', ztl:false,
    maps:'https://www.google.com/maps/dir/Nice,+France/Alicante,+Spain',
    acts:[
-     '08:00 Salida desde Niza — ultimo desayuno frances',
-     '09:00 Autopista A8 hacia Marseille, luego A9 hacia Espana',
-     '11:45 Parada descanso en Montpellier o Perpignan — llenar deposito (45 min)',
-     '13:00 Cruce de los Pirineos por La Junquera',
-     '17:00 Llegada Alicante — FIN DEL EUROTRIP 2026'
+     '07:30 Último desayuno francés en boulangerie de Niza — croissant y café au lait',
+     '08:00 Salida desde Niza — A8 hacia Marsella',
+     '09:30 Parada descanso área de servicio (20 min)',
+     '10:30 Paso por Marsella — vista del Mediterráneo desde la autopista',
+     '11:00 A9 hacia España — la Languedoc',
+     '11:45 Parada en Montpellier o Perpignan — llenar depósito en Francia (más barato) (30 min)',
+     '13:00 Cruce de los Pirineos por La Junquera — foto en la frontera',
+     '13:30 A7 Sur hacia Alicante — ya en España',
+     '15:00 Parada descanso área de servicio (20 min)',
+     '17:00 Llegada Alicante — FIN DEL EUROTRIP 2026 🏁',
+     '17:30 Resumen de cuentas y recuerdos del viaje',
+     'DORMIR — En casa. EuroTrip 2026 completado.'
    ],
-   stay:'Casa', note:'Llenar deposito en Francia antes de cruzar a Espana, algo mas barato. Ruta alternativa: por Montpellier-Perpignan-Barcelona.'}
+   stay:'Casa', note:'Llenar depósito en Francia antes de cruzar. La gasolina francesa es más barata. Ruta alternativa: Montpellier-Perpignan-Barcelona por la costa.'}
 ];
 
 // TL_ORIGINAL: copia inmutable del itinerario artesanal
@@ -3513,6 +3585,9 @@ function initHomeBefore() {
   if(el) el.textContent = diff > 0 ? diff : '¡Ya!';
 
   // Riesgos próximos
+  // IA home init
+  iaHomeInit();
+
   // Ruta banner dinámica desde TL
   var rutaChips = document.getElementById('home-ruta-chips');
   if(rutaChips) {
@@ -5107,6 +5182,66 @@ function tlIaSuggest(dayIdx) {
   });
 }
 
+
+
+// ===== IA COPILOTO EN HOME =====
+function iaHomeInit() {
+  var btn = document.getElementById('ia-home-btn');
+  var input = document.getElementById('ia-donde');
+  if(!btn || input._hooked) return;
+  input._hooked = true;
+
+  function askIA() {
+    var donde = input.value.trim();
+    if(!donde) return;
+    var result = document.getElementById('ia-home-result');
+    result.style.display = 'block';
+    result.innerHTML = '<span class="sim-spinner" style="border-color:rgba(255,255,255,0.3);border-top-color:white"></span> Consultando...';
+
+    var now = new Date();
+    var hora = now.getHours() + ':' + (now.getMinutes()<10?'0':'') + now.getMinutes();
+    var diaSemana = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'][now.getDay()];
+
+    // Find today's TL entry
+    var dayIdx = Math.floor((now - TRIP_START) / 86400000);
+    var todayTL = (dayIdx >= 0 && dayIdx < TL.length) ? TL[dayIdx] : null;
+
+    var EDGE = 'https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy';
+    var KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU';
+
+    var prompt = 'Eres el copiloto experto de 7 amigos en roadtrip por Europa en julio 2026. ' +
+      'AHORA MISMO: Son las ' + hora + 'h de un ' + diaSemana + '. ' +
+      'ESTÁN EN: ' + donde + '. ' +
+      (todayTL ? 'PLAN DE HOY: ' + todayTL.city + ' — ' + todayTL.acts.slice(0,5).join(' | ') + '. ' : '') +
+      'VIAJE: Alicante → Montpellier → París → Colmar → Milán → Venecia → Roma → Niza → Alicante. 7 personas, 2 coches. ' +
+      '\n\nDada la hora actual (' + hora + 'h) y que están en ' + donde + ', dime:' +
+      '\n1. Las 3 mejores opciones de qué hacer AHORA mismo (específicas, prácticas, con duración y coste estimado)' +
+      '\n2. Qué considerar: ¿hay algo importante que no se estén perdiendo cerca?' +
+      '\n3. Un consejo práctico urgente (aparcamiento, colas, restaurante, etc.)' +
+      '\nSé conciso, directo y útil. Máximo 150 palabras. En español.';
+
+    fetch(EDGE, {
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':KEY},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        messages:[{role:'user', content:prompt}]
+      })
+    })
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var text = (data.content||[]).map(function(b){return b.text||'';}).join('').trim();
+      result.innerHTML = text.replace(/\n/g,'<br>');
+    })
+    .catch(function(){
+      result.innerHTML = '⚠️ Sin conexión. Comprueba el WiFi o datos.';
+    });
+  }
+
+  btn.addEventListener('click', askIA);
+  input.addEventListener('keydown', function(e){ if(e.key==='Enter') askIA(); });
+}
 
 // ===== INIT =====
 updateCountdown();
