@@ -1303,23 +1303,29 @@ var clDone = {};
 var activeNota = 'Paris';
 
 var LINKS = {
-  paris:   {air:'https://www.airbnb.com/wishlists/2096493986', book:'https://www.booking.com/mywishlist.es.html?wl_id=3940213421'},
-  colmar:  {air:'https://www.airbnb.com/wishlists/2096505421', book:'https://www.booking.com/mywishlist.es.html?wl_id=3940550005'},
-  munich:  {air:'https://www.airbnb.com/wishlists/2096514736', book:'https://www.booking.com/mywishlist.es.html?wl_id=3966981218'},
-  milan:   {air:'https://www.airbnb.com/wishlists/2096516815', book:'https://www.booking.com/mywishlist.es.html?wl_id=3966992422'},
-  menton:  {air:'https://www.airbnb.com/wishlists/2096519674', book:'https://www.booking.com/mywishlist.es.html?wl_id=3967107406'}
+  paris:   {air:'https://www.airbnb.com.co/s/Marly-le-Roi--France/homes?checkin=2026-07-15&checkout=2026-07-16&adults=7&amenities[]=9', book:''},
+  colmar:  {air:'https://www.airbnb.com.co/s/Colmar--France/homes?checkin=2026-07-16&checkout=2026-07-17&adults=7&amenities[]=9&sort=price_asc', book:''},
+  munich:  {air:'https://www.airbnb.com.co/s/Munich--Germany/homes?checkin=2026-07-17&checkout=2026-07-18&adults=7&amenities[]=9&sort=price_asc', book:''},
+  milan:   {air:'https://www.airbnb.com.co/s/Milan--Italy/homes?checkin=2026-07-18&checkout=2026-07-19&adults=7&amenities[]=9&sort=price_asc', book:''},
+  menton:  {air:'https://www.airbnb.com.co/s/Menton--France/homes?checkin=2026-07-21&checkout=2026-07-22&adults=7&amenities[]=9&sort=price_asc', book:''}
 };
 var CITIES = [
-  {id:'paris',  name:'París',  flag:'🇫🇷', nights:1, dates:'15-16 jul', zone:'Le Marais / Montmartre',
-    top:[{name:'Maison Lavaud',rating:9.4,price:'2.0M'},{name:'Marais 4 hab.',rating:8.9,price:'1.8M'}]},
-  {id:'colmar', name:'Colmar', flag:'🇫🇷', nights:1, dates:'16-17 jul', zone:'Centro histórico',
-    top:[{name:'Le 7 Kléber',rating:9.7,price:'1.5M'},{name:'Big Mama',rating:8.9,price:'1.3M'}]},
-  {id:'munich', name:'Múnich', flag:'🇩🇪', nights:1, dates:'17-18 jul', zone:'Centro',
-    top:[{name:'Eleganz',rating:9.1,price:'2.2M'},{name:'KOOS Hotel',rating:8.7,price:'2.5M'}]},
-  {id:'milan',  name:'Milán',  flag:'🇮🇹', nights:1, dates:'18-19 jul', zone:'Cerca de Centrale',
-    top:[{name:'Fifty Eight Suite',rating:9.5,price:'3.5M'},{name:'Gaffurio Apt.',rating:9.2,price:'2.98M'}]},
-  {id:'menton', name:'Menton', flag:'🇫🇷', nights:1, dates:'21-22 jul', zone:'Centro / frontera Italia',
-    top:[{name:'Hôtel Gabriel',rating:9.5,price:'5.03M'},{name:'Ibis Styles Centre',rating:9.0,price:'3.59M'}]}
+  {id:'paris',  name:'París',  flag:'🇫🇷', nights:1, dates:'15-16 jul', zone:'Marly-le-Roi',
+    pick:{name:'Alojamiento en Marly-le-Roi', rating:4.95, label:'Excepcional',
+      reason:'Casa con parking privado, acceso directo en coche, a 20 min de París.'}},
+  {id:'colmar', name:'Colmar', flag:'🇫🇷', nights:1, dates:'16-17 jul', zone:'Volgelsheim',
+    pick:{name:'Apartamento en Volgelsheim', rating:4.94, label:'Excepcional',
+      reason:'Zona Colmar, parking incluido, apartamento entero para 7.'}},
+  {id:'munich', name:'Múnich', flag:'🇩🇪', nights:1, dates:'17-18 jul', zone:'En ciudad',
+    pick:{name:'Alojamiento en Múnich', rating:4.83, label:'Muy bueno',
+      reason:'Única opción EN ciudad con parking para 7 en julio.',
+      warn:'Múnich es la noche más cara — sin alternativa barata con parking cerca.'}},
+  {id:'milan',  name:'Milán',  flag:'🇮🇹', nights:1, dates:'18-19 jul', zone:'Cambiago',
+    pick:{name:'Alojamiento en Cambiago', rating:4.82, label:'Muy bueno',
+      reason:'Zona norte de Milán, parking incluido, acceso fácil en coche.'}},
+  {id:'menton', name:'Menton', flag:'🇫🇷', nights:1, dates:'21-22 jul', zone:'Centro',
+    pick:{name:'Apartamento en Menton', rating:4.89, label:'Excepcional',
+      reason:'En Menton, parking, excelente valoración. Única opción dentro de presupuesto.'}}
 ];
 
 var PEOPLE = ['Carlos','Lucia','Marco','Sofia','Diego','Ana','Javi'];
@@ -2022,16 +2028,14 @@ function renderCities() {
     html += '<div class="city-meta">'+c.dates+' · '+c.zone+'</div></div>';
     html += '<div class="city-nights">'+c.nights+(c.nights>1?' noches':' noche')+'</div></div>';
     html += '<div class="city-body">';
-    if(c.top && c.top.length){
-      html += '<div style="font-size:0.58rem;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.06em">Top opciones</div>';
-      c.top.forEach(function(t,i){
-        html += '<div style="display:flex;align-items:center;gap:0.5rem;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.45rem 0.7rem">'+
-          '<div style="background:'+(i===0?'#fef9c3;color:#854d0e':'#f1f5f9;color:#64748b')+';font-size:0.6rem;font-weight:800;border-radius:5px;padding:0.1rem 0.35rem">#'+(i+1)+'</div>'+
-          '<div style="flex:1;min-width:0;font-size:0.72rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+t.name+'</div>'+
-          '<div style="font-size:0.65rem;font-weight:700;color:#059669;white-space:nowrap">★'+t.rating+'</div>'+
-          '<div style="font-size:0.65rem;font-weight:700;color:#475569;white-space:nowrap">'+t.price+'</div>'+
-        '</div>';
-      });
+    if(c.pick){
+      var p=c.pick;
+      html += '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.55rem 0.7rem">'+
+        '<div style="font-size:0.74rem;font-weight:700;margin-bottom:0.15rem">'+p.name+'</div>'+
+        '<div style="font-size:0.68rem;color:#d97706;font-weight:600;margin-bottom:0.3rem">★ '+p.rating+' · '+p.label+' · 🅿️ Parking</div>'+
+        '<div style="font-size:0.68rem;color:#64748b;line-height:1.4">'+p.reason+'</div>'+
+        (p.warn?'<div style="font-size:0.65rem;color:#b45309;margin-top:0.3rem">⚠️ '+p.warn+'</div>':'')+
+      '</div>';
     }
     html += '<div class="lrow"><div class="lp"><div class="da"></div><span class="la">Airbnb</span></div>';
     if(air){ html += '<div class="ldesc ok">Inicia sesion en Airbnb para ver</div><a href="'+air+'" target="_blank" class="btn-ver ba">Ver</a>'; }
@@ -2041,11 +2045,7 @@ function renderCities() {
     if(book){ html += '<div class="ldesc ok">Inicia sesion en Booking para ver</div><a href="'+book+'" target="_blank" class="btn-ver bb">Ver</a>'; }
     else    { html += '<div class="ldesc">Proximamente</div>'; }
     html += '</div>';
-    html += '<div class="vrow">';
-    html += '<button class="vb '+vy+'" data-voteid="'+c.id+'" data-votetype="y">👍 Me apunto</button>';
-    html += '<button class="vb '+vf+'" data-voteid="'+c.id+'" data-votetype="f">⭐ Favorita</button>';
-    html += '<button class="vb '+vn+'" data-voteid="'+c.id+'" data-votetype="n">👎 No</button>';
-    html += '</div></div></div>';
+    html += '</div></div>';
   });
   document.getElementById('city-blocks').innerHTML = html;
   renderRanking();
