@@ -556,7 +556,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
     <div id="home-ruta-banner" style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);border-radius:14px;padding:1rem;margin-bottom:0.75rem;overflow:hidden">
       <div style="font-size:0.58rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#475569;margin-bottom:0.55rem">🗺️ Tu ruta</div>
       <div id="home-ruta-chips" style="display:flex;align-items:center;gap:0.28rem;flex-wrap:wrap"></div>
-      <div style="margin-top:0.65rem;font-size:0.63rem;color:#475569">7 viajeros · 2 coches · ~4.800 km · 8 días · 14–21 jul</div>
+      <div style="margin-top:0.65rem;font-size:0.63rem;color:#475569">7 viajeros · 2 coches · ~4.760 km · 9 días · 14–22 jul</div>
     </div>
 
     <!-- Cards rápidas 2x2 -->
@@ -570,8 +570,8 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
         <div class="dl">Por persona</div><span class="dt tg" id="dash-total-tag">Total 4.830€</span>
       </div>
       <div class="dcard" onclick="showView('alojamientos',1)">
-        <div class="di">🏠</div><div class="dv">6</div>
-        <div class="dl">Alojamientos</div><span class="dt tr">0 reservados</span>
+        <div class="di">🏠</div><div class="dv">7</div>
+        <div class="dl">Alojamientos</div><span class="dt tg">7 reservados</span>
       </div>
       <div class="dcard" onclick="showView('checklist',5)">
         <div class="di">✅</div><div class="dv" id="dash-cl">0%</div>
@@ -625,6 +625,18 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
   <div id="home-during" style="display:none">
     <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.5rem" id="home-during-date"></div>
 
+    <!-- Card destacado: cumpleaños -->
+    <div id="home-bday-banner" style="display:none;background:linear-gradient(135deg,#f472b6,#c026d3);border-radius:14px;padding:0.9rem 1rem;margin-bottom:0.75rem;color:white;text-align:center">
+      <div style="font-size:1.4rem">🎂</div>
+      <div style="font-weight:800;font-size:0.95rem;margin-top:0.2rem">Día de cumpleaños</div>
+    </div>
+
+    <!-- Card destacado: hotel de esta noche -->
+    <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;margin-bottom:0.75rem">
+      <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.55rem">🛏️ Hotel de esta noche</div>
+      <div id="home-hotel-card"></div>
+    </div>
+
     <!-- Estado del grupo -->
     <div style="background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:14px;padding:1rem;margin-bottom:0.75rem;color:white">
       <div style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#64748b;margin-bottom:0.6rem">Estado del grupo 🚗</div>
@@ -668,6 +680,13 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
         <div style="font-size:0.75rem;color:#94a3b8;font-style:italic">Cargando alertas...</div>
       </div>
     </div>
+
+    <!-- Qué hacer ahora — IA -->
+    <div style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:14px;padding:1rem;margin-bottom:0.75rem;color:white">
+      <div style="font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.6);margin-bottom:0.5rem">✨ Copiloto IA</div>
+      <button id="home-ahora-btn" onclick="agSuggestNow()" style="width:100%;background:white;color:#7c3aed;border:none;border-radius:8px;padding:0.6rem;font-family:inherit;font-weight:700;font-size:0.8rem;cursor:pointer">¿Qué hacemos ahora?</button>
+      <div id="home-ahora-result" style="display:none;background:rgba(255,255,255,0.12);border-radius:8px;padding:0.65rem;font-size:0.73rem;line-height:1.6;margin-top:0.6rem"></div>
+    </div>
   </div>
 
   <!-- ===== DESPUÉS DEL VIAJE ===== -->
@@ -675,7 +694,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
     <div style="text-align:center;padding:1.5rem 0">
       <div style="font-size:2.5rem;margin-bottom:0.5rem">🏁</div>
       <div style="font-size:1.2rem;font-weight:800;margin-bottom:0.3rem">EuroTrip 2026 completado</div>
-      <div style="font-size:0.8rem;color:#64748b">14 — 21 julio · 4.800 km · 7 viajeros</div>
+      <div style="font-size:0.8rem;color:#64748b">14 — 22 julio · 4.760 km · 7 viajeros</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.65rem">
       <div class="dcard" onclick="showView('gastos',3)">
@@ -694,12 +713,25 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
   <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem;transition:all .15s" onmouseover="this.style.borderColor='#3b82f6';this.style.color='#3b82f6'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b'">← Inicio</button>
   <div class="ptitle">Alojamientos</div>
   <div class="module-user">Hola, <strong class="user-name-display">—</strong></div>
-  <div class="psub">Votad vuestras opciones favoritas. Los links abren directamente las listas de Airbnb.</div>
+  <div class="psub">7 reservas confirmadas y pagadas.</div>
   <div id="city-blocks"></div>
+</div>
+
+<!-- PLANEACIÓN (archivo) — simulador y votos de un viaje ya cerrado, se conserva para reutilizar -->
+<div id="view-planeacion" class="view">
+  <button onclick="showView('dashboard',0)" style="display:inline-flex;align-items:center;gap:0.35rem;background:none;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.32rem 0.68rem;cursor:pointer;font-family:inherit;font-size:0.74rem;color:#64748b;margin-bottom:1rem">← Inicio</button>
+  <div class="ptitle">Planeación (archivo)</div>
+  <div class="psub">Herramientas de planeación de este viaje ya cerrado. Se conservan por si sirven para el próximo.</div>
+  <div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.9rem;margin-bottom:0.9rem">
+    <div style="font-size:0.63rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#94a3b8;margin-bottom:0.5rem">✨ Simulador de ruta</div>
+    <button onclick="showView('simulador',8)" style="width:100%;background:#0f172a;color:white;border:none;border-radius:8px;padding:0.6rem;font-family:inherit;font-weight:700;font-size:0.8rem;cursor:pointer">Abrir simulador</button>
+  </div>
+  <div class="st">Votos de alojamiento (archivo)</div>
+  <div id="city-blocks-legacy"></div>
   <div class="st" style="margin-top:1.25rem">Ranking de votos</div>
   <div class="rk-card">
     <div class="rk-h">Puntuacion en tiempo real</div>
-    <div id="rk-list"><div class="rk-empty">Sin votos todavia.</div></div>
+    <div id="rk-list-legacy"><div class="rk-empty">Sin votos todavia.</div></div>
   </div>
 </div>
 
@@ -713,7 +745,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
       <div style="font-size:0.68rem;color:#94a3b8">Hola, <strong class="user-name-display" style="color:#3b82f6">—</strong></div>
     </div>
     <div style="display:flex;gap:6px;align-items:center">
-      <button onclick="showView('simulador',8)" style="background:#f1f5f9;color:#64748b;border:none;border-radius:8px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:600;font-size:0.7rem;cursor:pointer">✨ Simular</button>
+      <button onclick="showView('planeacion',9)" style="background:#f1f5f9;color:#64748b;border:none;border-radius:8px;padding:0.3rem 0.7rem;font-family:inherit;font-weight:600;font-size:0.7rem;cursor:pointer">📁 Planeación</button>
       <div id="ruta-admin-btns" style="display:none;gap:0.4rem">
         <button id="ruta-edit-btn" style="font-size:0.65rem;font-weight:700;padding:0.25rem 0.65rem;border-radius:7px;background:#f1f5f9;border:1.5px solid #e2e8f0;cursor:pointer;font-family:inherit;color:#64748b">✏️ Editar ruta</button>
       </div>
@@ -1168,7 +1200,7 @@ body{font-family:'Inter',sans-serif;background:#f8fafc;color:#0f172a;padding-bot
 
 <!-- BOTTOM NAV -->
 <div class="bnav">
-  <button class="bnb active" onclick="showView('dashboard',0)"><span class="bnb-i">🏠</span><span class="bnb-l">Inicio</span></button>
+  <button class="bnb active" onclick="showView('dashboard',0)"><span class="bnb-i">📍</span><span class="bnb-l">Hoy</span></button>
   <button class="bnb" onclick="showView('alojamientos',1)"><span class="bnb-i">🛏</span><span class="bnb-l">Alojam.</span></button>
   <button class="bnb" onclick="showView('timeline',2)"><span class="bnb-i">🗺️</span><span class="bnb-l">Ruta</span></button>
   <button class="bnb" onclick="showView('gastos',3)"><span class="bnb-i">🧾</span><span class="bnb-l">Gastos</span></button>
@@ -1302,14 +1334,42 @@ var gastos = [];
 var clDone = {};
 var activeNota = 'Paris';
 
-var LINKS = {
+// STAYS: reservas reales y ya pagadas del EuroTrip 2026 — usado por la vista Alojamientos
+var STAYS = [
+  {id:'montpellier', name:'Montpellier', flag:'🇫🇷', dates:'14 jul', nights:1,
+    hotelName:'Airbnb T5', address:'5 Avenue du Petit Bard, Montpellier', checkin:'14:00',
+    parking:'Privado incluido', phone:'+33 6 60 28 18 97', host:'Kikmatou'},
+  {id:'paris', name:'París (Clichy)', flag:'🇫🇷', dates:'15 jul', nights:1,
+    hotelName:'ibis budget Paris Clichy Mairie', address:'18-20 Rue Palloy, 92110 Clichy', checkin:'12:00',
+    parking:'€15/día (reservar)', phone:'+33 1 41 27 20 45'},
+  {id:'colmar', name:'Colmar', flag:'🇫🇷', dates:'16 jul', nights:1,
+    hotelName:'ibis Colmar Est', address:'13 Route De Neuf-Brisach, 68180 Colmar', checkin:'15:00',
+    parking:'Privado gratis (garaje opcional +€10/día)', phone:'+33 3 89 23 46 46'},
+  {id:'munich', name:'Múnich', flag:'🇩🇪', dates:'17 jul', nights:1,
+    hotelName:'Amber Econtel', address:'Bodenseestraße 227, 81243 Múnich', checkin:'15:00',
+    parking:'Privado €9,50/día (no reservable)', phone:'+49 89 87189100'},
+  {id:'milan', name:'Milán (Opera)', flag:'🇮🇹', dates:'18 jul', nights:1,
+    hotelName:'Acca Sporting Milano - AA Hotels', address:'56 Via Sporting Mirasole, 20073 Opera', checkin:'14:00-00:00',
+    parking:'€15/día (reservar)', phone:'+39 02 9295 8581'},
+  {id:'roma', name:'Roma (Vaticano)', flag:'🇮🇹', dates:'19-20 jul', nights:2,
+    hotelName:'Vatican City San Peter apartment', address:'Vicolo del Gelsomino 50, Aurelio, Roma', checkin:'15:00',
+    parking:'Privado gratis', phone:'+39 393 903 5871', warn:'NO reembolsable'},
+  {id:'albenga', name:'Albenga', flag:'🇮🇹', dates:'21 jul', nights:1,
+    hotelName:'Il Leone Bianco Affittacamere', address:'Via Paccini 32, 17031 Albenga', checkin:'16:00-19:00',
+    parking:'Público gratis', phone:'+49 89 62826568'}
+];
+
+// ===== ARCHIVO / PLANEACIÓN (legado) =====
+// Opciones candidatas y sistema de votos ya usado para decidir alojamientos.
+// El itinerario ya está cerrado y todo reservado — se conserva para reutilizar en un próximo viaje.
+var LINKS_LEGACY = {
   paris:   {air:'https://www.airbnb.com.co/s/Marly-le-Roi--France/homes?checkin=2026-07-15&checkout=2026-07-16&adults=7&amenities[]=9', book:''},
   colmar:  {air:'https://www.airbnb.com.co/s/Colmar--France/homes?checkin=2026-07-16&checkout=2026-07-17&adults=7&amenities[]=9&sort=price_asc', book:''},
   munich:  {air:'https://www.airbnb.com.co/s/Munich--Germany/homes?checkin=2026-07-17&checkout=2026-07-18&adults=7&amenities[]=9&sort=price_asc', book:''},
   milan:   {air:'https://www.airbnb.com.co/s/Milan--Italy/homes?checkin=2026-07-18&checkout=2026-07-19&adults=7&amenities[]=9&sort=price_asc', book:''},
   menton:  {air:'https://www.airbnb.com.co/s/Menton--France/homes?checkin=2026-07-21&checkout=2026-07-22&adults=7&amenities[]=9&sort=price_asc', book:''}
 };
-var CITIES = [
+var CITIES_LEGACY = [
   {id:'paris',  name:'París',  flag:'🇫🇷', nights:1, dates:'15-16 jul', zone:'Marly-le-Roi',
     pick:{name:'Alojamiento en Marly-le-Roi', rating:4.95, label:'Excepcional',
       reason:'Casa con parking privado, acceso directo en coche, a 20 min de París.'}},
@@ -1378,8 +1438,8 @@ var CL_DATA = [
   {s:'Urgente — hacer ya', items:[
     {t:'Entradas Coliseo — coopculture.it (agotadas en verano)', own:'Marco', prio:'urgente'},
     {t:'Entradas Vaticano — museivaticani.va (reservar con semanas)', own:'Marco', prio:'urgente'},
-    {t:'Confirmar y reservar Airbnb Paris (2 noches)', own:'Todos', prio:'urgente'},
-    {t:'Confirmar y reservar Airbnb Roma (2 noches, cumple el 19)', own:'Todos', prio:'urgente'},
+    {t:'Confirmar y reservar Airbnb Paris (1 noche)', own:'Todos', prio:'urgente'},
+    {t:'Confirmar y reservar Airbnb Roma (2 noches, cumple el 20)', own:'Todos', prio:'urgente'},
     {t:'Confirmar resto de Airbnbs del itinerario', own:'Todos', prio:'urgente'},
     {t:'Reservar parking en Venecia — Piazzale Roma o Tronchetto', own:'Carlos', prio:'urgente'}
   ]},
@@ -1387,7 +1447,7 @@ var CL_DATA = [
     {t:'Contratar seguro de viaje europeo (todos)', own:'Todos', prio:'importante'},
     {t:'Revisar vigencia de DNI y pasaportes (minimo 6 meses)', own:'Todos', prio:'importante'},
     {t:'Solicitar pegatina Crit Air para Paris — critair.fr (~4€, 2 semanas de antelacion)', own:'Conductores', prio:'importante'},
-    {t:'Descargar Google Maps offline: Alicante, Montpellier, Paris, Colmar, Milan, Venecia, Roma, Niza', own:'Todos', prio:'normal'},
+    {t:'Descargar Google Maps offline: Alicante, Montpellier, Paris, Colmar, Múnich, Milán, Venecia, Roma, Albenga', own:'Todos', prio:'normal'},
     {t:'Crear fondo comun en Revolut o Bizum para gastos grupales', own:'Lucia', prio:'importante'},
     {t:'Revisar seguro del coche para cobertura en Francia e Italia', own:'Conductores', prio:'importante'},
     {t:'Chaleco reflectante y triangulos en ambos coches (obligatorio FR e IT)', own:'Conductores', prio:'normal'},
@@ -1410,160 +1470,104 @@ var CL_DATA = [
   ]}
 ];
 
+var HOTEL_MONTPELLIER = {name:'Airbnb T5', address:'5 Avenue du Petit Bard, Montpellier', checkin:'14:00', parking:'Privado incluido', phone:'+33 6 60 28 18 97', host:'Kikmatou'};
+var HOTEL_PARIS = {name:'ibis budget Paris Clichy Mairie', address:'18-20 Rue Palloy, 92110 Clichy', checkin:'12:00', parking:'€15/día (reservar)', phone:'+33 1 41 27 20 45'};
+var HOTEL_COLMAR = {name:'ibis Colmar Est', address:'13 Route De Neuf-Brisach, 68180 Colmar', checkin:'15:00', parking:'Privado gratis (garaje opcional +€10/día)', phone:'+33 3 89 23 46 46'};
+var HOTEL_MUNICH = {name:'Amber Econtel', address:'Bodenseestraße 227, 81243 Múnich', checkin:'15:00', parking:'Privado €9,50/día (no reservable)', phone:'+49 89 87189100'};
+var HOTEL_MILAN = {name:'Acca Sporting Milano - AA Hotels', address:'56 Via Sporting Mirasole, 20073 Opera', checkin:'14:00-00:00', parking:'€15/día (reservar)', phone:'+39 02 9295 8581'};
+var HOTEL_ROMA = {name:'Vatican City San Peter apartment', address:'Vicolo del Gelsomino 50, Aurelio, Roma', checkin:'15:00', parking:'Privado gratis', phone:'+39 393 903 5871', note:'NO reembolsable', nights:2};
+var HOTEL_ALBENGA = {name:'Il Leone Bianco Affittacamere', address:'Via Paccini 32, 17031 Albenga', checkin:'16:00-19:00', parking:'Público gratis', phone:'+49 89 62826568'};
+
 var TL = [
-  {date:'14 jul', city:'Alicante — Barcelona — Montpellier', drive:true, km:830, h:'9h 30min', ztl:false,
+  {date:'14 jul', city:'Alicante — Barcelona — Montpellier', drive:true, km:740, h:'8h', ztl:false,
    maps:'https://www.google.com/maps/dir/Alicante,+Spain/Barcelona,+Spain/Montpellier,+France',
    acts:[
-     '07:00 Salida desde Alicante — llenar tanque completo antes de la autopista',
-     '07:30 AP-7 Norte direccion Barcelona — primer turno de conduccion',
-     '09:30 Parada descanso area de servicio — cafe y estirar piernas (20 min)',
-     '10:30 Llegada Barcelona — aparcar en P+R periferia (Zona Franca o Glories)',
-     '11:00 Paseo rapido por el Barrio Gotico — Catedral y callejuelas medievales (45 min)',
-     '12:00 Almuerzo en el Born o Barceloneta — bocadillos o menu del dia (1h)',
-     '13:00 Salida hacia Montpellier — A7 por Tarragona y Girona',
-     '14:30 Cruce frontera La Junquera — sin parada, autopista directa',
-     '15:30 Parada descanso Perpignan — repostar en Francia (mas barato) (30 min)',
-     '19:00 Llegada Montpellier — check-in Airbnb y dejar equipaje',
-     '20:00 Paseo por Place de la Comedie — centro historico de Montpellier',
-     '21:00 Cena en el barrio Ecusson — cocina francesa informal',
-     'DORMIR — Noche 1 en Montpellier'
+     '09:00 Salida desde Alicante',
+     '13:00 Llegada a Barcelona (parada 1h)',
+     '14:00 Salida desde Barcelona',
+     '17:00 Llegada a Montpellier',
+     'DORMIR — Noche en Montpellier'
    ],
-   stay:'Airbnb Montpellier (noche 1)', note:'Primera etapa larga. Llevar nevera con snacks. Repostar en Francia siempre mas barato que en Espana.'},
+   stay:'Airbnb Montpellier', hotel:HOTEL_MONTPELLIER, note:''},
 
-  {date:'15 jul', city:'Montpellier — Clermont-Ferrand — Paris', drive:true, km:780, h:'8h 45min', ztl:false,
+  {date:'15 jul', city:'Montpellier — Clermont-Ferrand — Paris', drive:true, km:720, h:'8h 30min', ztl:true,
    maps:'https://www.google.com/maps/dir/Montpellier,+France/Clermont-Ferrand,+France/Paris,+France',
    acts:[
-     '08:00 Salida desde Montpellier — desayuno croissant antes de arrancar',
-     '08:30 A75 Norte hacia Clermont-Ferrand — paisaje volcanico del Macizo Central',
-     '10:30 Parada descanso en ruta (20 min)',
-     '11:30 Llegada Clermont-Ferrand — aparcar cerca del centro',
-     '11:45 Vista del Puy de Dome desde la ciudad — foto del volcan (gratis desde abajo)',
-     '12:15 Almuerzo en brasserie local — probar la truffade auvergnate (1h)',
-     '13:15 Salida hacia Paris — A71 directo',
-     '15:30 Parada descanso area de servicio (20 min)',
-     '17:00 Entrada en Ile-de-France — trafico posible, paciencia',
-     '19:00 Llegada Paris — check-in Airbnb y dejar maletas',
-     '20:30 Vista nocturna de la Torre Eiffel iluminada — desde Trocadero (gratis)',
-     '21:30 Cena en brasserie del barrio — moules-frites o steak-frites',
-     'DORMIR — Noche en Paris'
+     '09:00 Salida desde Montpellier',
+     '12:30 Llegada a Clermont-Ferrand (parada 1h)',
+     '13:30 Salida desde Clermont-Ferrand',
+     '17:30 Llegada a Paris',
+     'DORMIR — Noche en Paris (Clichy)'
    ],
-   stay:'Airbnb Paris (noche 1)', note:'Clermont-Ferrand perfecta parada. El Puy de Dome visible desde la ciudad sin subir. Solo una noche en Paris.'},
+   stay:'ibis budget Paris Clichy Mairie', hotel:HOTEL_PARIS, note:'ZFE París: pegatina Crit’Air requerida para circular.'},
 
-  {date:'16 jul', city:'Paris — Colmar', drive:true, km:530, h:'5h 30min', ztl:false,
+  {date:'16 jul', city:'Paris — Colmar', drive:true, km:450, h:'4h 30min', ztl:false,
    maps:'https://www.google.com/maps/dir/Paris,+France/Colmar,+France',
    acts:[
-     '07:00 Torre Eiffel al amanecer — foto desde Trocadero (45 min)',
-     '08:00 Desayuno en boulangerie del barrio — croissant au beurre y cafe',
-     '09:00 Salida hacia Colmar — A4 Este hacia Alsacia',
-     '10:30 Parada descanso area de servicio Reims (20 min)',
-     '13:00 Llegada Colmar — aparcar en P+R periferico (gratis)',
-     '13:15 La Petite Venise — canal y casas medievales de colores (foto imprescindible)',
-     '14:00 Almuerzo alsaciano — tarte flambee (flammekueche) en Winstub local (1h)',
-     '15:00 Rue des Marchands y centro historico — paseo por el casco mas bonito de Alsacia (1h)',
-     '16:30 Barrio de los curtidores (Gerberbach) — el rincon mas fotografiado (30 min)',
-     '18:00 Check-in Airbnb y dejar maletas',
-     '19:30 Aperitivo alsaciano — Gewurztraminer local en bar del centro',
-     '21:00 Cena en Winstub — choucroute garnie o baeckeoffe',
+     '08:30 Salida desde Paris',
+     '13:00 Llegada a Colmar (directo, sin paradas)',
      'DORMIR — Noche en Colmar'
    ],
-   stay:'Airbnb Colmar (noche 1)', note:'Colmar merece la tarde completa. Madrugar en Paris para aprovechar Colmar con luz de dia.'},
+   stay:'ibis Colmar Est', hotel:HOTEL_COLMAR, note:''},
 
-  {date:'17 jul', city:'Colmar — Milan', drive:true, km:480, h:'5h 30min', ztl:false,
-   maps:'https://www.google.com/maps/dir/Colmar,+France/Milan,+Italy',
+  {date:'17 jul', city:'Colmar — Múnich', drive:true, km:300, h:'3h 30min', ztl:false,
+   maps:'https://www.google.com/maps/dir/Colmar,+France/Munich,+Germany',
    acts:[
-     '08:00 Salida desde Colmar — A35 por Mulhouse',
-     '09:00 Cruce frontera Suiza — peaje vignette obligatorio (40 CHF, comprar online)',
-     '10:30 Parada descanso area autopista suiza (20 min)',
-     '11:30 Cruce frontera Italia — A8 hacia Milan',
-     '13:00 Llegada Milan — aparcar en Autosilos Sammartini (junto a Centrale)',
-     '13:30 Almuerzo en Brera — barrio artistico de Milan',
-     '15:00 Duomo di Milano — exterior imprescindible, subir a la terraza (1h)',
-     '16:30 Galleria Vittorio Emanuele II — la galeria comercial mas antigua del mundo (30 min)',
-     '17:30 Navigli — canales de Milan, barrio mas animado (1h)',
-     '20:00 Check-in Airbnb y dejar maletas',
-     '21:00 Aperitivo milanez en Navigli — bebida + buffet incluido (~10 euros) (1h 30min)',
-     'DORMIR — Noche en Milan'
+     '09:00 Salida desde Colmar',
+     '12:30 Llegada a Múnich (directo, sin paradas)',
+     'DORMIR — Noche en Múnich'
    ],
-   stay:'Airbnb Milan (noche 1)', note:'Vignette suiza obligatoria. Parking Autosilos Sammartini en Milan, 5min a pie de Centrale.'},
+   stay:'Amber Econtel', hotel:HOTEL_MUNICH, note:''},
 
-  {date:'18 jul', city:'Milan — Venecia — Roma', drive:true, km:800, h:'10h', ztl:true,
+  {date:'18 jul', city:'Múnich — Milán', drive:true, km:350, h:'3h 30min', ztl:true,
+   maps:'https://www.google.com/maps/dir/Munich,+Germany/Milan,+Italy',
+   acts:[
+     '09:00 Salida desde Múnich',
+     '12:30 Llegada a Milán (directo, sin paradas)',
+     'DORMIR — Noche en Milán'
+   ],
+   stay:'Acca Sporting Milano - AA Hotels', hotel:HOTEL_MILAN, note:'Área B/C activa en Milán — verificar restricciones antes de entrar al centro.'},
+
+  {date:'19 jul', city:'Milán — Venecia — Roma', drive:true, km:800, h:'8h', ztl:true,
    maps:'https://www.google.com/maps/dir/Milan,+Italy/Venice,+Italy/Rome,+Italy',
    acts:[
-     '07:00 Salida desde Milan — llenar deposito antes de la A4',
-     '07:30 A4 Este hacia Venecia — Po Valley',
-     '09:00 Parada descanso area Brescia (20 min)',
-     '10:30 Llegada Venecia-Mestre — aparcar en Piazzale Roma o Tronchetto (25-35 euros/dia, reservar)',
-     '11:00 Vaporetto linea 1 por el Canal Grande — sentarse en la proa (45 min)',
-     '11:45 Puente de Rialto — mercado y vistas del canal (30 min)',
-     '12:30 Plaza San Marcos — antes del pico de calor',
-     '12:45 Cicchetti y Spritz en bar local de Cannaregio — almuerzo veneciano autentico (1h)',
-     '14:00 Salida desde Mestre hacia Roma — A4 → A13 → A1',
-     '15:30 Parada descanso area de servicio Bologna (30 min)',
-     '17:30 Parada breve Florencia — cupula del Brunelleschi visible desde la autopista (10 min)',
-     '19:00 Parada descanso area de servicio (20 min)',
-     '21:00 Llegada Roma — check-in Airbnb. Manana es el cumpleanos',
-     'DORMIR — Noche 1 en Roma'
+     '09:00 Salida desde Milán',
+     '12:00 Llegada a Venecia (parada 2h)',
+     '14:00 Salida desde Venecia',
+     '17:00 Llegada a Roma',
+     'DORMIR — Noche 1 de 2 en Roma'
    ],
-   stay:'Airbnb Roma (noche 1 de 2)', note:'Etapa larga (10h). ZTL activa en Roma — NO entrar al centro con coches. Aparcar en periferia (Ostiense, Villa Borghese).'},
+   stay:'Vatican City San Peter apartment (noche 1 de 2)', hotel:HOTEL_ROMA, note:'ZTL activa en Roma. En Venecia aparcar en Piazzale Roma o Tronchetto.'},
 
-  {date:'19 jul', city:'Roma — Dia del Cumpleanos', drive:false, km:0, h:'', ztl:true,
+  {date:'20 jul', city:'Roma — Día de Cumpleaños', drive:false, km:0, h:'', ztl:true, isBday:true,
    maps:'https://www.google.com/maps/search/Roma+centro+storico',
    acts:[
-     '08:00 Vaticano — Museos y Capilla Sixtina (reserva obligatoria: museivaticani.va) (3h)',
-     '11:00 Castel Sant Angelo — exterior y Ponte Sant Angelo con angeles barrocos (30 min)',
-     '11:30 Paseo desde el Vaticano hasta el centro — cruzar el Tiber a pie',
-     '12:30 Almuerzo en Prati — barrio del Vaticano, autentico y sin turistas masivos (1h)',
-     '14:00 Coliseo y Foro Romano — reserva en coopculture.it imprescindible (2h)',
-     '16:30 Fontana di Trevi — ir a las 17h (menos gente, mejor luz). Moneda de espaldas (30 min)',
-     '17:15 Panteon — entrada gratuita, uno de los edificios mejor conservados del mundo (30 min)',
-     '18:00 Paseo por el centro historico — Piazza Navona, Campo de Fiori (1h)',
-     '19:00 Aperitivo especial de cumpleanos en Trastevere — bar con terraza',
-     '20:30 Cena especial cumpleanos en Trastevere — reservar mesa con antelacion',
-     '23:00 Passeggiata nocturna — los monumentos de Roma iluminados son espectaculares',
-     'DORMIR — Noche 2 en Roma'
+     'Sin traslados, día libre',
+     'DORMIR — Noche 2 de 2 en Roma'
    ],
-   stay:'Airbnb Roma (noche 2 de 2)', note:'Reservar Coliseo y Vaticano con semanas de antelacion. En julio las colas sin reserva superan 3h.'},
+   stay:'Vatican City San Peter apartment (noche 2 de 2)', hotel:HOTEL_ROMA, note:'🎂 Día de cumpleaños'},
 
-  {date:'20 jul', city:'Roma — Monaco — Niza', drive:true, km:780, h:'9h', ztl:false,
-   maps:'https://www.google.com/maps/dir/Rome,+Italy/Monaco/Nice,+France',
+  {date:'21 jul', city:'Roma — Albenga', drive:true, km:500, h:'5h', ztl:false,
+   maps:'https://www.google.com/maps/dir/Rome,+Italy/Albenga,+Italy',
    acts:[
-     '07:00 Salida desde Roma — A1 Norte hacia Genova',
-     '08:00 Autostrada del Sole hacia el Norte — paisaje de la Toscana',
-     '10:00 Parada descanso area de servicio (20 min)',
-     '12:00 Parada descanso area de servicio Genova (20 min)',
-     '13:00 Costa de Liguria — la A10 costera es espectacular: tuneles y mar',
-     '13:30 Paso por Sanremo — ciudad de la musica italiana (opcional 20 min)',
-     '14:30 Cruce frontera Italia-Francia (Ventimiglia)',
-     '15:00 Llegada Monaco — aparcar en aparcamiento subterraneo del puerto',
-     '15:15 Puerto de Monaco — los yates mas grandes del Mediterraneo',
-     '15:45 Paseo por Monte-Carlo — Casino de Monte-Carlo, exterior imprescindible',
-     '16:15 Palacio del Principe — cambio de guardia y vistas sobre el Mediterraneo (30 min)',
-     '17:00 Salida hacia Niza — solo 20 min por la A8',
-     '17:30 Llegada Niza — check-in Airbnb',
-     '18:30 Promenade des Anglais al atardecer — el paseo maritimo mas famoso de la Costa Azul (1h)',
-     '20:00 Vieux-Nice — casco antiguo, socca y helado (1h)',
-     '21:30 Cena de penultima noche en el puerto de Niza — frutos del mar',
-     'DORMIR — Noche en Niza'
+     '09:00 Salida desde Roma (check-out entre 07:00 y 10:00)',
+     '14:00 Llegada a Albenga (directo, sin paradas)',
+     'DORMIR — Noche en Albenga'
    ],
-   stay:'Airbnb Niza (noche 1)', note:'Monaco esta a solo 20 min de Niza. Aparcar en Monaco es caro (~30 euros/h) — limitar a 2h. Llenar deposito en Francia.'},
+   stay:'Il Leone Bianco Affittacamere', hotel:HOTEL_ALBENGA, note:''},
 
-  {date:'21 jul', city:'Niza — Alicante', drive:true, km:640, h:'7h 30min', ztl:false,
-   maps:'https://www.google.com/maps/dir/Nice,+France/Alicante,+Spain',
+  {date:'22 jul', city:'Albenga — Mónaco — Barcelona — Alicante', drive:true, km:900, h:'11h 30min', ztl:false,
+   maps:'https://www.google.com/maps/dir/Albenga,+Italy/Monaco/Barcelona,+Spain/Alicante,+Spain',
    acts:[
-     '07:30 Ultimo desayuno frances en boulangerie de Niza — croissant y cafe au lait',
-     '08:00 Salida desde Niza — A8 hacia Marsella',
-     '09:30 Parada descanso area de servicio (20 min)',
-     '10:30 Paso por Marsella — vista del Mediterraneo desde la autopista',
-     '11:00 A9 hacia Espana — la Languedoc',
-     '11:45 Parada en Perpignan — llenar deposito en Francia (mas barato) (30 min)',
-     '13:00 Cruce de los Pirineos por La Junquera — foto en la frontera',
-     '13:30 A7 Sur hacia Alicante — ya en Espana',
-     '15:00 Parada descanso area de servicio (20 min)',
-     '17:00 Llegada Alicante — FIN DEL EUROTRIP 2026',
-     '17:30 Resumen de cuentas y recuerdos del viaje',
+     '09:00 Salida desde Albenga',
+     '10:30 Llegada a Mónaco (parada 2h)',
+     '12:30 Salida desde Mónaco',
+     '17:00 Llegada a Barcelona (parada 1h)',
+     '18:00 Salida desde Barcelona',
+     '20:30 Llegada a Alicante — FIN DEL EUROTRIP 2026',
      'DORMIR — En casa. EuroTrip 2026 completado.'
    ],
-   stay:'Casa', note:'Llenar deposito en Francia antes de cruzar. Ruta alternativa costera: Montpellier-Perpignan-Barcelona.'}
+   stay:'Casa', note:''}
 ];
 
 // TL_ORIGINAL: copia inmutable del itinerario artesanal
@@ -1713,7 +1717,7 @@ function agOpenCountry(code) {
 }
 
 // ===== NAV =====
-var VIEWS = ['dashboard','alojamientos','timeline','presupuesto','gastos','notas','checklist','emergencias','simulador'];
+var VIEWS = ['dashboard','alojamientos','timeline','presupuesto','gastos','notas','checklist','emergencias','simulador','planeacion'];
 function showView(name, idx) {
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
   document.querySelectorAll('.bnb').forEach(function(b){b.classList.remove('active');});
@@ -1728,6 +1732,7 @@ function showView(name, idx) {
   if(name === 'perfil') { initPerfil(); }
   if(name === 'gastos') gInitForm();
   if(name === 'checklist') tareaInitView();
+  if(name === 'planeacion') renderCitiesLegacy();
 }
 
 // ===== COUNTDOWN =====
@@ -1985,7 +1990,7 @@ function loadData() {
     if(!Array.isArray(data)) return;
     votes = {};
     data.forEach(function(v){ votes[v.ciudad+'_'+v.tipo] = v.usuario; });
-    renderCities();
+    renderCitiesLegacy();
     setBadge(true);
   }).catch(function(){ setBadge(false); });
 
@@ -2013,15 +2018,39 @@ function setBadge(ok) {
   // Don't show error - just stay neutral if no connection
 }
 
-// ===== ALOJAMIENTOS =====
+// ===== ALOJAMIENTOS (datos reales, ya reservados) =====
 function renderCities() {
+  var html = STAYS.map(function(s) {
+    return '<div class="city-block">'+
+      '<div class="city-h"><div class="city-flag">'+s.flag+'</div>'+
+      '<div style="flex:1"><div class="city-name">'+s.name+'</div>'+
+      '<div class="city-meta">'+s.dates+'</div></div>'+
+      '<div class="city-nights">'+s.nights+(s.nights>1?' noches':' noche')+'</div></div>'+
+      '<div class="city-body">'+
+        '<div style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:8px;padding:0.6rem 0.7rem">'+
+          '<div style="font-size:0.76rem;font-weight:700;margin-bottom:0.2rem">'+s.hotelName+'</div>'+
+          '<div style="font-size:0.7rem;color:#475569;margin-bottom:0.3rem">📍 '+s.address+'</div>'+
+          '<div style="font-size:0.68rem;color:#64748b;line-height:1.6">'+
+            '🕐 Check-in '+s.checkin+'<br>'+
+            '🅿️ '+s.parking+'<br>'+
+            '📞 <a href="tel:'+s.phone.replace(/\s/g,'')+'" style="color:#3b82f6;text-decoration:none">'+s.phone+'</a>'+
+            (s.host?'<br>👤 Anfitrión: '+s.host:'')+
+          '</div>'+
+          (s.warn?'<div style="font-size:0.66rem;color:#b45309;margin-top:0.35rem;font-weight:600">⚠️ '+s.warn+'</div>':'')+
+        '</div>'+
+      '</div></div>';
+  }).join('');
+  document.getElementById('city-blocks').innerHTML = html;
+}
+
+// ===== ARCHIVO / PLANEACIÓN — voto de opciones (ya no aplica a este viaje, reservas cerradas) =====
+function renderCitiesLegacy() {
+  var el = document.getElementById('city-blocks-legacy');
+  if(!el) return;
   var html = '';
-  CITIES.forEach(function(c) {
-    var air = LINKS[c.id] ? LINKS[c.id].air : '';
-    var book = LINKS[c.id] ? LINKS[c.id].book : '';
-    var vy = votes[c.id+'_y'] ? 'vy' : '';
-    var vf = votes[c.id+'_f'] ? 'vf' : '';
-    var vn = votes[c.id+'_n'] ? 'vn' : '';
+  CITIES_LEGACY.forEach(function(c) {
+    var air = LINKS_LEGACY[c.id] ? LINKS_LEGACY[c.id].air : '';
+    var book = LINKS_LEGACY[c.id] ? LINKS_LEGACY[c.id].book : '';
     html += '<div class="city-block">';
     html += '<div class="city-h"><div class="city-flag">'+c.flag+'</div>';
     html += '<div style="flex:1"><div class="city-name">'+c.name+'</div>';
@@ -2045,9 +2074,17 @@ function renderCities() {
     if(book){ html += '<div class="ldesc ok">Inicia sesion en Booking para ver</div><a href="'+book+'" target="_blank" class="btn-ver bb">Ver</a>'; }
     else    { html += '<div class="ldesc">Proximamente</div>'; }
     html += '</div>';
+    var vy = votes[c.id+'_y']?'vy':'';
+    var vf = votes[c.id+'_f']?'vf':'';
+    var vn = votes[c.id+'_n']?'vn':'';
+    html += '<div class="vrow">';
+    html += '<button class="vb '+vy+'" data-voteid="'+c.id+'" data-votetype="y">👍 Me apunto</button>';
+    html += '<button class="vb '+vf+'" data-voteid="'+c.id+'" data-votetype="f">⭐ Favorita</button>';
+    html += '<button class="vb '+vn+'" data-voteid="'+c.id+'" data-votetype="n">👎 No</button>';
+    html += '</div>';
     html += '</div></div>';
   });
-  document.getElementById('city-blocks').innerHTML = html;
+  el.innerHTML = html;
   renderRanking();
 }
 
@@ -2063,14 +2100,16 @@ function vote(id, tipo) {
 }
 
 function renderRanking() {
-  var sc = CITIES.map(function(c){
+  var el = document.getElementById('rk-list-legacy');
+  if(!el) return;
+  var sc = CITIES_LEGACY.map(function(c){
     return {name:c.name, flag:c.flag,
       score:(votes[c.id+'_y']?2:0)+(votes[c.id+'_f']?3:0)+(votes[c.id+'_n']?-1:0)};
   }).filter(function(x){return x.score!==0;});
   sc.sort(function(a,b){return b.score-a.score;});
-  if(!sc.length){ document.getElementById('rk-list').innerHTML='<div class="rk-empty">Sin votos todavia.</div>'; return; }
+  if(!sc.length){ el.innerHTML='<div class="rk-empty">Sin votos todavia.</div>'; return; }
   var m=['🥇','🥈','🥉'];
-  document.getElementById('rk-list').innerHTML = sc.slice(0,6).map(function(x,i){
+  el.innerHTML = sc.slice(0,6).map(function(x,i){
     return '<div class="rk-row"><span class="rk-pos">'+(m[i]||'·')+'</span><span class="rk-name">'+x.flag+' '+x.name+'</span><span class="rk-pts">'+x.score+' pts</span></div>';
   }).join('');
 }
@@ -2184,8 +2223,8 @@ var simRouteInited = false;
 var dragSrc = null;
 
 // City data
-var SIM_BASE_ROUTE = ['alicante','montpellier','paris','colmar','milan','venecia','roma','niza','alicante'];
-var simRoute = ['alicante','barcelona','montpellier','clermont','paris','colmar','milan','venecia','roma','monaco','niza','alicante'];
+var SIM_BASE_ROUTE = ['alicante','montpellier','paris','colmar','munich','milan','roma','albenga','alicante'];
+var simRoute = ['alicante','barcelona','montpellier','clermont','paris','colmar','munich','milan','venecia','roma','albenga','monaco','barcelona','alicante'];
 var simCandidatas = []; // from Supabase
 var simCityCache = {}; // AI-generated city data
 var simSelected = null; // currently selected candidate city id
@@ -2203,7 +2242,7 @@ var SIM_COORDS = {
   amsterdam:[4.90,52.37], bruselas:[4.35,50.85],
   berlin:[13.40,52.52], munich:[11.58,48.14], frankfurt:[8.68,50.11],
   colonia:[6.96,50.93],
-  genova:[8.93,44.41], sanremo:[7.78,43.82]
+  genova:[8.93,44.41], sanremo:[7.78,43.82], albenga:[8.21,44.05]
 };
 
 var SIM_KM = {
@@ -2226,7 +2265,9 @@ var SIM_KM = {
   'perpignan|niza':420,'perpignan|montpellier':160,'perpignan|barcelona':190,
   'verona|milan':160,'verona|venecia':120,'brescia|milan':100,'brescia|venecia':180,
   'berna|colmar':180,'berna|milan':330,'sanremo|niza':55,'sanremo|genova':160,
-  'marsella|niza':200,'marsella|montpellier':170,'marsella|alicante':540
+  'marsella|niza':200,'marsella|montpellier':170,'marsella|alicante':540,
+  'colmar|munich':300,'munich|milan':350,'roma|albenga':500,
+  'albenga|monaco':110,'monaco|barcelona':650
 };
 
 var SIM_MODES = {
@@ -2272,7 +2313,7 @@ var SIM_NAMES = {
   zurich:'Zurich', ginebra:'Ginebra',
   amsterdam:'Amsterdam', bruselas:'Bruselas',
   berlin:'Berlin', munich:'Munich', frankfurt:'Frankfurt', colonia:'Colonia',
-  sanremo:'Sanremo', clermont:'Clermont-Ferrand'
+  sanremo:'Sanremo', clermont:'Clermont-Ferrand', albenga:'Albenga'
 };
 var SIM_FLAGS = {
   alicante:'ES', madrid:'ES', barcelona:'ES',
@@ -2283,11 +2324,11 @@ var SIM_FLAGS = {
   zurich:'CH', ginebra:'CH',
   amsterdam:'NL', bruselas:'BE',
   berlin:'DE', munich:'DE', frankfurt:'DE', colonia:'DE',
-  genova:'IT', sanremo:'IT'
+  genova:'IT', sanremo:'IT', albenga:'IT'
 };
 
 // TL dates for date display
-var TL_DATES = ['14 jul','15 jul','16 jul','17 jul','18 jul','19 jul','20 jul','21 jul','22 jul','23 jul'];
+var TL_DATES = ['14 jul','15 jul','16 jul','17 jul','18 jul','19 jul','20 jul','21 jul','22 jul'];
 
 // ===== PIN =====
 function simRequestAdmin(action){
@@ -3938,40 +3979,41 @@ function loadSheet() {
     for(var i=1;i<lines.length;i++){
       var cols=lines[i].split(',');
       var city=cols[0]?cols[0].trim().toLowerCase():'';
-      if(city&&LINKS[city]!==undefined){
-        if(cur.city&&cur.city!==city) LINKS[cur.city]={air:cur.air.replace(/"/g,''),book:cur.book.replace(/"/g,'')};
+      if(city&&LINKS_LEGACY[city]!==undefined){
+        if(cur.city&&cur.city!==city) LINKS_LEGACY[cur.city]={air:cur.air.replace(/"/g,''),book:cur.book.replace(/"/g,'')};
         cur={city:city,air:cols[1]?cols[1].trim():'',book:cols[2]?cols[2].trim():''};
       } else if(cur.city){
         if(cols[1]) cur.air+=cols[1].trim();
         if(cols[2]) cur.book+=cols[2].trim();
       }
     }
-    if(cur.city&&LINKS[cur.city]!==undefined) LINKS[cur.city]={air:cur.air.replace(/"/g,''),book:cur.book.replace(/"/g,'')};
-    renderCities();
+    if(cur.city&&LINKS_LEGACY[cur.city]!==undefined) LINKS_LEGACY[cur.city]={air:cur.air.replace(/"/g,''),book:cur.book.replace(/"/g,'')};
+    renderCitiesLegacy();
   }).catch(function(){});
 }
 
 // ===== CIUDAD DETAIL =====
 var CITY_DAYS = {
-  alicante:[1], montpellier:[1,2], paris:[2,3], colmar:[4],
-  milan:[4,5], venecia:[5], roma:[5,6,7], niza:[7,8]
+  alicante:[1,9], montpellier:[1,2], paris:[2,3], colmar:[3,4], munich:[4,5],
+  milan:[5,6], venecia:[6], roma:[6,7,8], albenga:[8,9]
 };
 
 var CITY_META = {
-  alicante:    {name:'Alicante',    flag:'ES', nights:0, dates:'14 jul salida', zone:'Origen del viaje'},
+  alicante:    {name:'Alicante',    flag:'ES', nights:0, dates:'14 jul salida / 22 jul llegada', zone:'Origen y regreso'},
   montpellier: {name:'Montpellier', flag:'FR', nights:1, dates:'14-15 jul', zone:'Centre historique'},
-  paris:       {name:'Paris',       flag:'FR', nights:2, dates:'15-17 jul', zone:'Le Marais / Montmartre'},
-  colmar:      {name:'Colmar',      flag:'FR', nights:0, dates:'17 jul parada', zone:'Petite Venise / Alsacia'},
-  milan:       {name:'Milan',       flag:'IT', nights:1, dates:'17-18 jul', zone:'Cerca de Centrale'},
-  venecia:     {name:'Venecia',     flag:'IT', nights:0, dates:'18 jul parada tren', zone:'Canal Grande / Rialto'},
-  roma:        {name:'Roma',        flag:'IT', nights:2, dates:'18-20 jul', zone:'Trastevere / Prati'},
-  niza:        {name:'Niza',        flag:'FR', nights:1, dates:'20-21 jul', zone:'Promenade des Anglais'}
+  paris:       {name:'Paris',       flag:'FR', nights:1, dates:'15-16 jul', zone:'Clichy'},
+  colmar:      {name:'Colmar',      flag:'FR', nights:1, dates:'16-17 jul', zone:'Petite Venise / Alsacia'},
+  munich:      {name:'Múnich',      flag:'DE', nights:1, dates:'17-18 jul', zone:'En ciudad'},
+  milan:       {name:'Milán',       flag:'IT', nights:1, dates:'18-19 jul', zone:'Opera'},
+  venecia:     {name:'Venecia',     flag:'IT', nights:0, dates:'19 jul parada', zone:'Canal Grande / Rialto'},
+  roma:        {name:'Roma',        flag:'IT', nights:2, dates:'19-21 jul', zone:'Vaticano / Aurelio'},
+  albenga:     {name:'Albenga',     flag:'IT', nights:1, dates:'21-22 jul', zone:'Liguria'}
 };
 
 var NOTAS_MAP = {
   alicante:null, montpellier:null, paris:'Paris',
-  colmar:'Colmar', milan:'Milan', venecia:'Venecia',
-  roma:'Roma', niza:'Niza'
+  colmar:'Colmar', munich:null, milan:'Milan', venecia:'Venecia',
+  roma:'Roma', albenga:null
 };
 
 var _openCity = function(cityId) {
@@ -3990,27 +4032,15 @@ var _openCity = function(cityId) {
   html += '<div><div style="font-size:1.1rem;font-weight:800;letter-spacing:-0.02em">'+m.name+'</div>';
   html += '<div style="font-size:0.72rem;color:#64748b;margin-top:0.1rem">'+m.dates+' &nbsp;·&nbsp; '+ns+' &nbsp;·&nbsp; '+m.zone+'</div></div></div>';
 
-  // Alojamiento
-  if(LINKS[cityId]){
-    var air = LINKS[cityId].air;
-    var book = LINKS[cityId].book;
+  // Alojamiento (datos reales, ya reservado)
+  var stay = STAYS.find(function(s){ return s.id === cityId; });
+  if(stay){
     html += '<div class="st">Alojamiento</div>';
-    html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:1rem">';
-    html += '<div class="city-body">';
-    html += '<div class="lrow"><div class="lp"><div class="da"></div><span class="la">Airbnb</span></div>';
-    html += air ? '<div class="ldesc ok">Inicia sesion para ver opciones</div><a href="'+air+'" target="_blank" class="btn-ver ba">Ver</a>' : '<div class="ldesc">Proximamente</div>';
-    html += '</div>';
-    html += '<div class="lrow"><div class="lp"><div class="db"></div><span class="lb">Booking</span></div>';
-    html += book ? '<div class="ldesc ok">Inicia sesion para ver opciones</div><a href="'+book+'" target="_blank" class="btn-ver bb">Ver</a>' : '<div class="ldesc">Proximamente</div>';
-    html += '</div></div></div>';
-    // Votes
-    var vy = votes[cityId+'_y']?'vy':'';
-    var vf = votes[cityId+'_f']?'vf':'';
-    var vn = votes[cityId+'_n']?'vn':'';
-    html += '<div class="vrow" style="margin-bottom:1rem">';
-    html += '<button class="vb '+vy+'" data-voteid="'+cityId+'" data-votetype="y">👍 Me apunto</button>';
-    html += '<button class="vb '+vf+'" data-voteid="'+cityId+'" data-votetype="f">⭐ Favorita</button>';
-    html += '<button class="vb '+vn+'" data-voteid="'+cityId+'" data-votetype="n">👎 No</button>';
+    html += '<div style="background:white;border:1.5px solid #e2e8f0;border-radius:12px;padding:0.6rem 0.7rem;margin-bottom:1rem">';
+    html += '<div style="font-size:0.76rem;font-weight:700;margin-bottom:0.2rem">'+stay.hotelName+'</div>';
+    html += '<div style="font-size:0.7rem;color:#475569;margin-bottom:0.3rem">📍 '+stay.address+'</div>';
+    html += '<div style="font-size:0.68rem;color:#64748b;line-height:1.6">🕐 Check-in '+stay.checkin+'<br>🅿️ '+stay.parking+'<br>📞 <a href="tel:'+stay.phone.replace(/\s/g,'')+'" style="color:#3b82f6;text-decoration:none">'+stay.phone+'</a></div>';
+    if(stay.warn) html += '<div style="font-size:0.66rem;color:#b45309;margin-top:0.35rem;font-weight:600">⚠️ '+stay.warn+'</div>';
     html += '</div>';
   }
 
@@ -4366,8 +4396,6 @@ function agAISuggestLocal(tlIdx) {
     method:'POST',
     headers:{'Content-Type':'application/json','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU'},
     body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens:1000,
       messages:[{role:'user', content:prompt}]
     })
   })
@@ -4431,12 +4459,12 @@ var _origSimSaveAsBase = typeof simSaveAsBase === 'function' ? simSaveAsBase : n
 
 // ===== HOME DINÁMICA =====
 var TRIP_START = new Date(2026,6,14); // 14 julio 2026
-var TRIP_END   = new Date(2026,6,21); // 21 julio 2026
+var TRIP_END   = new Date(2026,6,22); // 22 julio 2026
 var homeOffset = 0; // para navegar días durante el viaje
 
 // Alertas estáticas por proximidad
 var HOME_ALERTS = [
-  {days:7,  level:'red',    text:'Confirmar alojamientos de Roma. ¡El cumpleaños es el 19!'},
+  {days:7,  level:'red',    text:'Confirmar alojamiento de Roma. Día de cumpleaños el 20 jul.'},
   {days:14, level:'orange', text:'Llenar depósito en Francia antes de cruzar a España — más barato que en España.'},
   {days:21, level:'orange', text:'Descargar mapas offline de Google Maps para toda la ruta antes de salir.'},
   {days:30, level:'green',  text:'Verificar documentación: pasaportes, permisos de conducir, tarjetas de crédito.'},
@@ -4485,6 +4513,7 @@ var RISK_DB = {
     {level:'orange',icon:'🅿️', title:'Aparcamiento', text:'Aparcar en Barcelona es difícil y caro. Usar parking Parc de l Arpa o aparcamientos del Eixample. Evitar dejar cosas visibles en el coche.'}
   ]
 };
+RISK_DB['Milán'] = RISK_DB['Milan']; // alias — el TL real usa el nombre con tilde
 
 // Riesgos de tramo/frontera — se detectan por el recorrido del TL
 var RISK_FRONTERAS = [
@@ -4534,7 +4563,7 @@ function buildRiesgosFromTL() {
     // 3. Riesgos de frontera — detectar cambio de país
     var CITY_COUNTRY = {
       'Alicante':'ES','Barcelona':'ES','Montpellier':'FR','Paris':'FR',
-      'Niza':'FR','Colmar':'FR','Milan':'IT','Venecia':'IT','Roma':'IT','Genova':'IT'
+      'Niza':'FR','Colmar':'FR','Múnich':'DE','Milan':'IT','Milán':'IT','Venecia':'IT','Roma':'IT','Genova':'IT','Albenga':'IT','Mónaco':'MC'
     };
     var entryCountry = null;
     Object.keys(CITY_COUNTRY).forEach(function(c) {
@@ -4648,6 +4677,25 @@ function initHomeDuring() {
   var dateEl = document.getElementById('home-during-date');
   if(dateEl) dateEl.textContent = entry.date + ' · ' + entry.city;
 
+  // Banner cumpleaños
+  var bdayEl = document.getElementById('home-bday-banner');
+  if(bdayEl) bdayEl.style.display = entry.isBday ? 'block' : 'none';
+
+  // Hotel de esta noche
+  var hotelEl = document.getElementById('home-hotel-card');
+  if(hotelEl) {
+    if(entry.hotel) {
+      var ho = entry.hotel;
+      hotelEl.innerHTML =
+        '<div style="font-size:0.8rem;font-weight:700;margin-bottom:0.2rem">'+ho.name+'</div>'+
+        '<div style="font-size:0.72rem;color:#475569;margin-bottom:0.35rem">📍 '+ho.address+'</div>'+
+        '<div style="font-size:0.7rem;color:#64748b;line-height:1.6">🕐 Check-in '+ho.checkin+'<br>🅿️ '+ho.parking+'<br>📞 <a href="tel:'+ho.phone.replace(/\s/g,'')+'" style="color:#3b82f6;text-decoration:none">'+ho.phone+'</a></div>'+
+        (ho.note?'<div style="font-size:0.66rem;color:#b45309;margin-top:0.3rem;font-weight:600">⚠️ '+ho.note+'</div>':'');
+    } else {
+      hotelEl.innerHTML = '<div style="font-size:0.75rem;color:#94a3b8;font-style:italic">Sin alojamiento esta noche — de vuelta a casa.</div>';
+    }
+  }
+
   // Estado del grupo
   document.getElementById('grupo-dia').textContent = 'Día ' + (dayIdx+1) + ' de ' + TL.length;
   document.getElementById('grupo-destino').textContent = entry.city;
@@ -4697,57 +4745,65 @@ function homeDayNav(dir) {
   initHomeDuring();
 }
 
-// ===== FIX BOTÓN IA EN AGENDA =====
-// El problema: api.anthropic.com bloquea llamadas CORS desde browser
-// Solución: usar el endpoint interno de claude.ai que sí está permitido
-// Como no existe ese proxy, generamos el horario localmente con lógica inteligente
-function agAISuggestLocal(tlIdx) {
-  var tl = TL[tlIdx];
-  var slotsEl = document.getElementById('ag-slots-'+tlIdx);
-  if(!slotsEl) return;
+// ===== QUÉ HACER AHORA — IA =====
+function agSuggestNow() {
+  var now = new Date();
+  var dayIdx = Math.floor((now - TRIP_START) / 86400000) + homeOffset;
+  dayIdx = Math.max(0, Math.min(dayIdx, TL.length-1));
+  var entry = TL[dayIdx];
+  if(!entry) return;
 
-  slotsEl.innerHTML = '<div class="ag-ai-loading"><span class="sim-spinner"></span>Generando horario para ' + tl.city + '...</div>';
+  // Ciudad actual: última "Llegada a X" ya pasada, si no la primera de la ruta
+  var nowMin = now.getHours()*60 + now.getMinutes();
+  var currentCity = entry.city.split(/\s*[\-–—→]\s*/)[0].trim();
+  entry.acts.forEach(function(a) {
+    var m = a.match(/^(\d{1,2}:\d{2})\s+Llegada a (.+?)(\s*\(|$)/);
+    if(m) {
+      var parts = m[1].split(':'); var actMin = parseInt(parts[0])*60 + parseInt(parts[1]);
+      if(actMin <= nowMin) currentCity = m[2].trim();
+    }
+  });
 
-  // Generar horario inteligente basado en el tipo de día
-  setTimeout(function() {
-    var slots = [];
-    if(tl.drive) {
-      // Día de conducción — extraer acts del TL y enriquecer
-      slots = tl.acts.map(function(act, i) {
-        var m = act.match(/^(\d{1,2}:\d{2})\s+(.*)/);
-        if(m) return {id:'ai'+i, time:m[1], text:m[2], type: act.toLowerCase().indexOf('salida')!==-1||act.toLowerCase().indexOf('conduccion')!==-1||act.toLowerCase().indexOf('autopista')!==-1?'drive':'normal'};
-        return {id:'ai'+i, time:'—', text:act, type:'normal'};
-      });
-      // Añadir paradas sugeridas si no las hay
-      var hasBreak = slots.some(function(s){ return s.text.toLowerCase().indexOf('parada')!==-1||s.text.toLowerCase().indexOf('descanso')!==-1; });
-      if(!hasBreak && slots.length > 2) {
-        var midIdx = Math.floor(slots.length/2);
-        slots.splice(midIdx, 0, {id:'ai_break', time:'—', text:'☕ Parada descanso recomendada (20 min) — conductor y combustible', type:'normal'});
-      }
-    } else {
-      // Día libre — sugerir horario turístico
-      var cityName = tl.city.split(' - ')[0].split('—')[0].trim();
-      slots = [
-        {id:'ai0', time:'08:00', text:'🥐 Desayuno en el barrio — buscar cafetería local, evitar zonas turísticas para ahorrar', type:'normal'},
-        {id:'ai1', time:'09:30', text:'🏛️ Visita principal de '+cityName+' — ir temprano para evitar colas y calor', type:'normal'},
-        {id:'ai2', time:'11:30', text:'📸 Tiempo libre para fotos y explorar el centro histórico', type:'normal'},
-        {id:'ai3', time:'13:00', text:'🍕 Almuerzo — pedir menú del día, siempre más económico que la carta', type:'normal'},
-        {id:'ai4', time:'14:30', text:'💤 Siesta o descanso en el alojamiento — temperatura alta al mediodía', type:'normal'},
-        {id:'ai5', time:'16:30', text:'🗺️ Segunda visita o zona alternativa de '+cityName, type:'normal'},
-        {id:'ai6', time:'19:00', text:'🌅 Paseo por el centro — mejor luz para fotos, ambiente local', type:'normal'},
-        {id:'ai7', time:'21:00', text:'🍷 Cena — reservar si es temporada alta', type:'normal'},
-        {id:'sleep', time:'DORMIR', text:'Fin de actividades del día', type:'sleep'}
-      ];
+  // Tiempo disponible hasta el próximo evento fijo (check-in del hotel o DORMIR ~23:00)
+  var fixedMin = 23*60;
+  if(entry.hotel && entry.hotel.checkin) {
+    var cm = entry.hotel.checkin.match(/^(\d{1,2}):(\d{2})/);
+    if(cm) {
+      var ciMin = parseInt(cm[1])*60 + parseInt(cm[2]);
+      if(ciMin > nowMin) fixedMin = ciMin;
     }
-    // Asegurar que siempre termina con DORMIR
-    if(!slots.length || slots[slots.length-1].type !== 'sleep') {
-      slots.push({id:'sleep', time:'DORMIR', text:'Fin de actividades del día', type:'sleep'});
-    }
-    agSaveSlots(tlIdx, slots);
-    slotsEl.innerHTML = agRenderSlots(tlIdx, slots);
-  }, 800);
+  }
+  var availMin = Math.max(30, fixedMin - nowMin);
+  var horas = Math.round(availMin/60*10)/10;
+
+  var btn = document.getElementById('home-ahora-btn');
+  var resEl = document.getElementById('home-ahora-result');
+  btn.textContent = 'Pensando...'; btn.disabled = true;
+  resEl.style.display = 'block';
+  resEl.innerHTML = '<span class="sim-spinner"></span>Buscando ideas cerca de '+currentCity+'...';
+
+  fetch('https://nhblyxltpdpyxmvjtrmt.supabase.co/functions/v1/claude-proxy', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5oYmx5eGx0cGRweXhtdmp0cm10Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2OTMxMzMsImV4cCI6MjA5NjI2OTEzM30.vEN_rC7mQ4-T9ozChCrCX7Y4Ej3GFE3A7gezxEm6GPU'},
+    body:JSON.stringify({messages:[{role:'user', content:
+      'Somos 7 amigos de roadtrip en '+currentCity+'. Son las '+now.getHours()+':'+String(now.getMinutes()).padStart(2,'0')+' y tenemos ~'+horas+'h libres antes del próximo plan fijo. '+
+      'Dame 3-4 sugerencias breves y accionables de qué hacer AHORA MISMO cerca de donde estamos (comida, algo que ver, algo rápido). '+
+      'Cada sugerencia en una línea, máx 100 caracteres, sin numerar, sin markdown.'
+    }]})
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    var text = (data.content||[]).map(function(b){return b.text||'';}).join('');
+    var ideas = text.split('\n').map(function(l){return l.replace(/^[-•\d.\s]+/,'').trim();}).filter(Boolean);
+    resEl.innerHTML = ideas.map(function(i){return '<div style="padding:0.25rem 0">💡 '+i+'</div>';}).join('');
+    btn.textContent = '¿Qué hacemos ahora?'; btn.disabled = false;
+  })
+  .catch(function(err){
+    console.error('agSuggestNow error:', err);
+    resEl.innerHTML = 'No se pudo conectar con la IA. Intenta de nuevo.';
+    btn.textContent = '¿Qué hacemos ahora?'; btn.disabled = false;
+  });
 }
-
 
 // ===== SOS DINÁMICO POR PAÍS =====
 var SOS_DATA = {
@@ -4765,6 +4821,16 @@ var SOS_DATA = {
     name: '🇮🇹 Italia',
     emergency: '112', police: '113', ambulance: '118', road: '803 116',
     tips: ['⚠️ ZTL — Zonas de Tráfico Limitado en Roma, Milán, Venecia. Multas automáticas por cámara','Velocidad máxima autopista: 130 km/h','Autostrada de peaje — tener tarjeta','Luces diurnas obligatorias fuera de ciudad']
+  },
+  DE: {
+    name: '🇩🇪 Alemania',
+    emergency: '112', police: '110', ambulance: '112', road: '0180 222 2222',
+    tips: ['⚠️ Umweltzone — pegatina ambiental (Umweltplakette) obligatoria para entrar en Múnich','Autobahn sin límite general en muchos tramos — respetar límites señalizados','Luces diurnas recomendadas','Alcohol máximo conductor: 0.5 g/L']
+  },
+  MC: {
+    name: '🇲🇨 Mónaco',
+    emergency: '112', police: '17', ambulance: '112', road: '+377 93 15 30 00',
+    tips: ['Parking en Mónaco es caro (~30€/h) — limitar el tiempo','Velocidad máxima ciudad: 50 km/h','Circulación densa — paciencia en el centro']
   }
 };
 
@@ -4784,8 +4850,8 @@ function renderSOSDynamic() {
     currentCity = entry ? entry.city : '';
     // Detect country from city
     var KMAP = {
-      'Alicante':'ES','Barcelona':'ES','Montpellier':'FR','Paris':'FR','Niza':'FR','Colmar':'FR',
-      'Milan':'IT','Venecia':'IT','Roma':'IT','Genova':'IT'
+      'Alicante':'ES','Barcelona':'ES','Montpellier':'FR','Paris':'FR','Niza':'FR','Colmar':'FR','Múnich':'DE',
+      'Milan':'IT','Milán':'IT','Venecia':'IT','Roma':'IT','Genova':'IT','Albenga':'IT','Mónaco':'MC'
     };
     for(var kw in KMAP) {
       if(currentCity.indexOf(kw) !== -1) { currentCountry = KMAP[kw]; break; }
@@ -6060,6 +6126,7 @@ window._tlEditSlots = [];
 updateCountdown();
 setInterval(updateCountdown, 60000);
 renderCities();
+renderCitiesLegacy();
 dayDataLoad(); // loads Supabase day data then calls renderTL
 renderBudget();
 renderGastos();
