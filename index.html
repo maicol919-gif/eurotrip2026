@@ -1338,25 +1338,25 @@ var activeNota = 'Paris';
 var STAYS = [
   {id:'montpellier', name:'Montpellier', flag:'🇫🇷', dates:'14 jul', nights:1,
     hotelName:'Airbnb T5', address:'5 Avenue du Petit Bard, Montpellier', checkin:'14:00',
-    parking:'Privado incluido', phone:'+33 6 60 28 18 97', host:'Kikmatou'},
+    parking:'Privado incluido', phone:'+33 6 60 28 18 97', host:'Kikmatou', pdf:'reservas/montpellier.pdf'},
   {id:'paris', name:'París (Clichy)', flag:'🇫🇷', dates:'15 jul', nights:1,
     hotelName:'ibis budget Paris Clichy Mairie', address:'18-20 Rue Palloy, 92110 Clichy', checkin:'12:00',
-    parking:'€15/día (reservar)', phone:'+33 1 41 27 20 45'},
+    parking:'€15/día (reservar)', phone:'+33 1 41 27 20 45', pdf:'reservas/paris.pdf'},
   {id:'colmar', name:'Colmar', flag:'🇫🇷', dates:'16 jul', nights:1,
     hotelName:'ibis Colmar Est', address:'13 Route De Neuf-Brisach, 68180 Colmar', checkin:'15:00',
-    parking:'Privado gratis (garaje opcional +€10/día)', phone:'+33 3 89 23 46 46'},
+    parking:'Privado gratis (garaje opcional +€10/día)', phone:'+33 3 89 23 46 46', pdf:'reservas/colmar.pdf'},
   {id:'munich', name:'Múnich', flag:'🇩🇪', dates:'17 jul', nights:1,
     hotelName:'Amber Econtel', address:'Bodenseestraße 227, 81243 Múnich', checkin:'15:00',
-    parking:'Privado €9,50/día (no reservable)', phone:'+49 89 87189100'},
+    parking:'Privado €9,50/día (no reservable)', phone:'+49 89 87189100', pdf:'reservas/munich.pdf'},
   {id:'milan', name:'Milán (Opera)', flag:'🇮🇹', dates:'18 jul', nights:1,
     hotelName:'Acca Sporting Milano - AA Hotels', address:'56 Via Sporting Mirasole, 20073 Opera', checkin:'14:00-00:00',
-    parking:'€15/día (reservar)', phone:'+39 02 9295 8581'},
+    parking:'€15/día (reservar)', phone:'+39 02 9295 8581', pdf:'reservas/milan.pdf'},
   {id:'roma', name:'Roma (Vaticano)', flag:'🇮🇹', dates:'19-20 jul', nights:2,
     hotelName:'Vatican City San Peter apartment', address:'Vicolo del Gelsomino 50, Aurelio, Roma', checkin:'15:00',
-    parking:'Privado gratis', phone:'+39 393 903 5871', warn:'NO reembolsable'},
+    parking:'Privado gratis', phone:'+39 393 903 5871', warn:'NO reembolsable', pdf:'reservas/roma.pdf'},
   {id:'albenga', name:'Albenga', flag:'🇮🇹', dates:'21 jul', nights:1,
     hotelName:'Il Leone Bianco Affittacamere', address:'Via Paccini 32, 17031 Albenga', checkin:'16:00-19:00',
-    parking:'Público gratis', phone:'+49 89 62826568'}
+    parking:'Público gratis', phone:'+49 89 62826568', pdf:'reservas/albenga.pdf'}
 ];
 
 // ===== ARCHIVO / PLANEACIÓN (legado) =====
@@ -2038,6 +2038,7 @@ function renderCities() {
           '</div>'+
           (s.warn?'<div style="font-size:0.66rem;color:#b45309;margin-top:0.35rem;font-weight:600">⚠️ '+s.warn+'</div>':'')+
         '</div>'+
+        (s.pdf?'<a href="'+s.pdf+'" target="_blank" style="display:block;text-align:center;margin-top:0.5rem;padding:0.5rem;background:#3b82f6;color:#fff;border-radius:8px;font-size:0.72rem;font-weight:700;text-decoration:none">📄 Descargar reserva (PDF)</a>':'')+
       '</div></div>';
   }).join('');
   document.getElementById('city-blocks').innerHTML = html;
